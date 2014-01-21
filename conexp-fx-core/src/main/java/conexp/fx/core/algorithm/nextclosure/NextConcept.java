@@ -1,7 +1,7 @@
 /*
  * @author Francesco.Kriegel@gmx.de
  */
-package conexp.fx.core.algorithm;
+package conexp.fx.core.algorithm.nextclosure;
 
 /*
  * #%L
@@ -23,7 +23,6 @@ package conexp.fx.core.algorithm;
  * #L%
  */
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,12 +43,11 @@ import conexp.fx.core.concurrent.BlockingTask;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.math.HullOperator;
 
-public final class NextExtent<G, M> implements Iterable<Concept<G, M>> {
+public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
 
   public static final <G, M> BlockingTask concepts(final ConceptLattice<G, M> lattice) {
-    return new BlockingTask("NextExtent") {
+    return new BlockingTask("NextConcept") {
 
       private final Comparator<Concept<G, M>> intentSizeComparator = new Comparator<Concept<G, M>>() {
 
@@ -70,7 +68,7 @@ public final class NextExtent<G, M> implements Iterable<Concept<G, M>> {
             Math.pow(2d, (double) Math.min(lattice.context.rowHeads().size(), lattice.context.colHeads().size()));
         final HashSet<Concept<G, M>> hashSet = new HashSet<Concept<G, M>>();
         updateProgress(0.1d, 1d);
-        final Iterator<Concept<G, M>> iterator = new NextExtent<G, M>(lattice.context).iterator();
+        final Iterator<Concept<G, M>> iterator = new NextConcept<G, M>(lattice.context).iterator();
         updateProgress(0.2d, 1d);
         while (iterator.hasNext()) {
           hashSet.add(iterator.next());
@@ -92,9 +90,14 @@ public final class NextExtent<G, M> implements Iterable<Concept<G, M>> {
 
   private final MatrixContext<G, M> context;
 
-  public NextExtent(final MatrixContext<G, M> context) {
+  public NextConcept(final MatrixContext<G, M> context) {
     super();
     this.context = context;
+  }
+
+  private interface HullOperator<M> {
+
+    public Collection<Integer> closure(final Iterable<M> iterable);
   }
 
   public final Iterator<Concept<G, M>> iterator() {
@@ -106,7 +109,7 @@ public final class NextExtent<G, M> implements Iterable<Concept<G, M>> {
     final HullOperator<Integer> hullOp = new HullOperator<Integer>() {
 
       @Override
-      public Collection<Integer> computeHull(Iterable<Integer> set) {
+      public Collection<Integer> closure(Iterable<Integer> set) {
         return reduced._extent(set);
       }
     };
@@ -139,7 +142,7 @@ public final class NextExtent<G, M> implements Iterable<Concept<G, M>> {
       }
 
       private final BitSetSet _APlusG(final int _g) {
-        return Collections3.newBitSetSet(hullOp.computeHull(Collections3.iterable(Iterators.concat(
+        return Collections3.newBitSetSet(hullOp.closure(Collections3.iterable(Iterators.concat(
             Iterators.filter(_A.iterator(), Collections3.isSmaller(_g)),
             Iterators.singletonIterator(_g)))));
       }

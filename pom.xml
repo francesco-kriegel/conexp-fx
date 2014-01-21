@@ -12,6 +12,7 @@
 		<module>conexp-fx-core</module>
 		<module>conexp-fx-cli</module>
 		<module>conexp-fx-gui</module>
+		<module>conexp-fx-test</module>
 	</modules>
 
 	<organization>

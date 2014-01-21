@@ -1,4 +1,4 @@
-package conexp.fx.core.algorithm;
+package conexp.fx.core.algorithm.lattice;
 
 /*
  * #%L

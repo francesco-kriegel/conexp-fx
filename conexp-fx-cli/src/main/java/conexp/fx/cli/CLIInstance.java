@@ -32,11 +32,11 @@ import conexp.fx.core.collections.relation.RelationEvent;
 import conexp.fx.core.collections.relation.RelationEventHandler;
 import conexp.fx.core.concurrent.BlockingTask;
 import conexp.fx.core.context.Concept;
-import conexp.fx.core.context.Implication;
 import conexp.fx.core.service.FCAInstance;
 import conexp.fx.core.service.FCAInstance.InitLevel;
 import conexp.fx.core.service.FCAListener;
 import conexp.fx.core.util.FileFormat;
+import de.tudresden.inf.tcs.fcalib.Implication;
 
 public class CLIInstance extends FCAListener<String, String> {
 

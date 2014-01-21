@@ -47,7 +47,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
-import conexp.fx.core.algorithm.NextExtent;
+import conexp.fx.core.algorithm.nextclosure.NextConcept;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.IterableSet;
 import conexp.fx.core.collections.ListIterators;
@@ -722,7 +722,7 @@ public class MatrixContext<G, M>
 
   public final Iterable<Concept<G, M>> concepts()
   {
-    return new NextExtent<G, M>(this);
+    return new NextConcept<G, M>(this);
   }
 
   public final Relation<G, G> objectQuasiOrder()

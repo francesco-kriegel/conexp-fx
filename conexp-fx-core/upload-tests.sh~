@@ -1,0 +1,2 @@
+mvn clean package
+scp target/conexp-fx-core-*.jar francesco@russell:conexp-fx

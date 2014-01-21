@@ -8,8 +8,8 @@ import javafx.scene.control.ButtonBuilder;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.text.Text;
-import conexp.fx.core.context.Implication;
 import conexp.fx.gui.tab.CFXTab;
+import de.tudresden.inf.tcs.fcalib.Implication;
 
 public class ExplorationDialog<G, M> extends Dialog {
 

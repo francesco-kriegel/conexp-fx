@@ -14,10 +14,10 @@ import javafx.scene.text.TextBuilder;
 import javafx.stage.Window;
 import conexp.fx.core.builder.Request;
 import conexp.fx.core.builder.Requests;
-import conexp.fx.core.context.Implication;
 import conexp.fx.core.util.IdGenerator;
 import conexp.fx.gui.context.MatrixContextWidget;
 import conexp.fx.gui.tab.CFXTab;
+import de.tudresden.inf.tcs.fcalib.Implication;
 
 public class CounterExampleDialog<G, M> extends Dialog {
 

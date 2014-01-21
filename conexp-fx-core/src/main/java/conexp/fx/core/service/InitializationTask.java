@@ -2,8 +2,8 @@ package conexp.fx.core.service;
 
 import com.google.common.collect.Iterators;
 
-import conexp.fx.core.algorithm.IPred;
-import conexp.fx.core.algorithm.NextExtent;
+import conexp.fx.core.algorithm.lattice.IPred;
+import conexp.fx.core.algorithm.nextclosure.NextConcept;
 import conexp.fx.core.concurrent.BlockingTask;
 import conexp.fx.core.layout.GeneticLayouter;
 import conexp.fx.core.service.FCAInstance.InitLevel;
@@ -27,7 +27,7 @@ final class InitializationTask<G, M> extends BlockingTask {
     updateMessage("checking whether there are more than 200 concepts...");
     if (isDisplayable()) {
       if (lvl.isOrNeedsLevel(InitLevel.CONCEPTS)) {
-        this.fcaInstance.executor.submit(NextExtent.concepts(this.fcaInstance.lattice));
+        this.fcaInstance.executor.submit(NextConcept.concepts(this.fcaInstance.lattice));
         if (lvl.isOrNeedsLevel(InitLevel.LAYOUT))
           this.fcaInstance.executor.submit(new SeedsAndLabelsTask<G, M>(this.fcaInstance));
         if (lvl.isOrNeedsLevel(InitLevel.LATTICE))
@@ -51,7 +51,7 @@ final class InitializationTask<G, M> extends BlockingTask {
     if (this.fcaInstance.context.colHeads().size() > 100)
       return false;
     try {
-      Iterators.get(new NextExtent<G, M>(this.fcaInstance.context).iterator(), Constants.MAX_CONCEPTS + 1);
+      Iterators.get(new NextConcept<G, M>(this.fcaInstance.context).iterator(), Constants.MAX_CONCEPTS + 1);
     } catch (IndexOutOfBoundsException e) {
       return true;
     }

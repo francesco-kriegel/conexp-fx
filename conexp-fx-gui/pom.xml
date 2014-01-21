@@ -117,7 +117,7 @@
 						<keyPassword>conexp-fx</keyPassword>
 						<keyStoreAlias>conexp-fx</keyStoreAlias>
 						<keyStorePassword>conexp-fx</keyStorePassword>
-						<keyStore>../key/keyStore.jks</keyStore>
+						<keyStore>../key/keystore.jks</keyStore>
 						<keyStoreType>jks</keyStoreType>
 						<nativeReleaseVersion>${setup.version}</nativeReleaseVersion>
 						<embeddedHeight>100%</embeddedHeight>

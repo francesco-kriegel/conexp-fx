@@ -2,9 +2,9 @@ package conexp.fx.gui.exploration;
 
 import java.util.Iterator;
 
-import conexp.fx.core.algorithm.NextImplication;
-import conexp.fx.core.context.Implication;
+import conexp.fx.core.algorithm.nextclosure.NextImplication;
 import conexp.fx.gui.tab.CFXTab;
+import de.tudresden.inf.tcs.fcalib.Implication;
 
 public class AttributeExploration {
 
