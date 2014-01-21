@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>javafx-installer</artifactId>
+	<version>2.2.45</version>
+	<name>Concept Explorer FX - JavaFX Installer</name>
+
+	<parent>
+		<groupId>conexp-fx</groupId>
+		<artifactId>conexp-fx</artifactId>
+		<version>5.0-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<javadoc.location>javafx-2_2_45-apidocs.zip</javadoc.location>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>javafx</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>install-javafx</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-install-plugin</artifactId>
+						<version>2.4</version>
+						<executions>
+							<execution>
+								<id>install-javafx</id>
+								<goals>
+									<goal>install-file</goal>
+								</goals>
+								<phase>validate</phase>
+								<configuration>
+									<file>${java.home}/lib/jfxrt.jar</file>
+									<groupId>com.oracle</groupId>
+									<artifactId>javafx</artifactId>
+									<version>${project.version}</version>
+									<packaging>jar</packaging>
+									<javadoc>${javadoc.location}</javadoc>
+									<!-- <sources>no source available</sources> -->
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>
