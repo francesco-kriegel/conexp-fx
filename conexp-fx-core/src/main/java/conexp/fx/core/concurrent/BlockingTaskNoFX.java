@@ -17,7 +17,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Worker.State;
 
-public abstract class BlockingTask extends FutureTask<Void> {
+public abstract class BlockingTaskNoFX extends FutureTask<Void> {
 
   public static final BlockingTask      NULL                = new BlockingTask("") {
 
@@ -45,7 +45,7 @@ public abstract class BlockingTask extends FutureTask<Void> {
                                                               }
                                                             };
 
-  public BlockingTask(final String title) {
+  public BlockingTaskNoFX(final String title) {
     super(new Callable<Void>() {
 
       @Override
@@ -64,7 +64,7 @@ public abstract class BlockingTask extends FutureTask<Void> {
 
         @Override
         public Void call() throws Exception {
-          return BlockingTask.this.call();
+          return BlockingTaskNoFX.this.call();
         }
       });
     } catch (NoSuchFieldException | IllegalAccessException | SecurityException e) {
@@ -86,6 +86,8 @@ public abstract class BlockingTask extends FutureTask<Void> {
     try {
       _call();
     } catch (IllegalStateException e) {
+//    	e.printStackTrace();
+    	System.err.println(e + " @ "+titleProperty.get());
       Platform.runLater(new Runnable() {
 
         @Override
@@ -100,8 +102,8 @@ public abstract class BlockingTask extends FutureTask<Void> {
       done();
     } finally {
       runTimeMillis = System.currentTimeMillis() - startTimeMillis;
-      updateProgress(1d, 1d);
       updateMessage("succeeded (" + runTimeMillis + "ms)");
+      updateProgress(1d, 1d);
       succeeded();
       done();
     }

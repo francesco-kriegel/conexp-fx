@@ -71,7 +71,8 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
         final Iterator<Concept<G, M>> iterator = new NextConcept<G, M>(lattice.context).iterator();
         updateProgress(0.2d, 1d);
         while (iterator.hasNext()) {
-          hashSet.add(iterator.next());
+          Concept<G, M> concept = iterator.next();
+		  hashSet.add(concept);
           currentConceptNumber++;
           updateProgress(0.2d + 0.5d * (currentConceptNumber / maximalConceptNumber), 1d);
           updateMessage("computing concepts: " + currentConceptNumber + "...");

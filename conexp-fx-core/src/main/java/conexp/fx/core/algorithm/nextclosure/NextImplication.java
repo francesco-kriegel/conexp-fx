@@ -56,24 +56,25 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
         // ObservableList;
         while (iterator.hasNext()) {
           final Implication<M> next = iterator.next();
-          if (!next.getPremise().equals(next.getConclusion())) {
-            final HashSet<M> premise = new HashSet<M>();
-            premise.addAll(next.getPremise());
-            final HashSet<M> conclusion = new HashSet<M>();
-            conclusion.addAll(next.getConclusion());
-            conclusion.removeAll(next.getPremise());
-            // if (observable)
-            // Platform.runLater(new Runnable() {
-            //
-            // @Override
-            // public void run() {
-            // implications.add(new Implication<M>(premise,
-            // conclusion));
-            // }
-            // });
-            // else
-            implications.add(new Implication<M>(premise, conclusion));
-          }
+          implications.add(next);
+//          if (!next.getPremise().equals(next.getConclusion())) {
+//            final HashSet<M> premise = new HashSet<M>();
+//            premise.addAll(next.getPremise());
+//            final HashSet<M> conclusion = new HashSet<M>();
+//            conclusion.addAll(next.getConclusion());
+//            conclusion.removeAll(next.getPremise());
+//            // if (observable)
+//            // Platform.runLater(new Runnable() {
+//            //
+//            // @Override
+//            // public void run() {
+//            // implications.add(new Implication<M>(premise,
+//            // conclusion));
+//            // }
+//            // });
+//            // else
+//            implications.add(new Implication<M>(premise, conclusion));
+//          }
           currentImplicationNumber++;
           // updateProgress(0.2d + 0.7d * (currentImplicationNumber /
           // maximalImplicationNumber), 1d);

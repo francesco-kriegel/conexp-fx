@@ -24,31 +24,15 @@ final class InitializationTask<G, M> extends BlockingTask {
   }
 
   protected final void _call() {
-    updateMessage("checking whether there are more than 200 concepts...");
-    if (isDisplayable()) {
-      if (lvl.isOrNeedsLevel(InitLevel.CONCEPTS)) {
-        this.fcaInstance.executor.submit(NextConcept.concepts(this.fcaInstance.lattice));
-        if (lvl.isOrNeedsLevel(InitLevel.LAYOUT))
-          this.fcaInstance.executor.submit(new SeedsAndLabelsTask<G, M>(this.fcaInstance));
-        if (lvl.isOrNeedsLevel(InitLevel.LATTICE))
-          this.fcaInstance.executor.submit(IPred.neighborhood(this.fcaInstance.lattice));
-        if (lvl.isOrNeedsLevel(InitLevel.LAYOUT))
-          this.fcaInstance.executor.submit(GeneticLayouter.seeds(
-              this.fcaInstance.layout,
-              false,
-              Constants.GENERATIONS,
-              Constants.POPULATION,
-              this.fcaInstance.tab == null ? false : this.fcaInstance.tab.threeDimensions(),
-              this.fcaInstance.conflictDistance,
-              this.fcaInstance.tpe));
-      }
-    }
+    updateMessage("checking whether there are more than " + Constants.MAX_CONCEPTS + " concepts...");
+    if (isDisplayable()) fcaInstance.init();
+//    updateProgress(1,1);
   }
 
   private final boolean isDisplayable() {
-    if (this.fcaInstance.context.rowHeads().size() > 100)
+    if (this.fcaInstance.context.rowHeads().size() > 1000)
       return false;
-    if (this.fcaInstance.context.colHeads().size() > 100)
+    if (this.fcaInstance.context.colHeads().size() > 1000)
       return false;
     try {
       Iterators.get(new NextConcept<G, M>(this.fcaInstance.context).iterator(), Constants.MAX_CONCEPTS + 1);

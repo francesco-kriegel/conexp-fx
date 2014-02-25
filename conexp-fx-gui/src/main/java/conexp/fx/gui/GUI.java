@@ -524,7 +524,7 @@ public class GUI extends Application {
   }
 
   private final void showOpenFileDialog() {
-    final Pair<File, FileFormat> ffile = showOpenFileDialog("Open Formal Context File", FileFormat.CFX, FileFormat.CXT);
+    final Pair<File, FileFormat> ffile = showOpenFileDialog("Open Formal Context File", FileFormat.CXT, FileFormat.CFX);
     if (ffile != null)
       openFFile(ffile);
   }

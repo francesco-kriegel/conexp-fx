@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>javafx-installer</artifactId>
-	<version>2.2.45</version>
+	<version>2.2.51</version>
 	<name>Concept Explorer FX - JavaFX Installer</name>
 
 	<parent>
@@ -13,7 +13,7 @@
 	</parent>
 
 	<properties>
-		<javadoc.location>javafx-2_2_45-apidocs.zip</javadoc.location>
+		<javadoc.location>javafx-2_2_51-apidocs.zip</javadoc.location>
 	</properties>
 
 	<dependencies>

@@ -23,7 +23,7 @@ package conexp.fx.core.concurrent;
 
 import javafx.concurrent.Task;
 
-public abstract class BlockingTaskOld extends Task<Void>
+public abstract class BlockingTask extends Task<Void>
 {
   public static final BlockingTask NULL          = new BlockingTask("")
                                                  {
@@ -33,7 +33,7 @@ public abstract class BlockingTaskOld extends Task<Void>
   protected final String           title;
   private long                     runTimeMillis = 0l;
 
-  public BlockingTaskOld(final String title)
+  public BlockingTask(final String title)
   {
     super();
     this.title = title;

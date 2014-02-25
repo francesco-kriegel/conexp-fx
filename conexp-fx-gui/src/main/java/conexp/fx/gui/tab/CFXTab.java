@@ -23,14 +23,18 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ProgressBar;
@@ -56,7 +60,6 @@ import conexp.fx.core.lock.ALock;
 import conexp.fx.core.service.FCAInstance;
 import conexp.fx.core.service.FCAInstance.InitLevel;
 import conexp.fx.core.service.FCAInstance.TabConfiguration;
-import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.GUI;
 import conexp.fx.gui.context.MatrixContextWidget;
 import conexp.fx.gui.context.StringMatrixContextWidget;
@@ -127,7 +130,6 @@ public class CFXTab<G, M> extends Tab {
         return contextWidget.colHeaderPane.columnMap;
       }
     });
-    this.fca.initialize(InitLevel.LAYOUT);
     this.setContent(pane);
     this.pane.setCenter(splitPane);
     this.setGraphic(ImageViewBuilder
@@ -165,6 +167,7 @@ public class CFXTab<G, M> extends Tab {
     } else
       this.contextWidget = new MatrixContextWidget<G, M>(this);
     this.conceptGraph = new ConceptGraph<G, M>(this);
+    this.fca.initialize(InitLevel.LAYOUT);
     this.splitPane.getItems().addAll(contextWidget, conceptGraph, new ImplicationWidget<G, M>(this));
     this.splitPane.setDividerPositions(0, 0.85);
   }
@@ -172,6 +175,7 @@ public class CFXTab<G, M> extends Tab {
   private final class CFXStatusBar {
 
     private final int               height                   = 20;
+    private final int buttonSize 							=16;
     private final int               padding                  = 2;
     private final int               progressWidth            = 128;
     private final ProgressIndicator currentProgressIndicator = ProgressIndicatorBuilder
@@ -215,20 +219,25 @@ public class CFXTab<G, M> extends Tab {
                                                                  .maxHeight(height - 2 * padding)
                                                                  .build();
 
-//    private final Button            stopButton               = ButtonBuilder
-//                                                                 .create()
+    private final Button            stopButton               = ButtonBuilder
+                                                                 .create()
 //                                                                 .text("stop")
-//                                                                 .onAction(new EventHandler<ActionEvent>() {
-//
-//                                                                   public void handle(ActionEvent event) {
-//                                                                     stopCurrentTask();
-//                                                                   };
-//                                                                 })
-//                                                                 .build();
-//
-//    private final void stopCurrentTask() {
-//      fca.executor.currentTaskProperty.getValue().cancel();
-//    }
+                                                                 .style("-fx-base: red; -fx-label-padding: 0 4 0 0")
+                                                                 .maxHeight(buttonSize)
+                                                                 .maxWidth(buttonSize)
+                                                                 .minHeight(buttonSize)
+                                                                 .minWidth(buttonSize)
+                                                                 .onAction(new EventHandler<ActionEvent>() {
+
+                                                                   public void handle(ActionEvent event) {
+                                                                     stopCurrentTask();
+                                                                   };
+                                                                 })
+                                                                 .build();
+
+    private final void stopCurrentTask() {
+      fca.executor.currentTaskProperty.getValue().cancel();
+    }
     private CFXStatusBar() {
       final DoubleBinding progressIndicationBinding = new DoubleBinding() {
 
@@ -317,6 +326,8 @@ public class CFXTab<G, M> extends Tab {
           BorderPaneBuilder.create().left(currentStatusLabel).right(currentProgressBar).build();
       final BorderPane overallPane =
           BorderPaneBuilder.create().left(overallStatusLabel).right(overallProgressBar).build();
+      final BorderPane overallPaneWithStopButton =
+    		  BorderPaneBuilder.create().center(overallPane).right(stopButton).build();
       final BorderPane statusBar =
           BorderPaneBuilder
               .create()
@@ -324,7 +335,7 @@ public class CFXTab<G, M> extends Tab {
               .minHeight(height)
               .maxHeight(height)
               .left(currentPane)
-              .right(overallPane)
+              .right(overallPaneWithStopButton)
               .build();
       pane.setBottom(statusBar);
     }

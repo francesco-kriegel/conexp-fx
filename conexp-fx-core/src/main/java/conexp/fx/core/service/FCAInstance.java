@@ -122,8 +122,25 @@ public final class FCAInstance<G, M> {
 	public FCAInstance(final FCAService service, final Request<G, M> request) {
 		this.tpe = service.tpe();
 		this.request = request;
+		
+		
+		
+		
+		
+		
+
 		// TODO: should not be false in every case, e.g. for GUI
-		this.context = request.createContext(false);
+		// TODO: should not be false in every case, e.g. for GUI
+//		this.context = request.createContext(false);
+		this.context = request.createContext(true);
+		// TODO: should not be false in every case, e.g. for GUI
+		// TODO: should not be false in every case, e.g. for GUI
+		
+		
+		
+		
+		
+		
 		this.context.id.bind(id);
 		this.lattice = new ConceptLattice<G, M>(context);
 		this.layout = new ConceptLayout<G, M>(lattice, null);
@@ -147,25 +164,39 @@ public final class FCAInstance<G, M> {
 	}
 
 	public final void initialize(final InitLevel lvl) {
+		System.out.println("initialize");
 		this.defaultLvl = lvl;
 		executor.submit(new ImportTask<G, M>(this));
 		executor.submit(new InitializationTask<G, M>(this, lvl));
 	}
 
 	public final void simpleInit(final InitLevel lvl) {
+		System.out.println("simpleInit");
 		this.defaultLvl = lvl;
 		executor.submit(new ImportTask<G, M>(this));
-		if (lvl.isOrNeedsLevel(InitLevel.CONCEPTS)) {
+		init();
+	}
+
+	public final void init() {
+		if (defaultLvl.isOrNeedsLevel(InitLevel.CONCEPTS)) {
 			executor.submit(NextConcept.concepts(lattice));
-			if (lvl.isOrNeedsLevel(InitLevel.LAYOUT))
+			if (defaultLvl.isOrNeedsLevel(InitLevel.LAYOUT))
 				executor.submit(new SeedsAndLabelsTask<G, M>(this));
-			if (lvl.isOrNeedsLevel(InitLevel.LATTICE))
+			if (defaultLvl.isOrNeedsLevel(InitLevel.LATTICE))
 				executor.submit(IPred.neighborhood(lattice));
-			if (lvl.isOrNeedsLevel(InitLevel.LAYOUT))
+			if (defaultLvl.isOrNeedsLevel(InitLevel.LAYOUT)){
 				executor.submit(GeneticLayouter.seeds(layout, false,
 						Constants.GENERATIONS, Constants.POPULATION,
 						tab == null ? false : tab.threeDimensions(),
 						conflictDistance, tpe));
+			}
+			executor.submit(new BlockingTask("initial update"){
+				@Override
+				protected void _call() {
+					layout.invalidate();
+					updateProgress(1, 1);
+				}
+			});
 		}
 	}
 
