@@ -24,6 +24,10 @@ import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.IntegerBinding;
@@ -36,6 +40,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -55,6 +60,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
@@ -73,6 +79,7 @@ import conexp.fx.gui.cellpane.InteractionMode;
 import conexp.fx.gui.graph.ConceptGraph;
 import conexp.fx.gui.tab.CFXTab;
 import conexp.fx.gui.util.ColorScheme;
+import de.tudresden.inf.tcs.fcalib.Implication;
 
 public class MatrixContextWidget<G, M> extends BorderPane {
 
@@ -423,7 +430,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       final G g = context.rowHeads().get(contentCoordinates.get().x());
       final M m = context.colHeads().get(contentCoordinates.get().y());
       if (context.selectedAttributes().contains(m)) {
-        final Pair<Incidence, Incidence> p = context.selection.getValue(g, m, showArrows.get());
+        final Pair<Incidence, Incidence> p = context.selection.getValue(g, m, showArrows.get(), showPaths.get());
         final Incidence first = p.first();
         final Incidence second = p.second();
         ContextCell.this.textContent.set(second != null && first == Incidence.NO_CROSS
@@ -516,6 +523,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
                                                             };
   public final BooleanProperty        animate               = new SimpleBooleanProperty(false);
   public final BooleanProperty        showArrows            = new SimpleBooleanProperty();
+  public final BooleanProperty showPaths = new SimpleBooleanProperty();
   public final ToggleButton           highlightToggleButton = new ToggleButton("Highlight");
   public final DoubleBinding          height;
 
@@ -585,7 +593,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       createToolBar();
     else
       zoomFactor.set(Math.pow(2d, 0));
-    showArrows.addListener(new ChangeListener<Boolean>() {
+    final ChangeListener<Boolean> updateContentListener = new ChangeListener<Boolean>() {
 
       public final void changed(
           final ObservableValue<? extends Boolean> observable,
@@ -593,7 +601,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
           final Boolean newValue) {
         contextPane.updateContent();
       }
-    });
+    };
+	showArrows.addListener(updateContentListener);
+	showPaths.addListener(updateContentListener);
     height = new DoubleBinding() {
 
       {
@@ -615,32 +625,32 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     };
     rowHeaderPane.toFront();
     colHeaderPane.toFront();
-//    final Timeline t = new Timeline();
-//    t.getKeyFrames().add(new KeyFrame(Duration.millis(1000),
-////        new EventHandler<ActionEvent>() {
-////
-////      public final void handle(final ActionEvent event) {
-////        final Timeline s = new Timeline();
-////        s.getKeyFrames().add(
-////            new KeyFrame(Duration.millis(1000), new KeyValue(zoomSlider.valueProperty(), 0.9d, Interpolator.EASE_OUT)));
-////        Platform.runLater(new Runnable() {
-////
-////          
-////          public final void run() {
-////            s.play();
-////          }
-////        });
-////      }
-////    },
-//        new KeyValue(zoomSlider.valueProperty(), 0.7d, Interpolator.EASE_IN)));
-//    Platform.runLater(new Runnable()
-//    {
-//      
-//      public void run()
-//      {
-//        t.play();
+    final Timeline t = new Timeline();
+    t.getKeyFrames().add(new KeyFrame(Duration.millis(1000),
+//        new EventHandler<ActionEvent>() {
+//
+//      public final void handle(final ActionEvent event) {
+//        final Timeline s = new Timeline();
+//        s.getKeyFrames().add(
+//            new KeyFrame(Duration.millis(1000), new KeyValue(zoomSlider.valueProperty(), 0.9d, Interpolator.EASE_OUT)));
+//        Platform.runLater(new Runnable() {
+//
+//          
+//          public final void run() {
+//            s.play();
+//          }
+//        });
 //      }
-//    });
+//    },
+        new KeyValue(zoomSlider.valueProperty(), 0d, Interpolator.EASE_IN)));
+    Platform.runLater(new Runnable()
+    {
+      
+      public void run()
+      {
+        t.play();
+      }
+    });
   }
 
   private final void createToolBar() {
@@ -658,16 +668,33 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     arrowsToggleButton.setSelected(false);
     arrowsToggleButton.setMinHeight(24);
     showArrows.bind(arrowsToggleButton.selectedProperty());
+    final ToggleButton pathsToggleButton = new ToggleButton("Paths");
+    pathsToggleButton.setDisable(true);
+    pathsToggleButton.setSelected(false);
+    pathsToggleButton.setMinHeight(24);
+    showPaths.bind(pathsToggleButton.selectedProperty());
+    arrowsToggleButton.addEventHandler(ActionEvent.ACTION, new EventHandler<ActionEvent>(){
+    	@Override
+    	public final void handle(final ActionEvent event) {
+    		if (showArrows.get()){
+    			pathsToggleButton.setDisable(false);
+    		}else{
+    			pathsToggleButton.setSelected(false);
+    			pathsToggleButton.setDisable(true);
+    		}
+    	}
+    });
     highlightToggleButton.setSelected(false);
     highlightToggleButton.setMinHeight(24);
     rowHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());
     colHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());
     contextPane.highlight.bind(highlightToggleButton.selectedProperty());
     arrowsToggleButton.setStyle("-fx-background-radius: 5 0 0 5, 5 0 0 5, 4 0 0 4, 3 0 0 3;");
+    pathsToggleButton.setStyle("-fx-background-radius: 0, 0, 0, 0");
     highlightToggleButton.setStyle("-fx-background-radius: 0 5 5 0, 0 5 5 0, 0 4 4 0, 0 3 3 0;");
     HBox showBox = new HBox();
     showBox.setPadding(new Insets(0d));
-    showBox.getChildren().addAll(arrowsToggleButton, highlightToggleButton);
+    showBox.getChildren().addAll(arrowsToggleButton, pathsToggleButton, highlightToggleButton);
     final ToolBar toolBar = new ToolBar();
     toolBar.getItems().addAll(zoomSlider, showBox);
     this.setTop(toolBar);
@@ -709,5 +736,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
         return index;
       }
     }));
+  }
+  
+  public final void highlightImplication(final Implication<M> implication){
+	  
   }
 }

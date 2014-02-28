@@ -516,13 +516,13 @@ public class MatrixContext<G, M>
   public MatrixContext(final boolean homogen)
   {
     super(homogen);
-    initHandlers(true, true);
+    initHandlers(true, AutomaticMode.REDUCE);
   }
 
   public MatrixContext(final SetList<G> objects, final SetList<M> attributes, final boolean homogen)
   {
     super(objects, attributes, homogen);
-    initHandlers(true, true);
+    initHandlers(true, AutomaticMode.REDUCE);
   }
 
   public MatrixContext(
@@ -532,29 +532,29 @@ public class MatrixContext<G, M>
       final boolean homogen)
   {
     super(objects, attributes, matrix, homogen);
-    initHandlers(true, true);
+    initHandlers(true, AutomaticMode.REDUCE);
   }
 
-  public MatrixContext(final boolean homogen, final boolean selfReducing)
+  public MatrixContext(final boolean homogen, final AutomaticMode automaticMode)
   {
     super(homogen);
-    initHandlers(true, selfReducing);
+    initHandlers(true, automaticMode);
   }
 
-  public MatrixContext(final SetList<G> objects, final SetList<M> attributes, final boolean homogen, final boolean selfReducing)
+  public MatrixContext(final SetList<G> objects, final SetList<M> attributes, final boolean homogen, final AutomaticMode automaticMode)
   {
     super(objects, attributes, homogen);
-    initHandlers(true, selfReducing);
+    initHandlers(true, automaticMode);
   }
 
   public MatrixContext(
       final SetList<G> objects,
       final SetList<M> attributes,
       final BooleanMatrix matrix,
-      final boolean homogen, final boolean selfReducing)
+      final boolean homogen, final AutomaticMode automaticMode)
   {
     super(objects, attributes, matrix, homogen);
-    initHandlers(true, selfReducing);
+    initHandlers(true, automaticMode);
   }
 
   private boolean lock = false;
@@ -568,34 +568,65 @@ public class MatrixContext<G, M>
   {
     lock = false;
   }
+  
+  public enum AutomaticMode {
+	  NONE,
+	  CLEAN,
+	  REDUCE;
+	  
+	  public final static AutomaticMode fromSize(final int objs, final int atts){
+		  if (objs>1000|| atts>1000) return NONE;
+		  else if (objs*atts>10000) return CLEAN;
+		  return REDUCE;
+	  }
+  }
 
-  private void initHandlers(final boolean selfSelecting, final boolean selfReducing)
+  public void initHandlers(final boolean selfSelecting, final AutomaticMode auto)
   {
 //    if (selfSelecting) {
 //      addEventHandler(new RelationEventHandler<G, M>() {
-//
-//        
 //        public final void handle(final RelationEvent<G, M> event) {
 //          select();
 //        }
 //      }, RelationEvent.SELECTION_CHANGED);
 //      select();
 //    }
-    if (selfReducing) {
-      addEventHandler(new RelationEventHandler<G, M>()
-        {
-          public final void handle(final RelationEvent<G, M> event)
-          {
-            if (!lock) {
-//              final long start = System.currentTimeMillis();
-              // System.out.println("reducing...");
-              reduce();
-//              System.out.println("reducing done in " + (System.currentTimeMillis() - start) + " ms.");
-            }
-          }
-        }, RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
-      reduce();
-    }
+	  switch (auto){
+	  	case REDUCE:
+	        addEventHandler(new RelationEventHandler<G, M>()
+	                {
+	                  public final void handle(final RelationEvent<G, M> event)
+	                  {
+	                    if (!lock) {
+	                      final long start = System.currentTimeMillis();
+	                      reduce();
+	                      System.out.println("reducing done in " + (System.currentTimeMillis() - start) + " ms.");
+	                    }
+	                  }
+	                }, RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
+            final long start = System.currentTimeMillis();
+            reduce();
+            System.out.println("reducing done in " + (System.currentTimeMillis() - start) + " ms.");
+	              break;
+	  	case CLEAN:
+	        addEventHandler(new RelationEventHandler<G, M>()
+	                {
+	                  public final void handle(final RelationEvent<G, M> event)
+	                  {
+	                    if (!lock) {
+	                      final long start = System.currentTimeMillis();
+	                      clean();
+	                      System.out.println("cleaning done in " + (System.currentTimeMillis() - start) + " ms.");
+	                    }
+	                  }
+	                }, RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
+            final long startt = System.currentTimeMillis();
+            clean();
+            System.out.println("cleaning done in " + (System.currentTimeMillis() - startt) + " ms.");
+	              break;
+	  	case NONE:
+	  	default:
+	  }
   }
 
   public synchronized final void select()
@@ -612,12 +643,16 @@ public class MatrixContext<G, M>
               MatrixContext.this.colHeads().indicesOf(selectedColHeads, false)), false);
   }
 
-  public synchronized final void reduce()
-  {
-    _objects.clear();
+  public synchronized final void clean() {
+	_objects.clear();
     _objects.addAll(_objectEquivalence().equivalenceClasses());
     _attributes.clear();
     _attributes.addAll(_attributeEquivalence().equivalenceClasses());
+}
+
+public synchronized final void reduce()
+  {
+    clean();
     _downArrows = new AbstractRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, false)
       {
         public final boolean contains(final Object object, final Object attribute)
@@ -653,32 +688,33 @@ public class MatrixContext<G, M>
     _irreducibleObjects.addAll(_objects.filter(_isIrreducibleObject));
     _irreducibleAttributes.clear();
     _irreducibleAttributes.addAll(_attributes.filter(_isIrreducibleAttribute).clone());
-//    try {
-//      final int rows = _objects.size();
-//      final int cols = _attributes.size();
-//      @SuppressWarnings("deprecation")
-//      final BooleanMatrix arrowPaths =
-//          BooleanMatrices.transitiveClosure(BooleanMatrices.reflexiveClosure(BooleanMatrices.quadPosition(
-//              BooleanMatrices.empty(rows),
-//              _downArrows.clone().matrix(),
-//              BooleanMatrices.dual(_upArrows.clone().matrix()),
-//              BooleanMatrices.empty(cols))));
-//      final BooleanMatrix downPaths = (BooleanMatrix) arrowPaths.subMatrix(Ret.NEW, 0, rows, rows - 1, rows + cols - 1);
-//      final BooleanMatrix upPaths =
-//          (BooleanMatrix) BooleanMatrices.dual((BooleanMatrix) arrowPaths.subMatrix(
-//              Ret.NEW,
-//              rows,
-//              0,
-//              rows + cols - 1,
-//              rows - 1));
-//      _downPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, downPaths, false);
-//      _upPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, upPaths, false);
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
+    try {
+      final int rows = _objects.size();
+      final int cols = _attributes.size();
+      if (rows==0||cols==0) return;
+      @SuppressWarnings("deprecation")
+      final BooleanMatrix arrowPaths =
+          BooleanMatrices.transitiveClosure(BooleanMatrices.reflexiveClosure(BooleanMatrices.quadPosition(
+              BooleanMatrices.empty(rows),
+              _downArrows.clone().matrix(),
+              BooleanMatrices.dual(_upArrows.clone().matrix()),
+              BooleanMatrices.empty(cols))));
+      final BooleanMatrix downPaths = (BooleanMatrix) arrowPaths.subMatrix(Ret.NEW, 0, rows, rows - 1, rows + cols - 1);
+      final BooleanMatrix upPaths =
+          (BooleanMatrix) BooleanMatrices.dual((BooleanMatrix) arrowPaths.subMatrix(
+              Ret.NEW,
+              rows,
+              0,
+              rows + cols - 1,
+              rows - 1));
+      _downPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, downPaths, false);
+      _upPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, upPaths, false);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
-  public final Pair<Incidence, Incidence> getValue(final G g, final M m, final boolean... withArrows)
+public final Pair<Incidence, Incidence> getValue(final G g, final M m, final boolean... withArrows)
   {
     if (withArrows.length == 0 || withArrows[0]) {
       Incidence first;
@@ -699,19 +735,20 @@ public class MatrixContext<G, M>
         else
           first = Incidence.NO_CROSS;
       }
-//      final boolean Down = DownPaths.contains(g, m);
-//      final boolean Up = UpPaths.contains(g, m);
-//      if (up || down)
-//        second = null;
-//      else if (Down && Up)
-//        second = Incidence.BOTH_PATH;
-//      else if (Down)
-//        second = Incidence.DOWN_PATH;
-//      else if (Up)
-//        second = Incidence.UP_PATH;
-//      else
       second = null;
-      return Pair.of(first, second);
+      if (withArrows.length==0||(withArrows.length>1&&withArrows[1])) {
+		final boolean Down = DownPaths.contains(g, m);
+		final boolean Up = UpPaths.contains(g, m);
+		if (up || down)
+			second = null;
+		else if (Down && Up)
+			second = Incidence.BOTH_PATH;
+		else if (Down)
+			second = Incidence.DOWN_PATH;
+		else if (Up)
+			second = Incidence.UP_PATH;
+	}
+	return Pair.of(first, second);
     } else {
       if (contains(g, m))
         return Pair.of(Incidence.CROSS, null);

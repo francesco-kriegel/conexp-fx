@@ -44,8 +44,8 @@ public abstract class Request<G, M> {
     return context;
   }
 
-  public final MatrixContext<G, M> createContext(final boolean selfReducing) {
-    context = new MatrixContext<G, M>(type.homogen, selfReducing);
+  public final MatrixContext<G, M> createContext(final MatrixContext.AutomaticMode automaticMode) {
+    context = new MatrixContext<G, M>(type.homogen, automaticMode);
     return context;
   }
 

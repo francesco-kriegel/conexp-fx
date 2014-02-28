@@ -23,6 +23,7 @@ package conexp.fx.core.algorithm.nextclosure;
  * #L%
  */
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,6 +44,7 @@ import conexp.fx.core.concurrent.BlockingTask;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.importer.CXTImporter;
 
 public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
 
@@ -88,6 +90,16 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
       }
     };
   }
+  
+  public static final void main(String[] args){
+	  MatrixContext<String,String> cxt = new MatrixContext<String,String>(false);
+	  CXTImporter.importt(cxt,new File("/Users/francesco/Documents/workspace/conexp-fx/contexts/huge/algorithms.cxt"));
+	  NextConcept<String,String> nex = new NextConcept<String,String>(cxt);
+	  final Iterator<Concept<String, String>> it = nex.iterator();
+	  int i = 0;
+	  while (it.hasNext())
+		  System.out.println(i+++":"+it.next());
+  }
 
   private final MatrixContext<G, M> context;
 
@@ -103,10 +115,21 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
 
   public final Iterator<Concept<G, M>> iterator() {
     final MatrixContext<G, M> selection = context.selection;
-    selection.pushAllChangedEvent();
+//    selection.pushAllChangedEvent();
     // maybe drop this for huge contexts
     // or encapsulate in own class or blocking task
-    final MatrixContext<Set<Integer>, Set<Integer>> reduced = selection._reduced.clone();
+    final MatrixContext<Set<Integer>, Set<Integer>> reduced;
+//    switch (MatrixContext.AutomaticMode.fromSize(selection.rowHeads().size(), selection.colHeads().size())){
+//    	case REDUCE:
+//    		reduced = selection._reduced.clone();
+//    		break;
+//    	case CLEAN:
+//    	case NONE:
+//    	default:
+       	 	reduced= selection._cleaned.clone();
+//       	 	break;
+//    }
+//    final MatrixContext<Set<Integer>, Set<Integer>> reduced = selection._reduced.clone();
     final HullOperator<Integer> hullOp = new HullOperator<Integer>() {
 
       @Override

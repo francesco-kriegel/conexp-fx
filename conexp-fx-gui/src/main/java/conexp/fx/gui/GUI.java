@@ -105,8 +105,8 @@ public class GUI extends Application {
   private final class InfoDialog extends FXDialog {
 
     private InfoDialog() {
-      super(primaryStage, Style.INFO, "Info", "Concept Explorer FX\t\t(c) 2013, Francesco Kriegel\r\n\r\n"
-          + "You may use this software for private or educational purposes at no charge.", HBoxBuilder
+      super(primaryStage, Style.INFO, "Info", "Concept Explorer FX\t\t(c) 2014, Francesco Kriegel, TU Dresden\r\n\r\n"
+          + "This software is licensed by Apache License 2.0.", HBoxBuilder
           .create()
           .spacing(10)
           .padding(InsetsBuilder.create().left(10).top(10).right(10).bottom(10).build())
@@ -432,6 +432,7 @@ public class GUI extends Application {
       } catch (NullPointerException e) {
         file = new File(File.createTempFile("conexp-fx", "tmp").getParent(), "conexp-fx.xml");
       }
+      System.out.println(file.getAbsolutePath());
       if (!file.exists())
         XMLFile.createEmptyConfiguration(file);
       return new XMLFile(file);
@@ -564,6 +565,7 @@ public class GUI extends Application {
       primaryStage.close();
       System.exit(0);
     } catch (IOException e) {
+    	System.err.println("The following error can be ignored:");
       e.printStackTrace();
       primaryStage.close();
       System.exit(1);

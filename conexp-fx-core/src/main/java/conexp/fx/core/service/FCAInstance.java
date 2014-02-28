@@ -46,6 +46,7 @@ import conexp.fx.core.concurrent.BlockingTask;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.context.MatrixContext.AutomaticMode;
 import conexp.fx.core.exporter.CFXExporter;
 import conexp.fx.core.exporter.CXTExporter;
 import conexp.fx.core.exporter.HTMLExporter;
@@ -132,7 +133,7 @@ public final class FCAInstance<G, M> {
 		// TODO: should not be false in every case, e.g. for GUI
 		// TODO: should not be false in every case, e.g. for GUI
 //		this.context = request.createContext(false);
-		this.context = request.createContext(true);
+		this.context = request.createContext(AutomaticMode.NONE);
 		// TODO: should not be false in every case, e.g. for GUI
 		// TODO: should not be false in every case, e.g. for GUI
 		

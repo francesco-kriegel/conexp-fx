@@ -28,10 +28,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javafx.application.Platform;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 
+import conexp.fx.core.builder.Requests;
 import conexp.fx.core.concurrent.BlockingTask;
 import conexp.fx.core.context.ImplicationSet;
 import conexp.fx.core.context.MatrixContext;
@@ -56,7 +59,16 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
         // ObservableList;
         while (iterator.hasNext()) {
           final Implication<M> next = iterator.next();
-          implications.add(next);
+          if (Platform.isFxApplicationThread()){
+        	  implications.add(next);
+          }else{
+        	  Platform.runLater(new Runnable(){
+        		  @Override
+        		public void run() {
+        			  implications.add(next);	
+        		}
+        	  });
+          }
 //          if (!next.getPremise().equals(next.getConclusion())) {
 //            final HashSet<M> premise = new HashSet<M>();
 //            premise.addAll(next.getPremise());
@@ -83,6 +95,7 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
         updateProgress(0.9d, 1d);
       }
     };
+    
   }
 
   private final MatrixContext<G, M> context;

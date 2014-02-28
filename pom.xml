@@ -13,6 +13,7 @@
 		<module>conexp-fx-cli</module>
 		<module>conexp-fx-gui</module>
 		<module>conexp-fx-test</module>
+		<module>conelk</module>
 	</modules>
 
 	<organization>

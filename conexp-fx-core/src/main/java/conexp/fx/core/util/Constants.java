@@ -27,7 +27,7 @@ public class Constants
 {
   public static final double   FRAMES_PER_SECOND                = 100d;
   public static final double   FRAME_SIZE_MILLIS                = 1000d / FRAMES_PER_SECOND;
-  public static final int      MAX_CONCEPTS                     = 1024;
+  public static final int      MAX_CONCEPTS                     = 2048;
   public static final int      MULTI_CLICK_DURATION             = 300;
   public static final int      UI_DELAY                         = 100;
   public static final int      ANIMATION_TIME                   = 100;

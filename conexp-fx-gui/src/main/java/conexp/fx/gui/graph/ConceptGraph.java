@@ -113,6 +113,7 @@ import conexp.fx.gui.util.FXControls;
 import conexp.fx.gui.util.NumberPropertyTransition;
 import conexp.fx.gui.util.SearchBox;
 import conexp.fx.gui.util.TransitionTimer;
+import de.tudresden.inf.tcs.fcalib.Implication;
 
 public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
 
@@ -1568,6 +1569,35 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           Color.BLACK,
           COLOR_CONCEPT,
           Color.BLACK));
+    }
+    
+    public final Iterable<HighlightRequest> implication(final Implication<M> implication) {
+    	if (controller.graphLock.isLocked() || dontHighlight || !toolBar.highlight.isSelected())
+    		return Collections.emptySet();
+    	final Set<Concept<G, M>> conceptsP = new HashSet<Concept<G,M>>();
+    	final Set<Concept<G, M>> conceptsC = new HashSet<Concept<G,M>>();
+    	for (M m : implication.getPremise()) conceptsP.add(fca.context.attributeConcept(m));
+    	for (M m : implication.getConclusion()) conceptsC.add(fca.context.attributeConcept(m));
+		return Sets.<HighlightRequest> newHashSet(new HighlightRequest(
+    			conceptsP,
+    	          EdgeHighlight.CONTAINS_ONE,
+    	          COLOR_UPPER,
+    	          COLOR_UPPER,
+    	          COLOR_UPPER,
+    	          Color.BLACK,
+    	          COLOR_UPPER,
+    	          Color.BLACK	
+    			),
+    			new HighlightRequest(
+    			conceptsC,
+    	          EdgeHighlight.CONTAINS_ONE,
+    	          COLOR_LOWER,
+    	          COLOR_LOWER,
+    	          COLOR_LOWER,
+    	          Color.BLACK,
+    	          COLOR_LOWER,
+    	          Color.BLACK	
+    			));
     }
 
     public final Iterable<HighlightRequest> upperNeighbors(final Concept<G, M> concept) {
