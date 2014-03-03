@@ -20,7 +20,6 @@ package conexp.fx.gui.dialog;
  * #L%
  */
 
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -78,7 +77,7 @@ public class FXDialog {
   }
 
   private final int        width        = 500;
-  private final Stage      stage        = StageBuilder.create().title("Construction Wizard").build();
+  private final Stage      stage        = StageBuilder.create().build();
   private final BorderPane pane         = BorderPaneBuilder.create().build();
   private final Text       text         = TextBuilder
                                             .create()
@@ -231,7 +230,8 @@ public class FXDialog {
                     .children(text)
                     .build())
             .build();
-    pane.setTop(topPane);
+    if (text.getText().trim() != "")
+      pane.setTop(topPane);
   }
 
   private final void createBottom() {

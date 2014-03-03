@@ -9,9 +9,7 @@
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="conexp.fx.core.test.TestSuite"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="conexp-fx-test"/>
-<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms256m&#10;-Xmx2048m&#10;-Djub.customkey=oracle-1.7.0_45&#10;-Djub.consumers=CONSOLE,H2,XML&#10;-Djub.db.file=benchmarks/.benchmarks&#10;-Djub.xml.file=benchmarks/latest.xml"/>
 </launchConfiguration>

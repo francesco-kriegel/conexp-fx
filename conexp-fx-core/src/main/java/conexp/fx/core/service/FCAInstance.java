@@ -37,7 +37,7 @@ import javafx.stage.Stage;
 import conexp.fx.core.algorithm.lattice.IFox;
 import conexp.fx.core.algorithm.lattice.IPred;
 import conexp.fx.core.algorithm.nextclosure.NextConcept;
-import conexp.fx.core.algorithm.nextclosure.NextImplication;
+import conexp.fx.core.algorithm.nextclosure.NextImplication2;
 import conexp.fx.core.builder.FileRequest;
 import conexp.fx.core.builder.Request;
 import conexp.fx.core.builder.Requests.Source;
@@ -133,7 +133,7 @@ public final class FCAInstance<G, M> {
 		// TODO: should not be false in every case, e.g. for GUI
 		// TODO: should not be false in every case, e.g. for GUI
 //		this.context = request.createContext(false);
-		this.context = request.createContext(AutomaticMode.NONE);
+		this.context = request.createContext(AutomaticMode.REDUCE);
 		// TODO: should not be false in every case, e.g. for GUI
 		// TODO: should not be false in every case, e.g. for GUI
 		
@@ -449,7 +449,7 @@ public final class FCAInstance<G, M> {
 				implications.clear();
 			}
 		});
-		executor.submit(NextImplication.implications(context, implications));
+		executor.submit(NextImplication2.implications(context, implications));
 	}
 
 	public void calcAssociations(final double support, final double confidence) {

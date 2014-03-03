@@ -42,10 +42,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.InsetsBuilder;
+import javafx.geometry.Rectangle2D;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.HyperlinkBuilder;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -66,6 +65,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.TextBuilder;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
@@ -102,50 +102,9 @@ public class GUI extends Application {
     launch(args);
   }
 
-  private final class InfoDialog extends FXDialog {
+  final class ErrorDialog extends FXDialog {
 
-    private InfoDialog() {
-      super(primaryStage, Style.INFO, "Info", "Concept Explorer FX\t\t(c) 2014, Francesco Kriegel, TU Dresden\r\n\r\n"
-          + "This software is licensed by Apache License 2.0.", HBoxBuilder
-          .create()
-          .spacing(10)
-          .padding(InsetsBuilder.create().left(10).top(10).right(10).bottom(10).build())
-          .children(
-              HyperlinkBuilder
-                  .create()
-                  .text("mailto:francesco.kriegel@tu-dresden.de")
-                  .onAction(new EventHandler<ActionEvent>() {
-
-                    public final void handle(final ActionEvent event) {
-                      try {
-                        Desktop.getDesktop().mail(new URI("mailto:francesco.kriegel@tu-dresden.de"));
-                      } catch (Exception e) {
-                        new ErrorDialog(e).showAndWait();
-                      }
-                    }
-                  })
-                  .build(),
-              HyperlinkBuilder
-                  .create()
-                  .text("http://lat.inf.tu-dresden.de/~francesco")
-                  .onAction(new EventHandler<ActionEvent>() {
-
-                    public final void handle(final ActionEvent event) {
-                      try {
-                        Desktop.getDesktop().browse(new URI("http://lat.inf.tu-dresden.de/~francesco"));
-                      } catch (Exception e) {
-                        new ErrorDialog(e).showAndWait();
-                      }
-                    }
-                  })
-                  .build())
-          .build());
-    }
-  }
-
-  private final class ErrorDialog extends FXDialog {
-
-    private ErrorDialog(final Exception e) {
+    public ErrorDialog(final Exception e) {
       super(primaryStage, Style.ERROR, e.getMessage(), e.toString(), null);
     }
   }
@@ -326,7 +285,7 @@ public class GUI extends Application {
           FXControls.newMenuItem("Info", "image/help-contents.png", new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
-              new InfoDialog().showAndWait();
+              new InfoDialog(GUI.this).showAndWait();
             }
           });
       helpMenu.getItems().add(infoMenuItem);
@@ -396,12 +355,12 @@ public class GUI extends Application {
         stop();
       }
     });
-//    Screen screen = Screen.getPrimary();
-//    Rectangle2D bounds = screen.getVisualBounds();
-//    primaryStage.setX(bounds.getMinX());
-//    primaryStage.setY(bounds.getMinY());
-//    primaryStage.setWidth(bounds.getWidth());
-//    primaryStage.setHeight(bounds.getHeight());
+    Screen screen = Screen.getPrimary();
+    Rectangle2D bounds = screen.getVisualBounds();
+    primaryStage.setX(bounds.getMinX());
+    primaryStage.setY(bounds.getMinY());
+    primaryStage.setWidth(bounds.getWidth());
+    primaryStage.setHeight(bounds.getHeight());
 //    primaryStage.setFullScreen(true);
     this.rootPane.getStylesheets().add("conexp/fx/gui/style/style.css");
     new CFXMenuBar();
@@ -499,25 +458,6 @@ public class GUI extends Application {
     final CFXTab<G, M> tab = new CFXTab<G, M>(this, request);
     tabPane.getTabs().add(tab);
     tabPane.getSelectionModel().select(tab);
-    tab.splitPane.getDividers().get(0).positionProperty().set(0.33d);
-    Platform.runLater(new Runnable() {
-
-      public final void run() {
-        tab.splitPane.getDividers().get(0).positionProperty().set(0.33d);
-        Platform.runLater(new Runnable() {
-
-          public final void run() {
-            tab.splitPane.getDividers().get(0).positionProperty().set(0.33d);
-            Platform.runLater(new Runnable() {
-
-              public final void run() {
-                tab.splitPane.getDividers().get(0).positionProperty().set(0.33d);
-              }
-            });
-          }
-        });
-      }
-    });
   }
 
   private final void showConstructAssistent() {
@@ -565,7 +505,7 @@ public class GUI extends Application {
       primaryStage.close();
       System.exit(0);
     } catch (IOException e) {
-    	System.err.println("The following error can be ignored:");
+      System.err.println("The following error can be ignored:");
       e.printStackTrace();
       primaryStage.close();
       System.exit(1);

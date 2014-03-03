@@ -74,7 +74,7 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
         updateProgress(0.2d, 1d);
         while (iterator.hasNext()) {
           Concept<G, M> concept = iterator.next();
-		  hashSet.add(concept);
+          hashSet.add(concept);
           currentConceptNumber++;
           updateProgress(0.2d + 0.5d * (currentConceptNumber / maximalConceptNumber), 1d);
           updateMessage("computing concepts: " + currentConceptNumber + "...");
@@ -90,15 +90,15 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
       }
     };
   }
-  
-  public static final void main(String[] args){
-	  MatrixContext<String,String> cxt = new MatrixContext<String,String>(false);
-	  CXTImporter.importt(cxt,new File("/Users/francesco/Documents/workspace/conexp-fx/contexts/huge/algorithms.cxt"));
-	  NextConcept<String,String> nex = new NextConcept<String,String>(cxt);
-	  final Iterator<Concept<String, String>> it = nex.iterator();
-	  int i = 0;
-	  while (it.hasNext())
-		  System.out.println(i+++":"+it.next());
+
+  public static final void main(String[] args) {
+    MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
+    CXTImporter.importt(cxt, new File("/Users/francesco/Documents/workspace/conexp-fx/contexts/huge/algorithms.cxt"));
+    NextConcept<String, String> nex = new NextConcept<String, String>(cxt);
+    final Iterator<Concept<String, String>> it = nex.iterator();
+    int i = 0;
+    while (it.hasNext())
+      System.out.println(i++ + ":" + it.next());
   }
 
   private final MatrixContext<G, M> context;
@@ -126,7 +126,7 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
 //    	case CLEAN:
 //    	case NONE:
 //    	default:
-       	 	reduced= selection._cleaned.clone();
+    reduced = selection._cleaned.clone();
 //       	 	break;
 //    }
 //    final MatrixContext<Set<Integer>, Set<Integer>> reduced = selection._reduced.clone();

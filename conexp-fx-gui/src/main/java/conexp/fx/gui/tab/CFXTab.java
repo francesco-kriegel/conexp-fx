@@ -33,6 +33,7 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
@@ -42,6 +43,7 @@ import javafx.scene.control.ProgressBarBuilder;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.control.Tab;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -73,8 +75,7 @@ public class CFXTab<G, M> extends Tab {
 
   public final GUI                       conExp;
   public final FCAInstance<G, M>         fca;
-  private final BorderPane               pane      = new BorderPane();
-  public final SplitPane                 splitPane = new SplitPane();
+  private final BorderPane               pane = new BorderPane();
   public final MatrixContextWidget<G, M> contextWidget;
   public final ConceptGraph<G, M>        conceptGraph;
 
@@ -131,7 +132,6 @@ public class CFXTab<G, M> extends Tab {
       }
     });
     this.setContent(pane);
-    this.pane.setCenter(splitPane);
     this.setGraphic(ImageViewBuilder
         .create()
         .image(new Image(GUI.class.getResourceAsStream("image/context.gif")))
@@ -168,14 +168,26 @@ public class CFXTab<G, M> extends Tab {
       this.contextWidget = new MatrixContextWidget<G, M>(this);
     this.conceptGraph = new ConceptGraph<G, M>(this);
     this.fca.initialize(InitLevel.LAYOUT);
-    this.splitPane.getItems().addAll(contextWidget, conceptGraph, new ImplicationWidget<G, M>(this));
-    this.splitPane.setDividerPositions(0, 0.85);
+    final ImplicationWidget<G, M> implicationWidget = new ImplicationWidget<G, M>(this);
+    this.pane.setCenter(SplitPaneBuilder
+        .create()
+        .dividerPositions(new double[] { 0.8d })
+        .orientation(Orientation.VERTICAL)
+        .items(
+            SplitPaneBuilder
+                .create()
+                .dividerPositions(new double[] { 0.3d })
+                .orientation(Orientation.HORIZONTAL)
+                .items(contextWidget, conceptGraph)
+                .build(),
+            implicationWidget)
+        .build());
   }
 
   private final class CFXStatusBar {
 
     private final int               height                   = 20;
-    private final int buttonSize 							=16;
+    private final int               buttonSize               = 16;
     private final int               padding                  = 2;
     private final int               progressWidth            = 128;
     private final ProgressIndicator currentProgressIndicator = ProgressIndicatorBuilder
@@ -219,8 +231,7 @@ public class CFXTab<G, M> extends Tab {
                                                                  .maxHeight(height - 2 * padding)
                                                                  .build();
 
-    private final Button            stopButton               = ButtonBuilder
-                                                                 .create()
+    private final Button            stopButton               = ButtonBuilder.create()
 //                                                                 .text("stop")
                                                                  .style("-fx-base: red; -fx-label-padding: 0 4 0 0")
                                                                  .maxHeight(buttonSize)
@@ -238,6 +249,7 @@ public class CFXTab<G, M> extends Tab {
     private final void stopCurrentTask() {
       fca.executor.currentTaskProperty.getValue().cancel();
     }
+
     private CFXStatusBar() {
       final DoubleBinding progressIndicationBinding = new DoubleBinding() {
 
@@ -327,7 +339,7 @@ public class CFXTab<G, M> extends Tab {
       final BorderPane overallPane =
           BorderPaneBuilder.create().left(overallStatusLabel).right(overallProgressBar).build();
       final BorderPane overallPaneWithStopButton =
-    		  BorderPaneBuilder.create().center(overallPane).right(stopButton).build();
+          BorderPaneBuilder.create().center(overallPane).right(stopButton).build();
       final BorderPane statusBar =
           BorderPaneBuilder
               .create()

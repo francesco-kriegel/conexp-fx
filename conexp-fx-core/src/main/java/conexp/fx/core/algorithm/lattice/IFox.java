@@ -176,6 +176,7 @@ public final class IFox<G, M>
                   layout.lattice.attributeConcepts.put(m, c);
                 }
             }
+          layout.lattice.pushAllChangedEvent();
         }
 
         @SuppressWarnings("deprecation")
@@ -345,6 +346,7 @@ public final class IFox<G, M>
               layout.seeds.put(n, seed);
             }
           }
+          layout.lattice.pushAllChangedEvent();
         }
 
         private void reducible()
@@ -355,6 +357,7 @@ public final class IFox<G, M>
           }
           for (Concept<G, M> c : layout.lattice.rowHeads())
             c.intent().remove(m);
+          layout.lattice.pushAllChangedEvent();
         }
 
         private void irreducible()

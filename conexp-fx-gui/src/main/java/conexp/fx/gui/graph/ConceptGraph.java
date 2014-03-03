@@ -20,8 +20,8 @@ package conexp.fx.gui.graph;
  * #L%
  */
 
-
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -90,6 +90,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.collections.relation.RelationEvent;
 import conexp.fx.core.collections.relation.RelationEventHandler;
@@ -1570,34 +1571,74 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           COLOR_CONCEPT,
           Color.BLACK));
     }
-    
+
     public final Iterable<HighlightRequest> implication(final Implication<M> implication) {
-    	if (controller.graphLock.isLocked() || dontHighlight || !toolBar.highlight.isSelected())
-    		return Collections.emptySet();
-    	final Set<Concept<G, M>> conceptsP = new HashSet<Concept<G,M>>();
-    	final Set<Concept<G, M>> conceptsC = new HashSet<Concept<G,M>>();
-    	for (M m : implication.getPremise()) conceptsP.add(fca.context.attributeConcept(m));
-    	for (M m : implication.getConclusion()) conceptsC.add(fca.context.attributeConcept(m));
-		return Sets.<HighlightRequest> newHashSet(new HighlightRequest(
-    			conceptsP,
-    	          EdgeHighlight.CONTAINS_ONE,
-    	          COLOR_UPPER,
-    	          COLOR_UPPER,
-    	          COLOR_UPPER,
-    	          Color.BLACK,
-    	          COLOR_UPPER,
-    	          Color.BLACK	
-    			),
-    			new HighlightRequest(
-    			conceptsC,
-    	          EdgeHighlight.CONTAINS_ONE,
-    	          COLOR_LOWER,
-    	          COLOR_LOWER,
-    	          COLOR_LOWER,
-    	          Color.BLACK,
-    	          COLOR_LOWER,
-    	          Color.BLACK	
-    			));
+      if (controller.graphLock.isLocked() || dontHighlight || !toolBar.highlight.isSelected())
+        return Collections.emptySet();
+      final Set<Concept<G, M>> conceptsP = new HashSet<Concept<G, M>>();
+      final Set<Concept<G, M>> conceptsC = new HashSet<Concept<G, M>>();
+      final Set<Concept<G, M>> concepts = new HashSet<Concept<G, M>>();
+      final Set<Concept<G, M>> inner = new HashSet<Concept<G, M>>();
+      for (M m : implication.getPremise())
+        conceptsP.add(fca.context.attributeConcept(m));
+      for (M m : implication.getConclusion())
+        conceptsC.add(fca.context.attributeConcept(m));
+      for (G g : fca.context.colAnd(implication.getPremise()))
+        concepts.add(fca.context.objectConcept(g));
+//      final Collection<Concept<G, M>> lower =
+//          Collections3.union(Collections2.transform(
+//              conceptsC,
+//              new Function<Concept<G, M>, Collection<Concept<G, M>>>() {
+//
+//                @Override
+//                public Collection<Concept<G, M>> apply(Concept<G, M> mm) {
+//                  return Collections3.difference(fca.lattice.ideal(mm), Collections.singleton(mm));
+//                }
+//              }));
+//      final Collection<Concept<G, M>> upper =
+//          Collections3.union(Collections2.transform(
+//              conceptsP,
+//              new Function<Concept<G, M>, Collection<Concept<G, M>>>() {
+//
+//                @Override
+//                public Collection<Concept<G, M>> apply(Concept<G, M> mm) {
+//                  return Collections3.difference(fca.lattice.filter(mm), Collections.singleton(mm));
+//                }
+//              }));
+//      inner.addAll(Collections3.intersection(lower, upper));
+      return Sets.<HighlightRequest> newHashSet(new HighlightRequest(
+          fca.lattice.ideal(fca.lattice.supremum(concepts)),
+          EdgeHighlight.CONTAINS_BOTH,
+          COLOR_CONCEPT,
+          COLOR_CONCEPT,
+          COLOR_CONCEPT,
+          Color.WHITE,
+          COLOR_CONCEPT,
+          Color.WHITE), new HighlightRequest(
+          conceptsP,
+          EdgeHighlight.CONTAINS_LOWER,
+          COLOR_UPPER,
+          COLOR_UPPER,
+          COLOR_UPPER,
+          Color.BLACK,
+          COLOR_UPPER,
+          Color.BLACK), new HighlightRequest(
+          conceptsC,
+          EdgeHighlight.CONTAINS_UPPER,
+          COLOR_LOWER,
+          COLOR_LOWER,
+          COLOR_LOWER,
+          Color.BLACK,
+          COLOR_LOWER,
+          Color.BLACK), new HighlightRequest(
+          inner,
+          EdgeHighlight.CONTAINS_BOTH,
+          COLOR_INTERVAL,
+          COLOR_INTERVAL,
+          COLOR_INTERVAL,
+          Color.WHITE,
+          COLOR_INTERVAL,
+          Color.WHITE));
     }
 
     public final Iterable<HighlightRequest> upperNeighbors(final Concept<G, M> concept) {
