@@ -89,7 +89,8 @@ public final class IPred<G, M> {
           }
           borderIntents.add(intent);
         }
-        lattice.pushAllChangedEvent();
+        updateMessage("Pushing Changes...");
+//        lattice.pushAllChangedEvent();
       }
     };
   }

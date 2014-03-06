@@ -1,7 +1,6 @@
 package conexp.fx.core.service;
 
 import conexp.fx.core.concurrent.BlockingTask;
-import conexp.fx.core.context.MatrixContext;
 
 final class ImportTask<G, M> extends BlockingTask {
 
@@ -16,9 +15,12 @@ final class ImportTask<G, M> extends BlockingTask {
   }
 
   protected final void _call() {
+    updateMessage("Setting Content...");
     this.fcaInstance.request.setContent();
-    final int rows = this.fcaInstance.context.rowHeads().size();
-    final int cols = this.fcaInstance.context.colHeads().size();
-    this.fcaInstance.context.initHandlers(true, MatrixContext.AutomaticMode.fromSize(rows,cols));
+//    updateMessage("Reducing Context...");
+//    this.fcaInstance.context.initHandlers(true, MatrixContext.AutomaticMode.REDUCE);
+//    final int rows = this.fcaInstance.context.rowHeads().size();
+//    final int cols = this.fcaInstance.context.colHeads().size();
+//    this.fcaInstance.context.initHandlers(true, MatrixContext.AutomaticMode.fromSize(rows,cols));
   }
 }

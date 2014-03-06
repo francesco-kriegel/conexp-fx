@@ -48,14 +48,18 @@
 
 	<distributionManagement>
 		<repository>
-			<id>goedel.artifactory.libs-release-local</id>
-			<name>libs-release-local</name>
-			<url>https://lat.inf.tu-dresden.de/artifactory/libs-release-local</url>
+			<uniqueVersion>false</uniqueVersion>
+			<id>myreleases</id>
+			<name>My Releases</name>
+			<url>scp://tcs.inf.tu-dresden.de:/users/lat/francesco/maven/</url>
+			<layout>default</layout>
 		</repository>
 		<snapshotRepository>
-			<id>goedel.artifactory.libs-snapshot-local</id>
-			<name>libs-snapshot-local</name>
-			<url>https://lat.inf.tu-dresden.de/artifactory/libs-snapshot-local</url>
+			<uniqueVersion>true</uniqueVersion>
+			<id>mysnapshots</id>
+			<name>My Snapshots</name>
+			<url>scp://tcs.inf.tu-dresden.de:/users/lat/francesco/maven/</url>
+			<layout>default</layout>
 		</snapshotRepository>
 	</distributionManagement>
 

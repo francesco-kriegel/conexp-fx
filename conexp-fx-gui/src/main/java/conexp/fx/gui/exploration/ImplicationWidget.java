@@ -121,15 +121,12 @@ public class ImplicationWidget<G, M> extends BorderPane {
 
       @Override
       public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
-        System.out.println("update");
         l.clear();
-        System.out.println("cleared");
 //        Platform.runLater(new Runnable() {
 //
 //          @Override
 //          public final void run() {
             l.addAll(tab.fca.lattice.colHeads());
-            System.out.println("added");
 //          }
 //        });
       }

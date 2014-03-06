@@ -20,7 +20,6 @@ package conexp.fx.core.util;
  * #L%
  */
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -40,6 +39,11 @@ public class IterableFile implements Iterable<String> {
 
   /*
    * @see java.lang.Iterable#iterator() {@inheritDoc}
+   */
+  /**
+   * The iterator uses a BufferedReader to read the file's contents, that is opened upon construction of the iterator
+   * and closed just after the last line has been read. WARNING: This implies, that the BufferedReader is left unclosed,
+   * if the file is not read completely, i.e. if next() is not called repeatedly until hasNext() returns false.
    */
   public Iterator<String> iterator() {
     try {

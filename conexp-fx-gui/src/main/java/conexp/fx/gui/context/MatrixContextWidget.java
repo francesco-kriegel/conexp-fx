@@ -272,9 +272,10 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
 
         public final void handle(final MouseEvent event) {
-          tab.conceptGraph.highlight(
-              true,
-              tab.conceptGraph.highlightRequests.object(context.rowHeads().get(contentCoordinates.get().x())));
+          if (highlight.get())
+            tab.conceptGraph.highlight(
+                true,
+                tab.conceptGraph.highlightRequests.object(context.rowHeads().get(contentCoordinates.get().x())));
         }
       });
       context.addEventHandler(new RelationEventHandler<G, M>() {
@@ -296,6 +297,8 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       super(colHeaderPane, 0, column, Pos.CENTER_LEFT, TextAlignment.LEFT, true, null);
       this.dehighlightColor = Color.WHITE;
       this.contentPane.get().background.setFill(dehighlightColor);
+//      if (!tab.fca.context.selectedAttributes().contains(tab.fca.context.colHeads().get(contentCoordinates.get().y())))
+//        colHeaderPane.columnOpacityMap.put(contentCoordinates.get().y(), Constants.HIDE_OPACITY);
       this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 
         @SuppressWarnings("incomplete-switch")
@@ -362,9 +365,11 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
 
         public final void handle(final MouseEvent event) {
-          final M m = context.colHeads().get(contentCoordinates.get().y());
-          if (context.selectedAttributes().contains(m))
-            tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.attribute(m));
+          if (highlight.get()) {
+            final M m = context.colHeads().get(contentCoordinates.get().y());
+            if (context.selectedAttributes().contains(m))
+              tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.attribute(m));
+          }
         }
       });
       context.addEventHandler(new RelationEventHandler<G, M>() {
@@ -397,19 +402,21 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
 
         public final void handle(final MouseEvent event) {
-          final G g = context.rowHeads().get(contentCoordinates.get().x());
-          final M m = context.colHeads().get(contentCoordinates.get().y());
-          if (context.selectedAttributes().contains(m))
-            if (textContent.get().equals(Constants.CROSS_CHARACTER))
-              tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.incidence(g, m));
-            else if (textContent.get().equals(Constants.DOWN_ARROW_CHARACTER))
-              tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.downArrow(g, m));
-            else if (textContent.get().equals(Constants.UP_ARROW_CHARACTER))
-              tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.upArrow(g, m));
-            else if (textContent.get().equals(Constants.BOTH_ARROW_CHARACTER))
-              tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.bothArrow(g, m));
-            else if (textContent.get().equals(Constants.NO_CROSS_CHARACTER))
-              tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.nonIncidence(g, m));
+          if (highlight.get()) {
+            final G g = context.rowHeads().get(contentCoordinates.get().x());
+            final M m = context.colHeads().get(contentCoordinates.get().y());
+            if (context.selectedAttributes().contains(m))
+              if (textContent.get().equals(Constants.CROSS_CHARACTER))
+                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.incidence(g, m));
+              else if (textContent.get().equals(Constants.DOWN_ARROW_CHARACTER))
+                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.downArrow(g, m));
+              else if (textContent.get().equals(Constants.UP_ARROW_CHARACTER))
+                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.upArrow(g, m));
+              else if (textContent.get().equals(Constants.BOTH_ARROW_CHARACTER))
+                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.bothArrow(g, m));
+              else if (textContent.get().equals(Constants.NO_CROSS_CHARACTER))
+                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.nonIncidence(g, m));
+          }
         }
       });
       context.addEventHandler(
@@ -523,7 +530,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
                                                             };
   public final BooleanProperty        animate               = new SimpleBooleanProperty(false);
   public final BooleanProperty        showArrows            = new SimpleBooleanProperty();
-  public final BooleanProperty showPaths = new SimpleBooleanProperty();
+  public final BooleanProperty        showPaths             = new SimpleBooleanProperty();
   public final ToggleButton           highlightToggleButton = new ToggleButton("Highlight");
   public final DoubleBinding          height;
 
@@ -602,12 +609,18 @@ public class MatrixContextWidget<G, M> extends BorderPane {
         contextPane.updateContent();
       }
     };
-	showArrows.addListener(updateContentListener);
-	showPaths.addListener(updateContentListener);
+    showArrows.addListener(updateContentListener);
+    showPaths.addListener(updateContentListener);
     height = new DoubleBinding() {
 
       {
-        bind(colHeaderPane.heightProperty(),contextPane.heightProperty(),colHeaderPane.rowHeight, colHeaderPane.visibleRows, contextPane.rowHeight, contextPane.visibleRows);
+        bind(
+            colHeaderPane.heightProperty(),
+            contextPane.heightProperty(),
+            colHeaderPane.rowHeight,
+            colHeaderPane.visibleRows,
+            contextPane.rowHeight,
+            contextPane.visibleRows);
       }
 
       @Override
@@ -643,11 +656,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 //      }
 //    },
         new KeyValue(zoomSlider.valueProperty(), 0d, Interpolator.EASE_IN)));
-    Platform.runLater(new Runnable()
-    {
-      
-      public void run()
-      {
+    Platform.runLater(new Runnable() {
+
+      public void run() {
         t.play();
       }
     });
@@ -673,16 +684,17 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     pathsToggleButton.setSelected(false);
     pathsToggleButton.setMinHeight(24);
     showPaths.bind(pathsToggleButton.selectedProperty());
-    arrowsToggleButton.addEventHandler(ActionEvent.ACTION, new EventHandler<ActionEvent>(){
-    	@Override
-    	public final void handle(final ActionEvent event) {
-    		if (showArrows.get()){
-    			pathsToggleButton.setDisable(false);
-    		}else{
-    			pathsToggleButton.setSelected(false);
-    			pathsToggleButton.setDisable(true);
-    		}
-    	}
+    arrowsToggleButton.addEventHandler(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
+
+      @Override
+      public final void handle(final ActionEvent event) {
+        if (showArrows.get()) {
+          pathsToggleButton.setDisable(false);
+        } else {
+          pathsToggleButton.setSelected(false);
+          pathsToggleButton.setDisable(true);
+        }
+      }
     });
     highlightToggleButton.setSelected(false);
     highlightToggleButton.setMinHeight(24);
@@ -737,8 +749,8 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       }
     }));
   }
-  
-  public final void highlightImplication(final Implication<M> implication){
-	  
+
+  public final void highlightImplication(final Implication<M> implication) {
+
   }
 }

@@ -86,19 +86,10 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
         Collections.sort(concepts, intentSizeComparator);
         updateProgress(0.9d, 1d);
         lattice.rowHeads().addAll(concepts);
-        lattice.pushAllChangedEvent();
+        updateMessage("Pushing Changes...");
+//        lattice.pushAllChangedEvent();
       }
     };
-  }
-
-  public static final void main(String[] args) {
-    MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
-    CXTImporter.importt(cxt, new File("/Users/francesco/Documents/workspace/conexp-fx/contexts/huge/algorithms.cxt"));
-    NextConcept<String, String> nex = new NextConcept<String, String>(cxt);
-    final Iterator<Concept<String, String>> it = nex.iterator();
-    int i = 0;
-    while (it.hasNext())
-      System.out.println(i++ + ":" + it.next());
   }
 
   private final MatrixContext<G, M> context;
@@ -118,7 +109,7 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
 //    selection.pushAllChangedEvent();
     // maybe drop this for huge contexts
     // or encapsulate in own class or blocking task
-    final MatrixContext<Set<Integer>, Set<Integer>> reduced;
+//    final MatrixContext<Set<Integer>, Set<Integer>> reduced;
 //    switch (MatrixContext.AutomaticMode.fromSize(selection.rowHeads().size(), selection.colHeads().size())){
 //    	case REDUCE:
 //    		reduced = selection._reduced.clone();
@@ -126,10 +117,10 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
 //    	case CLEAN:
 //    	case NONE:
 //    	default:
-    reduced = selection._cleaned.clone();
+//    reduced = selection._cleaned.clone();
 //       	 	break;
 //    }
-//    final MatrixContext<Set<Integer>, Set<Integer>> reduced = selection._reduced.clone();
+    final MatrixContext<Set<Integer>, Set<Integer>> reduced = selection._reduced.clone();
     final HullOperator<Integer> hullOp = new HullOperator<Integer>() {
 
       @Override

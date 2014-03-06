@@ -157,6 +157,7 @@ public final class IFox<G, M>
               irreducible();
               break;
           }
+          layout.lattice.pushAllChangedEvent();
           layout.invalidate();
         }
 
@@ -176,7 +177,6 @@ public final class IFox<G, M>
                   layout.lattice.attributeConcepts.put(m, c);
                 }
             }
-          layout.lattice.pushAllChangedEvent();
         }
 
         @SuppressWarnings("deprecation")
@@ -294,7 +294,6 @@ public final class IFox<G, M>
             }
             adjust(layout, m, conflictDistance, tpe);
           }
-          layout.lattice.pushAllChangedEvent();
         }
       };
   }
@@ -327,6 +326,7 @@ public final class IFox<G, M>
               irreducible();
               break;
           }
+          layout.lattice.pushAllChangedEvent();
           layout.invalidate();
         }
 
@@ -346,7 +346,6 @@ public final class IFox<G, M>
               layout.seeds.put(n, seed);
             }
           }
-          layout.lattice.pushAllChangedEvent();
         }
 
         private void reducible()
@@ -357,7 +356,6 @@ public final class IFox<G, M>
           }
           for (Concept<G, M> c : layout.lattice.rowHeads())
             c.intent().remove(m);
-          layout.lattice.pushAllChangedEvent();
         }
 
         private void irreducible()
@@ -479,7 +477,6 @@ public final class IFox<G, M>
             // 1)
           }
           updateProgress(0.9d, 1d);
-          layout.lattice.pushAllChangedEvent();
         }
       };
   }

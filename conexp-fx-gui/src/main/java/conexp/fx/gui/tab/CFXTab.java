@@ -23,7 +23,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.StringBinding;
@@ -42,7 +41,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressBarBuilder;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ProgressIndicatorBuilder;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPaneBuilder;
 import javafx.scene.control.Tab;
 import javafx.scene.control.Tooltip;
@@ -60,7 +58,6 @@ import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.concurrent.BlockingTask;
 import conexp.fx.core.lock.ALock;
 import conexp.fx.core.service.FCAInstance;
-import conexp.fx.core.service.FCAInstance.InitLevel;
 import conexp.fx.core.service.FCAInstance.TabConfiguration;
 import conexp.fx.gui.GUI;
 import conexp.fx.gui.context.MatrixContextWidget;
@@ -68,7 +65,6 @@ import conexp.fx.gui.context.StringMatrixContextWidget;
 import conexp.fx.gui.dialog.FXDialog;
 import conexp.fx.gui.dialog.FXDialog.Result;
 import conexp.fx.gui.dialog.FXDialog.Style;
-import conexp.fx.gui.exploration.ImplicationWidget;
 import conexp.fx.gui.graph.ConceptGraph;
 
 public class CFXTab<G, M> extends Tab {
@@ -78,6 +74,8 @@ public class CFXTab<G, M> extends Tab {
   private final BorderPane               pane = new BorderPane();
   public final MatrixContextWidget<G, M> contextWidget;
   public final ConceptGraph<G, M>        conceptGraph;
+
+//  public final ImplicationWidget<G, M> implicationWidget;
 
   @SuppressWarnings("unchecked")
   public CFXTab(final GUI conExp, final Request<G, M> request) {
@@ -167,8 +165,7 @@ public class CFXTab<G, M> extends Tab {
     } else
       this.contextWidget = new MatrixContextWidget<G, M>(this);
     this.conceptGraph = new ConceptGraph<G, M>(this);
-    this.fca.initialize(InitLevel.LAYOUT);
-    final ImplicationWidget<G, M> implicationWidget = new ImplicationWidget<G, M>(this);
+//    this.implicationWidget = new ImplicationWidget<G, M>(this);
     this.pane.setCenter(SplitPaneBuilder
         .create()
         .dividerPositions(new double[] { 0.8d })
@@ -179,9 +176,12 @@ public class CFXTab<G, M> extends Tab {
                 .dividerPositions(new double[] { 0.3d })
                 .orientation(Orientation.HORIZONTAL)
                 .items(contextWidget, conceptGraph)
-                .build(),
-            implicationWidget)
+                .build()
+//                ,
+//            implicationWidget
+        )
         .build());
+    this.fca.initialize();
   }
 
   private final class CFXStatusBar {
