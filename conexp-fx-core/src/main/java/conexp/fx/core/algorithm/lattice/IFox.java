@@ -249,38 +249,38 @@ public final class IFox<G, M> {
               layout.lattice.addFast(n1.getKey(), n2.getKey());
           }
         // layout.invalidate();
-//        updateMessage("Updating seeds...");
-//        updateProgress(0.8d, 1d);
-//        synchronized (layout.seeds) {
-//          updateMessage("Determining new Reducibles...");
-//          for (M n : layout.seeds.keySet()) {
-//            final int _n = IuJ.colHeads().indexOf(n);
-//            final Set<Integer> eq = Iterables.find(IuJ._attributes, new Predicate<Collection<Integer>>() {
-//
-//              public final boolean apply(final Collection<Integer> c) {
-//                return c.contains(_n);
-//              }
-//            });
-//            if (!IuJ._irreducibleAttributes.contains(eq)) {
-//              updateMessage("Backup seed: " + n);
-//              final Point3D oldSeed = layout.seeds.remove(n);
-//              layout.seedHistory.put(n, oldSeed);
-//            }
-//          }
-//          // final HashSet<M> currentIrreducibles = new HashSet<M>(layout.seeds.keySet());
-//          // for (M s : currentIrreducibles)
-//          // if (layout.lattice.row(layout.lattice.attributeConcepts.get(s)).size() != 1)
-//          if (layout.seedHistory.containsKey(m)) {
-//            updateMessage("Restoring seed: " + m);
-//            layout.seeds.put(m, layout.seedHistory.get(m));
-//          } else {
-//            updateMessage("Computing random seed: " + m);
-//            layout.seeds.put(m, new Point3D(2d * Math.random() - 1d, 0.5d + Math.random(), 0));
-//          }
-//          updateProgress(0.9d, 1d);
-//          updateMessage("Adjusting Layout...");
-////          adjust(layout, m, conflictDistance, tpe);
-//        }
+        updateMessage("Updating seeds...");
+        updateProgress(0.8d, 1d);
+        synchronized (layout.seeds) {
+          updateMessage("Determining new Reducibles...");
+          for (M n : layout.seeds.keySet()) {
+            final int _n = IuJ.colHeads().indexOf(n);
+            final Set<Integer> eq = Iterables.find(IuJ._attributes, new Predicate<Collection<Integer>>() {
+
+              public final boolean apply(final Collection<Integer> c) {
+                return c.contains(_n);
+              }
+            });
+            if (!IuJ._irreducibleAttributes.contains(eq)) {
+              updateMessage("Backup seed: " + n);
+              final Point3D oldSeed = layout.seeds.remove(n);
+              layout.seedHistory.put(n, oldSeed);
+            }
+          }
+          // final HashSet<M> currentIrreducibles = new HashSet<M>(layout.seeds.keySet());
+          // for (M s : currentIrreducibles)
+          // if (layout.lattice.row(layout.lattice.attributeConcepts.get(s)).size() != 1)
+          if (layout.seedHistory.containsKey(m)) {
+            updateMessage("Restoring seed: " + m);
+            layout.seeds.put(m, layout.seedHistory.get(m));
+          } else {
+            updateMessage("Computing random seed: " + m);
+            layout.seeds.put(m, new Point3D(2d * Math.random() - 1d, 0.5d + Math.random(), 0));
+          }
+          updateProgress(0.9d, 1d);
+          updateMessage("Adjusting Layout...");
+//          adjust(layout, m, conflictDistance, tpe);
+        }
       }
     };
   }
@@ -417,45 +417,45 @@ public final class IFox<G, M> {
             layout.lattice.remove(z, y);
           layout.lattice.rowHeads().remove(y);
         }
-//        updateMessage("Updating seeds...");
-//        updateProgress(0.6d, 1d);
-//        synchronized (layout.seeds) {
-//          updateMessage("Backup seed: " + m);
-//          final Point3D oldSeed = layout.seeds.remove(m);
-//          layout.seedHistory.put(m, oldSeed);
-//          Set<Integer> _seeds =
-//              new HashSet<Integer>(Collections2.transform(layout.seeds.keySet(), I.colHeads().index()));
-//          for (Set<Integer> eq : I._irreducibleAttributes)
-//            if (!Iterables.any(_seeds, Predicates.in(eq))) {
-//              // introduce new seed
-//              final M n = Collections2.transform(eq, I.colHeads().index().inverse()).iterator().next();
-//              // if (true) {
-//              // read seed vector from current layout
-//              final Concept<G, M> nc = I.attributeConcept(n);
-//              final Point3D np = Points.plus(layout.positions.get(nc), oldSeed);
-//              final Point3D nnp = layout.positions.get(Iterables.getOnlyElement(layout.lattice.row(nc)));
-//              final Point3D seed = Points.minus(np, nnp);
-//              layout.seeds.put(n, seed);
-//              updateProgress(0.8d, 1d);
-//              updateMessage("Adjusting Layout...");
-////              adjust(layout, n, conflictDistance, tpe);
-//              // }
-//              // if (layout.seedHistory.containsKey(n)) {
-//              // updateMessage("Restoring seed: " + n);
-//              // final Point3D seedBackup = layout.seedHistory.get(n);
-//              // layout.seeds.put(n, seedBackup);
-//              // } else {
-//              // updateMessage("Computing random seed: " + n);
-//              // layout.seeds.put(n, new Point3D(2d * Math.random() - 1d, 0.5d + Math.random(), 0));
-//              // adjust(layout, n);
-//              // }
-//            }
-//          // final HashSet<M> currentReducibles =
-//          // new HashSet<M>(Sets.difference(I.colHeads(), layout.seeds.keySet()));
-//          // for (M s : currentReducibles)
-//          // if (Sets.difference(layout.lattice.row(layout.lattice.attributeConcepts.get(s)), news.keySet()).size() ==
-//          // 1)
-//        }
+        updateMessage("Updating seeds...");
+        updateProgress(0.6d, 1d);
+        synchronized (layout.seeds) {
+          updateMessage("Backup seed: " + m);
+          final Point3D oldSeed = layout.seeds.remove(m);
+          layout.seedHistory.put(m, oldSeed);
+          Set<Integer> _seeds =
+              new HashSet<Integer>(Collections2.transform(layout.seeds.keySet(), I.colHeads().index()));
+          for (Set<Integer> eq : I._irreducibleAttributes)
+            if (!Iterables.any(_seeds, Predicates.in(eq))) {
+              // introduce new seed
+              final M n = Collections2.transform(eq, I.colHeads().index().inverse()).iterator().next();
+              // if (true) {
+              // read seed vector from current layout
+              final Concept<G, M> nc = I.attributeConcept(n);
+              final Point3D np = Points.plus(layout.positions.get(nc), oldSeed);
+              final Point3D nnp = layout.positions.get(Iterables.getOnlyElement(layout.lattice.row(nc)));
+              final Point3D seed = Points.minus(np, nnp);
+              layout.seeds.put(n, seed);
+              updateProgress(0.8d, 1d);
+              updateMessage("Adjusting Layout...");
+//              adjust(layout, n, conflictDistance, tpe);
+              // }
+              // if (layout.seedHistory.containsKey(n)) {
+              // updateMessage("Restoring seed: " + n);
+              // final Point3D seedBackup = layout.seedHistory.get(n);
+              // layout.seeds.put(n, seedBackup);
+              // } else {
+              // updateMessage("Computing random seed: " + n);
+              // layout.seeds.put(n, new Point3D(2d * Math.random() - 1d, 0.5d + Math.random(), 0));
+              // adjust(layout, n);
+              // }
+            }
+          // final HashSet<M> currentReducibles =
+          // new HashSet<M>(Sets.difference(I.colHeads(), layout.seeds.keySet()));
+          // for (M s : currentReducibles)
+          // if (Sets.difference(layout.lattice.row(layout.lattice.attributeConcepts.get(s)), news.keySet()).size() ==
+          // 1)
+        }
         updateProgress(0.9d, 1d);
       }
     };
