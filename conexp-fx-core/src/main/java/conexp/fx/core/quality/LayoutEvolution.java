@@ -170,7 +170,7 @@ public final class LayoutEvolution<G, M>
         new Rectangle2D(origin.getX() - width / 2d, origin.getY() - height / 2d, width, height);
     final Value firstValue =
         new Value(Points.ZERO, rectangle, conflictDistance.apply(layout), layout.clone()._seeds);
-    if (concept.equals(layout.lattice.context.topConcept())) {
+    if (concept.equals(layout.lattice.context.selection.topConcept())) {
       best = firstValue;
       return;
     }

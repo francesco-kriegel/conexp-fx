@@ -96,6 +96,7 @@ public final class FCAInstance<G, M> {
     this.context.id.bind(id);
     this.lattice = new ConceptLattice<G, M>(context);
     this.layout = new ConceptLayout<G, M>(lattice, null);
+    this.layout.observe();
     this.id.set(request.getId());
     if (request.src != Source.FILE)
       unsavedChanges.set(true);
@@ -109,8 +110,18 @@ public final class FCAInstance<G, M> {
 
       @Override
       protected void _call() {
+        updateProgress(0.1d, 1d);
         context.deselectAllAttributes();
-        lattice.rowHeads().add(new Concept<G, M>(context.rowHeads(), Collections.<M> emptySet()));
+        final Concept<G, M> top = new Concept<G, M>(context.rowHeads(), Collections.<M> emptySet());
+        lattice.rowHeads().add(top);
+        updateProgress(0.2d, 1d);
+        updateMessage("Computing Object Labels...");
+        synchronized (lattice.objectConcepts) {
+          for (G g : context.rowHeads())
+            lattice.objectConcepts.put(g, top);
+        }
+        updateProgress(0.4d, 1d);
+        layout.invalidate();
         for (int col = 0; col < context.colHeads().size(); col++) {
           final int _col = col;
           executor.submit(new BlockingTask("Selecting " + _col) {

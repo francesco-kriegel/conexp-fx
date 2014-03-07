@@ -592,9 +592,10 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
 
   public synchronized final void select() {
     final SetList<M> selectedColHeads = SetLists.difference(colHeads, ignoredAttributes).clone();
-    if (ignoredAttributes.isEmpty())
+    if (ignoredAttributes.isEmpty()) {
       selection = this;
-    else if (selectedColHeads.isEmpty())
+      reduce();
+    } else if (selectedColHeads.isEmpty())
       selection = new MatrixContext<G, M>(false);
     else
       selection =
@@ -645,31 +646,31 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
     _irreducibleObjects.addAll(_objects.filter(_isIrreducibleObject));
     _irreducibleAttributes.clear();
     _irreducibleAttributes.addAll(_attributes.filter(_isIrreducibleAttribute).clone());
-    try {
-      final int rows = _objects.size();
-      final int cols = _attributes.size();
-      if (rows == 0 || cols == 0)
-        return;
-      @SuppressWarnings("deprecation")
-      final BooleanMatrix arrowPaths =
-          BooleanMatrices.transitiveClosure(BooleanMatrices.reflexiveClosure(BooleanMatrices.quadPosition(
-              BooleanMatrices.empty(rows),
-              _downArrows.clone().matrix(),
-              BooleanMatrices.dual(_upArrows.clone().matrix()),
-              BooleanMatrices.empty(cols))));
-      final BooleanMatrix downPaths = (BooleanMatrix) arrowPaths.subMatrix(Ret.NEW, 0, rows, rows - 1, rows + cols - 1);
-      final BooleanMatrix upPaths =
-          (BooleanMatrix) BooleanMatrices.dual((BooleanMatrix) arrowPaths.subMatrix(
-              Ret.NEW,
-              rows,
-              0,
-              rows + cols - 1,
-              rows - 1));
-      _downPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, downPaths, false);
-      _upPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, upPaths, false);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+//    try {
+//      final int rows = _objects.size();
+//      final int cols = _attributes.size();
+//      if (rows == 0 || cols == 0)
+//        return;
+//      @SuppressWarnings("deprecation")
+//      final BooleanMatrix arrowPaths =
+//          BooleanMatrices.transitiveClosure(BooleanMatrices.reflexiveClosure(BooleanMatrices.quadPosition(
+//              BooleanMatrices.empty(rows),
+//              _downArrows.clone().matrix(),
+//              BooleanMatrices.dual(_upArrows.clone().matrix()),
+//              BooleanMatrices.empty(cols))));
+//      final BooleanMatrix downPaths = (BooleanMatrix) arrowPaths.subMatrix(Ret.NEW, 0, rows, rows - 1, rows + cols - 1);
+//      final BooleanMatrix upPaths =
+//          (BooleanMatrix) BooleanMatrices.dual((BooleanMatrix) arrowPaths.subMatrix(
+//              Ret.NEW,
+//              rows,
+//              0,
+//              rows + cols - 1,
+//              rows - 1));
+//      _downPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, downPaths, false);
+//      _upPaths = new MatrixRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, upPaths, false);
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
   }
 
   public final Pair<Incidence, Incidence> getValue(final G g, final M m, final boolean... withArrows) {

@@ -44,7 +44,7 @@ public final class ConflictDistance<G, M>
     double sumC = 0d;
     double minL = Double.MAX_VALUE;
     double sumL = 0d;
-    final Concept<G, M> bottom = layout.lattice.context.bottomConcept();
+    final Concept<G, M> bottom = layout.lattice.context.selection.bottomConcept();
     Concept<G, M> faulty = bottom;
     for (Entry<Concept<G, M>, Point3D> entry : layout.positions.entrySet()) {
       if (!entry.getKey().equals(bottom)) {

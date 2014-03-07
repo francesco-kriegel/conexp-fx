@@ -20,7 +20,6 @@ package conexp.fx.core.layout;
  * #L%
  */
 
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -84,6 +83,8 @@ public final class ConceptLayout<G, M> implements Observable {
   }
 
   public final void observe() {
+    if (this.observe)
+      return;
     this.observe = true;
     lattice.addEventHandler(new RelationEventHandler<Concept<G, M>, Concept<G, M>>() {
 
