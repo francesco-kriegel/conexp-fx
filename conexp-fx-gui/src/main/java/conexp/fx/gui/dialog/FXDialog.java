@@ -55,7 +55,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.StageStyle;
 
-public class FXDialog {
+public class FXDialog<T> {
 
   public enum Result {
 
@@ -76,24 +76,13 @@ public class FXDialog {
 
   }
 
-  private final int        width        = 500;
+  private final int        width;
   private final Stage      stage        = StageBuilder.create().build();
   private final BorderPane pane         = BorderPaneBuilder.create().build();
-  private final Text       text         = TextBuilder
-                                            .create()
-                                            .effect(
-                                                DropShadowBuilder
-                                                    .create()
-                                                    .radius(1)
-                                                    .blurType(BlurType.GAUSSIAN)
-                                                    .color(Color.LIGHTGREY)
-                                                    .spread(1)
-                                                    .build())
-                                            .font(FontBuilder.create().size(16).build())
-                                            .wrappingWidth(width - 50)
-                                            .build();
+  private final Text       text;
   private final Style      style;
   private Result           result       = Result.UNKNOWN;
+  protected T              value        = null;
   private StackPane        topPane;
   private StackPane        bottomPane;
   private Rectangle        topBackground;
@@ -158,6 +147,7 @@ public class FXDialog {
                                               }
                                             })
                                             .build();
+  protected final Node     optionalCenterNode;
 
   public FXDialog(
       final Stage primaryStage,
@@ -165,8 +155,33 @@ public class FXDialog {
       final String title,
       final String message,
       final Node optionalCenterNode) {
+    this(primaryStage, style, title, message, optionalCenterNode, 500);
+  }
+
+  public FXDialog(
+      final Stage primaryStage,
+      final Style style,
+      final String title,
+      final String message,
+      final Node optionalCenterNode,
+      final int width) {
     super();
+    this.width = width;
     this.style = style;
+    this.text =
+        TextBuilder
+            .create()
+            .effect(
+                DropShadowBuilder
+                    .create()
+                    .radius(1)
+                    .blurType(BlurType.GAUSSIAN)
+                    .color(Color.LIGHTGREY)
+                    .spread(1)
+                    .build())
+            .font(FontBuilder.create().size(16).build())
+            .wrappingWidth(width - 50)
+            .build();
     stage.initOwner(primaryStage);
     stage.initStyle(StageStyle.UTILITY);
     stage.initModality(Modality.WINDOW_MODAL);
@@ -174,16 +189,37 @@ public class FXDialog {
     stage.setResizable(false);
     stage.setScene(SceneBuilder.create().width(width).root(pane).build());
     text.setText(message);
+    this.optionalCenterNode = optionalCenterNode;
     createTop();
     if (optionalCenterNode != null)
       pane.setCenter(optionalCenterNode);
     createBottom();
   }
 
-  public final Result showAndWait() {
+  public final static class Return<T> {
+
+    private final Result result;
+    private final T      value;
+
+    private Return(final Result result, final T value) {
+      super();
+      this.result = result;
+      this.value = value;
+    }
+
+    public final Result result() {
+      return result;
+    }
+
+    public final T value() {
+      return value;
+    }
+  }
+
+  public final Return<T> showAndWait() {
     stage.showAndWait();
     bindHeight();
-    return result;
+    return new Return<T>(result, value);
   }
 
   private final void bindHeight() {

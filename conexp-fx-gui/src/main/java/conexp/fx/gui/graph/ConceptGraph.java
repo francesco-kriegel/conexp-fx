@@ -21,7 +21,6 @@ package conexp.fx.gui.graph;
  */
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -53,6 +52,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Slider;
@@ -61,6 +61,8 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -90,7 +92,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.collections.relation.RelationEvent;
 import conexp.fx.core.collections.relation.RelationEventHandler;
@@ -101,6 +102,7 @@ import conexp.fx.core.math.Points;
 import conexp.fx.core.quality.LayoutEvolution;
 import conexp.fx.core.service.FCAInstance;
 import conexp.fx.core.util.Constants;
+import conexp.fx.gui.GUI;
 import conexp.fx.gui.graph.option.AnimationSpeed;
 import conexp.fx.gui.graph.option.AttributeLabelText;
 import conexp.fx.gui.graph.option.EdgeHighlight;
@@ -432,7 +434,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         protected final Concept<G, M> computeValue() {
           return c;
         }
-      }, new SimpleStringProperty(object.toString()));
+      }, new SimpleStringProperty(object.toString()), true);
       text.styleProperty().bind(controlBox.textSizeBinding);
       synchronized (objectLabels) {
         objectLabels.put(object, this);
@@ -453,7 +455,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
               .get()
               .get(fca.context, fca.lattice, concept);
         }
-      });
+      }, true);
       text.styleProperty().bind(controlBox.textSizeBinding);
     }
 
@@ -487,7 +489,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         protected final Concept<G, M> computeValue() {
           return c;
         }
-      }, new SimpleStringProperty(attribute.toString()));
+      }, new SimpleStringProperty(attribute.toString()), true);
       text.styleProperty().bind(controlBox.textSizeBinding);
       synchronized (attributeLabels) {
         attributeLabels.put(attribute, this);
@@ -508,7 +510,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
               .get()
               .get(fca.context, fca.lattice, concept);
         }
-      });
+      }, true);
       text.styleProperty().bind(controlBox.textSizeBinding);
     }
 
@@ -834,29 +836,83 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
 
   private final class CFXToolBar {
 
-    private final Button       relayout  = new Button("Relayout");
-    private final Button       adjust    = new Button("Adjust");
-    private final ToggleButton highlight = new ToggleButton("Highlight");
-    private final ToggleButton labels    = new ToggleButton("Labels");
+    private final Button       relayout  = new Button();
+    private final Button       adjust    = new Button();
+    private final ToggleButton highlight = new ToggleButton();
+    private final ToggleButton labels    = new ToggleButton();
 
     private CFXToolBar() {
       final ToolBar toolBar = new ToolBar();
+      final Button exportButton =
+          ButtonBuilder
+              .create()
+              .graphic(
+                  ImageViewBuilder
+                      .create()
+                      .image(new Image(GUI.class.getResourceAsStream("image/16x16/briefcase.png")))
+                      .build())
+              .onAction(new EventHandler<ActionEvent>() {
+
+                @Override
+                public final void handle(final ActionEvent event) {
+                  tab.exportTeX();
+                }
+              })
+              .minHeight(24)
+              .build();
       toolBar.getItems().addAll(
           createTransformationBox(),
           createLayoutBox(),
           createShowBox(),
+          exportButton,
           createSpace(),
           createSearchBox());
+      relayout.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/refresh.png")))
+          .build());
+      adjust.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/process.png")))
+          .build());
+      highlight.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/flag.png")))
+          .build());
+      labels.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/comments.png")))
+          .build());
       setTop(toolBar);
     }
 
     private final HBox createTransformationBox() {
       final ToggleGroup transformationToggleGroup = new ToggleGroup();
-      final ToggleButton transformation2DButton = new ToggleButton("2D");
-      final ToggleButton transformation3DButton = new ToggleButton("3D");// 2\u00bdD
-      final ToggleButton transformationXYButton = new ToggleButton("XY");
-      final ToggleButton transformationPolarButton = new ToggleButton("Polar");
-      final ToggleButton transformationCircularButton = new ToggleButton("Circular");
+      final ToggleButton transformation2DButton = new ToggleButton();
+      final ToggleButton transformation3DButton = new ToggleButton();// 2\u00bdD
+      final ToggleButton transformationXYButton = new ToggleButton();
+      final ToggleButton transformationPolarButton = new ToggleButton();
+      final ToggleButton transformationCircularButton = new ToggleButton();
+      transformation2DButton.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/wired.png")))
+          .build());
+      transformation3DButton.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/wired.png")))
+          .build());
+      transformationXYButton.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/chart.png")))
+          .build());
+      transformationPolarButton.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/target.png")))
+          .build());
+      transformationCircularButton.setGraphic(ImageViewBuilder
+          .create()
+          .image(new Image(GUI.class.getResourceAsStream("image/16x16/chart_pie.png")))
+          .build());
       transformation2DButton.setOnAction(new EventHandler<ActionEvent>() {
 
         public final void handle(final ActionEvent event) {

@@ -44,6 +44,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SliderBuilder;
@@ -51,6 +52,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFieldBuilder;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.ImageViewBuilder;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -73,6 +77,8 @@ import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.context.MatrixContext.Incidence;
 import conexp.fx.core.util.Constants;
 import conexp.fx.core.util.Platform2;
+import conexp.fx.gui.GUI;
+import conexp.fx.gui.LaTeX;
 import conexp.fx.gui.cellpane.Cell;
 import conexp.fx.gui.cellpane.CellPane;
 import conexp.fx.gui.cellpane.InteractionMode;
@@ -206,8 +212,15 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
   private final class RowHeaderCell extends Cell<RowHeaderCell, RowHeaderPane> {
 
+    private ImageView view;
+
     private RowHeaderCell(final int row) {
       super(rowHeaderPane, row, 0, Pos.CENTER_RIGHT, TextAlignment.RIGHT, false, null);
+      if (view == null) {
+        view = ImageViewBuilder.create().build();
+        this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+        this.contentPane.get().text.setOpacity(0);
+      }
       this.dehighlightColor = Color.WHITE;
       this.contentPane.get().background.setFill(dehighlightColor);
       this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -287,14 +300,32 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
 
     public final void updateContent() {
-      textContent.set(context.rowHeads().get(contentCoordinates.get().x()).toString());
+      final String string = context.rowHeads().get(contentCoordinates.get().x()).toString();
+      textContent.set(string);
+      try {
+        if (view == null) {
+          view = ImageViewBuilder.create().build();
+          this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+          this.contentPane.get().text.setOpacity(0);
+        }
+        view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
   private final class ColHeaderCell extends Cell<ColHeaderCell, ColHeaderPane> {
 
+    private ImageView view;
+
     private ColHeaderCell(final int column) {
       super(colHeaderPane, 0, column, Pos.CENTER_LEFT, TextAlignment.LEFT, true, null);
+      if (view == null) {
+        view = ImageViewBuilder.create().build();
+        this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+        this.contentPane.get().text.setOpacity(0);
+      }
       this.dehighlightColor = Color.WHITE;
       this.contentPane.get().background.setFill(dehighlightColor);
 //      if (!tab.fca.context.selectedAttributes().contains(tab.fca.context.colHeads().get(contentCoordinates.get().y())))
@@ -381,7 +412,18 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
 
     public final void updateContent() {
-      textContent.set(context.colHeads().get(contentCoordinates.get().y()).toString());
+      final String string = context.colHeads().get(contentCoordinates.get().y()).toString();
+      textContent.set(string);
+      try {
+        if (view == null) {
+          view = ImageViewBuilder.create().build();
+          this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+          this.contentPane.get().text.setOpacity(0);
+        }
+        view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
@@ -482,11 +524,12 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   public final ContextPane            contextPane;
   protected final ScrollBar           rowScrollBar;
   protected final ScrollBar           colScrollBar;
-  public final Slider                 zoomSlider            = SliderBuilder
-                                                                .create()
-                                                                .min(-4d)
-                                                                .max(4d)
-                                                                .value(0d)
+//  public final ListSpinner<Integer> zoomSpinner =new ListSpinner<Integer>(-4, 4, 1);
+  public final Slider                 zoomSlider            = SliderBuilder.create().min(-4d).max(4d).value(0d)
+//                                                                .showTickMarks(true)
+//                                                                .minorTickCount(17)
+//                                                                .majorTickUnit(1d)
+//                                                                .snapToTicks(true)
                                                                 .blockIncrement(0.25d)
                                                                 .build();
   public final DoubleProperty         zoomFactor            = new SimpleDoubleProperty(0.01d);
@@ -531,7 +574,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   public final BooleanProperty        animate               = new SimpleBooleanProperty(false);
   public final BooleanProperty        showArrows            = new SimpleBooleanProperty();
   public final BooleanProperty        showPaths             = new SimpleBooleanProperty();
-  public final ToggleButton           highlightToggleButton = new ToggleButton("Highlight");
+  public final ToggleButton           highlightToggleButton = new ToggleButton();
   public final DoubleBinding          height;
 
   public MatrixContextWidget(final CFXTab<G, M> tab) {
@@ -675,11 +718,13 @@ public class MatrixContextWidget<G, M> extends BorderPane {
         return Math.pow(2d, zoomSlider.valueProperty().get());
       }
     });
-    final ToggleButton arrowsToggleButton = new ToggleButton("Arrows");
+    final ToggleButton arrowsToggleButton =
+        new ToggleButton(Constants.DOWN_ARROW_CHARACTER + Constants.UP_ARROW_CHARACTER);
     arrowsToggleButton.setSelected(false);
     arrowsToggleButton.setMinHeight(24);
     showArrows.bind(arrowsToggleButton.selectedProperty());
-    final ToggleButton pathsToggleButton = new ToggleButton("Paths");
+    final ToggleButton pathsToggleButton =
+        new ToggleButton(Constants.DOWN_ARROW_CHARACTER + Constants.DOWN_ARROW_CHARACTER);
     pathsToggleButton.setDisable(true);
     pathsToggleButton.setSelected(false);
     pathsToggleButton.setMinHeight(24);
@@ -698,6 +743,10 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     });
     highlightToggleButton.setSelected(false);
     highlightToggleButton.setMinHeight(24);
+    highlightToggleButton.setGraphic(ImageViewBuilder
+        .create()
+        .image(new Image(GUI.class.getResourceAsStream("image/16x16/flag.png")))
+        .build());
     rowHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());
     colHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());
     contextPane.highlight.bind(highlightToggleButton.selectedProperty());

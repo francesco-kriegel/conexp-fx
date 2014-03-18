@@ -1,19 +1,19 @@
-﻿B
+B
 
 10
 11
 
-B(N,\wp_E(N),\in)
-B(C_{[0,1]})
-B(I_3)
-B(S)
-B(N,N,\ne)
-B(N,N,=)
-B(S)^d
-B(I_3)^d
-B(C_{[0,1]})^d
-B(N,\wp_E(N),\in)^d
-J(V) sup-dicht
+$\mathfrak{B}(N,\wp_E(N),\in)$
+$\mathfrak{B}(C_{[0,1]})$
+$\mathfrak{B}(I_3)$
+$\mathfrak{B}(S)$
+$\mathfrak{B}(N,N,\ne)$
+$\mathfrak{B}(N,N,=)$
+$\mathfrak{B}(S)^d$
+$\mathfrak{B}(I_3)^d$
+$\mathfrak{B}(C_{[0,1]})^d$
+$\mathfrak{B}(N,\wp_E(N),\in)^d$
+$J(V)$ sup-dicht
 koalgebraisch
 sup-fundiert
 atomistisch
@@ -23,7 +23,7 @@ endlich
 koatomistisch
 inf-fundiert
 algebraisch
-M(V) inf-dicht
+$M(V)$ inf-dicht
 XXXX.......
 XXXX.....XX
 XXXXXXX.XXX

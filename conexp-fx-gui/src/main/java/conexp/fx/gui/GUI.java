@@ -153,48 +153,52 @@ public class GUI extends Application {
 
     private final void buildContextMenu() {
       final MenuItem newMenuItem =
-          FXControls.newMenuItem("New", "image/document-new-3.png", new EventHandler<ActionEvent>() {
+          FXControls.newMenuItem("New", "image/16x16/new_page.png", new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
               showConstructAssistent();
             }
           });
       final MenuItem openMenuItem =
-          FXControls.newMenuItem("Open", "image/document-open-2.png", new EventHandler<ActionEvent>() {
+          FXControls.newMenuItem("Open", "image/16x16/folder.png", new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
               showOpenFileDialog();
             }
           });
       final MenuItem saveMenuItem =
-          FXControls.newMenuItem("Save", "image/document-save-5.png", true, new EventHandler<ActionEvent>() {
+          FXControls.newMenuItem("Save", "image/16x16/save.png", true, new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
               selectedTab.get().save();
             }
           });
       final MenuItem saveAsMenuItem =
-          FXControls.newMenuItem("Save As", "image/document-save-as-5.png", true, new EventHandler<ActionEvent>() {
+          FXControls.newMenuItem("Save As", "image/16x16/save.png", true, new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
               selectedTab.get().saveAs();
             }
           });
+      final MenuItem texMenuItem =
+          FXControls.newMenuItem("TeX-Export", "image/16x16/briefcase.png", true, new EventHandler<ActionEvent>() {
+
+            public final void handle(final ActionEvent event) {
+              selectedTab.get().exportTeX();
+            }
+          });
       final MenuItem exportMenuItem =
-          FXControls.newMenuItem("Export", "image/document-export.png", true, new EventHandler<ActionEvent>() {
+          FXControls.newMenuItem("Export", "image/16x16/briefcase.png", true, new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
               selectedTab.get().export();
             }
           });
+      texMenuItem.disableProperty().bind(exportMenuItem.disableProperty());
       final Menu historyMenu =
-          MenuBuilder
-              .create()
-              .text("History")
-              .graphic(FXControls.newImageView("image/document-open-recent-2.png"))
-              .build();
+          MenuBuilder.create().text("History").graphic(FXControls.newImageView("image/16x16/clock.png")).build();
       final MenuItem exitMenuItem =
-          FXControls.newMenuItem("Exit", "image/dialog-close.png", new EventHandler<ActionEvent>() {
+          FXControls.newMenuItem("Exit", "image/16x16/delete.png", new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
               stop();
@@ -260,6 +264,7 @@ public class GUI extends Application {
           openMenuItem,
           saveMenuItem,
           saveAsMenuItem,
+          texMenuItem,
           exportMenuItem,
           new SeparatorMenuItem(),
           historyMenu,
@@ -269,26 +274,27 @@ public class GUI extends Application {
 
     private final void buildHelpMenu() {
       if (Desktop.isDesktopSupported()) {
-        final MenuItem helpMenuItem = FXControls.newMenuItem("Help", "image/help.png", new EventHandler<ActionEvent>() {
+        final MenuItem helpMenuItem =
+            FXControls.newMenuItem("Help", "image/16x16/help.png", new EventHandler<ActionEvent>() {
 
-          public final void handle(final ActionEvent event) {
-            try {
-              Desktop.getDesktop().browse(new URI("http://francesco.kriegel.bplaced.de/conexp-fx/conexp-fx.html"));
-            } catch (Exception e) {
-              new ErrorDialog(e).showAndWait();
-            }
-          }
-        });
+              public final void handle(final ActionEvent event) {
+                try {
+                  Desktop.getDesktop().browse(new URI("http://francesco.kriegel.bplaced.de/conexp-fx/conexp-fx.html"));
+                } catch (Exception e) {
+                  new ErrorDialog(e).showAndWait();
+                }
+              }
+            });
         helpMenu.getItems().add(helpMenuItem);
       }
       final MenuItem infoMenuItem =
-          FXControls.newMenuItem("Info", "image/help-contents.png", new EventHandler<ActionEvent>() {
+          FXControls.newMenuItem("Info", "image/16x16/info.png", new EventHandler<ActionEvent>() {
 
             public final void handle(final ActionEvent event) {
               new InfoDialog(GUI.this).showAndWait();
             }
           });
-      helpMenu.getItems().add(infoMenuItem);
+      helpMenu.getItems().addAll(infoMenuItem);
     }
   }
 

@@ -28,6 +28,11 @@
 			<artifactId>jfxtras-labs</artifactId>
 			<version>2.2-r5</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jlatexmath</groupId>
+			<artifactId>jlatexmath</artifactId>
+			<version>1.0.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>

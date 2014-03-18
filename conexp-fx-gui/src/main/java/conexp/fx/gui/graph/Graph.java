@@ -20,7 +20,6 @@ package conexp.fx.gui.graph;
  * #L%
  */
 
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,6 +40,7 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.FloatBinding;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
@@ -62,6 +62,8 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.control.LabelBuilder;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -89,6 +91,7 @@ import conexp.fx.core.math.Isomorphism;
 import conexp.fx.core.math.VoronoiGenerator;
 import conexp.fx.core.quality.LayoutEvolution;
 import conexp.fx.core.util.Platform2;
+import conexp.fx.gui.LaTeX;
 import conexp.fx.gui.graph.option.AnimationSpeed;
 import conexp.fx.gui.graph.option.EdgeHighlight;
 import conexp.fx.gui.graph.option.GraphTransformation;
@@ -218,15 +221,23 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 
     protected final ObservableValue<T>      element;
     protected final ObjectBinding<Vertex>   vertex;
+    protected final ImageView               tex           = new ImageView();
     protected final Text                    text          = new Text();
+    protected final boolean                 showLaTeX;
     protected final Rectangle               back          = new Rectangle();
-    protected final StackPane               content       = StackPaneBuilder.create().children(back, text).build();
+    protected final StackPane               content       = StackPaneBuilder.create().children(back).build();
     protected final IntegerProperty         index         = new SimpleIntegerProperty(0);
     protected final ObjectProperty<Point2D> shift         = new SimpleObjectProperty<Point2D>(new Point2D(0, 0));
     protected boolean                       isInitialized = false;
 
-    protected Label(final ObservableValue<T> element, final ObservableValue<String> string) {
+    protected Label(final ObservableValue<T> element, final ObservableValue<String> string, final boolean showLaTeX) {
       super();
+      this.showLaTeX = showLaTeX;
+      if (showLaTeX) {
+        content.getChildren().add(LabelBuilder.create().graphic(tex).build());
+      } else {
+        content.getChildren().add(text);
+      }
       this.element = element;
       this.vertex = new ObjectBinding<Vertex>() {
 
@@ -248,7 +259,21 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
           rebind(from, to);
         }
       });
-      this.text.textProperty().bind(string);
+      if (showLaTeX) {
+        this.tex.imageProperty().bind(LaTeX.toFXImageBinding(string, new FloatBinding() {
+
+          {
+            bind(zoom);
+          }
+
+          @Override
+          protected final float computeValue() {
+            return (float) (zoom.get() * 14d);
+          }
+        }));
+      } else {
+        this.text.textProperty().bind(string);
+      }
       this.createContent();
       synchronized (controller.addLabels) {
         controller.addLabels.offer(this);
@@ -263,26 +288,49 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
       back.setStroke(Color.BLACK);
       back.setStrokeWidth(0.25d);
       back.setOpacity(0.8d);
-      back.widthProperty().bind(new DoubleBinding() {
+      if (showLaTeX) {
+        back.widthProperty().bind(new DoubleBinding() {
 
-        {
-          bind(text.boundsInLocalProperty());
-        }
+          {
+            bind(tex.boundsInLocalProperty());
+          }
 
-        protected double computeValue() {
-          return text.boundsInLocalProperty().getValue().getWidth() + 4;
-        }
-      });
-      back.heightProperty().bind(new DoubleBinding() {
+          protected double computeValue() {
+            return tex.boundsInLocalProperty().getValue().getWidth() + 4;
+          }
+        });
+        back.heightProperty().bind(new DoubleBinding() {
 
-        {
-          bind(text.boundsInLocalProperty());
-        }
+          {
+            bind(tex.boundsInLocalProperty());
+          }
 
-        protected double computeValue() {
-          return text.boundsInLocalProperty().getValue().getHeight();
-        }
-      });
+          protected double computeValue() {
+            return tex.boundsInLocalProperty().getValue().getHeight();
+          }
+        });
+      } else {
+        back.widthProperty().bind(new DoubleBinding() {
+
+          {
+            bind(text.boundsInLocalProperty());
+          }
+
+          protected double computeValue() {
+            return text.boundsInLocalProperty().getValue().getWidth() + 4;
+          }
+        });
+        back.heightProperty().bind(new DoubleBinding() {
+
+          {
+            bind(text.boundsInLocalProperty());
+          }
+
+          protected double computeValue() {
+            return text.boundsInLocalProperty().getValue().getHeight();
+          }
+        });
+      }
     }
 
     protected void dispose() {
@@ -295,8 +343,8 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 
   protected abstract class LowerLabel extends Label {
 
-    protected LowerLabel(ObservableValue<T> element, ObservableValue<String> string) {
-      super(element, string);
+    protected LowerLabel(ObservableValue<T> element, ObservableValue<String> string, final boolean showLaTeX) {
+      super(element, string, showLaTeX);
     }
 
     protected void rebind(final Vertex from, final Vertex to) {
@@ -332,8 +380,8 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 
   protected abstract class UpperLabel extends Label {
 
-    protected UpperLabel(ObservableValue<T> element, ObservableValue<String> string) {
-      super(element, string);
+    protected UpperLabel(ObservableValue<T> element, ObservableValue<String> string, final boolean showLaTeX) {
+      super(element, string, showLaTeX);
     }
 
     protected void rebind(final Vertex from, final Vertex to) {

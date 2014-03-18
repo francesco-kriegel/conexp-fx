@@ -20,6 +20,7 @@ package conexp.fx.core.service;
  * #L%
  */
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -53,6 +54,10 @@ import conexp.fx.core.exporter.PDFExporter;
 import conexp.fx.core.exporter.PNGExporter;
 import conexp.fx.core.exporter.SVGExporter;
 import conexp.fx.core.exporter.TeXExporter;
+import conexp.fx.core.exporter.TeXExporter.ContextTeXPackage;
+import conexp.fx.core.exporter.TeXExporter.DiagramTeXPackage;
+import conexp.fx.core.exporter.TeXExporter.FitScale;
+import conexp.fx.core.exporter.TeXExporter.TeXOptions;
 import conexp.fx.core.layout.ConceptLayout;
 import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.layout.GeneticLayouter;
@@ -342,6 +347,19 @@ public final class FCAInstance<G, M> {
     exportToFile(file2);
   }
 
+  public void exportTeX(TeXOptions options) {
+    try {
+      new TeXExporter<G, M>(
+          context,
+          tab == null ? null : tab.rowMap(),
+          tab == null ? null : tab.colMap(),
+          layout,
+          options).export();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   public final void exportToFile(final File file) {
     executor.submit(new BlockingTask("Export") {
 
@@ -352,14 +370,14 @@ public final class FCAInstance<G, M> {
             .of(file, FileFormat.TEX, FileFormat.PNG, FileFormat.SVG, FileFormat.PDF, FileFormat.HTML)
             .second()) {
         case TEX:
-          TeXExporter.export(
-              context,
-              tab == null ? null : tab.rowMap(),
-              tab == null ? null : tab.colMap(),
-              layout,
+          exportTeX(new TeXOptions(
+              file,
+              false,
               true,
-              true,
-              file);
+              false,
+              ContextTeXPackage.Ganter,
+              DiagramTeXPackage.Ganter,
+              new FitScale(80, 120)));
           break;
         case PNG:
           PNGExporter.export(

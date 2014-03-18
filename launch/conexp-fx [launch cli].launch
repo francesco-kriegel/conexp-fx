@@ -10,7 +10,9 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="conexp.fx.cli.CLI"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-fromCXT '/Users/francesco/Documents/workspace/conexp-fx/bin/contexts/small/tamari_4.cxt'&#10;-blk&#10;-out 'tex' '/Users/francesco/Documents/tamari_4.tex'"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="conexp-fx-cli"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>

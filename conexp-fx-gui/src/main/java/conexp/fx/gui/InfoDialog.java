@@ -20,7 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import conexp.fx.gui.dialog.FXDialog;
 
-final class InfoDialog extends FXDialog {
+final class InfoDialog extends FXDialog<Void> {
 
   private final GUI gui;
 
