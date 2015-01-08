@@ -43,7 +43,7 @@ public class CounterExampleDialog<G, M> extends Dialog {
     pane.setBottom(buttons);
     pane.setTop(TextBuilder.create().text(imp.toString()).wrappingWidth(300).build());
     Request request = new Requests.New.NewContext(0, 0);// 1, tab.fca.context.colHeads().size());
-    cExTab = new FCAInstance<Object, Object>(tab2.conExpFX, request);
+    cExTab = new FCAInstance<Object, Object>(tab2.cfx, request);
     cExTab.context.rowHeads().add("counterexample " + IdGenerator.getNextId());
     cExTab.context.colHeads().addAll(tab2.context.colHeads());
     final MatrixContextWidget<Object, Object> matrixContextWidget =

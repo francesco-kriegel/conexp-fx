@@ -212,7 +212,7 @@ public final class TestContexts {
     return test;
   }
 
-  private static final File                                          BASEDIR         = new File("../contexts");
+  private static final File                                          BASEDIR         = new File("Contexts");
   private static final FilenameFilter                                CXT_FILTER      = new FilenameFilter() {
 
                                                                                        @Override
@@ -277,21 +277,28 @@ public final class TestContexts {
   /**
    * @return a {@link List} of small {@link MatrixContext}s read from example directory
    */
-  private static final List<MatrixContext<String, String>> small() {
+  public static final List<MatrixContext<String, String>> small() {
     return Lists.transform(Arrays.asList(new File(BASEDIR, "small").listFiles(CXT_FILTER)), IMPORT_FUNCTION);
   }
 
   /**
    * @return a {@link List} of big {@link MatrixContext}s read from example directory
    */
-  private static final List<MatrixContext<String, String>> big() {
+  public static final List<MatrixContext<String, String>> big() {
     return Lists.transform(Arrays.asList(new File(BASEDIR, "big").listFiles(CXT_FILTER)), IMPORT_FUNCTION);
   }
 
   /**
    * @return a {@link List} of scales as {@link MatrixContext}s read from example directory
    */
-  private static final List<MatrixContext<String, String>> scales() {
+  public static final List<MatrixContext<String, String>> scales() {
     return Lists.transform(Arrays.asList(new File(BASEDIR, "scales").listFiles(CXT_FILTER)), IMPORT_FUNCTION);
+  }
+
+  /**
+   * @return a {@link List} of random {@link MatrixContext}s read from example directory
+   */
+  public static final List<MatrixContext<String, String>> random() {
+    return Lists.transform(Arrays.asList(new File(BASEDIR, "random").listFiles(CXT_FILTER)), IMPORT_FUNCTION);
   }
 }

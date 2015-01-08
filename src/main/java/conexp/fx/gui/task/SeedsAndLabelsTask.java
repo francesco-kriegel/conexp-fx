@@ -21,7 +21,7 @@ public final class SeedsAndLabelsTask<G, M> extends BlockingTask {
   private final FCAInstance<G, M> fcaInstance;
 
   public SeedsAndLabelsTask(FCAInstance<G, M> fcaInstance) {
-    super("Initial Seeds and Labels");
+    super(fcaInstance.id.get() + " - Initial Seeds and Labels");
     this.fcaInstance = fcaInstance;
   }
 

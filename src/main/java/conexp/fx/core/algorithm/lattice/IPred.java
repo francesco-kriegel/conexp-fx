@@ -39,8 +39,8 @@ import conexp.fx.gui.task.BlockingTask;
 
 public final class IPred<G, M> {
 
-  public static final <G, M> BlockingTask neighborhood(final ConceptLattice<G, M> lattice) {
-    return new BlockingTask("iPred") {
+  public static final <G, M> BlockingTask neighborhood(final String id, final ConceptLattice<G, M> lattice) {
+    return new BlockingTask(id + " - iPred") {
 
       protected final void _call() {
         updateMessage("Computing Concept Neighborhood...");

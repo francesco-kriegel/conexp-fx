@@ -27,59 +27,48 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuBuilder;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.MenuItemBuilder;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.SplitPaneBuilder;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageViewBuilder;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.Priority;
-import javafx.scene.paint.Color;
-import javafx.scene.text.FontSmoothingType;
-import javafx.scene.text.TextBuilder;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
@@ -96,19 +85,24 @@ import conexp.fx.gui.assistent.ConstructAssistent;
 import conexp.fx.gui.dialog.FXDialog;
 import conexp.fx.gui.dialog.FXDialog.Result;
 import conexp.fx.gui.dialog.FXDialog.Style;
+import conexp.fx.gui.task.BlockingExecutor;
+import conexp.fx.gui.task.ExecutorStatusBar;
 import conexp.fx.gui.util.AppUserModelIdUtility;
 import conexp.fx.gui.util.FXControls;
 
 public class ConExpFX extends Application {
 
+  public static ConExpFX __;
+
   public final static void main(String[] args) {
     System.setProperty("file.encoding", "UTF-8");
     if (System.getProperty("os.name").toLowerCase().startsWith("windows"))
       AppUserModelIdUtility.setCurrentProcessExplicitAppUserModelID("peter.panther.conexp.conexp-fx");
+//    AquaFx.style();
     launch(args);
   }
 
-  final class ErrorDialog extends FXDialog {
+  public final class ErrorDialog extends FXDialog<Void> {
 
     public ErrorDialog(final Exception e) {
       super(primaryStage, Style.ERROR, e.getMessage(), e.toString(), null);
@@ -117,43 +111,40 @@ public class ConExpFX extends Application {
 
   private final class CFXMenuBar {
 
-    private final MenuBar leftBar     = new MenuBar();
-    private final MenuBar rightBar    = new MenuBar();
-    private final Menu    contextMenu = MenuBuilder.create().text("_Context").build();
-    private final Menu    helpMenu    = MenuBuilder.create().text("?").build();
+    private final MenuBar menuBar     = new MenuBar();
+    private final Menu    contextMenu = new Menu("_Context");
+    private final Menu    viewMenu    = new Menu("_View");
+    private final Menu    helpMenu    = new Menu("?");
 
     public CFXMenuBar() {
       super();
-      buildLeftBar();
-      buildRightBar();
-      rootPane.setTop(HBoxBuilder.create().children(leftBar, rightBar).build());
-    }
-
-    private final void buildLeftBar() {
-      HBox.setHgrow(leftBar, Priority.ALWAYS);
+      HBox.setHgrow(menuBar, Priority.ALWAYS);
       buildContextMenu();
+      buildViewMenu();
       buildHelpMenu();
-      leftBar.getMenus().addAll(contextMenu, helpMenu);
+      menuBar.getMenus().addAll(contextMenu, viewMenu, helpMenu);
+      menuBar.setUseSystemMenuBar(true);
+      rootPane.setTop(menuBar);
     }
 
-    private final void buildRightBar() {
-      final Menu fullScreenMenu =
-          MenuBuilder
-              .create()
-              .graphic(
-                  TextBuilder
-                      .create()
-                      .text("Fullscreen")
-                      .fontSmoothingType(FontSmoothingType.LCD)
-                      .fill(Color.WHITE)
-                      .onMouseClicked(new EventHandler<Event>() {
-
-                        public final void handle(final Event event) {
-                          primaryStage.setFullScreen(!primaryStage.isFullScreen());
-                        }
-                      })
-                      .build())
-              .build();
+    private final void buildViewMenu() {
+//      final Menu fullScreenMenu =
+//          MenuBuilder
+//              .create()
+//              .graphic(
+//                  TextBuilder
+//                      .create()
+//                      .text("Fullscreen")
+//                      .fontSmoothingType(FontSmoothingType.LCD)
+//                      .fill(Color.WHITE)
+//                      .onMouseClicked(new EventHandler<Event>() {
+//
+//                        public final void handle(final Event event) {
+//                          primaryStage.setFullScreen(!primaryStage.isFullScreen());
+//                        }
+//                      })
+//                      .build())
+//              .build();
 //      final ProgressBar progressBar = ProgressBarBuilder.create().minHeight(10).maxHeight(10).build();
 //      progressBar.progressProperty().bind(new DoubleBinding() {
 //
@@ -178,62 +169,31 @@ public class ConExpFX extends Application {
 //
 //      });
 //      final Menu progressMenu = MenuBuilder.create().graphic(progressBar).build();
-      rightBar.getMenus().addAll(fullScreenMenu);
+//      rightBar.getMenus().addAll(fullScreenMenu);
+      viewMenu.getItems().add(
+          FXControls.newMenuItem(
+              "Fullscreen",
+              "image/16x16/new_page.png",
+              e -> primaryStage.setFullScreen(!primaryStage.isFullScreen())));
     }
 
     private final void buildContextMenu() {
       final MenuItem newMenuItem =
-          FXControls.newMenuItem("New", "image/16x16/new_page.png", new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              showConstructAssistent();
-            }
-          });
-      final MenuItem openMenuItem =
-          FXControls.newMenuItem("Open", "image/16x16/folder.png", new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              showOpenFileDialog();
-            }
-          });
+          FXControls.newMenuItem("New", "image/16x16/new_page.png", e -> showConstructAssistent());
+      final MenuItem openMenuItem = FXControls.newMenuItem("Open", "image/16x16/folder.png", e -> showOpenFileDialog());
       final MenuItem saveMenuItem =
-          FXControls.newMenuItem("Save", "image/16x16/save.png", true, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              activeInstance.get().save();
-            }
-          });
+          FXControls.newMenuItem("Save", "image/16x16/save.png", true, e -> activeInstance.get().save());
       final MenuItem saveAsMenuItem =
-          FXControls.newMenuItem("Save As", "image/16x16/save.png", true, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              activeInstance.get().saveAs();
-            }
-          });
+          FXControls.newMenuItem("Save As", "image/16x16/save.png", true, e -> activeInstance.get().saveAs());
       final MenuItem texMenuItem =
-          FXControls.newMenuItem("TeX-Export", "image/16x16/briefcase.png", true, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              activeInstance.get().exportTeX();
-            }
-          });
+          FXControls
+              .newMenuItem("TeX-Export", "image/16x16/briefcase.png", true, e -> activeInstance.get().exportTeX());
       final MenuItem exportMenuItem =
-          FXControls.newMenuItem("Export", "image/16x16/briefcase.png", true, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              activeInstance.get().export();
-            }
-          });
+          FXControls.newMenuItem("Export", "image/16x16/briefcase.png", true, e -> activeInstance.get().export());
       texMenuItem.disableProperty().bind(exportMenuItem.disableProperty());
-      final Menu historyMenu =
-          MenuBuilder.create().text("History").graphic(FXControls.newImageView("image/16x16/clock.png")).build();
-      final MenuItem exitMenuItem =
-          FXControls.newMenuItem("Exit", "image/16x16/delete.png", new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              stop();
-            }
-          });
+      final Menu historyMenu = new Menu("History", FXControls.newImageView("image/16x16/clock.png"));
+//          MenuBuilder.create().text("History").graphic(FXControls.newImageView("image/16x16/clock.png")).build();
+      final MenuItem exitMenuItem = FXControls.newMenuItem("Exit", "image/16x16/delete.png", e -> stop());
       activeInstance.addListener(new ChangeListener<FCAInstance<?, ?>>() {
 
         public final void changed(
@@ -246,16 +206,22 @@ public class ConExpFX extends Application {
             saveAsMenuItem.setDisable(true);
             exportMenuItem.setDisable(true);
           } else {
-            saveMenuItem.disableProperty().bind(new BooleanBinding() {
-
-              {
-                bind(newSelectedTab.unsavedChanges);
-              }
-
-              protected final boolean computeValue() {
-                return !newSelectedTab.unsavedChanges.get();
-              }
-            });
+            saveMenuItem
+                .disableProperty()
+                .bind(
+                    Bindings.createBooleanBinding(
+                        () -> !newSelectedTab.unsavedChanges.get(),
+                        newSelectedTab.unsavedChanges));
+//            saveMenuItem.disableProperty().bind(new BooleanBinding() {
+//
+//              {
+//                bind(newSelectedTab.unsavedChanges);
+//              }
+//
+//              protected final boolean computeValue() {
+//                return !newSelectedTab.unsavedChanges.get();
+//              }
+//            });
             saveAsMenuItem.setDisable(false);
             exportMenuItem.setDisable(false);
           }
@@ -266,27 +232,15 @@ public class ConExpFX extends Application {
 
         public final void onChanged(final ListChangeListener.Change<? extends File> c) {
           historyMenu.getItems().clear();
-          historyMenu.getItems().addAll(Collections2.transform(fileHistory, new Function<File, MenuItem>() {
-
-            public final MenuItem apply(final File file) {
-              return MenuItemBuilder
-                  .create()
-                  .graphic(LabelBuilder.create().text(file.toString()).build())
-                  .onAction(new EventHandler<ActionEvent>() {
-
-                    public final void handle(final ActionEvent event) {
-                      Platform.runLater(new Runnable() {
-
-                        public final void run() {
-                          if (file.exists() && file.isFile())
-                            openFFile(FileFormat.of(file, FileFormat.CFX, FileFormat.CXT));
-                        }
-                      });
-                    }
-                  })
-                  .build();
-            }
-          }));
+          historyMenu.getItems().addAll(Collections2.transform(fileHistory, file -> MenuItemBuilder.create()
+//                      .graphic(LabelBuilder.create()
+              .text(file.toString())
+//                          .build())
+              .onAction(e -> Platform.runLater(() -> {
+                if (file.exists() && file.isFile())
+                  openFFile(FileFormat.of(file, FileFormat.CFX, FileFormat.CXT));
+              }))
+              .build()));
         }
       });
       contextMenu.getItems().addAll(
@@ -305,76 +259,158 @@ public class ConExpFX extends Application {
 
     private final void buildHelpMenu() {
       if (Desktop.isDesktopSupported()) {
-        final MenuItem helpMenuItem =
-            FXControls.newMenuItem("Help", "image/16x16/help.png", new EventHandler<ActionEvent>() {
-
-              public final void handle(final ActionEvent event) {
-                try {
-                  Desktop.getDesktop().browse(new URI("http://francesco.kriegel.bplaced.de/conexp-fx/conexp-fx.html"));
-                } catch (Exception e) {
-                  new ErrorDialog(e).showAndWait();
-                }
-              }
-            });
+        final MenuItem helpMenuItem = FXControls.newMenuItem("Help", "image/16x16/help.png", ev -> {
+          try {
+            Desktop.getDesktop().browse(new URI("http://lat.inf.tu-dresden.de/~francesco/conexp-fx/conexp-fx.html"));
+          } catch (Exception e) {
+            new ErrorDialog(e).showAndWait();
+          }
+        });
         helpMenu.getItems().add(helpMenuItem);
       }
       final MenuItem infoMenuItem =
-          FXControls.newMenuItem("Info", "image/16x16/info.png", new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              new InfoDialog(ConExpFX.this).showAndWait();
-            }
-          });
+          FXControls.newMenuItem("Info", "image/16x16/info.png", e -> new InfoDialog(ConExpFX.this).showAndWait());
       helpMenu.getItems().addAll(infoMenuItem);
     }
   }
 
-  public final XMLFile                             configuration  = initConfiguration();
-  public final ListProperty<File>                  fileHistory    = new SimpleListProperty<File>(
-                                                                      FXCollections.<File> observableArrayList());
+  private final class CFXTreeView {
+
+    private final ToolBar         toolBar  = new ToolBar();
+    private final TreeView<Label> treeView = new TreeView<Label>();
+
+    public CFXTreeView() {
+      super();
+      final Button newButton = new Button("New", FXControls.newImageView("image/16x16/new_page.png"));
+      newButton.setOnAction(e -> showConstructAssistent());
+      final Button openButton = new Button("Open", FXControls.newImageView("image/16x16/folder.png"));
+      openButton.setOnAction(e -> showOpenFileDialog());
+      toolBar.getItems().addAll(newButton, openButton);
+      this.treeView.setRoot(new TreeItem<>());
+      this.treeView.setShowRoot(false);
+      this.treeView.selectionModelProperty().get().setSelectionMode(SelectionMode.MULTIPLE);
+      this.treeView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TreeItem<?>>() {
+
+        @Override
+        public void onChanged(javafx.collections.ListChangeListener.Change<? extends TreeItem<?>> c) {
+          c.next();
+          contentPane.getItems().clear();
+          for (TreeItem<?> item : c.getList()) {
+            if (item != null && item.getValue() != null && item.getValue() instanceof String) {
+              FCAInstance<?, ?> fca = (FCAInstance<?, ?>) ((Label) item.getParent().getValue()).getUserData();
+              activeInstance.set(fca);
+              if (fca != null)
+                switch ((String) item.getValue()) {
+                case "Context":
+                  contentPane.getItems().add(fca.contextWidget);
+                  break;
+                case "Lattice":
+                  contentPane.getItems().add(fca.conceptGraph);
+                  break;
+                case "Concepts":
+                  contentPane.getItems().add(fca.conceptWidget);
+                  break;
+                case "Implications":
+                  contentPane.getItems().add(fca.implicationWidget);
+                  break;
+//                case "Status":
+//                  contentPane.getItems().add(fca.statusWidget);
+//                  break;
+                }
+            }
+          }
+          Platform.runLater(() -> {
+            final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();
+            for (int i = 0; i < contentPane.getItems().size(); i++)
+              contentPane.setDividerPosition(i, pos * (double) (i + 1));
+          });
+        }
+      });
+      ConExpFX.this.fcaInstances.addListener(new ListChangeListener<FCAInstance<?, ?>>() {
+
+        @Override
+        public final void onChanged(final ListChangeListener.Change<? extends FCAInstance<?, ?>> c) {
+          c.next();
+          if (c.wasAdded())
+            for (FCAInstance<?, ?> fca : c.getAddedSubList()) {
+              final Label label = new Label(fca.id.get());
+              label.setUserData(fca);
+              label.textProperty().bind(fca.id);
+              label.setStyle("-fx-font-weight: bold;");
+              final TreeItem<Label> treeItem =
+                  new TreeItem<Label>(label, new ImageView(new Image(ConExpFX.class
+                      .getResourceAsStream("image/context.gif"))));
+              treeView.getRoot().getChildren().add(treeItem);// , new Label(tab.fca.id.get())
+              final TreeItem treeItem2 = new TreeItem("Lattice");
+              treeItem.getChildren().addAll(
+                  new TreeItem("Context"),
+                  treeItem2,
+                  new TreeItem("Concepts"),
+                  new TreeItem("Implications")
+//                  ,new TreeItem("Status")
+                  );
+              treeView.getSelectionModel().select(treeItem2);
+            }
+          if (c.wasRemoved())
+            for (FCAInstance<?, ?> fca : c.getRemoved()) {
+
+            }
+        }
+
+      });
+      ConExpFX.this.datasets.addListener(new ListChangeListener<Dataset>() {
+
+        @Override
+        public void onChanged(javafx.collections.ListChangeListener.Change<? extends Dataset> c) {
+          while (c.next())
+            if (c.wasAdded())
+              for (Dataset d : c.getAddedSubList()) {
+                final Label label = new Label(d.id.get());
+                label.textProperty().bind(d.id);
+                label.setUserData(d);
+                label.setStyle("-fx-font-weight: bold;");
+                final TreeItem treeItem =
+                    new TreeItem(label, new ImageView(
+                        new Image(ConExpFX.class.getResourceAsStream("image/context.gif"))));
+                treeView.getRoot().getChildren().add(treeItem);
+                treeView.getSelectionModel().select(treeItem);
+              }
+            else if (c.wasRemoved())
+              for (Dataset d : c.getRemoved()) {
+
+              }
+        }
+      });
+      ConExpFX.this.splitPane.getItems().add(new BorderPane(treeView, toolBar, null, null, null));
+    }
+
+  }
+
+  public final BlockingExecutor                    exe               = new BlockingExecutor();
+  public final XMLFile                             configuration     = initConfiguration();
+  public final ListProperty<File>                  fileHistory       = new SimpleListProperty<File>(
+                                                                         FXCollections.<File> observableArrayList());
   public File                                      lastDirectory;
-  public final ThreadPoolExecutor                  tpe            = new ThreadPoolExecutor(
-                                                                      Runtime.getRuntime().availableProcessors(),
-                                                                      Runtime.getRuntime().availableProcessors(),
-                                                                      60,
-                                                                      TimeUnit.SECONDS,
-                                                                      new LinkedBlockingQueue<Runnable>());
-  private final ObservableList<FCAInstance<?, ?>>  fcaInstances   = FXCollections.observableArrayList();
-  public final ObjectBinding<FCAInstance<?, ?>>    activeInstance = new ObjectBinding<FCAInstance<?, ?>>() {
-
-                                                                    @Override
-                                                                    protected FCAInstance<?, ?> computeValue() {
-                                                                      // TODO Auto-generated method stub
-                                                                      return null;
-                                                                    }
-                                                                  };
-  public final ObservableList<MatrixContext<?, ?>> contexts       =
-                                                                      FXCollections
-                                                                          .observableList(Lists
-                                                                              .transform(
-                                                                                  fcaInstances,
-                                                                                  new Function<FCAInstance<?, ?>, MatrixContext<?, ?>>() {
-
-                                                                                    public final MatrixContext<?, ?>
-                                                                                        apply(final FCAInstance tab) {
-                                                                                      return tab.context;
-                                                                                    }
-                                                                                  }));
-  public final ObservableList<MatrixContext<?, ?>> orders         = FXCollections.observableList(Collections3.filter(
-                                                                      contexts,
-                                                                      new Predicate<MatrixContext<?, ?>>() {
-
-                                                                        public final boolean apply(
-                                                                            final MatrixContext<?, ?> context) {
-                                                                          return context.isHomogen();
-                                                                        }
-                                                                      }));
+  private final ObservableList<FCAInstance<?, ?>>  fcaInstances      = FXCollections.observableArrayList();
+  private final ObservableList<Dataset>            datasets          = FXCollections.observableArrayList();
+  public final ObjectProperty<FCAInstance<?, ?>>   activeInstance    =
+                                                                         new SimpleObjectProperty<FCAInstance<?, ?>>(
+                                                                             null);
+  public final ObservableList<MatrixContext<?, ?>> contexts          = FXCollections.observableList(Lists.transform(
+                                                                         fcaInstances,
+                                                                         tab -> tab.context));
+  public final ObservableList<MatrixContext<?, ?>> orders            = FXCollections.observableList(Collections3
+                                                                         .filter(
+                                                                             contexts,
+                                                                             context -> context.isHomogen()));
 
   public Stage                                     primaryStage;
-  private final BorderPane                         rootPane       = new BorderPane();
-  private final TreeView<Label>                    treeView       = new TreeView<Label>();
-  private final SplitPane                          contentPane    = new SplitPane();
-  private SplitPane                                splitPane;
+  private final StackPane                          stackPane         = new StackPane();
+  private final BorderPane                         rootPane          = new BorderPane();
+  private final AnchorPane                         overlayPane       = new AnchorPane();
+  private final SplitPane                          contentPane       = new SplitPane();
+  private final SplitPane                          splitPane         = new SplitPane();
+  public final ExecutorStatusBar                   executorStatusBar = new ExecutorStatusBar(overlayPane);
 
   public final void start(final Stage primaryStage) {
     Platform.setImplicitExit(true);
@@ -382,20 +418,14 @@ public class ConExpFX extends Application {
     this.primaryStage.initStyle(StageStyle.DECORATED);
     this.primaryStage.setTitle("Concept Explorer FX");
     this.primaryStage.getIcons().add(new Image(ConExpFX.class.getResourceAsStream("image/conexp-fx.png")));
+    stackPane.getChildren().addAll(splitPane, overlayPane);
+    overlayPane.setMouseTransparent(true);
     this.primaryStage.setScene(new Scene(rootPane, 1280, 800));
-    this.primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-
-      public final void handle(final KeyEvent event) {
-        if (event.getCode().equals(KeyCode.F11))
-          ConExpFX.this.primaryStage.setFullScreen(!ConExpFX.this.primaryStage.isFullScreen());
-      }
+    this.primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+      if (e.getCode().equals(KeyCode.F11))
+        ConExpFX.this.primaryStage.setFullScreen(!ConExpFX.this.primaryStage.isFullScreen());
     });
-    this.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-
-      public final void handle(final WindowEvent event) {
-        stop();
-      }
-    });
+    this.primaryStage.setOnCloseRequest(e -> stop());
     final Screen screen = Screen.getPrimary();
     final Rectangle2D bounds = screen.getVisualBounds();
     primaryStage.setX(bounds.getMinX());
@@ -404,98 +434,17 @@ public class ConExpFX extends Application {
     primaryStage.setHeight(bounds.getHeight());
 //    primaryStage.setFullScreen(true);
 //    this.rootPane.getStylesheets().add("conexp/fx/gui/style/style.css");
+    this.splitPane.setOrientation(Orientation.HORIZONTAL);
     new CFXMenuBar();
-//    this.tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>()
-//    {
-//
-//      
-//      public final void
-//          changed(final ObservableValue<? extends Tab> observable, final Tab oldValue, final Tab newValue)
-//      {}
-//    });
-    this.treeView.setRoot(new TreeItem<>());
-    this.treeView.setShowRoot(false);
-    this.treeView.selectionModelProperty().get().setSelectionMode(SelectionMode.MULTIPLE);
-    this.treeView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TreeItem<?>>() {
-
-      @Override
-      public void onChanged(javafx.collections.ListChangeListener.Change<? extends TreeItem<?>> c) {
-        c.next();
-        contentPane.getItems().clear();
-        for (TreeItem<?> item : c.getList()) {
-          if (item != null && item.getValue() != null && item.getValue() instanceof String) {
-            FCAInstance<?, ?> fca = (FCAInstance<?, ?>) ((Label) item.getParent().getValue()).getUserData();
-            if (fca != null)
-              switch ((String) item.getValue()) {
-              case "Context":
-                contentPane.getItems().add(fca.contextWidget);
-                break;
-              case "Lattice":
-                contentPane.getItems().add(fca.conceptGraph);
-                break;
-              case "Concepts":
-                contentPane.getItems().add(fca.conceptWidget);
-                break;
-              case "Implications":
-                contentPane.getItems().add(fca.implicationWidget);
-                break;
-              case "Status":
-                contentPane.getItems().add(fca.statusWidget);
-                break;
-              }
-          }
-        }
-        Platform.runLater(new Runnable() {
-
-          @Override
-          public void run() {
-            final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();
-            for (int i = 0; i < contentPane.getItems().size(); i++)
-              contentPane.setDividerPosition(i, pos * (double) (i + 1));
-          }
-        });
-      }
-    });
-    this.fcaInstances.addListener(new ListChangeListener<FCAInstance<?, ?>>() {
-
-      @Override
-      public final void onChanged(final ListChangeListener.Change<? extends FCAInstance<?, ?>> c) {
-        c.next();
-        if (c.wasAdded())
-          for (FCAInstance<?, ?> fca : c.getAddedSubList()) {
-            final Label label = new Label(fca.id.get());
-            label.setUserData(fca);
-            label.textProperty().bind(fca.id);
-            label.setStyle("-fx-font-weight: bold;");
-            final TreeItem treeItem =
-                new TreeItem(label, ImageViewBuilder
-                    .create()
-                    .image(new Image(ConExpFX.class.getResourceAsStream("image/context.gif")))
-                    .build());
-            treeView.getRoot().getChildren().add(treeItem);// , new Label(tab.fca.id.get())
-            treeItem.getChildren().addAll(
-                new TreeItem("Context"),
-                new TreeItem("Lattice"),
-                new TreeItem("Concepts"),
-                new TreeItem("Implications"),
-                new TreeItem("Status"));
-          }
-        if (c.wasRemoved())
-          for (FCAInstance<?, ?> fca : c.getRemoved()) {
-
-          }
-      }
-
-    });
-    this.splitPane = SplitPaneBuilder.create().orientation(Orientation.HORIZONTAL).items(treeView, contentPane).build();
-    this.rootPane.setCenter(splitPane);
+    new CFXTreeView();
+    this.splitPane.getItems().add(contentPane);
+    this.rootPane.setCenter(stackPane);
+    executorStatusBar.bindTo(exe);
+    this.rootPane.setBottom(executorStatusBar.statusBar);
     this.primaryStage.show();
-    Platform.runLater(new Runnable() {
-
-      public final void run() {
-        ConExpFX.this.splitPane.setDividerPositions(new double[] { 0.1d });
-        readConfiguration();
-      }
+    Platform.runLater(() -> {
+      ConExpFX.this.splitPane.setDividerPositions(new double[] { 0.1d });
+      readConfiguration();
     });
   }
 
@@ -519,14 +468,7 @@ public class ConExpFX extends Application {
 
   private final void readConfiguration() {
     if (configuration.containsKey("file_history"))
-      fileHistory.addAll(Lists.transform(
-          configuration.get("file_history").getStringListValue(),
-          new Function<String, File>() {
-
-            public final File apply(final String string) {
-              return new File(string);
-            }
-          }));
+      fileHistory.addAll(Lists.transform(configuration.get("file_history").getStringListValue(), File::new));
     if (configuration.containsKey("last_directory")
         && new File(configuration.get("last_directory").getStringValue()).exists()
         && new File(configuration.get("last_directory").getStringValue()).isDirectory())
@@ -550,7 +492,7 @@ public class ConExpFX extends Application {
     if (lastDirectory != null)
       configuration.put("last_directory", new StringData("last_directory", lastDirectory.toString()));
     configuration.put("last_opened_files", new StringListData("last_opened_files", "last_opened_file"));
-    for (FCAInstance conExpTab : fcaInstances) {
+    for (FCAInstance<?, ?> conExpTab : fcaInstances) {
       if (conExpTab.file != null) {
         configuration.get("last_opened_files").getStringListValue().add(conExpTab.file.toString());
 //        if (tabPane.getSelectionModel().getSelectedItem().equals(tab))
@@ -559,12 +501,7 @@ public class ConExpFX extends Application {
     }
     configuration.put(
         "file_history",
-        new StringListData("file_history", "file", Lists.transform(fileHistory, new Function<File, String>() {
-
-          public final String apply(final File file) {
-            return file.toString();
-          }
-        })));
+        new StringListData("file_history", "file", Lists.transform(fileHistory, File::toString)));
     configuration.store();
   }
 
@@ -578,7 +515,8 @@ public class ConExpFX extends Application {
   }
 
   private final void showOpenFileDialog() {
-    final Pair<File, FileFormat> ffile = showOpenFileDialog("Open Formal Context File", FileFormat.CXT, FileFormat.CFX);
+    final Pair<File, FileFormat> ffile =
+        showOpenFileDialog("Open Formal Context File", FileFormat.CXT, FileFormat.CFX, FileFormat.TTL);
     if (ffile != null)
       openFFile(ffile);
   }
@@ -592,6 +530,9 @@ public class ConExpFX extends Application {
     case CXT:
       newFCAInstance(new Requests.Import.ImportCXT(ffile.first()));
       break;
+    case TTL:
+      final Dataset dataset = new Dataset(ffile.x(), ffile.y());
+      datasets.add(dataset);
     }
   }
 

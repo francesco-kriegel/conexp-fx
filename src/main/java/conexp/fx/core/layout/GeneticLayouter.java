@@ -45,6 +45,7 @@ import conexp.fx.gui.task.BlockingTask;
 public final class GeneticLayouter<G, M> {
 
   public static final <G, M> BlockingTask seeds(
+      final String id,
       final ConceptLayout<G, M> layout,
       final boolean includingLayout,
       final int generationCount,
@@ -52,7 +53,7 @@ public final class GeneticLayouter<G, M> {
       final boolean threeDimensions,
       final ConflictDistance<G, M> conflictDistance,
       final ThreadPoolExecutor tpe) {
-    return new BlockingTask("Genetic Layouter") {
+    return new BlockingTask(id + " - Genetic Layouter") {
 
       private final DoubleProperty           evolutionaryProgressProperty = new SimpleDoubleProperty(0d);
       private final Set<ConceptLayout<G, M>> layouts                      = new HashSet<ConceptLayout<G, M>>(

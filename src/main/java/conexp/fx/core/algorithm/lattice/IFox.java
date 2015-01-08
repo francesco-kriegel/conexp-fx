@@ -122,11 +122,12 @@ public final class IFox<G, M> {
   }
 
   public static final <G, M> BlockingTask select(
+      final String id,
       final ConceptLayout<G, M> layout,
       final M m,
       final ConflictDistance<G, M> conflictDistance,
       final ThreadPoolExecutor tpe) {
-    return new BlockingTask("iFox Select") {
+    return new BlockingTask(id + " - iFox Select") {
 
       private MatrixContext<G, M> I;
       private MatrixContext<G, M> IuJ;
@@ -297,11 +298,12 @@ public final class IFox<G, M> {
   }
 
   public static final <G, M> BlockingTask ignore(
+      final String id,
       final ConceptLayout<G, M> layout,
       final M m,
       final ConflictDistance<G, M> conflictDistance,
       final ThreadPoolExecutor tpe) {
-    return new BlockingTask("iFox Ignore") {
+    return new BlockingTask(id + " - iFox Ignore") {
 
       private MatrixContext<G, M> I;
       private Attribute<M>        attribute;

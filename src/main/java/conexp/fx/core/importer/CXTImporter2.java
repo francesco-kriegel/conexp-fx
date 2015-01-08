@@ -33,6 +33,8 @@ import conexp.fx.core.util.IterableFile;
 public class CXTImporter2 {
 
   public static final void read(final MatrixContext<String, String> context, final File file) {
+    if (!context.id.isBound())
+      context.id.set(file.getName());
     final Iterator<String> lineIterator = new IterableFile(file).iterator();
     final String[] firstLines = new String[5];
     int i = 0;

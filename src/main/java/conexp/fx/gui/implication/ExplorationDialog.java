@@ -26,7 +26,7 @@ public class ExplorationDialog<G, M> extends Dialog {
   }
 
   public ExplorationDialog(final FCAInstance<String, String> tab2, final Implication<M> imp) {
-    super("Attribute Exploration", tab2.conExpFX.primaryStage);
+    super("Attribute Exploration", tab2.cfx.primaryStage);
     this.tab = tab2;
     this.imp = imp;
     pane.setPadding(new Insets(10));

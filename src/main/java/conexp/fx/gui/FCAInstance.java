@@ -27,7 +27,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -35,7 +34,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import conexp.fx.core.algorithm.lattice.IFox;
@@ -77,9 +75,7 @@ import conexp.fx.gui.dialog.FXDialog.Return;
 import conexp.fx.gui.dialog.TeXDialog;
 import conexp.fx.gui.graph.ConceptGraph;
 import conexp.fx.gui.implication.ImplicationWidget;
-import conexp.fx.gui.task.BlockingExecutor;
 import conexp.fx.gui.task.BlockingTask;
-import conexp.fx.gui.task.ExecutorStatusBar;
 import conexp.fx.gui.task.ImportTask;
 import conexp.fx.gui.task.SeedsAndLabelsTask;
 
@@ -93,25 +89,21 @@ public final class FCAInstance<G, M> {
   public final ObservableList<Implication<G, M>> implications     = FXCollections
                                                                       .<Implication<G, M>> observableArrayList();
 
-  public final ThreadPoolExecutor                tpe;
   public final ConflictDistance<G, M>            conflictDistance = new ConflictDistance<G, M>();
-  public final BlockingExecutor                  executor         = new BlockingExecutor();
   public final StringProperty                    id               = new SimpleStringProperty("");
   public final BooleanProperty                   unsavedChanges   = new SimpleBooleanProperty(false);
   public File                                    file;
-  public boolean                                 isStringTab      = false;
+  public boolean                                 editable         = false;
 
-  public final ConExpFX                          conExpFX;
+  public final ConExpFX                          cfx;
   public final MatrixContextWidget<G, M>         contextWidget;
   public final ConceptGraph<G, M>                conceptGraph;
   public final ConceptWidget<G, M>               conceptWidget;
   public final ImplicationWidget<G, M>           implicationWidget;
-  public final BorderPane                        statusWidget;
 
   public FCAInstance(final ConExpFX conExp, final Request<G, M> request) {
     super();
-    this.conExpFX = conExp;
-    this.tpe = conExp.tpe;
+    this.cfx = conExp;
     this.request = request;
     this.context = request.createContext(AutomaticMode.REDUCE);
     this.context.id.bind(id);
@@ -148,15 +140,17 @@ public final class FCAInstance<G, M> {
 //            save();
 //      }
 //    });
-    this.statusWidget = new ExecutorStatusBar<G, M>(executor).statusBar;
+//    final ExecutorStatusBar conExp.executorStatusBar = new ExecutorStatusBar();
+//    conExp.executorStatusBar.bindTo(conExp.executor);
+//    this.statusWidget = conExp.executorStatusBar.statusBar;
     if (request instanceof FileRequest) {
-      this.isStringTab = true;
+      this.editable = true;
       this.contextWidget =
           (MatrixContextWidget<G, M>) new StringMatrixContextWidget((FCAInstance<String, String>) this);
       conExp.fileHistory.remove(((FileRequest) request).file);
       conExp.fileHistory.add(0, ((FileRequest) request).file);
     } else if (request instanceof StringRequest) {
-      this.isStringTab = true;
+      this.editable = true;
       this.contextWidget =
           (MatrixContextWidget<G, M>) new StringMatrixContextWidget((FCAInstance<String, String>) this);
     } else
@@ -182,8 +176,8 @@ public final class FCAInstance<G, M> {
   }
 
   public final void initialize() {
-    executor.submit(new ImportTask<G, M>(this));
-    executor.submit(new BlockingTask("Initialization") {
+    cfx.exe.submit(new ImportTask<G, M>(this));
+    cfx.exe.submit(new BlockingTask("Initialization") {
 
       @Override
       protected void _call() {
@@ -201,7 +195,7 @@ public final class FCAInstance<G, M> {
         layout.invalidate();
         for (int col = 0; col < context.colHeads().size(); col++) {
           final int _col = col;
-          executor.submit(new BlockingTask("Selecting " + _col) {
+          cfx.exe.submit(new BlockingTask("Selecting " + _col) {
 
             @Override
             protected void _call() {
@@ -214,13 +208,13 @@ public final class FCAInstance<G, M> {
   }
 
   public final void initialize2() {
-    executor.submit(new ImportTask<G, M>(this));
-    executor.submit(new BlockingTask("Initialization") {
+    cfx.exe.submit(new ImportTask<G, M>(this));
+    cfx.exe.submit(new BlockingTask(id.get() + " - Initialization") {
 
       @Override
       protected void _call() {
         updateProgress(0.1d, 1d);
-        final NextClosures6.Result<G, M> result = NextClosures6.compute(context, false);
+        final NextClosures6.Result<G, M> result = NextClosures6.compute(context, true);
         for (Entry<Set<M>, Set<M>> e : result.implications.entrySet())
           implications.add(new Implication<G, M>(e.getKey(), e.getValue(), result.supports.get(e.getKey())));
         List<Concept<G, M>> concepts = new ArrayList<Concept<G, M>>();
@@ -238,13 +232,13 @@ public final class FCAInstance<G, M> {
 //        layout.invalidate();
       }
     });
-    executor.submit(new SeedsAndLabelsTask<G, M>(FCAInstance.this));
-    executor.submit(IPred.neighborhood(lattice));
+    cfx.exe.submit(new SeedsAndLabelsTask<G, M>(FCAInstance.this));
+    cfx.exe.submit(IPred.neighborhood(id.get(), lattice));
     relayout(0, 64);
   }
 
   public final void addObject(final G object) {
-    executor.submit(new BlockingTask("New Object") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - New Object") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -259,7 +253,7 @@ public final class FCAInstance<G, M> {
   }
 
   public final void addAttribute(final M attribute) {
-    executor.submit(new BlockingTask("New Attribute") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - New Attribute") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -272,8 +266,8 @@ public final class FCAInstance<G, M> {
 //        select(attribute);
       }
     });
-    executor.submit(IFox.select(layout, attribute, conflictDistance, tpe));
-    executor.submit(new BlockingTask("New Attribute") {
+    cfx.exe.submit(IFox.select(id.get(), layout, attribute, conflictDistance, cfx.exe.tpe));
+    cfx.exe.submit(new BlockingTask(id.get() + " - New Attribute") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -284,7 +278,7 @@ public final class FCAInstance<G, M> {
   }
 
   public final void flip(final G object, final M attribute) {
-    executor.submit(new BlockingTask("Context Flip") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Context Flip") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -295,7 +289,7 @@ public final class FCAInstance<G, M> {
             context.addFast(object, attribute);
           return;
         } else {
-          executor.submit(new BlockingTask("Flip Init") {
+          cfx.exe.submit(new BlockingTask(id.get() + " - Flip Init") {
 
             protected final void _call() {
               updateProgress(0.5d, 1d);
@@ -310,8 +304,8 @@ public final class FCAInstance<G, M> {
               conceptGraph.highlightLock.lock();
             }
           });
-          executor.submit(IFox.ignore(layout, attribute, conflictDistance, tpe));
-          executor.submit(new BlockingTask("Context Flip") {
+          cfx.exe.submit(IFox.ignore(id.get(), layout, attribute, conflictDistance, cfx.exe.tpe));
+          cfx.exe.submit(new BlockingTask(id.get() + " - Context Flip") {
 
             protected final void _call() {
               updateProgress(0.5d, 1d);
@@ -325,9 +319,9 @@ public final class FCAInstance<G, M> {
               conceptGraph.highlightLock.lock();
             }
           });
-          executor.submit(IFox.select(layout, attribute, conflictDistance, tpe));
+          cfx.exe.submit(IFox.select(id.get(), layout, attribute, conflictDistance, cfx.exe.tpe));
 
-          executor.submit(new BlockingTask("Flip Finish") {
+          cfx.exe.submit(new BlockingTask(id.get() + " - Flip Finish") {
 
             protected final void _call() {
               updateProgress(0.5d, 1d);
@@ -342,7 +336,7 @@ public final class FCAInstance<G, M> {
 
   public final void select(final M attribute) {
 
-    executor.submit(new BlockingTask("Select Init") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Select Init") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -350,9 +344,9 @@ public final class FCAInstance<G, M> {
         conceptGraph.highlightLock.lock();
       }
     });
-    executor.submit(IFox.select(layout, attribute, conflictDistance, tpe));
+    cfx.exe.submit(IFox.select(id.get(), layout, attribute, conflictDistance, cfx.exe.tpe));
 
-    executor.submit(new BlockingTask("Select Finish") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Select Finish") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -364,7 +358,7 @@ public final class FCAInstance<G, M> {
 
   public final void ignore(final M attribute) {
 
-    executor.submit(new BlockingTask("Ignore Init") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Ignore Init") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -372,9 +366,9 @@ public final class FCAInstance<G, M> {
         conceptGraph.highlightLock.lock();
       }
     });
-    executor.submit(IFox.ignore(layout, attribute, conflictDistance, tpe));
+    cfx.exe.submit(IFox.ignore(id.get(), layout, attribute, conflictDistance, cfx.exe.tpe));
 
-    executor.submit(new BlockingTask("Ignore Finish") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Ignore Finish") {
 
       protected final void _call() {
         updateProgress(0.5d, 1d);
@@ -385,36 +379,38 @@ public final class FCAInstance<G, M> {
   }
 
   public final void relayout(final int generationCount, final int populationSize) {
-    executor.submit(GeneticLayouter.seeds(
+    cfx.exe.submit(GeneticLayouter.seeds(
+        id.get(),
         layout,
         false,
         generationCount,
         populationSize,
         conceptGraph.threeDimensions(),
         conflictDistance,
-        tpe));
+        cfx.exe.tpe));
   }
 
   public final void refine(final int generationCount) {
-    executor.submit(GeneticLayouter.seeds(
+    cfx.exe.submit(GeneticLayouter.seeds(
+        id.get(),
         layout,
         true,
         generationCount,
         1,
         conceptGraph.threeDimensions(),
         conflictDistance,
-        tpe));
+        cfx.exe.tpe));
   }
 
   public final LayoutEvolution<G, M> qualityChart(final Concept<G, M> concept, final ConceptMovement movement) {
     final LayoutEvolution<G, M> qualityEvolution =
-        new LayoutEvolution<G, M>(layout, concept, movement, 2d, 2d, 32, 1, 16, conflictDistance, tpe);
-    executor.submit(LayoutEvolution.calculate(qualityEvolution));
+        new LayoutEvolution<G, M>(layout, concept, movement, 2d, 2d, 32, 1, 16, conflictDistance, cfx.exe.tpe);
+    cfx.exe.submit(LayoutEvolution.calculate(qualityEvolution));
     return qualityEvolution;
   }
 
   public final void storeToFile() {
-    executor.submit(new BlockingTask("Store") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Store") {
 
       @SuppressWarnings("incomplete-switch")
       protected final void _call() {
@@ -434,8 +430,8 @@ public final class FCAInstance<G, M> {
         }
         id.set(file.getName());
         unsavedChanges.set(false);
-        conExpFX.fileHistory.remove(file);
-        conExpFX.fileHistory.add(0, file);
+        cfx.fileHistory.remove(file);
+        cfx.fileHistory.add(0, file);
       }
     });
   }
@@ -458,7 +454,7 @@ public final class FCAInstance<G, M> {
   }
 
   public final void exportToFile(final File file) {
-    executor.submit(new BlockingTask("Export") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Export") {
 
       @SuppressWarnings("incomplete-switch")
       protected final void _call() {
@@ -522,14 +518,14 @@ public final class FCAInstance<G, M> {
   }
 
   public void calcImplications() {
-    executor.submit(new BlockingTask("Clear implications list") {
+    cfx.exe.submit(new BlockingTask(id.get() + " - Clear implications list") {
 
       @Override
       protected void _call() {
         implications.clear();
       }
     });
-//    executor.submit(NextImplication2.implications(context, implications));
+//    conExp.executor.submit(NextImplication2.implications(context, implications));
   }
 
   public final void save() {
@@ -542,22 +538,22 @@ public final class FCAInstance<G, M> {
   public final void saveAs() {
     final FileChooser fileChooser = new FileChooser();
     fileChooser.setTitle("Save Formal Context File");
-    if (conExpFX.lastDirectory != null)
-      fileChooser.setInitialDirectory(conExpFX.lastDirectory);
+    if (cfx.lastDirectory != null)
+      fileChooser.setInitialDirectory(cfx.lastDirectory);
     fileChooser.getExtensionFilters().add(new ExtensionFilter("Context & Lattice (ConExpFX Format, *.cfx)", "*.cfx"));
     fileChooser.getExtensionFilters().add(new ExtensionFilter("Only Context (Burmeister Format, *.cxt)", "*.cxt"));
-    final File file = fileChooser.showSaveDialog(conExpFX.primaryStage);
+    final File file = fileChooser.showSaveDialog(cfx.primaryStage);
     if (file != null) {
       this.file = file;
-      conExpFX.lastDirectory = file.getParentFile();
+      cfx.lastDirectory = file.getParentFile();
       storeToFile();
     }
   }
 
   public final void export() {
     final FileChooser fileChooser = new FileChooser();
-    if (conExpFX.lastDirectory != null)
-      fileChooser.setInitialDirectory(conExpFX.lastDirectory);
+    if (cfx.lastDirectory != null)
+      fileChooser.setInitialDirectory(cfx.lastDirectory);
     fileChooser.getExtensionFilters().add(
         new ExtensionFilter("Context & Lattice (TeX - Ganter's fca.sty, *.tex)", "*.tex"));
     fileChooser.getExtensionFilters().add(
@@ -568,20 +564,20 @@ public final class FCAInstance<G, M> {
         new ExtensionFilter("Only Lattice (Portable Document Format, *.pdf)", "*.pdf"));
     fileChooser.getExtensionFilters().add(
         new ExtensionFilter("Only Context (Hypertext Markup Language, *.html)", "*.html"));
-    final File file = fileChooser.showSaveDialog(conExpFX.primaryStage);
+    final File file = fileChooser.showSaveDialog(cfx.primaryStage);
     if (file != null) {
-      conExpFX.lastDirectory = file.getParentFile();
+      cfx.lastDirectory = file.getParentFile();
       exportToFile(file);
     }
   }
 
   public void exportTeX() {
-    final Return<TeXOptions> ret = new TeXDialog<G, M>(this.conExpFX.primaryStage).showAndWait();
+    final Return<TeXOptions> ret = new TeXDialog<G, M>(this.cfx.primaryStage).showAndWait();
     if (ret.result().equals(Result.OK)) {
       final FileChooser chooser = new FileChooser();
       chooser.getExtensionFilters().add(new ExtensionFilter("LaTeX File (*.tex)", "*.tex"));
-      chooser.setInitialDirectory(conExpFX.lastDirectory);
-      final File file = chooser.showSaveDialog(conExpFX.primaryStage);
+      chooser.setInitialDirectory(cfx.lastDirectory);
+      final File file = chooser.showSaveDialog(cfx.primaryStage);
       if (file == null)
         return;
       final TeXOptions value = ret.value();

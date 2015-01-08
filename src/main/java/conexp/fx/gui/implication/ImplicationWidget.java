@@ -91,7 +91,7 @@ public class ImplicationWidget<G, M> extends BorderPane {
       public final void handle(final ActionEvent event) {
         new AttributeExploration((FCAInstance<String, String>) fcaInstance);
       }
-    }).disable(!fcaInstance.isStringTab).build();
+    }).disable(!fcaInstance.editable).build();
     this.toolBar = ToolBarBuilder.create().items(computeButton, exploreButton).build();
     this.setTop(toolBar);
     this.table.getFocusModel().focusedItemProperty().addListener(new ChangeListener<Implication<G, M>>() {

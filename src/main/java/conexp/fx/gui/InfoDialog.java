@@ -3,8 +3,6 @@ package conexp.fx.gui;
 import java.awt.Desktop;
 import java.net.URI;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.InsetsBuilder;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.HyperlinkBuilder;
@@ -13,7 +11,6 @@ import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.ImageViewBuilder;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
@@ -31,39 +28,24 @@ final class InfoDialog extends FXDialog<Void> {
 
   private static VBox content(final ConExpFX gui) {
     final Hyperlink homepage =
-        HyperlinkBuilder
-            .create()
-            .text("http://lat.inf.tu-dresden.de/~francesco")
-            .onAction(new EventHandler<ActionEvent>() {
-
-              public final void handle(final ActionEvent event) {
-                try {
-                  Desktop.getDesktop().browse(new URI("http://lat.inf.tu-dresden.de/~francesco"));
-                } catch (Exception e) {
-                  gui.new ErrorDialog(e).showAndWait();
-                }
-              }
-            })
-            .build();
-    final Hyperlink email =
-        HyperlinkBuilder
-            .create()
-            .text("mailto:francesco.kriegel@tu-dresden.de")
-            .onAction(new EventHandler<ActionEvent>() {
-
-              public final void handle(final ActionEvent event) {
-                try {
-                  Desktop.getDesktop().mail(new URI("mailto:francesco.kriegel@tu-dresden.de"));
-                } catch (Exception e) {
-                  gui.new ErrorDialog(e).showAndWait();
-                }
-              }
-            })
-            .build();
+        HyperlinkBuilder.create().text("http://lat.inf.tu-dresden.de/~francesco").onAction(ev -> {
+          try {
+            Desktop.getDesktop().browse(new URI("http://lat.inf.tu-dresden.de/~francesco"));
+          } catch (Exception e) {
+            gui.new ErrorDialog(e).showAndWait();
+          }
+        }).build();
+    final Hyperlink email = HyperlinkBuilder.create().text("mailto:francesco.kriegel@tu-dresden.de").onAction(ev -> {
+      try {
+        Desktop.getDesktop().mail(new URI("mailto:francesco.kriegel@tu-dresden.de"));
+      } catch (Exception e) {
+        gui.new ErrorDialog(e).showAndWait();
+      }
+    }).build();
     final Label label =
         LabelBuilder
             .create()
-            .text("Concept Explorer FX\r\n" + "(c) 2010-2014, Francesco Kriegel, TU Dresden\r\n" + "Apache License 2.0")
+            .text("Concept Explorer FX\r\n" + "(c) 2010-2015, Francesco Kriegel, TU Dresden\r\n" + "Apache License 2.0")
             .build();
     final ImageView icon =
         imageView("image/conexp-fx.png", 64, "http://lat.inf.tu-dresden.de/~francesco/conexp-fx/conexp-fx.html");
@@ -111,15 +93,12 @@ final class InfoDialog extends FXDialog<Void> {
   private static ImageView imageView(final String image, final int h, final String url) {
     final Image i = new Image(ConExpFX.class.getResourceAsStream(image));
     final double r = i.getWidth() / i.getHeight();
-    return ImageViewBuilder.create().onMouseClicked(new EventHandler<MouseEvent>() {
-
-      public final void handle(final MouseEvent event) {
-        try {
-          Desktop.getDesktop().browse(new URI(url));
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      };
+    return ImageViewBuilder.create().onMouseClicked(ev -> {
+      try {
+        Desktop.getDesktop().browse(new URI(url));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }).image(i).fitHeight(h).fitWidth(r * h).build();
   }
 }

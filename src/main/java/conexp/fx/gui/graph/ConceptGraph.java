@@ -100,8 +100,8 @@ import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.math.Points;
 import conexp.fx.core.quality.LayoutEvolution;
 import conexp.fx.core.util.Constants;
-import conexp.fx.gui.FCAInstance;
 import conexp.fx.gui.ConExpFX;
+import conexp.fx.gui.FCAInstance;
 import conexp.fx.gui.graph.option.AnimationSpeed;
 import conexp.fx.gui.graph.option.AttributeLabelText;
 import conexp.fx.gui.graph.option.EdgeHighlight;
@@ -1302,7 +1302,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           path.getStrokeDashArray().addAll(2d, 4d);
           front.getChildren().add(path);
         } else if (event.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-          if (path.getElements().size() > 1) {
+          if (path != null && path.getElements().size() > 1) {
             path.getElements().add(new ClosePath());
             path.setFill(Color.RED);
             final Set<Concept<G, M>> concepts =

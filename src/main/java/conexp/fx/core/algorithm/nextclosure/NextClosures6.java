@@ -14,7 +14,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 
@@ -92,15 +91,13 @@ public final class NextClosures6 {
 
   }
 
-  private static final int maxc  = Runtime.getRuntime().availableProcessors();
-  private static final int cores = maxc < 9 ? maxc : (maxc * 3) / 4;
-
-  public static final <G, M> NextClosures6.Result<G, M> compute(final MatrixContext<G, M> cxt, final boolean verbose) {
+  public static final <G, M> NextClosures6.Result<G, M> compute(
+      final MatrixContext<G, M> cxt,
+      final boolean verbose,
+      final ThreadPoolExecutor tpe) {
     if (verbose)
-      System.out.println("NextClosures running on " + cores + " cores...");
-    final ThreadPoolExecutor tpe =
-        new ThreadPoolExecutor(cores, cores, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-    tpe.prestartAllCoreThreads();
+      System.out.println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize()
+          + " cores...");
     final Result<G, M> result = new Result<G, M>();
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
@@ -108,13 +105,16 @@ public final class NextClosures6 {
       if (verbose)
         System.out.print("current cardinality: " + result.cardinality + "/" + maxCardinality + " (" + p + "%)");
       final Collection<Set<M>> candidatesN =
-          new HashSet<Set<M>>(Collections2.filter(result.candidates.keySet(), new Predicate<Set<M>>() {
-
-            @Override
-            public final boolean apply(final Set<M> candidate) {
-              return candidate.size() == result.cardinality;
-            }
-          }));
+          new HashSet<Set<M>>(Collections2.filter(
+              result.candidates.keySet(),
+              candidate -> candidate.size() == result.cardinality));
+//          new Predicate<Set<M>>() {
+//
+//            @Override
+//            public final boolean apply(final Set<M> candidate) {
+//              return candidate.size() == result.cardinality;
+//            }
+//          }));
       if (verbose)
         System.out.println("     " + candidatesN.size() + " candidates will be processed...");
       final Set<Future<?>> futures = new HashSet<Future<?>>();
@@ -137,6 +137,7 @@ public final class NextClosures6 {
               if (candidateII.size() == candidate.size()) {
                 result.concepts.add(new Concept<G, M>(candidateI, candidate));
               } else {
+                result.concepts.add(new Concept<G, M>(candidateI, candidateII));
                 candidateII.removeAll(candidate);
                 result.implications.put(candidate, candidateII);
                 result.supports.put(candidate, candidateI);
@@ -155,9 +156,34 @@ public final class NextClosures6 {
         }
       result.candidates.keySet().removeAll(candidatesN);
     }
+    if (verbose) {
+      System.out.println(result.concepts.size() + " concepts found");
+      System.out.println(result.implications.size() + " implications found");
+    }
+    return result;
+  }
+
+  public static final <G, M> NextClosures6.Result<G, M> compute(
+      final MatrixContext<G, M> cxt,
+      final boolean verbose,
+      final int cores) {
+    if (cores > Runtime.getRuntime().availableProcessors())
+      throw new IllegalArgumentException("Requested pool size is too large. VM has only "
+          + Runtime.getRuntime().availableProcessors() + " available cpus, thus a thread pool with " + cores
+          + " cores cannot be used here.");
+    final ThreadPoolExecutor tpe =
+        new ThreadPoolExecutor(cores, cores, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+    tpe.prestartAllCoreThreads();
+    final Result<G, M> result = compute(cxt, verbose, tpe);
     tpe.purge();
     tpe.shutdown();
     return result;
+  }
+
+  public static final <G, M> NextClosures6.Result<G, M> compute(final MatrixContext<G, M> cxt, final boolean verbose) {
+    final int maxc = Runtime.getRuntime().availableProcessors();
+    final int cores = maxc < 9 ? maxc : (maxc * 3) / 4;
+    return compute(cxt, verbose, cores);
   }
 
 }

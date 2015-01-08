@@ -41,7 +41,7 @@ import conexp.fx.core.algorithm.nextclosure.NextClosures6.Result;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter2;
-import conexp.fx.test.algorithm.nextclosure.Test;
+import conexp.fx.test.algorithm.nextclosure.NextClosuresTest;
 
 public class CLI {
 
@@ -64,7 +64,7 @@ public class CLI {
 
   private static final void test(final CommandLine commandLine) {
     final String path = commandLine.getOptionValue(CLI.TEST.getLongOpt());
-    Test.run(path);
+    NextClosuresTest.run(path);
   }
 
   private static final void computeImplications(final CommandLine commandLine) {

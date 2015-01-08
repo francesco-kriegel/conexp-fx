@@ -88,7 +88,7 @@ public class HashSetArrayList<E> extends AbstractSetList<E> {
   }
 
   public boolean remove(final Object o) {
-    return s.remove(o) && l.remove(o);
+    return l.remove(o) && s.remove(o);
   }
 
   public E remove(final int i) {
@@ -98,11 +98,11 @@ public class HashSetArrayList<E> extends AbstractSetList<E> {
   }
 
   public boolean removeAll(final Collection<?> c) {
-    return s.removeAll(c) && l.removeAll(c);
+    return l.removeAll(c) && s.removeAll(c);
   }
 
   public boolean retainAll(final Collection<?> c) {
-    return s.retainAll(c) && l.retainAll(c);
+    return l.retainAll(c) && s.retainAll(c);
   }
 
   public boolean contains(final Object o) {

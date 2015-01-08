@@ -20,6 +20,9 @@ package conexp.fx.gui.task;
  * #L%
  */
 
+import javafx.application.Platform;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.concurrent.Task;
 
 public abstract class BlockingTask extends Task<Void> {
@@ -28,16 +31,11 @@ public abstract class BlockingTask extends Task<Void> {
 
                                                    protected void _call() {}
                                                  };
-  protected final String           title;
-  private long                     runTimeMillis = 0l;
+  public final LongProperty        runTimeMillis = new SimpleLongProperty(0l);
 
   public BlockingTask(final String title) {
     super();
-    this.title = title;
-  }
-
-  public final long runTimeMillis() {
-    return runTimeMillis;
+    updateTitle(title);
   }
 
   @Override
@@ -45,14 +43,23 @@ public abstract class BlockingTask extends Task<Void> {
     final long startTimeMillis = System.currentTimeMillis();
     scheduled();
     running();
-    updateTitle(title);
     updateProgress(0d, 1d);
+    final Thread t = new Thread(() -> {
+      while (true) {
+        Platform.runLater(() -> runTimeMillis.set(System.currentTimeMillis() - startTimeMillis));
+        try {
+          Thread.sleep(250);
+        } catch (Exception e) {}
+      }
+    });
+    t.start();
     try {
       _call();
     } catch (Exception e) {
       e.printStackTrace();
     }
-    runTimeMillis = System.currentTimeMillis() - startTimeMillis;
+    t.stop();
+    Platform.runLater(() -> runTimeMillis.set(System.currentTimeMillis() - startTimeMillis));
     updateProgress(1d, 1d);
     updateMessage("succeeded (" + runTimeMillis + "ms)");
     succeeded();

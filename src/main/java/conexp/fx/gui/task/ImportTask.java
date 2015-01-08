@@ -11,7 +11,7 @@ public final class ImportTask<G, M> extends BlockingTask {
   private final FCAInstance<G, M> fcaInstance;
 
   public ImportTask(FCAInstance<G, M> fcaInstance) {
-    super("Import Task");
+    super(fcaInstance.id.get() + " - Import Task");
     this.fcaInstance = fcaInstance;
   }
 

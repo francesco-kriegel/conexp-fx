@@ -20,6 +20,7 @@ package conexp.fx.gui.task;
  * #L%
  */
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,34 +31,40 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker.State;
-import conexp.fx.core.collections.pair.Pair;
 
 public final class BlockingExecutor {
 
-  public final LongProperty                        executionTimeMillis     = new SimpleLongProperty(0l);
-  public final ObservableList<Pair<String, Long>>  executionsTimeMillisMap =
-                                                                               FXCollections
-                                                                                   .observableList(new LinkedList<Pair<String, Long>>());
+  public void clearFinished() {
+    scheduledTasks.removeIf(t -> t.isDone());
+  }
+
+//  public final LongProperty                        executionTimeMillis     = new SimpleLongProperty(0l);
   public final DoubleBinding                       overallProgressBinding;
   public final BooleanBinding                      isIdleBinding;
+  public final ObservableList<BlockingTask>        scheduledTasks          =
+                                                                               FXCollections
+                                                                                   .observableList(Collections
+                                                                                       .synchronizedList(new LinkedList<BlockingTask>()));
   public final ConcurrentLinkedQueue<BlockingTask> taskQueue               = new ConcurrentLinkedQueue<BlockingTask>();
   public final Property<BlockingTask>              currentTaskProperty     = new SimpleObjectProperty<BlockingTask>(
                                                                                BlockingTask.NULL);
-  public final ThreadPoolExecutor                  exec                    = new ThreadPoolExecutor(
-                                                                               0,
-                                                                               1,
-                                                                               1,
+  public final ThreadPoolExecutor                  tpe                     = new ThreadPoolExecutor(
+                                                                               Runtime
+                                                                                   .getRuntime()
+                                                                                   .availableProcessors(),
+                                                                               Runtime
+                                                                                   .getRuntime()
+                                                                                   .availableProcessors(),
+                                                                               60,
                                                                                TimeUnit.SECONDS,
                                                                                new LinkedBlockingQueue<Runnable>());
   public final IntegerProperty                     doneTasksProperty       = new SimpleIntegerProperty(0);
@@ -66,7 +73,7 @@ public final class BlockingExecutor {
 
   public BlockingExecutor() {
     currentTaskProperty.getValue().run();
-    exec.prestartAllCoreThreads();
+    tpe.prestartAllCoreThreads();
     overallProgressBinding = new DoubleBinding() {
 
       {
@@ -122,15 +129,15 @@ public final class BlockingExecutor {
             case SUCCEEDED:
             case CANCELLED:
             case FAILED:
-              executionTimeMillis.set(executionTimeMillis.get() + newTask.runTimeMillis());
-              executionsTimeMillisMap.add(Pair.of(newTask.titleProperty().get(), newTask.runTimeMillis()));
+//              executionTimeMillis.set(executionTimeMillis.get() + newTask.runTimeMillis.get());
+//              executionsTimeMillisMap.add(Pair.of(newTask.titleProperty().get(), newTask.runTimeMillis()));
               doneTasksProperty.set(doneTasksProperty.get() + 1);
               BlockingExecutor.this.next();
               break;
             }
           };
         });
-        exec.submit(newTask);
+        tpe.submit(newTask);
       }
     });
   }
@@ -142,14 +149,17 @@ public final class BlockingExecutor {
       else {
         scheduledTasksProperty.set(scheduledTasksProperty.get() + 1);
         taskQueue.offer(task);
+        scheduledTasks.add(task);
       }
     }
   }
 
   private final void next() {
     synchronized (taskQueue) {
-      if (taskQueue.isEmpty())
+      if (taskQueue.isEmpty()) {
+//        currentTaskProperty.setValue(null);
         return;
+      }
       currentTaskProperty.setValue(taskQueue.poll());
       scheduledTasksProperty.set(scheduledTasksProperty.get() - 1);
     }
