@@ -12,6 +12,7 @@ Copyright ⓒ 2010-2015 Francesco Kriegel
 * Windows
 
 ## Features
+Most time-consuming algorithms use parallel threads to shorten computation time.  
 Please note, that currently not all features are available from the graphical user interface and from the command line interface.
 
 ### Formal Concept Analysis
