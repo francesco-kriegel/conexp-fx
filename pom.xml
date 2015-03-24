@@ -17,6 +17,10 @@
 			<url>http://lat.inf.tu-dresden.de/~francesco</url>
 		</developer>
 	</developers>
+	<organization>
+		<!-- workaround for the license-maven-plugin -->
+		<name>Francesco Kriegel</name>
+	</organization>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -39,16 +43,16 @@
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>myreleases</id>
-			<name>My Releases</name>
-			<url>scp://tcs.inf.tu-dresden.de:/users/lat/francesco/maven/</url>
+			<id>central</id>
+			<name>libs-release</name>
+			<url>http://artifactory.tcs.inf.tu-dresden.de/artifactory/libs-release</url>
 			<layout>default</layout>
 		</repository>
 		<snapshotRepository>
 			<uniqueVersion>true</uniqueVersion>
-			<id>mysnapshots</id>
-			<name>My Snapshots</name>
-			<url>scp://tcs.inf.tu-dresden.de:/users/lat/francesco/maven/</url>
+			<id>snapshots</id>
+			<name>libs-snapshot</name>
+			<url>http://artifactory.tcs.inf.tu-dresden.de/artifactory/libs-snapshot</url>
 			<layout>default</layout>
 		</snapshotRepository>
 	</distributionManagement>
@@ -121,7 +125,7 @@
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
-<!-- 			<version>4.0.1</version> -->
+			<!-- <version>4.0.1</version> -->
 			<version>3.5.2</version>
 		</dependency>
 		<dependency>
@@ -248,8 +252,18 @@
 								<canUpdateCopyright>true</canUpdateCopyright>
 								<canUpdateLicense>true</canUpdateLicense>
 								<roots>
-									<root>src/main/java</root>
+									<root>src/main/java/conexp</root>
+									<root>src/test/java</root>
 								</roots>
+<!-- 								<excludes> -->
+<!-- 									<exclude>src/main/java/be/humphreys/simplevoronoi/Edge.java</exclude> -->
+<!-- 									be.humphreys.simplevoronoi.Edge; -->
+<!-- 									be.humphreys.simplevoronoi.GraphEdge; -->
+<!-- 									be.humphreys.simplevoronoi.Halfedge; -->
+<!-- 									be.humphreys.simplevoronoi.Point; -->
+<!-- 									be.humphreys.simplevoronoi.Site; -->
+<!-- 									be.humphreys.simplevoronoi.Voronoi -->
+<!-- 								</excludes> -->
 							</configuration>
 						</plugin>
 						<plugin>

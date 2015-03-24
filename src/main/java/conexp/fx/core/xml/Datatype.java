@@ -2,9 +2,9 @@ package conexp.fx.core.xml;
 
 /*
  * #%L
- * Concept Explorer FX - Core
+ * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2013 TU Dresden, Chair of Automata Theory
+ * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
