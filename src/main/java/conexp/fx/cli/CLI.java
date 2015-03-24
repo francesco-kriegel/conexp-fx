@@ -36,12 +36,11 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import conexp.fx.core.algorithm.nextclosure.NextClosures6;
-import conexp.fx.core.algorithm.nextclosure.NextClosures6.Result;
+import conexp.fx.core.algorithm.nextclosures.NextClosures6;
+import conexp.fx.core.algorithm.nextclosures.NextClosures6.Result;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter2;
-import conexp.fx.test.algorithm.nextclosure.NextClosuresTest;
 
 public class CLI {
 
@@ -53,8 +52,8 @@ public class CLI {
         printHelp();
       else if (commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt()))
         computeImplications(commandLine);
-      else if (commandLine.hasOption(TEST.getLongOpt()))
-        test(commandLine);
+//      else if (commandLine.hasOption(TEST.getLongOpt()))
+//        test(commandLine);
       else
         runCLI(commandLine);
     } catch (ParseException e) {
@@ -62,10 +61,10 @@ public class CLI {
     }
   }
 
-  private static final void test(final CommandLine commandLine) {
-    final String path = commandLine.getOptionValue(CLI.TEST.getLongOpt());
-    NextClosuresTest.run(path);
-  }
+//  private static final void test(final CommandLine commandLine) {
+//    final String path = commandLine.getOptionValue(CLI.TEST.getLongOpt());
+//    NextClosuresTest.run(path);
+//  }
 
   private static final void computeImplications(final CommandLine commandLine) {
     if (!commandLine.hasOption(IMPORT_CXT.getLongOpt()))
@@ -221,13 +220,13 @@ public class CLI {
                                                            .withDescription(
                                                                "exports labeled and layouted concept lattice to SVG document (*.svg)")
                                                            .create("out");
-  @SuppressWarnings("static-access")
-  protected static final Option  TEST              = OptionBuilder
-                                                       .isRequired(false)
-                                                       .hasArg(true)
-                                                       .withArgName("path")
-                                                       .withLongOpt("runTestSuite")
-                                                       .create("test");
+//  @SuppressWarnings("static-access")
+//  protected static final Option  TEST              = OptionBuilder
+//                                                       .isRequired(false)
+//                                                       .hasArg(true)
+//                                                       .withArgName("path")
+//                                                       .withLongOpt("runTestSuite")
+//                                                       .create("test");
 
   static {
     OPTIONS.addOption(HELP);
@@ -239,6 +238,6 @@ public class CLI {
 //    OPTIONS.addOption(CALC_ASSOCIATIONS);
     OPTIONS.addOption(PRINT_TO_CONSOLE);
     OPTIONS.addOption(EXPORT);
-    OPTIONS.addOption(TEST);
+//    OPTIONS.addOption(TEST);
   }
 }

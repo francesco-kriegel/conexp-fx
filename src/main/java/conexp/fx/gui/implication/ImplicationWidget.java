@@ -16,7 +16,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import conexp.fx.core.context.Implication;
+import conexp.fx.core.implication.Implication;
 import conexp.fx.gui.FCAInstance;
 
 public class ImplicationWidget<G, M> extends BorderPane {

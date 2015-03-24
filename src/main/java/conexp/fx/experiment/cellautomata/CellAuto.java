@@ -7,8 +7,8 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.algorithm.nextclosure.NextClosuresMN;
-import conexp.fx.core.algorithm.nextclosure.NextClosuresMN2;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresMN;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresMN2;
 import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.context.temporal.LTL;

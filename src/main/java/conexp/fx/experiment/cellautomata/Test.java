@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import conexp.fx.core.algorithm.nextclosure.NextClosures6C;
-import conexp.fx.core.algorithm.nextclosure.NextClosures6C.ClosureOperator;
-import conexp.fx.core.algorithm.nextclosure.NextClosuresMN2;
+import conexp.fx.core.algorithm.nextclosures.NextClosures6C;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresMN2;
+import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.context.negation.Literal;
 import conexp.fx.core.context.negation.NegationScaling;
@@ -75,7 +75,7 @@ public class Test {
       }
 
     };
-    final NextClosures6C.Result<String, Literal<String>> result = NextClosures6C.compute(cxt2, clop);
+    final NextClosures6C.Result<String, Literal<String>> result = NextClosures6C.compute(cxt2, clop, true);
     for (Entry<Set<Literal<String>>, Set<Literal<String>>> e : result.implications.entrySet()) {
 //    System.out.println(e.getKey() + " ==> " + e.getValue());
       final Set<Literal<String>> intent = cxt2.intent(e.getKey());

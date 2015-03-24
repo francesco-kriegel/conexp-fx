@@ -35,8 +35,8 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 
 import conexp.fx.core.builder.Requests;
-import conexp.fx.core.context.ImplicationSet;
 import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.implication.ImplicationSet;
 import conexp.fx.gui.task.BlockingTask;
 import de.tudresden.inf.tcs.fcalib.Implication;
 

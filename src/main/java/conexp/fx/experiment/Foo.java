@@ -2,7 +2,7 @@ package conexp.fx.experiment;
 
 import java.io.File;
 
-import conexp.fx.core.algorithm.nextclosure.NextClosures6;
+import conexp.fx.core.algorithm.nextclosures.NextClosures6;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter2;
 

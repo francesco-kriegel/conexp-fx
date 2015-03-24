@@ -3,8 +3,8 @@ package conexp.fx.core.algorithm.exploration;
 import java.util.HashSet;
 import java.util.Set;
 
-import conexp.fx.core.context.ImplicationSet;
 import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.implication.ImplicationSet;
 import de.tudresden.inf.tcs.fcalib.Implication;
 
 public class AttributeExploration<G, M> {

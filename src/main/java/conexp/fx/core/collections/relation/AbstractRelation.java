@@ -20,7 +20,6 @@ package conexp.fx.core.collections.relation;
  * #L%
  */
 
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -41,16 +40,14 @@ import conexp.fx.core.collections.setlist.AbstractSetList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.collections.setlist.SetLists;
 
-public abstract class AbstractRelation<R, C> implements Relation<R, C>
-{
+public abstract class AbstractRelation<R, C> implements Relation<R, C> {
 
   protected final boolean homogen;
   protected SetList<R>    rowHeads;
   protected SetList<C>    colHeads;
 
   @SuppressWarnings("unchecked")
-  protected AbstractRelation(final SetList<R> rowHeads, final SetList<C> colHeads, final boolean homogen)
-  {
+  protected AbstractRelation(final SetList<R> rowHeads, final SetList<C> colHeads, final boolean homogen) {
     this(homogen);
     if (homogen) {
       if (!rowHeads.equals(colHeads))
@@ -63,59 +60,48 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     }
   }
 
-  protected AbstractRelation(final boolean homogen)
-  {
+  protected AbstractRelation(final boolean homogen) {
     super();
     this.homogen = homogen;
   }
 
-  public SetList<R> rowHeads()
-  {
+  public SetList<R> rowHeads() {
     return rowHeads;
   }
 
-  public SetList<C> colHeads()
-  {
+  public SetList<C> colHeads() {
     return colHeads;
   }
 
   public abstract boolean contains(Object o1, Object o2);
 
-  public boolean containsAll(final Relation<?, ?> r)
-  {
+  public boolean containsAll(final Relation<?, ?> r) {
     for (Pair<?, ?> p : r)
       if (!contains(p.x(), p.y()))
         return false;
     return true;
   }
 
-  public Set<C> row(final Object o)
-  {
+  public Set<C> row(final Object o) {
     return rowAnd(o);
   }
 
-  public Set<R> col(final Object o)
-  {
+  public Set<R> col(final Object o) {
     return colAnd(o);
   }
 
-  public final Set<C> rowAnd(final Object... rows)
-  {
+  public final Set<C> rowAnd(final Object... rows) {
     return rowAnd(Arrays.asList(rows));
   }
 
-  public final Set<R> colAnd(final Object... cols)
-  {
+  public final Set<R> colAnd(final Object... cols) {
     return colAnd(Arrays.asList(cols));
   }
 
-  public Set<C> rowAnd(final Collection<?> rows)
-  {
-    return Sets.filter(colHeads(), new Predicate<C>()
-    {
+  public Set<C> rowAnd(final Collection<?> rows) {
+    return Sets.filter(colHeads(), new Predicate<C>() {
 
-      public final boolean apply(C col)
-      {
+      public final boolean apply(C col) {
         for (Object row : rows)
           if (!AbstractRelation.this.contains(row, col))
             return false;
@@ -124,13 +110,10 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     });
   }
 
-  public Set<R> colAnd(final Collection<?> cols)
-  {
-    return Sets.filter(rowHeads(), new Predicate<R>()
-    {
+  public Set<R> colAnd(final Collection<?> cols) {
+    return Sets.filter(rowHeads(), new Predicate<R>() {
 
-      public final boolean apply(final R row)
-      {
+      public final boolean apply(final R row) {
         for (Object col : cols)
           if (!AbstractRelation.this.contains(row, col))
             return false;
@@ -139,16 +122,13 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     });
   }
 
-  public Relation<R, C> subRelation(final Collection<?> rows, final Collection<?> cols)
-  {
+  public Relation<R, C> subRelation(final Collection<?> rows, final Collection<?> cols) {
     return new AbstractRelation<R, C>(
         SetLists.intersection(rowHeads, rows),
         SetLists.intersection(colHeads, cols),
-        false)
-    {
+        false) {
 
-      public final boolean contains(final Object o1, final Object o2)
-      {
+      public final boolean contains(final Object o1, final Object o2) {
         return rowHeads().contains(o1) && colHeads().contains(o2) && AbstractRelation.this.contains(o1, o2);
       }
     };
@@ -157,53 +137,43 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
   public Relation<R, C> filter(
       final Predicate<? super R> rowPredicate,
       final Predicate<? super C> colPredicate,
-      final Predicate<Pair<R, C>> relationPredicate)
-  {
-    return new AbstractRelation<R, C>(rowHeads.filter(rowPredicate), colHeads.filter(colPredicate), false)
-    {
+      final Predicate<Pair<R, C>> relationPredicate) {
+    return new AbstractRelation<R, C>(rowHeads.filter(rowPredicate), colHeads.filter(colPredicate), false) {
 
       @SuppressWarnings("unchecked")
-      public final boolean contains(final Object o1, final Object o2)
-      {
+      public final boolean contains(final Object o1, final Object o2) {
         return rowHeads().contains(o1) && colHeads().contains(o2) && AbstractRelation.this.contains(o1, o2)
             && relationPredicate.apply(new Pair<R, C>((R) o1, (C) o2));
       }
     };
   }
 
-  public boolean equals(final Object o)
-  {
+  public boolean equals(final Object o) {
     return this == o
         || (o instanceof Relation && size() == ((Relation<?, ?>) o).size() && containsAll((Relation<?, ?>) o));
   }
 
-  public final boolean smallerEq(final Relation<R, C> r)
-  {
+  public final boolean smallerEq(final Relation<R, C> r) {
     return r.containsAll(this);
   }
 
-  public final boolean smaller(final Relation<R, C> r)
-  {
+  public final boolean smaller(final Relation<R, C> r) {
     return size() < r.size() && smallerEq(r);
   }
 
-  public final boolean greaterEq(final Relation<R, C> r)
-  {
+  public final boolean greaterEq(final Relation<R, C> r) {
     return r.smallerEq(this);
   }
 
-  public final boolean greater(final Relation<R, C> r)
-  {
+  public final boolean greater(final Relation<R, C> r) {
     return r.smaller(this);
   }
 
-  public final boolean uncomparable(final Relation<R, C> r)
-  {
+  public final boolean uncomparable(final Relation<R, C> r) {
     return !smallerEq(r) && !greaterEq(r);
   }
 
-  public final int compareTo(final Relation<R, C> r)
-  {
+  public final int compareTo(final Relation<R, C> r) {
     if (equals(r))
       return 0;
     if (smallerEq(r))
@@ -213,22 +183,18 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     return Integer.MAX_VALUE;
   }
 
-  public Iterator<Pair<R, C>> iterator()
-  {
+  public Iterator<Pair<R, C>> iterator() {
     return Iterators.filter(
         ListIterators.<R, C> cartesianProduct(rowHeads().listIterator(), colHeads().listIterator(), 0),
-        new Predicate<Pair<R, C>>()
-        {
+        new Predicate<Pair<R, C>>() {
 
-          public final boolean apply(final Pair<R, C> p)
-          {
+          public final boolean apply(final Pair<R, C> p) {
             return contains(p.x(), p.y());
           }
         });
   }
 
-  public int size()
-  {
+  public int size() {
     int size = 0;
     for (R row : rowHeads())
       for (C col : colHeads())
@@ -237,8 +203,7 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     return size;
   }
 
-  public boolean isFull()
-  {
+  public boolean isFull() {
     for (R row : rowHeads())
       for (C col : colHeads())
         if (!contains(row, col))
@@ -246,8 +211,7 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     return true;
   }
 
-  public boolean isEmpty()
-  {
+  public boolean isEmpty() {
     for (R row : rowHeads())
       for (C col : colHeads())
         if (contains(row, col))
@@ -255,15 +219,13 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     return true;
   }
 
-  public MatrixRelation<R, C> clone()
-  {
+  public MatrixRelation<R, C> clone() {
     final MatrixRelation<R, C> clone = new MatrixRelation<R, C>(rowHeads(), colHeads(), homogen);
     clone.addAllFast(this);
     return clone;
   }
 
-  public boolean[][] toArray()
-  {
+  public boolean[][] toArray() {
     final boolean[][] a = new boolean[rowHeads().size()][colHeads().size()];
     for (int i = 0; i < rowHeads().size(); i++)
       for (int j = 0; j < colHeads().size(); j++)
@@ -273,10 +235,11 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
 
   private static final int colspan = 5;
 
-  public String toString()
-  {
+  public String toString() {
     final StringBuilder s = new StringBuilder();
     s.append(getClass().getName() + "@" + hashCode() + "\r\n");
+    s.append(rowHeads().size() + " domain elements.\r\n");
+    s.append(colHeads().size() + " codomain elements.\r\n");
     String spaces = "";
     while (spaces.length() < colspan)
       spaces += " ";
@@ -306,91 +269,73 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
     return s.toString();
   }
 
-  public void empty()
-  {
+  public void empty() {
     throw new UnsupportedOperationException();
   }
 
-  public void fill()
-  {
+  public void fill() {
     throw new UnsupportedOperationException();
   }
 
-  public void dispose()
-  {
+  public void dispose() {
     throw new UnsupportedOperationException();
   }
 
-  public boolean add(final R row, final C col)
-  {
+  public boolean add(final R row, final C col) {
     throw new UnsupportedOperationException();
   }
 
-  public boolean addFast(final Object o1, final Object o2)
-  {
+  public boolean addFast(final Object o1, final Object o2) {
     throw new UnsupportedOperationException();
   }
 
-  public boolean addAll(final Relation<? extends R, ? extends C> r)
-  {
+  public boolean addAll(final Relation<? extends R, ? extends C> r) {
     throw new UnsupportedOperationException();
   }
 
-  public boolean addAllFast(final Relation<?, ?> r)
-  {
+  public boolean addAllFast(final Relation<?, ?> r) {
     throw new UnsupportedOperationException();
   }
 
-  public boolean remove(final Object o1, final Object o2)
-  {
+  public boolean remove(final Object o1, final Object o2) {
     throw new UnsupportedOperationException();
   }
 
-  public boolean removeAll(final Relation<?, ?> r)
-  {
+  public boolean removeAll(final Relation<?, ?> r) {
     throw new UnsupportedOperationException();
   }
 
-  public boolean retainAll(final Relation<?, ?> r)
-  {
+  public boolean retainAll(final Relation<?, ?> r) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public boolean isHomogen()
-  {
+  public boolean isHomogen() {
     return homogen;
   }
 
-  protected final void checkHomogen() throws NoHomogenRelationException
-  {
+  protected final void checkHomogen() throws NoHomogenRelationException {
     if (!isHomogen())
       throw new NoHomogenRelationException();
   }
 
-  public MatrixRelation<R, R> neighborhood()
-  {
+  public MatrixRelation<R, R> neighborhood() {
     checkHomogen();
     return clone().neighborhood();
   }
 
-  public MatrixRelation<R, R> order()
-  {
+  public MatrixRelation<R, R> order() {
     checkHomogen();
     return clone().order();
   }
 
-  public SetList<Set<R>> equivalenceClasses()
-  {
+  public SetList<Set<R>> equivalenceClasses() {
     checkHomogen();
-    return new AbstractSetList<Set<R>>()
-    {
+    return new AbstractSetList<Set<R>>() {
 
       @Override
-      public final ListIterator<Set<R>> listIterator(final int i)
-      {
-        return new SimpleListIterator<Set<R>>(true)
-        {
+      public final ListIterator<Set<R>> listIterator(final int i) {
+        return new SimpleListIterator<Set<R>>(true) {
 
           private final HashSet<R> available = new HashSet<R>(rowHeads());
           {
@@ -398,8 +343,7 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
           }
 
           @Override
-          protected final Set<R> createNext()
-          {
+          protected final Set<R> createNext() {
             try {
               final R head = Collections3.firstElement(available);
               final Set<R> eq = new HashSet<R>(col(head));
@@ -411,8 +355,7 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C>
           }
 
           @Override
-          protected final Set<R> createPrevious()
-          {
+          protected final Set<R> createPrevious() {
             // TODO Auto-generated method stub
             return null;
           }

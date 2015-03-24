@@ -9,9 +9,9 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.algorithm.nextclosure.NextClosures6C;
-import conexp.fx.core.algorithm.nextclosure.NextClosures6C.ClosureOperator;
-import conexp.fx.core.algorithm.nextclosure.NextClosuresMN2;
+import conexp.fx.core.algorithm.nextclosures.NextClosures6C;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresMN2;
+import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter2;
 

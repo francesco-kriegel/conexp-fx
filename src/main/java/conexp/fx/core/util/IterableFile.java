@@ -30,6 +30,10 @@ import com.google.common.collect.Iterators;
 
 public class IterableFile implements Iterable<String> {
 
+  public static final Iterator<String> iterator(final File file) {
+    return new IterableFile(file).iterator();
+  }
+
   private final File file;
 
   public IterableFile(File file) {

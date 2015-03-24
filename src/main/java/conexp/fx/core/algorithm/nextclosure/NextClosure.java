@@ -9,8 +9,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 
+import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.collections.setlist.SetList;
-import de.tudresden.inf.tcs.fcaapi.ClosureOperator;
 
 public class NextClosure<T> implements Iterable<Set<T>> {
 
