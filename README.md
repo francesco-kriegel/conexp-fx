@@ -1,4 +1,4 @@
-# Concept Explorer FX (conexp-fx)
+# Concept Explorer FX (conexp-fx) https://travis-ci.org/francesco-kriegel/conexp-fx.svg
 Copyright ⓒ 2010-2015 Francesco Kriegel
 
 ## Requirements
