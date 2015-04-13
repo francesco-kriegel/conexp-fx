@@ -6,20 +6,9 @@ package conexp.fx.core.builder;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
-
 
 import java.io.File;
 import java.util.Arrays;
@@ -35,32 +24,36 @@ import conexp.fx.core.collections.setlist.SetLists;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CEXImporter;
 import conexp.fx.core.importer.CFXImporter;
-import conexp.fx.core.importer.CXTImporter;
 import conexp.fx.core.importer.CXTImporter2;
 import conexp.fx.core.importer.SPARQLImporter;
 import conexp.fx.core.math.BooleanMatrices;
 
-public final class Requests
-{
-  public static enum Metatype
-  {
+public final class Requests {
+
+  public static enum Metatype {
     NEW("New Context", ""),
     IMPORT("Import Context", ""),
     SCALE("Scale Context", ""),
-    CONSTRUCT("Construction Context", "");
+    CONSTRUCT("Construction Context", ""),
+    DL_CONTEXT("DL Context", "");
+
 //    OTHER("Other Context", "");
     public final String title;
     public final String description;
 
-    private Metatype(final String title, final String description)
-    {
+    private Metatype(final String title, final String description) {
       this.title = title;
       this.description = description;
     }
   }
 
-  public static enum Type
-  {
+  public static enum Type {
+    INDUCED_CONTEXT(
+        "Induced Context",
+        "An induced context from a DL interpretation.",
+        Metatype.DL_CONTEXT,
+        false,
+        Source.NULL),
     NEW_CONTEXT(
         "New Context",
         "Creates a new empty Formal Context of desired size.",
@@ -128,6 +121,7 @@ public final class Requests
     BI_PRODUCT("Bi-Product Context", "", Metatype.CONSTRUCT, false, Source.CONTEXT_CONTEXT),
     SEMI_PRODUCT("Semi-Product Context", "", Metatype.CONSTRUCT, false, Source.CONTEXT_CONTEXT),
     SUBSTITUTION_SUM("Substitution Sum Context", "", Metatype.CONSTRUCT, false, Source.CONTEXT_CONTEXT_OBJECT_OBJECT);
+
 //    APPROXIMATION_CONTEXT_BY_ATTRIBUTES(
 //        "Dau's Approximation Context by Attributes",
 //        "",
@@ -147,8 +141,7 @@ public final class Requests
         final String description,
         final Metatype type,
         final boolean homogen,
-        final Source... sources)
-    {
+        final Source... sources) {
       this.title = title;
       this.description = description;
       this.type = type;
@@ -157,8 +150,7 @@ public final class Requests
     }
   }
 
-  public static enum Source
-  {
+  public static enum Source {
     NULL("No source needed"),
     INT_INT("Custom Size"),
     INT("Custom Size"),
@@ -177,349 +169,344 @@ public final class Requests
     SPARQL_AND_ONTOLOGYFILE("SPARQL Import from Ontology File"),
     SPARQL_AND_ONTOLOGYURL("SPARQL Import from Ontology URL"),
     SPARQL_AND_ONTOLOGYREPOSITORY("SPARQL Import from Sesame Repository");
+
     public final String title;
 
-    private Source(final String title)
-    {
+    private Source(final String title) {
       this.title = title;
     }
   }
 
-  public final static class New
-  {
-    public static final class NewContext
-      extends StringRequest
-    {
+  public final static class New {
+
+    public static final class NewContext extends StringRequest {
+
       private final int objects;
       private final int attributes;
 
-      public NewContext(final int objects, final int attributes)
-      {
+      public NewContext(final int objects, final int attributes) {
         super(Type.NEW_CONTEXT, Source.INT_INT);
         this.objects = objects;
         this.attributes = attributes;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         for (int row = 0; row < objects; row++)
-          context.rowHeads().add("Object " + row);
+          context.rowHeads().add(
+              "Object " + row);
         for (int column = 0; column < attributes; column++)
-          context.colHeads().add("Attribute " + column);
+          context.colHeads().add(
+              "Attribute " + column);
         context.pushAllChangedEvent();
       }
     }
 
-    public static final class NewOrder
-      extends StringRequest
-    {
+    public static final class NewOrder extends StringRequest {
+
       private final int elements;
 
-      public NewOrder(final int elements)
-      {
+      public NewOrder(final int elements) {
         super(Type.NEW_ORDER, Source.INT);
         this.elements = elements;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         for (int row = 0; row < elements; row++)
-          context.rowHeads().add("Element " + row);
+          context.rowHeads().add(
+              "Element " + row);
         context.pushAllChangedEvent();
       }
     }
   }
 
-  public static final class Import
-  {
-    public static final class ImportCFX
-      extends FileRequest
-    {
-      public ImportCFX(final File file)
-      {
+  public static final class Import {
+
+    public static final class ImportCFX extends FileRequest {
+
+      public ImportCFX(final File file) {
         super(Type.IMPORT_CFX_CONTEXT, file);
       }
 
-      public final void setContent()
-      {
-        CFXImporter.importt(context, null, file);
+      public final void setContent() {
+        CFXImporter.importt(
+            context,
+            null,
+            file);
       }
     }
 
-    public static final class ImportCXT
-      extends FileRequest
-    {
-      public ImportCXT(final File file)
-      {
+    public static final class ImportCXT extends FileRequest {
+
+      public ImportCXT(final File file) {
         super(Type.IMPORT_CXT_CONTEXT, file);
       }
 
-      public final void setContent()
-      {
-        CXTImporter2.read(context, file);
+      public final void setContent() {
+        CXTImporter2.read(
+            context,
+            file);
 //        CXTImporter.importt(context, file);
       }
     }
 
-    public static final class ImportCEX
-      extends StringRequest
-    {
+    public static final class ImportCEX extends StringRequest {
+
       private final File file;
 
-      public ImportCEX(final File file)
-      {
+      public ImportCEX(final File file) {
         super(Type.IMPORT_CEX_CONTEXT, Source.FILE);
         this.file = file;
       }
 
-      public final void setContent()
-      {
-        CEXImporter.importt(context, null, file);
+      public final void setContent() {
+        CEXImporter.importt(
+            context,
+            null,
+            file);
       }
     }
 
-    public static final class ImportSPARQLFromEndpoint
-      extends StringRequest
-    {
+    public static final class ImportSPARQLFromEndpoint extends StringRequest {
+
       private final String url;
       private final String query;
 
-      public ImportSPARQLFromEndpoint(final String url, final String query)
-      {
+      public ImportSPARQLFromEndpoint(final String url, final String query) {
         super(Type.IMPORT_SPARQL_CONTEXT, Source.SPARQL_AND_XMLURL);
         this.url = url;
         this.query = query;
       }
 
-      public final void setContent()
-      {
-        SPARQLImporter.importXML(context, url, query);
+      public final void setContent() {
+        SPARQLImporter.importXML(
+            context,
+            url,
+            query);
       }
     }
 
-    public static final class ImportSPARQLFromURL
-      extends StringRequest
-    {
+    public static final class ImportSPARQLFromURL extends StringRequest {
+
       private final String url;
       private final String query;
 
-      public ImportSPARQLFromURL(final String url, final String query)
-      {
+      public ImportSPARQLFromURL(final String url, final String query) {
         super(Type.IMPORT_SPARQL_CONTEXT, Source.SPARQL_AND_ONTOLOGYURL);
         this.url = url;
         this.query = query;
       }
 
-      public final void setContent()
-      {
-        SPARQLImporter.importURL(context, url, query);
+      public final void setContent() {
+        SPARQLImporter.importURL(
+            context,
+            url,
+            query);
       }
     }
 
-    public static final class ImportSPARQLFromFile
-      extends StringRequest
-    {
+    public static final class ImportSPARQLFromFile extends StringRequest {
+
       private final File   file;
       private final String query;
 
-      public ImportSPARQLFromFile(final File file, final String query)
-      {
+      public ImportSPARQLFromFile(final File file, final String query) {
         super(Type.IMPORT_SPARQL_CONTEXT, Source.SPARQL_AND_ONTOLOGYFILE);
         this.file = file;
         this.query = query;
       }
 
-      public final void setContent()
-      {
-        SPARQLImporter.importFile(context, file, query);
+      public final void setContent() {
+        SPARQLImporter.importFile(
+            context,
+            file,
+            query);
       }
     }
 
-    public static final class ImportSPARQLFromRepository
-      extends StringRequest
-    {
+    public static final class ImportSPARQLFromRepository extends StringRequest {
+
       private final Repository repo;
       private final String     query;
 
-      public ImportSPARQLFromRepository(final Repository repo, final String query)
-      {
+      public ImportSPARQLFromRepository(final Repository repo, final String query) {
         super(Type.IMPORT_SPARQL_CONTEXT, Source.SPARQL_AND_ONTOLOGYREPOSITORY);
         this.repo = repo;
         this.query = query;
       }
 
-      public final void setContent()
-      {
-        SPARQLImporter.importRepository(context, repo, query);
+      public final void setContent() {
+        SPARQLImporter.importRepository(
+            context,
+            repo,
+            query);
       }
     }
   }
 
-  public final static class Scale
-  {
-    public static final class DichtomicScale
-      extends Request<Boolean, Boolean>
-    {
-      public DichtomicScale()
-      {
+  public final static class Scale {
+
+    public static final class DichtomicScale extends Request<Boolean, Boolean> {
+
+      public DichtomicScale() {
         super(Type.DICHTOMIC, Source.NULL);
       }
 
-      public final void setContent()
-      {
-        context.setContent(SetLists.create(true, false), null, BooleanMatrices.identity(2));
+      public final void setContent() {
+        context.setContent(
+            SetLists.create(
+                true,
+                false),
+            null,
+            BooleanMatrices.identity(2));
       }
     }
 
-    public static final class BooleanScaleFromInt
-      extends Request<SetList<Integer>, SetList<Integer>>
-    {
+    public static final class BooleanScaleFromInt extends Request<SetList<Integer>, SetList<Integer>> {
+
       private final int n;
 
-      public BooleanScaleFromInt(final int n)
-      {
+      public BooleanScaleFromInt(final int n) {
         super(Type.BOOLEAN, Source.INT_LIST);
         this.n = n;
       }
 
-      public final void setContent()
-      {
-        context.setContent(SetLists.powerSet(SetLists.integers(n)), null, BooleanMatrices.booleann(n));
+      public final void setContent() {
+        context.setContent(
+            SetLists.powerSet(SetLists.integers(n)),
+            null,
+            BooleanMatrices.booleann(n));
       }
     }
 
-    public static final class BooleanScaleFromSetList<E>
-      extends Request<SetList<E>, SetList<E>>
-    {
+    public static final class BooleanScaleFromSetList<E> extends Request<SetList<E>, SetList<E>> {
+
       private final SetList<E> s;
 
-      public BooleanScaleFromSetList(final SetList<E> s)
-      {
+      public BooleanScaleFromSetList(final SetList<E> s) {
         super(Type.BOOLEAN, Source.STRINGS);
         this.s = s;
       }
 
-      public final void setContent()
-      {
-        context.setContent(SetLists.powerSet(s), null, BooleanMatrices.booleann(s.size()));
+      public final void setContent() {
+        context.setContent(
+            SetLists.powerSet(s),
+            null,
+            BooleanMatrices.booleann(s.size()));
       }
     }
 
-    public static final class NominalScaleFromInt
-      extends Request<Integer, Integer>
-    {
+    public static final class NominalScaleFromInt extends Request<Integer, Integer> {
+
       private final int n;
 
-      public NominalScaleFromInt(final int n)
-      {
+      public NominalScaleFromInt(final int n) {
         super(Type.NOMINAL, Source.INT_LIST);
         this.n = n;
       }
 
-      public final void setContent()
-      {
-        context.setContent(SetLists.integers(n), null, BooleanMatrices.identity(n));
+      public final void setContent() {
+        context.setContent(
+            SetLists.integers(n),
+            null,
+            BooleanMatrices.identity(n));
       }
     }
 
-    public static final class NominalScaleFromSetList<E>
-      extends Request<E, E>
-    {
+    public static final class NominalScaleFromSetList<E> extends Request<E, E> {
+
       private final SetList<E> s;
 
-      public NominalScaleFromSetList(final SetList<E> s)
-      {
+      public NominalScaleFromSetList(final SetList<E> s) {
         super(Type.NOMINAL, Source.STRINGS);
         this.s = s;
       }
 
-      public final void setContent()
-      {
-        context.setContent(s, null, BooleanMatrices.identity(s.size()));
+      public final void setContent() {
+        context.setContent(
+            s,
+            null,
+            BooleanMatrices.identity(s.size()));
       }
     }
 
-    public static final class ContraNominalScaleFromInt
-      extends Request<Integer, Integer>
-    {
+    public static final class ContraNominalScaleFromInt extends Request<Integer, Integer> {
+
       private final int n;
 
-      public ContraNominalScaleFromInt(final int n)
-      {
+      public ContraNominalScaleFromInt(final int n) {
         super(Type.CONTRA_NOMINAL, Source.INT_LIST);
         this.n = n;
       }
 
-      public final void setContent()
-      {
-        context.setContent(SetLists.integers(n), null, BooleanMatrices.negativeIdentity(n));
+      public final void setContent() {
+        context.setContent(
+            SetLists.integers(n),
+            null,
+            BooleanMatrices.negativeIdentity(n));
       }
     }
 
-    public static final class ContraNominalScaleFromSetList<E>
-      extends Request<E, E>
-    {
+    public static final class ContraNominalScaleFromSetList<E> extends Request<E, E> {
+
       private final SetList<E> s;
 
-      public ContraNominalScaleFromSetList(final SetList<E> s)
-      {
+      public ContraNominalScaleFromSetList(final SetList<E> s) {
         super(Type.CONTRA_NOMINAL, Source.STRINGS);
         this.s = s;
       }
 
-      public final void setContent()
-      {
-        context.setContent(s, null, BooleanMatrices.negativeIdentity(s.size()));
+      public final void setContent() {
+        context.setContent(
+            s,
+            null,
+            BooleanMatrices.negativeIdentity(s.size()));
       }
     }
 
-    public static final class OrdinalScaleFromInt
-      extends Request<Integer, Integer>
-    {
+    public static final class OrdinalScaleFromInt extends Request<Integer, Integer> {
+
       private final int n;
 
-      public OrdinalScaleFromInt(final int n)
-      {
+      public OrdinalScaleFromInt(final int n) {
         super(Type.ORDINAL, Source.INT_LIST);
         this.n = n;
       }
 
-      public final void setContent()
-      {
-        context.setContent(SetLists.integers(n), null, BooleanMatrices.upperDiagonal(n));
+      public final void setContent() {
+        context.setContent(
+            SetLists.integers(n),
+            null,
+            BooleanMatrices.upperDiagonal(n));
       }
     }
 
-    public static final class OrdinalScaleFromSetList<E>
-      extends Request<E, E>
-    {
+    public static final class OrdinalScaleFromSetList<E> extends Request<E, E> {
+
       private final SetList<E> s;
 
-      public OrdinalScaleFromSetList(final SetList<E> s)
-      {
+      public OrdinalScaleFromSetList(final SetList<E> s) {
         super(Type.ORDINAL, Source.STRINGS);
         this.s = s;
       }
 
-      public final void setContent()
-      {
-        context.setContent(s, null, BooleanMatrices.upperDiagonal(s.size()));
+      public final void setContent() {
+        context.setContent(
+            s,
+            null,
+            BooleanMatrices.upperDiagonal(s.size()));
       }
     }
 
-    public static final class ContraOrdinalScaleFromInt
-      extends Request<Integer, Integer>
-    {
+    public static final class ContraOrdinalScaleFromInt extends Request<Integer, Integer> {
+
       private final int n;
 
-      public ContraOrdinalScaleFromInt(final int n)
-      {
+      public ContraOrdinalScaleFromInt(final int n) {
         super(Type.CONTRA_ORDINAL, Source.INT_LIST);
         this.n = n;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             SetLists.integers(n),
             null,
@@ -527,19 +514,16 @@ public final class Requests
       }
     }
 
-    public static final class ContraOrdinalScaleFromSetList<E>
-      extends Request<E, E>
-    {
+    public static final class ContraOrdinalScaleFromSetList<E> extends Request<E, E> {
+
       private final SetList<E> s;
 
-      public ContraOrdinalScaleFromSetList(final SetList<E> s)
-      {
+      public ContraOrdinalScaleFromSetList(final SetList<E> s) {
         super(Type.CONTRA_ORDINAL, Source.STRINGS);
         this.s = s;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             s,
             null,
@@ -547,298 +531,305 @@ public final class Requests
       }
     }
 
-    public static final class ContraOrdinalScaleFromOrder<E>
-      extends Request<E, E>
-    {
+    public static final class ContraOrdinalScaleFromOrder<E> extends Request<E, E> {
+
       private final MatrixContext<E, E> c;
 
-      public ContraOrdinalScaleFromOrder(final MatrixContext<E, E> c)
-      {
+      public ContraOrdinalScaleFromOrder(final MatrixContext<E, E> c) {
         super(Type.CONTRA_ORDINAL, Source.ORDER);
         this.c = c;
       }
 
-      public final void setContent()
-      {
-        context.setContent(c.rowHeads(), null, BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
+      public final void setContent() {
+        context.setContent(
+            c.rowHeads(),
+            null,
+            BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
       }
     }
 
-    public static final class InterOrdinalScaleFromInt
-      extends Request<Integer, Pair<Integer, Integer>>
-    {
+    public static final class InterOrdinalScaleFromInt extends Request<Integer, Pair<Integer, Integer>> {
+
       private final int n;
 
-      public InterOrdinalScaleFromInt(final int n)
-      {
+      public InterOrdinalScaleFromInt(final int n) {
         super(Type.INTER_ORDINAL, Source.INT_LIST);
         this.n = n;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             SetLists.integers(n),
-            SetLists.disjointUnion(SetLists.integers(n), SetLists.integers(n)),
+            SetLists.disjointUnion(
+                SetLists.integers(n),
+                SetLists.integers(n)),
             BooleanMatrices.apposition(
                 BooleanMatrices.upperDiagonal(n),
                 BooleanMatrices.dual(BooleanMatrices.upperDiagonal(n))));
       }
     }
 
-    public static final class InterOrdinalScaleFromSetList<E>
-      extends Request<E, Pair<E, E>>
-    {
+    public static final class InterOrdinalScaleFromSetList<E> extends Request<E, Pair<E, E>> {
+
       private final SetList<E> s;
 
-      public InterOrdinalScaleFromSetList(final SetList<E> s)
-      {
+      public InterOrdinalScaleFromSetList(final SetList<E> s) {
         super(Type.INTER_ORDINAL, Source.STRINGS);
         this.s = s;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             s,
-            SetLists.disjointUnion(s, s),
+            SetLists.disjointUnion(
+                s,
+                s),
             BooleanMatrices.apposition(
                 BooleanMatrices.upperDiagonal(s.size()),
                 BooleanMatrices.dual(BooleanMatrices.upperDiagonal(s.size()))));
       }
     }
 
-    public static final class InterOrdinalScaleFromOrder<E>
-      extends Request<E, Pair<E, E>>
-    {
+    public static final class InterOrdinalScaleFromOrder<E> extends Request<E, Pair<E, E>> {
+
       private final MatrixContext<E, E> c;
 
-      public InterOrdinalScaleFromOrder(final MatrixContext<E, E> c)
-      {
+      public InterOrdinalScaleFromOrder(final MatrixContext<E, E> c) {
         super(Type.INTER_ORDINAL, Source.ORDER);
         this.c = c;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             c.rowHeads(),
-            SetLists.disjointUnion(c.colHeads(), c.colHeads()),
-            BooleanMatrices.apposition(c.matrix(), BooleanMatrices.dual(c.matrix())));
+            SetLists.disjointUnion(
+                c.colHeads(),
+                c.colHeads()),
+            BooleanMatrices.apposition(
+                c.matrix(),
+                BooleanMatrices.dual(c.matrix())));
       }
     }
 
-    public static final class ConvexOrdinalScaleFromInt
-      extends Request<Integer, Pair<Integer, Integer>>
-    {
+    public static final class ConvexOrdinalScaleFromInt extends Request<Integer, Pair<Integer, Integer>> {
+
       private final int n;
 
-      public ConvexOrdinalScaleFromInt(final int n)
-      {
+      public ConvexOrdinalScaleFromInt(final int n) {
         super(Type.CONVEX_ORDINAL, Source.INT_LIST);
         this.n = n;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             SetLists.integers(n),
-            SetLists.disjointUnion(SetLists.integers(n), SetLists.integers(n)),
+            SetLists.disjointUnion(
+                SetLists.integers(n),
+                SetLists.integers(n)),
             BooleanMatrices.apposition(
                 BooleanMatrices.complement(BooleanMatrices.dual(BooleanMatrices.upperDiagonal(n))),
                 BooleanMatrices.complement(BooleanMatrices.upperDiagonal(n))));
       }
     }
 
-    public static final class ConvexOrdinalScaleFromSetList<E>
-      extends Request<E, Pair<E, E>>
-    {
+    public static final class ConvexOrdinalScaleFromSetList<E> extends Request<E, Pair<E, E>> {
+
       private final SetList<E> s;
 
-      public ConvexOrdinalScaleFromSetList(final SetList<E> s)
-      {
+      public ConvexOrdinalScaleFromSetList(final SetList<E> s) {
         super(Type.CONVEX_ORDINAL, Source.STRINGS);
         this.s = s;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             s,
-            SetLists.disjointUnion(s, s),
+            SetLists.disjointUnion(
+                s,
+                s),
             BooleanMatrices.apposition(
                 BooleanMatrices.complement(BooleanMatrices.dual(BooleanMatrices.upperDiagonal(s.size()))),
                 BooleanMatrices.complement(BooleanMatrices.upperDiagonal(s.size()))));
       }
     }
 
-    public static final class ConvexOrdinalScaleFromOrder<E>
-      extends Request<E, Pair<E, E>>
-    {
+    public static final class ConvexOrdinalScaleFromOrder<E> extends Request<E, Pair<E, E>> {
+
       private final MatrixContext<E, E> c;
 
-      public ConvexOrdinalScaleFromOrder(final MatrixContext<E, E> c)
-      {
+      public ConvexOrdinalScaleFromOrder(final MatrixContext<E, E> c) {
         super(Type.CONVEX_ORDINAL, Source.ORDER);
         this.c = c;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
             c.rowHeads(),
-            SetLists.disjointUnion(c.colHeads(), c.colHeads()),
+            SetLists.disjointUnion(
+                c.colHeads(),
+                c.colHeads()),
             BooleanMatrices.apposition(
                 BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())),
                 BooleanMatrices.complement(c.matrix())));
       }
     }
 
-    public static final class BiOrdinalScale<E, T>
-      extends Request<Pair<E, T>, Pair<E, T>>
-    {
+    public static final class BiOrdinalScale<E, T> extends Request<Pair<E, T>, Pair<E, T>> {
+
       private final MatrixContext<E, E> order1;
       private final MatrixContext<T, T> order2;
 
-      public BiOrdinalScale(final MatrixContext<E, E> order1, final MatrixContext<T, T> order2)
-      {
+      public BiOrdinalScale(final MatrixContext<E, E> order1, final MatrixContext<T, T> order2) {
         super(Type.BI_ORDINAL, Source.ORDER_ORDER);
         this.order1 = order1;
         this.order2 = order2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(order1.rowHeads(), order2.rowHeads()),
-            SetLists.disjointUnion(order1.colHeads(), order2.colHeads()),
-            BooleanMatrices.horizontalSum(order1.matrix(), order2.matrix()));
+            SetLists.disjointUnion(
+                order1.rowHeads(),
+                order2.rowHeads()),
+            SetLists.disjointUnion(
+                order1.colHeads(),
+                order2.colHeads()),
+            BooleanMatrices.horizontalSum(
+                order1.matrix(),
+                order2.matrix()));
       }
     }
 
-    public static final class GridScale<E, T>
-      extends Request<Pair<E, T>, Pair<E, T>>
-    {
+    public static final class GridScale<E, T> extends Request<Pair<E, T>, Pair<E, T>> {
+
       private final MatrixContext<E, E> order1;
       private final MatrixContext<T, T> order2;
 
-      public GridScale(final MatrixContext<E, E> order1, final MatrixContext<T, T> order2)
-      {
+      public GridScale(final MatrixContext<E, E> order1, final MatrixContext<T, T> order2) {
         super(Type.GRID, Source.ORDER_ORDER);
         this.order1 = order1;
         this.order2 = order2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(order1.rowHeads(), order2.rowHeads()),
-            SetLists.disjointUnion(order1.colHeads(), order2.colHeads()),
-            BooleanMatrices.semiProduct(order1.matrix(), order2.matrix()));
+            SetLists.cartesianProduct(
+                order1.rowHeads(),
+                order2.rowHeads()),
+            SetLists.disjointUnion(
+                order1.colHeads(),
+                order2.colHeads()),
+            BooleanMatrices.semiProduct(
+                order1.matrix(),
+                order2.matrix()));
       }
     }
   }
 
-  public static final class Construct
-  {
-    public static final class Complement<G, M>
-      extends Request<G, M>
-    {
+  public static final class Construct {
+
+    public static final class Complement<G, M> extends Request<G, M> {
+
       private final MatrixContext<G, M> c;
 
-      public Complement(final MatrixContext<G, M> c)
-      {
+      public Complement(final MatrixContext<G, M> c) {
         super(Type.COMPLEMENT, Source.CONTEXT);
         this.c = c;
       }
 
-      public final void setContent()
-      {
-        context.setContent(c.rowHeads(), c.colHeads(), BooleanMatrices.complement(c.matrix()));
+      public final void setContent() {
+        context.setContent(
+            c.rowHeads(),
+            c.colHeads(),
+            BooleanMatrices.complement(c.matrix()));
       }
     }
 
-    public static final class Dual<G, M>
-      extends Request<M, G>
-    {
+    public static final class Dual<G, M> extends Request<M, G> {
+
       private final MatrixContext<G, M> c;
 
-      public Dual(final MatrixContext<G, M> c)
-      {
+      public Dual(final MatrixContext<G, M> c) {
         super(Type.DUAL, Source.CONTEXT);
         this.c = c;
       }
 
-      public final void setContent()
-      {
-        context.setContent(c.colHeads(), c.rowHeads(), BooleanMatrices.dual(c.matrix()));
+      public final void setContent() {
+        context.setContent(
+            c.colHeads(),
+            c.rowHeads(),
+            BooleanMatrices.dual(c.matrix()));
       }
     }
 
-    public static final class Contrary<G, M>
-      extends Request<M, G>
-    {
+    public static final class Contrary<G, M> extends Request<M, G> {
+
       private final MatrixContext<G, M> c;
 
-      public Contrary(final MatrixContext<G, M> c)
-      {
+      public Contrary(final MatrixContext<G, M> c) {
         super(Type.CONTRARY, Source.CONTEXT);
         this.c = c;
       }
 
-      public final void setContent()
-      {
-        context.setContent(c.colHeads(), c.rowHeads(), BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
+      public final void setContent() {
+        context.setContent(
+            c.colHeads(),
+            c.rowHeads(),
+            BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
       }
     }
 
-    public static final class Apposition<G, M, N>
-      extends Request<G, Pair<M, N>>
-    {
+    public static final class Apposition<G, M, N> extends Request<G, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<G, N> context2;
 
-      public Apposition(final MatrixContext<G, M> context1, final MatrixContext<G, N> context2)
-      {
+      public Apposition(final MatrixContext<G, M> context1, final MatrixContext<G, N> context2) {
         super(Type.APPOSITION, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.intersection(context1.rowHeads(), context2.rowHeads()),
-            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.apposition(context1.matrix(), context2.matrix()));
+            SetLists.intersection(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.disjointUnion(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.apposition(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class Subposition<G, H, M>
-      extends Request<Pair<G, H>, M>
-    {
+    public static final class Subposition<G, H, M> extends Request<Pair<G, H>, M> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, M> context2;
 
-      public Subposition(final MatrixContext<G, M> context1, final MatrixContext<H, M> context2)
-      {
+      public Subposition(final MatrixContext<G, M> context1, final MatrixContext<H, M> context2) {
         super(Type.APPOSITION, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
-            SetLists.intersection(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.subposition(context1.matrix(), context2.matrix()));
+            SetLists.disjointUnion(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.intersection(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.subposition(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class Quadposition<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class Quadposition<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> upperLeft;
       private final MatrixContext<G, N> upperRight;
       private final MatrixContext<H, M> lowerLeft;
@@ -848,8 +839,7 @@ public final class Requests
           final MatrixContext<G, M> upperLeft,
           final MatrixContext<G, N> upperRight,
           final MatrixContext<H, M> lowerLeft,
-          final MatrixContext<H, N> lowerRight)
-      {
+          final MatrixContext<H, N> lowerRight) {
         super(Type.QUADPOSITION, Source.CONTEXT_CONTEXT_CONTEXT_CONTEXT);
         this.upperLeft = upperLeft;
         this.upperRight = upperRight;
@@ -857,153 +847,184 @@ public final class Requests
         this.lowerRight = lowerRight;
       }
 
-      public final void setContent()
-      {
-        context.setContent(SetLists.disjointUnion(
-            SetLists.intersection(upperLeft.rowHeads(), upperRight.rowHeads()),
-            SetLists.intersection(lowerLeft.rowHeads(), lowerRight.rowHeads())), SetLists.intersection(
-            SetLists.disjointUnion(upperLeft.colHeads(), upperRight.colHeads()),
-            SetLists.disjointUnion(lowerLeft.colHeads(), lowerRight.colHeads())), BooleanMatrices.subposition(
-            BooleanMatrices.apposition(upperLeft.matrix(), upperRight.matrix()),
-            BooleanMatrices.apposition(lowerLeft.matrix(), lowerRight.matrix())));
+      public final void setContent() {
+        context.setContent(
+            SetLists.disjointUnion(
+                SetLists.intersection(
+                    upperLeft.rowHeads(),
+                    upperRight.rowHeads()),
+                SetLists.intersection(
+                    lowerLeft.rowHeads(),
+                    lowerRight.rowHeads())),
+            SetLists.intersection(
+                SetLists.disjointUnion(
+                    upperLeft.colHeads(),
+                    upperRight.colHeads()),
+                SetLists.disjointUnion(
+                    lowerLeft.colHeads(),
+                    lowerRight.colHeads())),
+            BooleanMatrices.subposition(
+                BooleanMatrices.apposition(
+                    upperLeft.matrix(),
+                    upperRight.matrix()),
+                BooleanMatrices.apposition(
+                    lowerLeft.matrix(),
+                    lowerRight.matrix())));
       }
     }
 
-    public static final class HorizontalSum<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class HorizontalSum<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, N> context2;
 
-      public HorizontalSum(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2)
-      {
+      public HorizontalSum(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2) {
         super(Type.HORIZONTAL_SUM, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
-            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.horizontalSum(context1.matrix(), context2.matrix()));
+            SetLists.disjointUnion(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.disjointUnion(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.horizontalSum(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class VerticalSum<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class VerticalSum<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, N> context2;
 
-      public VerticalSum(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2)
-      {
+      public VerticalSum(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2) {
         super(Type.VERTICAL_SUM, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
-            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.verticalSum(context1.matrix(), context2.matrix()));
+            SetLists.disjointUnion(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.disjointUnion(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.verticalSum(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class DirectSum<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class DirectSum<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, N> context2;
 
-      public DirectSum(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2)
-      {
+      public DirectSum(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2) {
         super(Type.DIRECT_SUM, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
-            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.directSum(context1.matrix(), context2.matrix()));
+            SetLists.disjointUnion(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.disjointUnion(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.directSum(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class DirectProduct<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class DirectProduct<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, N> context2;
 
-      public DirectProduct(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2)
-      {
+      public DirectProduct(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2) {
         super(Type.DIRECT_PRODUCT, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(context1.rowHeads(), context2.rowHeads()),
-            SetLists.cartesianProduct(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.directProduct(context1.matrix(), context2.matrix()));
+            SetLists.cartesianProduct(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.cartesianProduct(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.directProduct(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class BiProduct<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class BiProduct<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, N> context2;
 
-      public BiProduct(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2)
-      {
+      public BiProduct(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2) {
         super(Type.BI_PRODUCT, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(context1.rowHeads(), context2.rowHeads()),
-            SetLists.cartesianProduct(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.biProduct(context1.matrix(), context2.matrix()));
+            SetLists.cartesianProduct(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.cartesianProduct(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.biProduct(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class SemiProduct<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class SemiProduct<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, N> context2;
 
-      public SemiProduct(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2)
-      {
+      public SemiProduct(final MatrixContext<G, M> context1, final MatrixContext<H, N> context2) {
         super(Type.SEMI_PRODUCT, Source.CONTEXT_CONTEXT);
         this.context1 = context1;
         this.context2 = context2;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(context1.rowHeads(), context2.rowHeads()),
-            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
-            BooleanMatrices.semiProduct(context1.matrix(), context2.matrix()));
+            SetLists.cartesianProduct(
+                context1.rowHeads(),
+                context2.rowHeads()),
+            SetLists.disjointUnion(
+                context1.colHeads(),
+                context2.colHeads()),
+            BooleanMatrices.semiProduct(
+                context1.matrix(),
+                context2.matrix()));
       }
     }
 
-    public static final class SubstitutionSum<G, H, M, N>
-      extends Request<Pair<G, H>, Pair<M, N>>
-    {
+    public static final class SubstitutionSum<G, H, M, N> extends Request<Pair<G, H>, Pair<M, N>> {
+
       private final MatrixContext<G, M> context1;
       private final MatrixContext<H, N> context2;
       private final G                   object;
@@ -1013,8 +1034,7 @@ public final class Requests
           final MatrixContext<G, M> context1,
           final MatrixContext<H, N> context2,
           final G object,
-          final M attribute)
-      {
+          final M attribute) {
         super(Type.SUBSTITUTION_SUM, Source.CONTEXT_CONTEXT_OBJECT_OBJECT);
         this.context1 = context1;
         this.context2 = context2;
@@ -1022,27 +1042,31 @@ public final class Requests
         this.attribute = attribute;
       }
 
-      public final void setContent()
-      {
+      public final void setContent() {
         System.out.println("substitution sum");
-        final int i = context1.rowHeads().indexOf(object);
-        final int j = context1.colHeads().indexOf(attribute);
+        final int i = context1.rowHeads().indexOf(
+            object);
+        final int j = context1.colHeads().indexOf(
+            attribute);
         System.out.println(i + ":" + j);
-        final BooleanMatrix matrix =
-            BooleanMatrices.substitutionSum(
-                context1.matrix(),
-                context2.matrix(),
-                i,
-                j,
-                context1._row(i),
-                context1._col(j));
+        final BooleanMatrix matrix = BooleanMatrices.substitutionSum(
+            context1.matrix(),
+            context2.matrix(),
+            i,
+            j,
+            context1._row(i),
+            context1._col(j));
         System.out.println(matrix);
         context.setContent(
             SetLists.disjointUnion(
-                SetLists.difference(context1.rowHeads(), Collections.singleton(object)),
+                SetLists.difference(
+                    context1.rowHeads(),
+                    Collections.singleton(object)),
                 context2.rowHeads()),
             SetLists.disjointUnion(
-                SetLists.difference(context1.colHeads(), Collections.singleton(attribute)),
+                SetLists.difference(
+                    context1.colHeads(),
+                    Collections.singleton(attribute)),
                 context2.colHeads()),
             matrix);
         System.out.println(context);

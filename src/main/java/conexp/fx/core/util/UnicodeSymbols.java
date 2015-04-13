@@ -6,17 +6,7 @@ package conexp.fx.core.util;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -38,5 +28,13 @@ public class UnicodeSymbols {
   public static final String LEQ        = "\u2264";
   public static final String GEQ        = "\u2265";
   public static final String MODELS     = "\u22A8";
+  public static final String CIRC       = "\u25E6";
+  public static final String TO         = "\u27F6";
+  public static final String WEDGE      = "\u22C0";
+  public static final String VEE        = "\u22C1";
+  public static final String UNTIL      = "UNTIL";
+  public static final String NEXT       = "\u25CB";
+  public static final String SOMETIMES  = "\u25C7";
+  public static final String ALWAYS     = "\u25A1";
 
 }

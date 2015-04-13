@@ -6,17 +6,7 @@ package conexp.fx.gui.dialog;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -46,55 +36,60 @@ public final class TeXDialog<G, M> extends FXDialog<TeXOptions> {
 
   public TeXDialog(final Stage stage) {
     super(stage, FXDialog.Style.WARN, "TeX Export Wizard", "TeX Export Wizard Options", new VBox(), 270);
-    VBox box = (VBox) optionalCenterNode;
+    VBox box = (VBox) pane.getCenter();
     box.setPadding(new Insets(0, 10, 0, 10));
     box.setSpacing(4);
     value =
         new TeXOptions(null, false, true, false, ContextTeXPackage.None, DiagramTeXPackage.ConExpFX, new FitScale(
             80,
             120));
-    final CheckBox arrowsCheckBox = CheckBoxBuilder.create().text("Arrow Relations").build();
-    final CheckBox labelsCheckBox = CheckBoxBuilder.create().text("Concept Labels").selected(true).build();
-    final CheckBox standAloneCheckBox = CheckBoxBuilder.create().disable(true).text("Stand-Alone Document").build();
-    final RadioButton noneContextButton =
-        RadioButtonBuilder
-            .create()
-            .text("Context Package: None")
-            .selected(true)
-            .userData(ContextTeXPackage.None)
-            .build();
-    final RadioButton ganterContextButton =
-        RadioButtonBuilder.create().text("Context Package: Ganter").userData(ContextTeXPackage.Ganter).build();
-    final RadioButton tabularContextButton =
-        RadioButtonBuilder.create().text("Context Package: Tabular").userData(ContextTeXPackage.Tabular).build();
-    final RadioButton noneDiagramButton =
-        RadioButtonBuilder.create().text("Diagram Package: None").userData(DiagramTeXPackage.None).build();
-    final RadioButton ganterDiagramButton =
-        RadioButtonBuilder.create().text("Diagram Package: Ganter").userData(DiagramTeXPackage.Ganter).build();
-    final RadioButton conExpFXDiagramButton =
-        RadioButtonBuilder
-            .create()
-            .text("Diagram Package: ConExpFX")
-            .selected(true)
-            .userData(DiagramTeXPackage.ConExpFX)
-            .build();
-    final RadioButton fitButton =
-        RadioButtonBuilder.create().text("Diagram Scale: Fit").userData(ScaleEnum.Fit).build();
-    final RadioButton fitWidthButton =
-        RadioButtonBuilder.create().text("Diagram Scale: Fit Width").userData(ScaleEnum.FitWidth).build();
-    final RadioButton fitHeightButton =
-        RadioButtonBuilder.create().text("Diagram Scale: Fit Height").userData(ScaleEnum.FitHeight).build();
-    final RadioButton fitRatioButton =
-        RadioButtonBuilder
-            .create()
-            .text("Diagram Scale: Fit Ratio")
-            .selected(true)
-            .userData(ScaleEnum.FitRatio)
-            .build();
+    final CheckBox arrowsCheckBox = CheckBoxBuilder.create().text(
+        "Arrow Relations").build();
+    final CheckBox labelsCheckBox = CheckBoxBuilder.create().text(
+        "Concept Labels").selected(
+        true).build();
+    final CheckBox standAloneCheckBox = CheckBoxBuilder.create().disable(
+        true).text(
+        "Stand-Alone Document").build();
+    final RadioButton noneContextButton = RadioButtonBuilder.create().text(
+        "Context Package: None").selected(
+        true).userData(
+        ContextTeXPackage.None).build();
+    final RadioButton ganterContextButton = RadioButtonBuilder.create().text(
+        "Context Package: Ganter").userData(
+        ContextTeXPackage.Ganter).build();
+    final RadioButton tabularContextButton = RadioButtonBuilder.create().text(
+        "Context Package: Tabular").userData(
+        ContextTeXPackage.Tabular).build();
+    final RadioButton noneDiagramButton = RadioButtonBuilder.create().text(
+        "Diagram Package: None").userData(
+        DiagramTeXPackage.None).build();
+    final RadioButton ganterDiagramButton = RadioButtonBuilder.create().text(
+        "Diagram Package: Ganter").userData(
+        DiagramTeXPackage.Ganter).build();
+    final RadioButton conExpFXDiagramButton = RadioButtonBuilder.create().text(
+        "Diagram Package: ConExpFX").selected(
+        true).userData(
+        DiagramTeXPackage.ConExpFX).build();
+    final RadioButton fitButton = RadioButtonBuilder.create().text(
+        "Diagram Scale: Fit").userData(
+        ScaleEnum.Fit).build();
+    final RadioButton fitWidthButton = RadioButtonBuilder.create().text(
+        "Diagram Scale: Fit Width").userData(
+        ScaleEnum.FitWidth).build();
+    final RadioButton fitHeightButton = RadioButtonBuilder.create().text(
+        "Diagram Scale: Fit Height").userData(
+        ScaleEnum.FitHeight).build();
+    final RadioButton fitRatioButton = RadioButtonBuilder.create().text(
+        "Diagram Scale: Fit Ratio").selected(
+        true).userData(
+        ScaleEnum.FitRatio).build();
     final ListSpinner<Integer> widthSpinner = new ListSpinner<Integer>(1, 1000);
     final ListSpinner<Integer> heightSpinner = new ListSpinner<Integer>(1, 1000);
-    widthSpinner.valueProperty().set(80);
-    heightSpinner.valueProperty().set(120);
+    widthSpinner.valueProperty().set(
+        80);
+    heightSpinner.valueProperty().set(
+        120);
     widthSpinner.withPostfix("mm");
     heightSpinner.withPostfix("mm");
 //      widthSpinner.withAlignment(Pos.CENTER);
@@ -111,108 +106,127 @@ public final class TeXDialog<G, M> extends FXDialog<TeXOptions> {
     widthSpinner.setMaxWidth(100);
     heightSpinner.setMinWidth(100);
     heightSpinner.setMaxWidth(100);
-    final ToggleGroup contextGroup =
-        ToggleGroupBuilder.create().toggles(noneContextButton, ganterContextButton, tabularContextButton).build();
-    final ToggleGroup diagramGroup =
-        ToggleGroupBuilder.create().toggles(noneDiagramButton, ganterDiagramButton, conExpFXDiagramButton).build();
-    final ToggleGroup scaleGroup =
-        ToggleGroupBuilder.create().toggles(fitButton, fitWidthButton, fitHeightButton, fitRatioButton).build();
-    arrowsCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+    final ToggleGroup contextGroup = ToggleGroupBuilder.create().toggles(
+        noneContextButton,
+        ganterContextButton,
+        tabularContextButton).build();
+    final ToggleGroup diagramGroup = ToggleGroupBuilder.create().toggles(
+        noneDiagramButton,
+        ganterDiagramButton,
+        conExpFXDiagramButton).build();
+    final ToggleGroup scaleGroup = ToggleGroupBuilder.create().toggles(
+        fitButton,
+        fitWidthButton,
+        fitHeightButton,
+        fitRatioButton).build();
+    arrowsCheckBox.selectedProperty().addListener(
+        new ChangeListener<Boolean>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-        value.arrows = newValue;
-      }
-    });
-    labelsCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+          @Override
+          public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            value.arrows = newValue;
+          }
+        });
+    labelsCheckBox.selectedProperty().addListener(
+        new ChangeListener<Boolean>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-        value.labels = newValue;
-      }
-    });
-    standAloneCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+          @Override
+          public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            value.labels = newValue;
+          }
+        });
+    standAloneCheckBox.selectedProperty().addListener(
+        new ChangeListener<Boolean>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-        value.standAlone = newValue;
-      }
-    });
-    contextGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+          @Override
+          public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            value.standAlone = newValue;
+          }
+        });
+    contextGroup.selectedToggleProperty().addListener(
+        new ChangeListener<Toggle>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
-        value.contextTeXPackage = (ContextTeXPackage) newToggle.getUserData();
-      }
-    });
-    diagramGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+          @Override
+          public void changed(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
+            value.contextTeXPackage = (ContextTeXPackage) newToggle.getUserData();
+          }
+        });
+    diagramGroup.selectedToggleProperty().addListener(
+        new ChangeListener<Toggle>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
-        value.diagramTeXPackage = (DiagramTeXPackage) newToggle.getUserData();
-      }
-    });
-    scaleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+          @Override
+          public void changed(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
+            value.diagramTeXPackage = (DiagramTeXPackage) newToggle.getUserData();
+          }
+        });
+    scaleGroup.selectedToggleProperty().addListener(
+        new ChangeListener<Toggle>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
-        value.scale =
-            ((ScaleEnum) newToggle.getUserData()).toOption(widthSpinner.valueProperty().get(), heightSpinner
-                .valueProperty()
-                .get());
-        widthSpinner.disableProperty().set((ScaleEnum) newToggle.getUserData() == ScaleEnum.FitHeight);
-        heightSpinner.disableProperty().set((ScaleEnum) newToggle.getUserData() == ScaleEnum.FitWidth);
-      }
-    });
-    widthSpinner.valueProperty().addListener(new ChangeListener<Integer>() {
+          @Override
+          public void changed(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
+            value.scale = ((ScaleEnum) newToggle.getUserData()).toOption(
+                widthSpinner.valueProperty().get(),
+                heightSpinner.valueProperty().get());
+            widthSpinner.disableProperty().set(
+                (ScaleEnum) newToggle.getUserData() == ScaleEnum.FitHeight);
+            heightSpinner.disableProperty().set(
+                (ScaleEnum) newToggle.getUserData() == ScaleEnum.FitWidth);
+          }
+        });
+    widthSpinner.valueProperty().addListener(
+        new ChangeListener<Integer>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-        value.scale =
-            ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData()).toOption(newValue, heightSpinner
-                .valueProperty()
-                .get());
-      }
-    });
-    heightSpinner.valueProperty().addListener(new ChangeListener<Integer>() {
+          @Override
+          public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+            value.scale = ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData()).toOption(
+                newValue,
+                heightSpinner.valueProperty().get());
+          }
+        });
+    heightSpinner.valueProperty().addListener(
+        new ChangeListener<Integer>() {
 
-      @Override
-      public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-        value.scale =
-            ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData()).toOption(widthSpinner
-                .valueProperty()
-                .get(), newValue);
-      }
-    });
+          @Override
+          public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+            value.scale = ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData()).toOption(
+                widthSpinner.valueProperty().get(),
+                newValue);
+          }
+        });
     box.getChildren().addAll(
-        VBoxBuilder
-            .create()
-            .padding(new Insets(2, 0, 2, 0))
-            .spacing(4)
-            .children(arrowsCheckBox, labelsCheckBox, standAloneCheckBox)
-            .build());
+        VBoxBuilder.create().padding(
+            new Insets(2, 0, 2, 0)).spacing(
+            4).children(
+            arrowsCheckBox,
+            labelsCheckBox,
+            standAloneCheckBox).build());
     box.getChildren().addAll(
-        VBoxBuilder
-            .create()
-            .padding(new Insets(2, 0, 2, 0))
-            .spacing(4)
-            .children(noneContextButton, ganterContextButton, tabularContextButton)
-            .build());
+        VBoxBuilder.create().padding(
+            new Insets(2, 0, 2, 0)).spacing(
+            4).children(
+            noneContextButton,
+            ganterContextButton,
+            tabularContextButton).build());
     box.getChildren().addAll(
-        VBoxBuilder
-            .create()
-            .padding(new Insets(2, 0, 2, 0))
-            .spacing(4)
-            .children(noneDiagramButton, ganterDiagramButton, conExpFXDiagramButton)
-            .build());
+        VBoxBuilder.create().padding(
+            new Insets(2, 0, 2, 0)).spacing(
+            4).children(
+            noneDiagramButton,
+            ganterDiagramButton,
+            conExpFXDiagramButton).build());
     box.getChildren().addAll(
-        VBoxBuilder
-            .create()
-            .padding(new Insets(2, 0, 0, 0))
-            .spacing(4)
-            .children(fitButton, fitWidthButton, fitHeightButton, fitRatioButton)
-            .build());
+        VBoxBuilder.create().padding(
+            new Insets(2, 0, 0, 0)).spacing(
+            4).children(
+            fitButton,
+            fitWidthButton,
+            fitHeightButton,
+            fitRatioButton).build());
     box.getChildren().addAll(
-        HBoxBuilder.create().padding(new Insets(0, 0, 2, 0)).spacing(4).children(widthSpinner, heightSpinner).build());
+        HBoxBuilder.create().padding(
+            new Insets(0, 0, 2, 0)).spacing(
+            4).children(
+            widthSpinner,
+            heightSpinner).build());
   }
 }

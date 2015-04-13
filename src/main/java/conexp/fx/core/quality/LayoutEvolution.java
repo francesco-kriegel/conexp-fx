@@ -6,20 +6,9 @@ package conexp.fx.core.quality;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
-
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,35 +41,31 @@ import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.math.Points;
 import conexp.fx.gui.task.BlockingTask;
 
-public final class LayoutEvolution<G, M>
-{
-  public static final <G, M> BlockingTask calculate(final LayoutEvolution<G, M> qualityChart)
-  {
-    return new BlockingTask("Quality Measure Chart")
-      {
-        @Override
-        protected final void _call()
-        {
-          updateMessage("Simulating Concept Movement...");
-          qualityChart.progressProperty.addListener(new ChangeListener<Number>()
-            {
-              @Override
-              public final void changed(
-                  final ObservableValue<? extends Number> observable,
-                  final Number oldValue,
-                  final Number newValue)
-              {
-                updateProgress(newValue.doubleValue(), 1d);
-              }
-            });
-          qualityChart.calculate();
-        }
-      };
+public final class LayoutEvolution<G, M> {
+
+  public static final <G, M> BlockingTask calculate(final LayoutEvolution<G, M> qualityChart) {
+    return new BlockingTask("Quality Measure Chart") {
+
+      @Override
+      protected final void _call() {
+        updateMessage("Simulating Concept Movement...");
+        qualityChart.progressProperty.addListener(new ChangeListener<Number>() {
+
+          @Override
+          public final void changed(
+              final ObservableValue<? extends Number> observable,
+              final Number oldValue,
+              final Number newValue) {
+            updateProgress(newValue.doubleValue(), 1d);
+          }
+        });
+        qualityChart.calculate();
+      }
+    };
   }
 
-  public final class Value
-    implements Comparable<Value>
-  {
+  public final class Value implements Comparable<Value> {
+
     public final Point3D         delta;
     public final Rectangle2D     rectangle;
     public final double          result;
@@ -91,8 +76,7 @@ public final class LayoutEvolution<G, M>
         final Point3D delta,
         final Rectangle2D rectangle,
         final Pair<Concept<G, M>, Double> result,
-        final Map<M, Point3D> seeds)
-    {
+        final Map<M, Point3D> seeds) {
       super();
       this.delta = delta;
       this.rectangle = rectangle;
@@ -106,8 +90,7 @@ public final class LayoutEvolution<G, M>
         final Rectangle2D rectangle,
         final double result,
         final Concept<G, M> hint,
-        final Map<M, Point3D> seeds)
-    {
+        final Map<M, Point3D> seeds) {
       super();
       this.delta = delta;
       this.rectangle = rectangle;
@@ -117,8 +100,7 @@ public final class LayoutEvolution<G, M>
     }
 
     @Override
-    public final int compareTo(final Value other)
-    {
+    public final int compareTo(final Value other) {
       return (int) Math.signum(other.result - this.result);
     }
   }
@@ -127,7 +109,7 @@ public final class LayoutEvolution<G, M>
   private final ConflictDistance<G, M> conflictDistance;
   private final ConceptLayout<G, M>    layout;
   private final Concept<G, M>          concept;
-  private final ConceptMovement  movement;
+  private final ConceptMovement        movement;
   private double                       minY;
   private final int                    toSide;
   private final int                    zoomInto;
@@ -149,8 +131,7 @@ public final class LayoutEvolution<G, M>
       final int steps,
       final int zoomInto,
       final ConflictDistance<G, M> conflictDistance,
-      final ThreadPoolExecutor tpe)
-  {
+      final ThreadPoolExecutor tpe) {
     super();
     this.layout = layout;
     this.concept = concept;
@@ -162,52 +143,46 @@ public final class LayoutEvolution<G, M>
     this.conflictDistance = conflictDistance;
     this.tpe = tpe;
     this.lastValues = new ArrayList<Value>((int) Math.pow(1d + 2d * toSide, 2d));
-    final BoundingBox layoutBounds = layout.getCurrentBoundingBox();
+    final BoundingBox layoutBounds = layout.getCurrentBoundingBox(false, false);
     final double width = widthFactor * layoutBounds.getWidth();
     final double height = heightFactor * layoutBounds.getHeight();
     final Point3D origin = layout.positionBinding(concept).getValue();
     final Rectangle2D rectangle =
         new Rectangle2D(origin.getX() - width / 2d, origin.getY() - height / 2d, width, height);
-    final Value firstValue =
-        new Value(Points.ZERO, rectangle, conflictDistance.apply(layout), layout.clone()._seeds);
+    final Value firstValue = new Value(Points.ZERO, rectangle, conflictDistance.apply(layout), layout.clone()._seeds);
     if (concept.equals(layout.lattice.context.selection.topConcept())) {
       best = firstValue;
       return;
     }
     switch (movement) {
-      case LABEL_SEED:
-        try {
-          minY =
-              layout
-                  .positionBinding(Iterators.getOnlyElement(layout.lattice.row(concept).iterator()))
-                  .getValue()
-                  .getY()
-                  - origin.getY();
-        } catch (IllegalArgumentException | NoSuchElementException e) {
-          best = firstValue;
-          return;
-        }
-        break;
-      case INTENT_SEEDS:
-      case INTENT_CHAIN_SEEDS:
-      default:
-        minY = -origin.getY();
-        break;
+    case LABEL_SEED:
+      try {
+        minY =
+            layout.positionBinding(Iterators.getOnlyElement(layout.lattice.row(concept).iterator())).getValue().getY()
+                - origin.getY();
+      } catch (IllegalArgumentException | NoSuchElementException e) {
+        best = firstValue;
+        return;
+      }
+      break;
+    case INTENT_SEEDS:
+    case INTENT_CHAIN_SEEDS:
+    default:
+      minY = -origin.getY();
+      break;
     }
     values.add(firstValue);
     nextValues.add(firstValue);
   }
 
-  public final Value calculate()
-  {
+  public final Value calculate() {
     if (!nextValues.isEmpty())
       for (int step = 0; step < steps; step++)
         zoomIn();
     return best;
   }
 
-  private final void zoomIn()
-  {
+  private final void zoomIn() {
     final Set<Future<?>> futures = new HashSet<Future<?>>();
     for (Value nextValue : nextValues) {
       values.remove(nextValue);
@@ -244,35 +219,33 @@ public final class LayoutEvolution<G, M>
       final double i,
       final double j,
       final double tileWidth,
-      final double tileHeight)
-  {
-    return new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          final Point3D delta = Points.plus(nextValue.delta, i * tileWidth, j * tileHeight);
-          if (delta.getY() < minY)
-            return;
-          final ConceptLayout<G, M> movedLayout = layout.clone();
-          movedLayout.move(concept, movement, delta);
-          final Value value =
-              new Value(delta, new Rectangle2D(
-                  nextValue.rectangle.getMinX() + (i + toSide) * tileWidth,
-                  nextValue.rectangle.getMinY() + (j + toSide) * tileHeight,
-                  tileWidth,
-                  tileHeight), conflictDistance.apply(movedLayout), movedLayout._seeds);
-          synchronized (values) {
-            values.add(value);
-          }
-          synchronized (lastValues) {
-            lastValues.add(value);
-          }
-//        synchronized (best) {
-          if (best == null || value.result >= best.result)
-            best = value;
-//        }
+      final double tileHeight) {
+    return new Runnable() {
+
+      @Override
+      public void run() {
+        final Point3D delta = Points.plus(nextValue.delta, i * tileWidth, j * tileHeight);
+        if (delta.getY() < minY)
+          return;
+        final ConceptLayout<G, M> movedLayout = layout.clone();
+        movedLayout.move(concept, movement, delta);
+        final Value value =
+            new Value(delta, new Rectangle2D(
+                nextValue.rectangle.getMinX() + (i + toSide) * tileWidth,
+                nextValue.rectangle.getMinY() + (j + toSide) * tileHeight,
+                tileWidth,
+                tileHeight), conflictDistance.apply(movedLayout), movedLayout._seeds);
+        synchronized (values) {
+          values.add(value);
         }
-      };
+        synchronized (lastValues) {
+          lastValues.add(value);
+        }
+//        synchronized (best) {
+        if (best == null || value.result >= best.result)
+          best = value;
+//        }
+      }
+    };
   }
 }

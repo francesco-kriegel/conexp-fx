@@ -6,17 +6,7 @@ package conexp.fx.gui.task;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -40,12 +30,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker.State;
+import conexp.fx.gui.util.Platform2;
 
 public final class BlockingExecutor {
 
-  public void clearFinished() {
-    scheduledTasks.removeIf(t -> t.isDone());
-  }
+//  public void clearFinished() {
+//    scheduledTasks.removeIf(t -> t.isDone());
+//  }
 
 //  public final LongProperty                        executionTimeMillis     = new SimpleLongProperty(0l);
   public final DoubleBinding                       overallProgressBinding;
@@ -77,7 +68,10 @@ public final class BlockingExecutor {
     overallProgressBinding = new DoubleBinding() {
 
       {
-        super.bind(doneTasksProperty, currentProgressProperty, scheduledTasksProperty);
+        super.bind(
+            doneTasksProperty,
+            currentProgressProperty,
+            scheduledTasksProperty);
       }
 
       protected final double computeValue() {
@@ -104,7 +98,9 @@ public final class BlockingExecutor {
     isIdleBinding = new BooleanBinding() {
 
       {
-        super.bind(currentProgressProperty, scheduledTasksProperty);
+        super.bind(
+            currentProgressProperty,
+            scheduledTasksProperty);
       }
 
       protected boolean computeValue() {
@@ -118,40 +114,44 @@ public final class BlockingExecutor {
           final BlockingTask oldTask,
           final BlockingTask newTask) {
         currentProgressProperty.bind(newTask.progressProperty());
-        newTask.stateProperty().addListener(new ChangeListener<State>() {
+        newTask.stateProperty().addListener(
+            new ChangeListener<State>() {
 
-          @SuppressWarnings("incomplete-switch")
-          public final void changed(
-              final ObservableValue<? extends State> observable,
-              final State oldState,
-              final State newState) {
-            switch (newState) {
-            case SUCCEEDED:
-            case CANCELLED:
-            case FAILED:
+              @SuppressWarnings("incomplete-switch")
+              public final void changed(
+                  final ObservableValue<? extends State> observable,
+                  final State oldState,
+                  final State newState) {
+                switch (newState) {
+                case SUCCEEDED:
+                case CANCELLED:
+                case FAILED:
 //              executionTimeMillis.set(executionTimeMillis.get() + newTask.runTimeMillis.get());
 //              executionsTimeMillisMap.add(Pair.of(newTask.titleProperty().get(), newTask.runTimeMillis()));
-              doneTasksProperty.set(doneTasksProperty.get() + 1);
-              BlockingExecutor.this.next();
-              break;
-            }
-          };
-        });
+                  doneTasksProperty.set(doneTasksProperty.get() + 1);
+                  BlockingExecutor.this.next();
+                  break;
+                }
+              };
+            });
         tpe.submit(newTask);
       }
     });
   }
 
   public final void submit(final BlockingTask task) {
-    synchronized (taskQueue) {
-      if (currentTaskProperty.getValue().isDone() && taskQueue.isEmpty())
-        currentTaskProperty.setValue(task);
-      else {
-        scheduledTasksProperty.set(scheduledTasksProperty.get() + 1);
-        taskQueue.offer(task);
+    Platform2.runOnFXThread(() -> {
+      synchronized (taskQueue) {
         scheduledTasks.add(task);
+        if (currentTaskProperty.getValue().isDone() && taskQueue.isEmpty())
+          currentTaskProperty.setValue(task);
+        else {
+          scheduledTasksProperty.set(scheduledTasksProperty.get() + 1);
+          taskQueue.offer(task);
+//          scheduledTasks.add(task);
+        }
       }
-    }
+    });
   }
 
   private final void next() {

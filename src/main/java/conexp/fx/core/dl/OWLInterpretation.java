@@ -6,29 +6,24 @@ package conexp.fx.core.dl;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.semanticweb.elk.util.collections.Triple;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -43,12 +38,13 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
 import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-//import org.semanticweb.owlapi.model.parameters.Imports;
+import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectComplementOfImpl;
@@ -57,14 +53,21 @@ import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.algorithm.nextclosures.NextClosures6;
 import conexp.fx.core.algorithm.nextclosures.NextClosures6C;
-import conexp.fx.core.algorithm.nextclosures.NextClosures6C.Result;
+import conexp.fx.core.algorithm.nextclosures.Result6;
+import conexp.fx.core.algorithm.nextclosures.ResultC;
+import conexp.fx.core.closureoperators.AClosureOperator;
+import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.Context;
+import conexp.fx.core.context.SparseContext;
 import conexp.fx.core.implication.Implication;
 import conexp.fx.core.util.OWLMinimizer;
+
+//import org.semanticweb.owlapi.model.parameters.Imports;
 
 public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSubClassOfAxiom, OWLOntology> {
 
@@ -339,12 +342,21 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
   }
 
   protected final Set<IRI> getAllSuccessors(final Set<IRI> individuals, final IRI roleName) {
-    return individuals.parallelStream().map(
+    if (individuals.isEmpty())
+      return Collections.emptySet();
+    final Optional<Stream<IRI>> optional = individuals.parallelStream().map(
         individual -> getRoleSuccessorStream(
             roleName,
             individual)).reduce(
-        Stream::concat).get().collect(
-        Collectors.toSet());
+        Stream::concat);
+    if (optional.isPresent())
+      return optional.get().collect(
+          Collectors.toSet());
+    System.out.println("optional is not present");
+    System.out.println(getRoleSuccessors(
+        roleName,
+        individuals.iterator().next()));
+    return Collections.emptySet();
   }
 
   protected final Set<Set<IRI>> getSuccessorSetsER(final Set<IRI> individuals, final IRI roleName) {
@@ -360,6 +372,54 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
                         individual,
                         successor))))).collect(
         Collectors.toSet()));
+  }
+
+  protected final Set<Set<IRI>> getSuccessorSetsER2(final Set<IRI> individuals, final IRI roleName) {
+    // this method should not filter the powerset, which is a costly operation, but instead create the minimal
+    // successors directly
+    Set<Set<IRI>> successorSets = Collections.emptySet();
+    final Iterator<IRI> it = individuals.iterator();
+    if (it.hasNext()) {
+      successorSets = firstSuccessorSetsER(
+          it.next(),
+          roleName);
+    }
+    while (it.hasNext()) {
+      successorSets = extendSuccessorSetsER(
+          successorSets,
+          it.next(),
+          roleName);
+    }
+    return filterMinimal(successorSets);
+  }
+
+  private final Set<Set<IRI>> firstSuccessorSetsER(final IRI individual, final IRI roleName) {
+    return getRoleSuccessorStream(
+        roleName,
+        individual).map(
+        successor -> Sets.newHashSet(successor)).collect(
+        Collectors.toSet());
+  }
+
+  private final Set<Set<IRI>> extendSuccessorSetsER(
+      final Set<Set<IRI>> successorSets,
+      final IRI individual,
+      final IRI roleName) {
+    final Set<Set<IRI>> extendedSets = new HashSet<Set<IRI>>();
+    final Set<Set<IRI>> extendedSetsP = Collections.synchronizedSet(extendedSets);
+    successorSets.parallelStream().forEach(
+        successorSet -> {
+          getRoleSuccessorStream(
+              roleName,
+              individual).forEach(
+              successor -> {
+                final Set<IRI> extendedSet = new HashSet<IRI>();
+                extendedSet.addAll(successorSet);
+                extendedSet.add(successor);
+                extendedSetsP.add(extendedSet);
+              });
+        });
+    return extendedSets;
   }
 
   public static final <T> Set<Set<T>> filterMinimal(final Set<Set<T>> sets) {
@@ -420,7 +480,32 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
   }
 
   @Override
-  public OWLClassExpression getMostSpecificConcept(final IRI individual, final int roleDepth) {
+  public OWLClassExpression getMostSpecificConcept(
+      final IRI individual,
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
+    return getMostSpecificConcept(
+        Collections.singleton(individual),
+        roleDepth,
+        maxCardinality,
+        constructors);
+  }
+
+  @Override
+  public OWLClassExpression getMostSpecificConcept(
+      final Set<IRI> individuals,
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
+    return getMostSpecificConceptALQ(
+        individuals,
+        roleDepth,
+        maxCardinality,
+        constructors);
+  }
+
+  public OWLClassExpression _getMostSpecificConcept(final IRI individual, final int roleDepth) {
     checkRoleDepth(roleDepth);
     final Set<OWLClassExpression> conjuncts = new HashSet<OWLClassExpression>();
     for (IRI conceptName : conceptNameExtensions.keySet())
@@ -437,6 +522,7 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
                 df.getOWLObjectProperty(roleName),
                 getMostSpecificConcept(
                     pair.y(),
+                    0,
                     roleDepth - 1)));
     if (conjuncts.isEmpty())
       return df.getOWLThing();
@@ -445,14 +531,14 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     return new OWLObjectIntersectionOfImpl(conjuncts);
   }
 
-  @Override
-  public final OWLClassExpression getMostSpecificConcept(final Set<IRI> individuals, final int roleDepth) {
+  public final OWLClassExpression _getMostSpecificConcept(final Set<IRI> individuals, final int roleDepth) {
     checkRoleDepth(roleDepth);
     return ELLeastCommonSubsumer.of(Collections2.transform(
         individuals,
         individual -> {
           return getMostSpecificConcept(
               individual,
+              0,
               roleDepth);
         }));
   }
@@ -500,21 +586,80 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
 //  }
 
   @Override
-  protected final SetList<OWLClassExpression> getAttributeSetForInducedContext(int roleDepth) {
-    final Set<OWLClassExpression> mmscs = getAllMostSpecificConcepts(roleDepth - 1);
+  protected final SetList<OWLClassExpression> getAttributeSetForInducedContext(
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
+    final Set<OWLClassExpression> mmscs = roleDepth > 0 ? getAllMostSpecificConcepts(
+        roleDepth - 1,
+        maxCardinality,
+        constructors) : Collections.emptySet();
     final SetList<OWLClassExpression> _codomain = new HashSetArrayList<OWLClassExpression>();
     _codomain.add(df.getOWLNothing());
     _codomain.addAll(Collections2.transform(
         signature.getConceptNames(),
         df::getOWLClass));
-    for (IRI roleName : signature.getRoleNames())
+    if (Arrays.asList(
+        constructors).contains(
+        Constructor.PRIMITIVE_NEGATION))
       _codomain.addAll(Collections2.transform(
-          mmscs,
-          mmsc -> {
-            return df.getOWLObjectSomeValuesFrom(
-                df.getOWLObjectProperty(roleName),
-                mmsc);
-          }));
+          signature.getConceptNames(),
+          conceptName -> df.getOWLObjectComplementOf(df.getOWLClass(conceptName))));
+    for (IRI roleName : signature.getRoleNames())
+      for (Constructor c : constructors)
+        switch (c) {
+        case EXISTENTIAL_RESTRICTION:
+          _codomain.addAll(Collections2.transform(
+              mmscs,
+              mmsc -> {
+                return df.getOWLObjectSomeValuesFrom(
+                    df.getOWLObjectProperty(roleName),
+                    mmsc);
+              }));
+          break;
+        case VALUE_RESTRICTION:
+          _codomain.addAll(Collections2.transform(
+              mmscs,
+              mmsc -> {
+                return df.getOWLObjectAllValuesFrom(
+                    df.getOWLObjectProperty(roleName),
+                    mmsc);
+              }));
+          break;
+        case QUALIFIED_AT_LEAST_RESTRICTION:
+          Stream.iterate(
+              0,
+              n -> n + 1).limit(
+              maxCardinality).skip(
+              2).map(
+              cardinality -> Collections2.transform(
+                  mmscs,
+                  mmsc -> df.getOWLObjectMinCardinality(
+                      cardinality,
+                      df.getOWLObjectProperty(roleName),
+                      mmsc)).stream()).reduce(
+              Stream::concat).ifPresent(
+              stream -> _codomain.addAll(stream.collect(Collectors.toSet())));
+          break;
+        case QUALIFIED_AT_MOST_RESTRICTION:
+          Stream.iterate(
+              0,
+              n -> n + 1).limit(
+              maxCardinality).skip(
+              1).map(
+              cardinality -> Collections2.transform(
+                  mmscs,
+                  mmsc -> df.getOWLObjectMaxCardinality(
+                      cardinality,
+                      df.getOWLObjectProperty(roleName),
+                      mmsc)).stream()).reduce(
+              Stream::concat).ifPresent(
+              stream -> _codomain.addAll(stream.collect(Collectors.toSet())));
+          break;
+        case EXISTENTIAL_SELF_RESTRICTION:
+          _codomain.add(df.getOWLObjectHasSelf(df.getOWLObjectProperty(roleName)));
+          break;
+        }
     return _codomain;
   };
 
@@ -549,16 +694,22 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
   }
 
   @Override
-  public final OWLOntology computeTBoxBase(final int roleDepth, final OWLOntology backgroundOntology)
-      throws OWLOntologyCreationException {
+  public final OWLOntology computeTBoxBase(
+      final int roleDepth,
+      final int maxCardinality,
+      final OWLOntology backgroundOntology,
+      final Constructor... constructors) throws OWLOntologyCreationException {
     checkRoleDepth(roleDepth);
     final OWLOntologyManager om = OWLManager.createOWLOntologyManager();
     final OWLOntology ontology = om.createOntology();
-    final Context<IRI, OWLClassExpression> inducedContext = getInducedContext(roleDepth);
+    final Context<IRI, OWLClassExpression> inducedContext = getInducedContext(
+        roleDepth,
+        maxCardinality,
+        constructors);
     final Set<Implication<IRI, OWLClassExpression>> backgroundImplications = getBackgroundImplications(
         inducedContext,
         backgroundOntology);
-    final Result<IRI, OWLClassExpression> result = NextClosures6C.computeWithBackgroundImplications(
+    final ResultC<IRI, OWLClassExpression> result = NextClosures6C.computeWithBackgroundImplications(
         inducedContext,
         backgroundImplications,
         true);
@@ -571,4 +722,146 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     return ontology;
   }
 
+  public final class Variable {
+
+    final int index;
+
+    public Variable(final int index) {
+      super();
+      this.index = index;
+    }
+  }
+
+  private final SetList<ArrayList<IRI>> getFirstFunctions() {
+    final SetList<ArrayList<IRI>> fs = new HashSetArrayList<ArrayList<IRI>>();
+    for (IRI individual : getDomain()) {
+      final ArrayList<IRI> f = new ArrayList<IRI>();
+      f.add(individual);
+      fs.add(f);
+    }
+    return fs;
+  }
+
+  private final SetList<ArrayList<IRI>> getNextFunctions(final SetList<ArrayList<IRI>> _fs) {
+    final SetList<ArrayList<IRI>> fs = new HashSetArrayList<ArrayList<IRI>>();
+    for (ArrayList<IRI> _f : _fs) {
+      for (IRI individual : getDomain()) {
+        final ArrayList<IRI> f = new ArrayList<IRI>(_f);
+        f.add(individual);
+        fs.add(f);
+      }
+    }
+    return fs;
+  }
+
+  private final SetList<ArrayList<IRI>> getFunctions(final int roleDepth) {
+    SetList<ArrayList<IRI>> fs = new HashSetArrayList<ArrayList<IRI>>();
+    fs.add(new ArrayList<IRI>());
+    for (int i = 0; i <= roleDepth; i++) {
+      fs = getNextFunctions(fs);
+    }
+    return fs;
+  }
+
+  private final boolean applies(final ArrayList<IRI> f, final Triple<Integer, IRI, Integer> t) {
+    final IRI d = f.get(t.getFirst());
+    final IRI r = t.getSecond();
+    final IRI e = f.get(t.getThird());
+    return roleNameExtensions.get(
+        r).contains(
+        Pair.of(
+            d,
+            e));
+  }
+
+  public final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> getInducedRoleContext(final int roleDepth) {
+    final SetList<ArrayList<IRI>> _domain = getFunctions(roleDepth + 1);
+
+    final SetList<Triple<Integer, IRI, Integer>> _codomain = new HashSetArrayList<Triple<Integer, IRI, Integer>>();
+    for (IRI roleName : signature.getRoleNames()) {
+      for (int i = 2; i <= roleDepth; i++)
+        for (int j = 1; j <= i; j++) {
+          _codomain.add(new Triple<Integer, IRI, Integer>(j, roleName, j + 1));
+          if (i != 1)
+            _codomain.add(new Triple<Integer, IRI, Integer>(1, roleName, j + 1));
+        }
+
+    }
+    final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> inducedRoleContext =
+        new SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>>(_domain, _codomain, false);
+
+    for (ArrayList<IRI> o : _domain)
+      for (Triple<Integer, IRI, Integer> a : _codomain) {
+        if (applies(
+            o,
+            a))
+          inducedRoleContext.add(
+              o,
+              a);
+      }
+
+    return inducedRoleContext;
+  }
+
+  public final Set<OWLSubPropertyChainOfAxiom> getRoleInclusionBase(final int roleDepth) {
+    final Set<OWLSubPropertyChainOfAxiom> base = new HashSet<OWLSubPropertyChainOfAxiom>();
+
+    final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> cxt = getInducedRoleContext(roleDepth);
+    final ClosureOperator<Triple<Integer, IRI, Integer>> clop = new AClosureOperator<Triple<Integer, IRI, Integer>>() {
+
+      @Override
+      public Set<Triple<Integer, IRI, Integer>> closure(Set<Triple<Integer, IRI, Integer>> set) {
+        return set;
+//        if (set.parallelStream().anyMatch(
+//            t -> t.getFirst().equals(
+//                1) && t.getThird().equals(
+//                2)))
+//          return new HashSet<Triple<Integer, IRI, Integer>>(set);
+//        return new HashSet<Triple<Integer, IRI, Integer>>(cxt.colHeads());
+      }
+
+    };
+    final Result6<ArrayList<IRI>, Triple<Integer, IRI, Integer>> result = NextClosures6.compute(
+        cxt,
+//        clop,
+        true);
+    for (Entry<Set<Triple<Integer, IRI, Integer>>, Set<Triple<Integer, IRI, Integer>>> e : result.implications
+        .entrySet()) {
+      final List<Triple<Integer, IRI, Integer>> chain = new ArrayList<Triple<Integer, IRI, Integer>>(roleDepth);
+      final Triple<Integer, IRI, Integer> conclusion;
+      boolean chainEnded = false;
+      int i;
+      for (i = 1; !chainEnded || i <= roleDepth; i++) {
+        final int j = i;
+        final Optional<Triple<Integer, IRI, Integer>> opt = e.getKey().parallelStream().filter(
+            t -> t.getFirst().equals(
+                j) && t.getThird().equals(
+                j + 1)).findFirst();
+        if (opt.isPresent())
+          chain.add(opt.get());
+        else
+          chainEnded = true;
+      }
+      if (!chain.isEmpty())
+        System.out.println("found chain of size "+chain.size()+" "+chain);
+      final int j = chain.size()+1;//i;
+      final Optional<Triple<Integer, IRI, Integer>> opt = e.getValue().parallelStream().filter(
+          t -> t.getFirst().equals(
+              1) && t.getThird().equals(
+              j)).findFirst();
+      if (opt.isPresent())
+        conclusion = opt.get();
+      else
+        conclusion = null;
+      if (conclusion != null) {
+        final List<OWLObjectPropertyExpression> subProperty = chain.stream().map(
+            t -> df.getOWLObjectProperty(t.getSecond())).collect(
+            Collectors.toList());
+        base.add(df.getOWLSubPropertyChainOfAxiom(
+            subProperty,
+            df.getOWLObjectProperty(conclusion.getSecond())));
+      }
+    }
+    return base;
+  }
 }

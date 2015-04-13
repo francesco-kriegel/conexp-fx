@@ -6,17 +6,7 @@ package conexp.fx.gui.graph;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -52,7 +42,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Slider;
@@ -85,6 +74,8 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import jfxtras.scene.control.ListSpinner;
 
+import org.semanticweb.owlapi.model.OWLClassExpression;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -100,8 +91,9 @@ import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.math.Points;
 import conexp.fx.core.quality.LayoutEvolution;
 import conexp.fx.core.util.Constants;
+import conexp.fx.core.util.OWLtoString;
 import conexp.fx.gui.ConExpFX;
-import conexp.fx.gui.FCAInstance;
+import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.graph.option.AnimationSpeed;
 import conexp.fx.gui.graph.option.AttributeLabelText;
 import conexp.fx.gui.graph.option.EdgeHighlight;
@@ -488,7 +480,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         protected final Concept<G, M> computeValue() {
           return c;
         }
-      }, new SimpleStringProperty(attribute.toString()), true);
+      },
+      // TODO: the type check for OWLClassExpression is currently a workaround, and will be removed in the future.
+          new SimpleStringProperty(attribute instanceof OWLClassExpression
+              ? OWLtoString.toString((OWLClassExpression) attribute) : attribute.toString()), true);
       text.styleProperty().bind(controlBox.textSizeBinding);
       synchronized (attributeLabels) {
         attributeLabels.put(attribute, this);
@@ -590,8 +585,8 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
                                                                        .build();
     private final CheckBox                      conflictChart      = new CheckBox("Conflict Chart");
     private final CheckBox                      voronoiChart       = new CheckBox("Voronoi Chart");
-    private final CheckBox                      hideBottom         = new CheckBox("Hide Bottom Edges");
-    private final CheckBox                      hideTop            = new CheckBox("Hide Top Edges");
+    private final CheckBox                      hideBottom         = new CheckBox("Hide Bottom Concept");
+    private final CheckBox                      hideTop            = new CheckBox("Hide Top Concept");
 
     private CFXControlBox() {
       createContent();
@@ -671,6 +666,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
             setRight(content);
         }
       });
+      ConceptGraph.this.setOnMouseExited(e -> setRight(null));
       animationSpeed.valueProperty().addListener(new ChangeListener<AnimationSpeed>() {
 
         public final void changed(
@@ -807,8 +803,11 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         public void changed(final ObservableValue<? extends Boolean> observable, final Boolean wasHidden, Boolean hide) {
           if (hide == wasHidden)
             return;
+          fca.layout.invalidate();
           if (hide) {
 //                vertices.get(fca.layout.bottomConcept.get()).node.opacityProperty().bind(zero);
+//            vertices.get(fca.context.selection.bottomConcept()).node.opacityProperty().set(0.05d);
+//            .bind(new SimpleDoubleProperty(0.05d));
             for (Edge e : upperEdges(fca.context.selection.bottomConcept())) {
               e.line.opacityProperty().unbind();
               e.line.opacityProperty().bind(new SimpleDoubleProperty(0.05d));
@@ -816,6 +815,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           } else {
 //                vertices.get(fca.layout.bottomConcept.get()).node.opacityProperty().unbind();
 //                vertices.get(fca.layout.bottomConcept.get()).node.opacityProperty().set(1d);
+//            vertices.get(fca.context.selection.bottomConcept()).node.opacityProperty().set(1d);
             for (Edge e : upperEdges(fca.context.selection.bottomConcept())) {
               e.line.opacityProperty().unbind();
               e.line.opacityProperty().bind(e.opacity);
@@ -828,6 +828,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         public void changed(final ObservableValue<? extends Boolean> observable, final Boolean wasHidden, Boolean hide) {
           if (hide == wasHidden)
             return;
+          fca.layout.invalidate();
           if (hide) {
 //                vertices.get(fca.layout.bottomConcept.get()).node.opacityProperty().bind(zero);
             for (Edge e : lowerEdges(fca.context.selection.topConcept())) {
@@ -856,28 +857,19 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
 
     private CFXToolBar() {
       final ToolBar toolBar = new ToolBar();
-      final Button exportButton =
-          ButtonBuilder
-              .create()
-              .graphic(
-                  ImageViewBuilder
-                      .create()
-                      .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/briefcase.png")))
-                      .build())
-              .onAction(new EventHandler<ActionEvent>() {
-
-                @Override
-                public final void handle(final ActionEvent event) {
-                  fca.exportTeX();
-                }
-              })
-              .minHeight(24)
-              .build();
-      toolBar.getItems().addAll(
-          createTransformationBox(),
-          createLayoutBox(),
-          createShowBox(),
-          exportButton,
+//      final Button exportButton = ButtonBuilder.create().graphic(
+//          ImageViewBuilder.create().image(
+//              new Image(ConExpFX.class.getResourceAsStream("image/16x16/briefcase.png"))).build()).onAction(
+//          new EventHandler<ActionEvent>() {
+//
+//            @Override
+//            public final void handle(final ActionEvent event) {
+//              fca.exportTeX();
+//            }
+//          }).minHeight(
+//          24).build();
+      toolBar.getItems().addAll(createTransformationBox(), createLayoutBox(), createShowBox(),
+//          exportButton,
           createSpace(),
           createSearchBox());
       relayout.setGraphic(ImageViewBuilder
@@ -905,7 +897,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
       final ToggleButton transformation3DButton = new ToggleButton();// 2\u00bdD
       final ToggleButton transformationXYButton = new ToggleButton();
       final ToggleButton transformationPolarButton = new ToggleButton();
-      final ToggleButton transformationCircularButton = new ToggleButton();
+//      final ToggleButton transformationCircularButton = new ToggleButton();
       transformation2DButton.setGraphic(ImageViewBuilder
           .create()
           .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/wired.png")))
@@ -922,10 +914,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           .create()
           .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/target.png")))
           .build());
-      transformationCircularButton.setGraphic(ImageViewBuilder
-          .create()
-          .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/chart_pie.png")))
-          .build());
+//      transformationCircularButton.setGraphic(ImageViewBuilder
+//          .create()
+//          .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/chart_pie.png")))
+//          .build());
 //      transformation2DButton.setOnAction(new EventHandler<ActionEvent>() {
 //
 //        public final void handle(final ActionEvent event) {
@@ -960,12 +952,12 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
       transformation3DButton.setUserData(GraphTransformation.GRAPH_3D);
       transformationXYButton.setUserData(GraphTransformation.XY);
       transformationPolarButton.setUserData(GraphTransformation.POLAR);
-      transformationCircularButton.setUserData(GraphTransformation.CIRCULAR);
+//      transformationCircularButton.setUserData(GraphTransformation.CIRCULAR);
       transformation2DButton.setToggleGroup(transformationToggleGroup);
       transformation3DButton.setToggleGroup(transformationToggleGroup);
       transformationXYButton.setToggleGroup(transformationToggleGroup);
       transformationPolarButton.setToggleGroup(transformationToggleGroup);
-      transformationCircularButton.setToggleGroup(transformationToggleGroup);
+//      transformationCircularButton.setToggleGroup(transformationToggleGroup);
       transformationToggleGroup.selectToggle(transformation2DButton);
       transformation.bind(new ObjectBinding<GraphTransformation>() {
 
@@ -994,7 +986,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
               // conceptVertexRadiusChoiceBox.setValue(ConceptVertexRadiusOption.BY_INTENT);
               break;
             case CIRCULAR:
-              new CircularGraph<G, M>().show(fca.lattice);
+//              new CircularGraph<G, M>().show(fca.lattice);
             }
             return lastValue;
           } else {
@@ -1004,24 +996,30 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           }
         }
       });
+//      transformation.addListener((observable, oldTransformation, newTransformation) -> {
+//        Platform.runLater(() -> fca.relayout(1, 4));
+//      });
       final HBox transformationBox = new HBox();
       transformationBox.setPadding(new Insets(0d));
       transformation2DButton.setStyle("-fx-background-radius: 5 0 0 5, 5 0 0 5, 4 0 0 4, 3 0 0 3;");
       transformation3DButton.setStyle("-fx-background-radius: 0, 0, 0, 0;");
       transformationXYButton.setStyle("-fx-background-radius: 0, 0, 0, 0;");
-      transformationPolarButton.setStyle("-fx-background-radius: 0, 0, 0, 0;");
-      transformationCircularButton.setStyle("-fx-background-radius: 0 5 5 0, 0 5 5 0, 0 4 4 0, 0 3 3 0;");
+      transformationPolarButton
+//      .setStyle("-fx-background-radius: 0, 0, 0, 0;");
+//      transformationCircularButton
+          .setStyle("-fx-background-radius: 0 5 5 0, 0 5 5 0, 0 4 4 0, 0 3 3 0;");
       transformation2DButton.setMinHeight(24);
       transformation3DButton.setMinHeight(24);
       transformationXYButton.setMinHeight(24);
       transformationPolarButton.setMinHeight(24);
-      transformationCircularButton.setMinHeight(24);
+//      transformationCircularButton.setMinHeight(24);
       transformationBox.getChildren().addAll(
           transformation2DButton,
           transformation3DButton,
           transformationXYButton,
-          transformationPolarButton,
-          transformationCircularButton);
+          transformationPolarButton
+//          ,transformationCircularButton
+          );
       return transformationBox;
     }
 
@@ -1123,7 +1121,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     }
   }
 
-  private final FCAInstance<G, M>      fca;
+  private final FCADataset<G, M>       fca;
   private final CFXControlBox          controlBox;
   private final CFXToolBar             toolBar;
   private final Map<G, ObjectLabel>    objectLabels      = new ConcurrentHashMap<G, ObjectLabel>();
@@ -1165,7 +1163,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     }
   }
 
-  public ConceptGraph(final FCAInstance<G, M> fcaInstance) {
+  public ConceptGraph(final FCADataset<G, M> fcaInstance) {
     super(fcaInstance.layout);
     this.fca = fcaInstance;
     this.controlBox = new CFXControlBox();
@@ -1338,9 +1336,9 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
   }
 
   protected final BoundingBox getContentBoundingBox() {
-    if (fca == null || fca.layout == null)
+    if (fca == null || fca.layout == null || controlBox == null)
       return new BoundingBox(0, 0, 0, 0, 0, 0);
-    return fca.layout.getCurrentBoundingBox();
+    return fca.layout.getCurrentBoundingBox(controlBox.hideBottom.isSelected(), controlBox.hideTop.isSelected());
   }
 
   protected final void initPolarBottom(final Config c, final Timeline t) {
@@ -1879,5 +1877,9 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
 
   public final boolean threeDimensions() {
     return transformation.get().equals(GraphTransformation.GRAPH_3D);
+  }
+
+  public final boolean polar() {
+    return transformation.get().equals(GraphTransformation.POLAR);
   }
 }

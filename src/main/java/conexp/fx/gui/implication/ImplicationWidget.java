@@ -6,21 +6,11 @@ package conexp.fx.gui.implication;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
-
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -29,6 +19,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableColumnBuilder;
 import javafx.scene.control.TableView;
@@ -36,20 +28,45 @@ import javafx.scene.control.TableViewBuilder;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 import conexp.fx.core.implication.Implication;
-import conexp.fx.gui.FCAInstance;
+import conexp.fx.gui.dataset.FCADataset;
 
 public class ImplicationWidget<G, M> extends BorderPane {
 
-  private final FCAInstance<G, M>            fca;
+  private final FCADataset<G, M>             fca;
   private final TableView<Implication<G, M>> table;
   private final ToolBar                      toolBar;
 
   @SuppressWarnings({ "deprecation", "unchecked" })
-  public ImplicationWidget(final FCAInstance<G, M> fcaInstance) {
+  public ImplicationWidget(final FCADataset<G, M> fcaInstance) {
     super();
     this.fca = fcaInstance;
+
+    final Label confidenceLabel = new Label("Confidence");
+    final Slider confidenceSlider = new Slider(0, 100, 100);
+    confidenceSlider.setBlockIncrement(5);
+    confidenceSlider.setSnapToTicks(true);
+    confidenceSlider.setMajorTickUnit(1);
+    final Label confidenceValue = new Label();
+    confidenceValue
+        .textProperty()
+        .bind(
+            Bindings.createStringBinding(
+                () -> ((int) confidenceSlider.getValue()) + "%",
+                confidenceSlider.valueProperty()));
+    final HBox confidenceBox = new HBox(confidenceLabel, confidenceSlider, confidenceValue);
+
+    final Label supportLabel = new Label("Support");
+    final Slider supportSlider = new Slider(0, 100, 1);
+    supportSlider.setBlockIncrement(5);
+    supportSlider.setSnapToTicks(true);
+    supportSlider.setMajorTickUnit(1);
+    final Label supportValue = new Label();
+    supportValue.textProperty().bind(
+        Bindings.createStringBinding(() -> ((int) supportSlider.getValue()) + "%", supportSlider.valueProperty()));
+    final HBox supportBox = new HBox(supportLabel, supportSlider, supportValue);
     this.table =
         TableViewBuilder
             .<Implication<G, M>> create()
@@ -67,6 +84,24 @@ public class ImplicationWidget<G, M> extends BorderPane {
                               @Override
                               public Integer getValue() {
                                 return param.getValue().getSupport().size();
+                              }
+                            };
+                          }
+                        })
+                    .build(),
+                TableColumnBuilder
+                    .<Implication<G, M>, Integer> create()
+                    .text("Confidence")
+                    .cellValueFactory(
+                        new Callback<CellDataFeatures<Implication<G, M>, Integer>, ObservableValue<Integer>>() {
+
+                          @Override
+                          public ObservableValue<Integer> call(CellDataFeatures<Implication<G, M>, Integer> param) {
+                            return new ObservableValueBase<Integer>() {
+
+                              @Override
+                              public Integer getValue() {
+                                return (int) (100d * param.getValue().getConfidence());
                               }
                             };
                           }
@@ -98,22 +133,26 @@ public class ImplicationWidget<G, M> extends BorderPane {
                     .build())
             .items(fca.implications)
             .build();
+    table
+        .itemsProperty()
+        .bind(
+            Bindings.createObjectBinding(
+                () -> fca.implications.filtered(impl -> impl.getConfidence() >= confidenceSlider.getValue() / 100d
+                    && (int) (100d * (((double) impl.getSupport().size()) / ((double) fca.context.rowHeads().size()))) >= (int) supportSlider
+                        .getValue()),
+                fca.implications,
+                confidenceSlider.valueProperty(),
+                supportSlider.valueProperty()));
     this.setCenter(table);
-    final Button computeButton = ButtonBuilder.create().text("Compute").onAction(new EventHandler<ActionEvent>() {
+    final Button computeButton = ButtonBuilder.create().text("Refresh").onAction(new EventHandler<ActionEvent>() {
 
       @Override
       public final void handle(final ActionEvent event) {
         fcaInstance.calcImplications();
       }
     }).build();
-    final Button exploreButton = ButtonBuilder.create().text("Explore").onAction(new EventHandler<ActionEvent>() {
 
-      @Override
-      public final void handle(final ActionEvent event) {
-        new AttributeExploration((FCAInstance<String, String>) fcaInstance);
-      }
-    }).disable(!fcaInstance.editable).build();
-    this.toolBar = ToolBarBuilder.create().items(computeButton, exploreButton).build();
+    this.toolBar = ToolBarBuilder.create().items(computeButton, supportBox, confidenceBox).build();
     this.setTop(toolBar);
     this.table.getFocusModel().focusedItemProperty().addListener(new ChangeListener<Implication<G, M>>() {
 

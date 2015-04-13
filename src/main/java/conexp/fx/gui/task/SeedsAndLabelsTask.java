@@ -6,17 +6,7 @@ package conexp.fx.gui.task;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -31,16 +21,16 @@ import javafx.geometry.Point3D;
 import org.ujmp.core.util.RandomSimple;
 
 import conexp.fx.core.context.Concept;
-import conexp.fx.gui.FCAInstance;
+import conexp.fx.gui.dataset.FCADataset;
 
 public final class SeedsAndLabelsTask<G, M> extends BlockingTask {
 
   /**
    * 
    */
-  private final FCAInstance<G, M> fcaInstance;
+  private final FCADataset<G, M> fcaInstance;
 
-  public SeedsAndLabelsTask(FCAInstance<G, M> fcaInstance) {
+  public SeedsAndLabelsTask(FCADataset<G, M> fcaInstance) {
     super(fcaInstance.id.get() + " - Initial Seeds and Labels");
     this.fcaInstance = fcaInstance;
   }

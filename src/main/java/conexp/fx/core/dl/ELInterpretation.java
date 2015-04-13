@@ -6,17 +6,7 @@ package conexp.fx.core.dl;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -37,7 +27,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import conexp.fx.core.algorithm.nextclosures.NextClosures6C;
-import conexp.fx.core.algorithm.nextclosures.NextClosures6C.Result;
+import conexp.fx.core.algorithm.nextclosures.ResultC;
 import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
@@ -65,16 +55,16 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       return false;
     if (conceptExpression.isTop())
       return true;
-    return conceptExpression
-        .getConceptNames()
-        .parallelStream()
-        .allMatch(conceptName -> conceptNameExtensions.get(conceptName).contains(individual))
-        && conceptExpression
-            .getExistentialRestrictions()
-            .parallelStream()
-            .allMatch(
-                existentialRestriction -> getRoleSuccessorStream(existentialRestriction.first(), individual).anyMatch(
-                    successor -> isInstanceOf(successor, existentialRestriction.second())));
+    return conceptExpression.getConceptNames().parallelStream().allMatch(
+        conceptName -> conceptNameExtensions.get(
+            conceptName).contains(
+            individual)) && conceptExpression.getExistentialRestrictions().parallelStream().allMatch(
+        existentialRestriction -> getRoleSuccessorStream(
+            existentialRestriction.first(),
+            individual).anyMatch(
+            successor -> isInstanceOf(
+                successor,
+                existentialRestriction.second())));
   }
 
 //  @Override
@@ -120,16 +110,23 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
 
   @Override
   public final boolean satisfies(final ELConceptInclusion gci) {
-    return isSubsumedBy(gci.getSubsumee(), gci.getSubsumer());
+    return isSubsumedBy(
+        gci.getSubsumee(),
+        gci.getSubsumer());
   }
 
   @Override
   public final boolean models(ELTBox tBox) {
-    return tBox.getGCIs().parallelStream().allMatch(this::satisfies);
+    return tBox.getGCIs().parallelStream().allMatch(
+        this::satisfies);
   }
 
   @Override
-  public ELConceptDescription getMostSpecificConcept(final IRI individual, final int roleDepth) {
+  public ELConceptDescription getMostSpecificConcept(
+      final IRI individual,
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
     checkRoleDepth(roleDepth);
     final Set<IRI> conceptNames = new HashSet<IRI>(conceptNamesPerIndividual.get(individual));
     final Set<Pair<IRI, ELConceptDescription>> existentialRestrictions;
@@ -137,9 +134,15 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
 //      if (getConceptNameExtension(conceptName).contains(individual))
 //        conceptNames.add(conceptName);
     if (roleDepth > 0)
-      existentialRestrictions = roleSuccessors.get(individual).parallelStream().map(p -> {
-        return new Pair<IRI, ELConceptDescription>(p.x(), getMostSpecificConcept(p.y(), roleDepth - 1));
-      }).collect(Collectors.toSet());
+      existentialRestrictions = roleSuccessors.get(
+          individual).parallelStream().map(
+          p -> {
+            return new Pair<IRI, ELConceptDescription>(p.x(), getMostSpecificConcept(
+                p.y(),
+                0,
+                roleDepth - 1));
+          }).collect(
+          Collectors.toSet());
 //      for (IRI roleName : roleNameExtensions.keySet())
 //        for (Pair<IRI, IRI> pair : getRoleNameExtension(roleName))
 //          if (pair.x().equals(individual))
@@ -152,11 +155,20 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
   }
 
   @Override
-  public final ELConceptDescription getMostSpecificConcept(final Set<IRI> individuals, final int roleDepth) {
+  public final ELConceptDescription getMostSpecificConcept(
+      final Set<IRI> individuals,
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
     checkRoleDepth(roleDepth);
-    return ELLeastCommonSubsumer._of(Collections2.transform(individuals, individual -> {
-      return getMostSpecificConcept(individual, roleDepth);
-    }));
+    return ELLeastCommonSubsumer._of(Collections2.transform(
+        individuals,
+        individual -> {
+          return getMostSpecificConcept(
+              individual,
+              0,
+              roleDepth);
+        }));
   }
 
 //  private Set<ELNormalForm> getAllMostSpecificConcepts(final int roleDepth) {
@@ -202,15 +214,26 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
 //  }
 
   @Override
-  protected final SetList<ELConceptDescription> getAttributeSetForInducedContext(int roleDepth) {
-    final Set<ELConceptDescription> mmscs = getAllMostSpecificConcepts(roleDepth - 1);
+  protected final SetList<ELConceptDescription> getAttributeSetForInducedContext(
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
+    final Set<ELConceptDescription> mmscs = getAllMostSpecificConcepts(
+        roleDepth - 1,
+        0);
     final SetList<ELConceptDescription> _codomain = new HashSetArrayList<ELConceptDescription>();
     _codomain.add(ELConceptDescription.bot());
-    _codomain.addAll(Collections2.transform(signature.getConceptNames(), ELConceptDescription::conceptName));
+    _codomain.addAll(Collections2.transform(
+        signature.getConceptNames(),
+        ELConceptDescription::conceptName));
     for (IRI roleName : signature.getRoleNames())
-      _codomain.addAll(Collections2.transform(mmscs, mmsc -> {
-        return ELConceptDescription.existentialRestriction(Pair.of(roleName, mmsc));
-      }));
+      _codomain.addAll(Collections2.transform(
+          mmscs,
+          mmsc -> {
+            return ELConceptDescription.existentialRestriction(Pair.of(
+                roleName,
+                mmsc));
+          }));
     return _codomain;
   };
 
@@ -220,33 +243,52 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       final ELTBox backgroundTBox) {
     final BiPredicate<ELConceptDescription, ELConceptDescription> subsumptionTest;
     if (backgroundTBox == null)
-      subsumptionTest = (concept1, concept2) -> ELReasoner.isSubsumedBy(concept1, concept2);
+      subsumptionTest = (concept1, concept2) -> ELReasoner.isSubsumedBy(
+          concept1,
+          concept2);
     else
-      subsumptionTest = (concept1, concept2) -> ELReasoner.isSubsumedBy(concept1, concept2, backgroundTBox);
-    final Set<Implication<IRI, ELConceptDescription>> backgroundImplications = new HashSet<Implication<IRI, ELConceptDescription>>();
+      subsumptionTest = (concept1, concept2) -> ELReasoner.isSubsumedBy(
+          concept1,
+          concept2,
+          backgroundTBox);
+    final Set<Implication<IRI, ELConceptDescription>> backgroundImplications =
+        new HashSet<Implication<IRI, ELConceptDescription>>();
     for (ELConceptDescription concept1 : inducedContext.colHeads())
       for (ELConceptDescription concept2 : inducedContext.colHeads())
         if (!concept1.equals(concept2))
-          if (subsumptionTest.test(concept1, concept2))
-            backgroundImplications.add(new Implication<IRI, ELConceptDescription>(Collections.singleton(concept1), Collections
-                .singleton(concept2), Collections.emptySet()));
+          if (subsumptionTest.test(
+              concept1,
+              concept2))
+            backgroundImplications.add(new Implication<IRI, ELConceptDescription>(
+                Collections.singleton(concept1),
+                Collections.singleton(concept2),
+                Collections.emptySet()));
     return backgroundImplications;
   }
 
   @Override
-  public final ELTBox computeTBoxBase(final int roleDepth, final ELTBox backgroundTBox) {
+  public final ELTBox computeTBoxBase(
+      final int roleDepth,
+      final int maxCardinality,
+      final ELTBox backgroundTBox,
+      final Constructor... constructors) {
     checkRoleDepth(roleDepth);
     final ELTBox tbox = new ELTBox();
-    final Context<IRI, ELConceptDescription> inducedContext = getInducedContext(roleDepth);
-    final Set<Implication<IRI, ELConceptDescription>> backgroundImplications =
-        getBackgroundImplications(inducedContext, backgroundTBox);
-    final Result<IRI, ELConceptDescription> result =
-        NextClosures6C.computeWithBackgroundImplications(inducedContext, backgroundImplications, false);
+    final Context<IRI, ELConceptDescription> inducedContext = getInducedContext(
+        roleDepth,
+        maxCardinality);
+    final Set<Implication<IRI, ELConceptDescription>> backgroundImplications = getBackgroundImplications(
+        inducedContext,
+        backgroundTBox);
+    final ResultC<IRI, ELConceptDescription> result = NextClosures6C.computeWithBackgroundImplications(
+        inducedContext,
+        backgroundImplications,
+        false);
     for (Entry<Set<ELConceptDescription>, Set<ELConceptDescription>> entry : result.implications.entrySet())
       tbox.getGCIs().add(
-          new ELConceptInclusion(ELConceptDescription.conjunction(entry.getKey()).minimize(), ELConceptDescription
-              .conjunction(entry.getValue())
-              .minimize()));
+          new ELConceptInclusion(ELConceptDescription.conjunction(
+              entry.getKey()).minimize(), ELConceptDescription.conjunction(
+              entry.getValue()).minimize()));
     return tbox;
   }
 
@@ -258,31 +300,51 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
     while (it.hasNext()) {
       String next = it.next();
       while (next.contains("  "))
-        next = next.replace("  ", " ");
-      next = next.replace("<", "").replace(">", "");
+        next = next.replace(
+            "  ",
+            " ");
+      next = next.replace(
+          "<",
+          "").replace(
+          ">",
+          "");
       final String[] triple = next.split(" ");
       if (triple.length > 2)
         if (triple[1].contains(isaRole)) {
-          concepts.put(triple[0], triple[2]);
+          concepts.put(
+              triple[0],
+              triple[2]);
         } else {
-          roles.put(triple[1], new Pair<String, String>(triple[0], triple[2]));
+          roles.put(
+              triple[1],
+              new Pair<String, String>(triple[0], triple[2]));
         }
     }
     for (Entry<String, String> entry : concepts.entries()) {
       final IRI c = IRI.create(entry.getKey());
       final IRI d = IRI.create(entry.getValue());
-      i.getSignature().getConceptNames().add(d);
-      i.getDomain().add(c);
-      i.addConceptNameAssertion(d, c);
+      i.getSignature().getConceptNames().add(
+          d);
+      i.getDomain().add(
+          c);
+      i.addConceptNameAssertion(
+          d,
+          c);
     }
     for (Entry<String, Pair<String, String>> entry : roles.entries()) {
       final IRI r = IRI.create(entry.getKey());
       final IRI d = IRI.create(entry.getValue().x());
       final IRI e = IRI.create(entry.getValue().y());
-      i.getSignature().getRoleNames().add(r);
-      i.getDomain().add(d);
-      i.getDomain().add(e);
-      i.addRoleNameAssertion(r, d, e);
+      i.getSignature().getRoleNames().add(
+          r);
+      i.getDomain().add(
+          d);
+      i.getDomain().add(
+          e);
+      i.addRoleNameAssertion(
+          r,
+          d,
+          e);
     }
     return i;
   }
@@ -291,14 +353,24 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
     final ELInterpretation i = new ELInterpretation(baseIRI);
     for (IRI[] triple : triples) {
       if (triple[1].equals(isaRole)) {
-        i.getSignature().getConceptNames().add(triple[2]);
-        i.getDomain().add(triple[0]);
-        i.addConceptNameAssertion(triple[2], triple[0]);
+        i.getSignature().getConceptNames().add(
+            triple[2]);
+        i.getDomain().add(
+            triple[0]);
+        i.addConceptNameAssertion(
+            triple[2],
+            triple[0]);
       } else {
-        i.getSignature().getRoleNames().add(triple[1]);
-        i.getDomain().add(triple[0]);
-        i.getDomain().add(triple[2]);
-        i.addRoleNameAssertion(triple[1], triple[0], triple[2]);
+        i.getSignature().getRoleNames().add(
+            triple[1]);
+        i.getDomain().add(
+            triple[0]);
+        i.getDomain().add(
+            triple[2]);
+        i.addRoleNameAssertion(
+            triple[1],
+            triple[0],
+            triple[2]);
       }
     }
     return i;

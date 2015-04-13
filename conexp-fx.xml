@@ -1,0 +1,30 @@
+<metadata>
+ <data>
+  <key>
+   file_history
+  </key>
+  <type>
+   STRING_LIST
+  </type>
+  <metadata>
+   <subkey>
+    file
+   </subkey>
+  </metadata>
+ </data>
+ <data>
+  <key>
+   last_opened_files
+  </key>
+  <type>
+   STRING_LIST
+  </type>
+  <metadata>
+   <subkey>
+    last_opened_file
+   </subkey>
+  </metadata>
+ </data>
+</metadata>
+<file_history></file_history>
+<last_opened_files></last_opened_files>

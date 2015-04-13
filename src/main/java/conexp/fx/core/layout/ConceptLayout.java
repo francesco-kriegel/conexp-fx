@@ -6,17 +6,7 @@ package conexp.fx.core.layout;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -33,7 +23,6 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
@@ -263,21 +252,49 @@ public final class ConceptLayout<G, M> implements Observable {
     invalidate();
   }
 
-  public synchronized final BoundingBox getCurrentBoundingBox() {
+  public synchronized final BoundingBox getCurrentBoundingBox(final boolean hideBottom, final boolean hideTop) {
     double xmin = Double.MAX_VALUE;
     double xmax = Double.MIN_VALUE;
     double ymin = Double.MAX_VALUE;
     double ymax = Double.MIN_VALUE;
     double zmin = Double.MAX_VALUE;
     double zmax = Double.MIN_VALUE;
-    for (Point3D p : positions.values()) {
-      xmin = Math.min(xmin, p.getX());
-      xmax = Math.max(xmax, p.getX());
-      ymin = Math.min(ymin, p.getY());
-      ymax = Math.max(ymax, p.getY());
-      zmin = Math.min(zmin, p.getZ());
-      zmax = Math.max(zmax, p.getZ());
-    }
+//    final java.util.function.Predicate<Entry<Concept<G, M>, Point3D>> pred;
+//    if (hideBottom && hideTop)
+//      pred =
+//          e -> !e.getKey().getExtent().containsAll(lattice.context.rowHeads())
+//              && !e.getKey().getIntent().containsAll(lattice.context.colHeads());
+//    else if (hideBottom)
+//      pred =
+//          e -> !e.getKey().getExtent().containsAll(lattice.context.rowHeads())
+//              && !e.getKey().getIntent().containsAll(lattice.context.colHeads());
+//    else if (hideTop)
+//      pred =
+//          e -> !e.getKey().getExtent().containsAll(lattice.context.rowHeads())
+//              && !e.getKey().getIntent().containsAll(lattice.context.colHeads());
+//    else
+//      pred = e -> true;
+//    positions
+//        .entrySet()
+//        .parallelStream()
+//        .filter(pred)
+//        .map(e -> e.getValue())
+//        .reduce(
+//            Pair.of(new double[] { Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE }, new double[] {
+//                Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE }),
+//            (a, p) -> Pair.of(new double[] {}, new double[] {}),
+//            (a, b) -> Pair.of(null, null));
+    for (Entry<Concept<G, M>, Point3D> e : positions.entrySet())
+      if (!hideBottom || !e.getKey().getIntent().containsAll(lattice.context.colHeads()))
+        if (!hideTop || !e.getKey().getExtent().containsAll(lattice.context.rowHeads())) {
+          final Point3D p = e.getValue();
+          xmin = Math.min(xmin, p.getX());
+          xmax = Math.max(xmax, p.getX());
+          ymin = Math.min(ymin, p.getY());
+          ymax = Math.max(ymax, p.getY());
+          zmin = Math.min(zmin, p.getZ());
+          zmax = Math.max(zmax, p.getZ());
+        }
     final double dx = xmax - xmin;
     final double dy = ymax - ymin;
     final double dz = zmax - zmin;

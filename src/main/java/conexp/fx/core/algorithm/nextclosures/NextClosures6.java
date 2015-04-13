@@ -6,28 +6,13 @@ package conexp.fx.core.algorithm.nextclosures;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -42,83 +27,14 @@ import conexp.fx.core.context.Context;
 
 public final class NextClosures6 {
 
-  public static final class Result<G, M> {
-
-    public final Set<Concept<G, M>>    concepts     = Collections
-                                                        .newSetFromMap(new ConcurrentHashMap<Concept<G, M>, Boolean>());
-    public final Map<Set<M>, Set<M>>   implications = new ConcurrentHashMap<Set<M>, Set<M>>();
-    public final Map<Set<M>, Set<G>>   supports     = new ConcurrentHashMap<Set<M>, Set<G>>();
-    private final Map<Set<M>, Integer> candidates   = new ConcurrentHashMap<Set<M>, Integer>();
-    private final Set<Set<M>>          processed    = Collections
-                                                        .newSetFromMap(new ConcurrentHashMap<Set<M>, Boolean>());
-    private int                        cardinality  = 0;
-
-    public Result() {
-      candidates.put(new HashSet<M>(), 0);
-    }
-
-    private final boolean isClosed(final Set<M> candidate) {
-      for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
-        if (candidate.size() > implication.getKey().size() && candidate.containsAll(implication.getKey())
-            && !candidate.containsAll(implication.getValue()))
-          return false;
-      return true;
-    }
-
-    private final Set<M> fastClosure(final Set<M> candidate, final int c) {
-      final Set<M> closure = new HashSet<M>(candidate);
-      boolean changed = false;
-      for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
-        if (implication.getKey().size() >= c && closure.size() > implication.getKey().size()
-            && closure.containsAll(implication.getKey()) && !closure.containsAll(implication.getValue())) {
-          closure.addAll(implication.getValue());
-          changed = true;
-        }
-      while (changed) {
-        changed = false;
-        for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
-          if (closure.size() > implication.getKey().size() && closure.containsAll(implication.getKey())
-              && !closure.containsAll(implication.getValue())) {
-            closure.addAll(implication.getValue());
-            changed = true;
-          }
-      }
-      return closure;
-    }
-
-    private final Set<M> closure(final Set<M> candidate) {
-      final Set<M> closure = new HashSet<M>(candidate);
-      boolean changed = true;
-      while (changed) {
-        changed = false;
-        for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
-          if (closure.size() > implication.getKey().size() && closure.containsAll(implication.getKey())
-              && !closure.containsAll(implication.getValue())) {
-            closure.addAll(implication.getValue());
-            changed = true;
-          }
-      }
-      return closure;
-    }
-
-    private final boolean addToProcessed(final Set<M> s) {
-      try {
-        return processed.add(s);
-      } catch (ConcurrentModificationException e) {
-        return addToProcessed(s);
-      }
-    }
-
-  }
-
-  public static final <G, M> NextClosures6.Result<G, M> compute(
+  public static final <G, M> Result6<G, M> compute(
       final Context<G, M> cxt,
       final boolean verbose,
       final ThreadPoolExecutor tpe) {
     if (verbose)
       System.out.println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize()
           + " cores...");
-    final Result<G, M> result = new Result<G, M>();
+    final Result6<G, M> result = new Result6<G, M>();
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
       if (verbose) {
@@ -184,7 +100,7 @@ public final class NextClosures6 {
     return result;
   }
 
-  public static final <G, M> NextClosures6.Result<G, M> compute(
+  public static final <G, M> Result6<G, M> compute(
       final Context<G, M> cxt,
       final boolean verbose,
       final int cores) {
@@ -195,13 +111,13 @@ public final class NextClosures6 {
     final ThreadPoolExecutor tpe =
         new ThreadPoolExecutor(cores, cores, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     tpe.prestartAllCoreThreads();
-    final Result<G, M> result = compute(cxt, verbose, tpe);
+    final Result6<G, M> result = compute(cxt, verbose, tpe);
     tpe.purge();
     tpe.shutdown();
     return result;
   }
 
-  public static final <G, M> NextClosures6.Result<G, M> compute(final Context<G, M> cxt, final boolean verbose) {
+  public static final <G, M> Result6<G, M> compute(final Context<G, M> cxt, final boolean verbose) {
     final int maxc = Runtime.getRuntime().availableProcessors();
     final int cores = maxc < 9 ? maxc : (maxc * 3) / 4;
     return compute(cxt, verbose, cores);

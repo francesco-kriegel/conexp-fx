@@ -39,7 +39,15 @@ Please note, that currently not all features are available from the graphical us
 
 ## Usage
 To run Concept Explorer FX with little effort, you can use the Java WebStart bundles, that are installed on my homepage at
-(http://lat.inf.tu-dresden.de/~francesco/conexp-fx/conexp-fx.html). Please make sure that your browser has the latest Java WebStart plugin installed.
+(http://lat.inf.tu-dresden.de/~francesco/conexp-fx/conexp-fx.html). Please make sure that your browser has the latest Java WebStart plugin installed. The security warning can be deactivated by importing the certificate `conexp-fx.cer` to the Trusted CAs.
+
+### Import Certificate to Trusted CAs
+* Use keytool to import it to trusted.cacerts.
+	command: `keytool -import -alias conexp-fx -keystore PATH_TO_TRUSTED_CACERTS`
+  On Mac OS X, trusted.cacerts is located in `~/Library/Application Support/Oracle/Java/Deployment/security/trusted.cacerts`.
+  On Windows, trusted.cacerts is located in `%USERPROFILE%\AppData\LocalLow\Sun\Java\Deploymenr\security\trusted.cacerts`.
+* Use Java Control Panel.
+	Security -> Manage Certificates... -> Certificate Type: Signer CA -> Import
 
 In case you do not want to run the software within your browser, there is also the option of downloading the latest release for your platform,
 either from this GitHub repository, or from the download site at (http://lat.inf.tu-dresden.de/~francesco/conexp-fx/download.html)

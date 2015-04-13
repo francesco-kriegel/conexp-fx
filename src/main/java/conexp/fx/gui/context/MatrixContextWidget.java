@@ -6,17 +6,7 @@ package conexp.fx.gui.context;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 import java.util.Collection;
@@ -66,6 +56,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
+import org.semanticweb.owlapi.model.OWLClassExpression;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
@@ -76,11 +68,12 @@ import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.context.MatrixContext.Incidence;
 import conexp.fx.core.util.Constants;
-import conexp.fx.gui.FCAInstance;
+import conexp.fx.core.util.OWLtoString;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.cellpane.Cell;
 import conexp.fx.gui.cellpane.CellPane;
 import conexp.fx.gui.cellpane.InteractionMode;
+import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.graph.ConceptGraph;
 import conexp.fx.gui.util.ColorScheme;
 import conexp.fx.gui.util.LaTeX;
@@ -112,15 +105,24 @@ public class MatrixContextWidget<G, M> extends BorderPane {
           });
         }
       };
-      context.addEventHandler(eventHandler, RelationEvent.ROWS_ADDED);
-      context.addEventHandler(eventHandler, RelationEvent.ROWS_REMOVED);
+      context.addEventHandler(
+          eventHandler,
+          RelationEvent.ROWS_ADDED);
+      context.addEventHandler(
+          eventHandler,
+          RelationEvent.ROWS_REMOVED);
       this.maxColumns.set(1);
-      this.interactionPane.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
+      if (tab != null)
+        this.interactionPane.addEventHandler(
+            MouseEvent.MOUSE_EXITED,
+            new EventHandler<MouseEvent>() {
 
-        public final void handle(final MouseEvent event) {
-          tab.conceptGraph.highlight(false, tab.conceptGraph.highlightRequests.dehighlight());
-        }
-      });
+              public final void handle(final MouseEvent event) {
+                tab.conceptGraph.highlight(
+                    false,
+                    tab.conceptGraph.highlightRequests.dehighlight());
+              }
+            });
     }
 
     protected final RowHeaderCell createCell(final int row, final int column) {
@@ -128,7 +130,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
 
     public final void highlightConcept(final Collection<Integer> domainIndices) {
-      highlight(domainIndices, null);
+      highlight(
+          domainIndices,
+          null);
     }
   }
 
@@ -156,14 +160,23 @@ public class MatrixContextWidget<G, M> extends BorderPane {
           });
         }
       };
-      context.addEventHandler(eventHandler, RelationEvent.COLUMNS_ADDED);
-      context.addEventHandler(eventHandler, RelationEvent.COLUMNS_REMOVED);
-      this.interactionPane.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
+      context.addEventHandler(
+          eventHandler,
+          RelationEvent.COLUMNS_ADDED);
+      context.addEventHandler(
+          eventHandler,
+          RelationEvent.COLUMNS_REMOVED);
+      if (tab != null)
+        this.interactionPane.addEventHandler(
+            MouseEvent.MOUSE_EXITED,
+            new EventHandler<MouseEvent>() {
 
-        public final void handle(final MouseEvent event) {
-          tab.conceptGraph.highlight(false, tab.conceptGraph.highlightRequests.dehighlight());
-        }
-      });
+              public final void handle(final MouseEvent event) {
+                tab.conceptGraph.highlight(
+                    false,
+                    tab.conceptGraph.highlightRequests.dehighlight());
+              }
+            });
     }
 
     protected final ColHeaderCell createCell(final int row, final int column) {
@@ -171,7 +184,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
 
     public final void highlightConcept(final Collection<Integer> codomainIndices) {
-      highlight(null, codomainIndices);
+      highlight(
+          null,
+          codomainIndices);
     }
   }
 
@@ -181,28 +196,39 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       super("FormalContextPane", InteractionMode.ROWS_AND_COLUMNS);
       this.textSizeDefault.bind(MatrixContextWidget.this.incidenceSizeDefault);
       this.zoomFactor.bind(MatrixContextWidget.this.zoomFactor);
-      this.bind(rowHeaderPane, InteractionMode.ROWS);
-      this.bind(colHeaderPane, InteractionMode.COLUMNS);
-      this.rowMap.addListener(new MapChangeListener<Integer, Integer>() {
+      this.bind(
+          rowHeaderPane,
+          InteractionMode.ROWS);
+      this.bind(
+          colHeaderPane,
+          InteractionMode.COLUMNS);
+      if (tab != null)
+        this.rowMap.addListener(new MapChangeListener<Integer, Integer>() {
 
-        public final void onChanged(
-            final javafx.collections.MapChangeListener.Change<? extends Integer, ? extends Integer> change) {
-          tab.unsavedChanges.set(true);
-        }
-      });
-      this.columnMap.addListener(new MapChangeListener<Integer, Integer>() {
+          public final void onChanged(
+              final javafx.collections.MapChangeListener.Change<? extends Integer, ? extends Integer> change) {
+            tab.unsavedChanges.set(true);
+          }
+        });
+      if (tab != null)
+        this.columnMap.addListener(new MapChangeListener<Integer, Integer>() {
 
-        public final void onChanged(
-            final javafx.collections.MapChangeListener.Change<? extends Integer, ? extends Integer> change) {
-          tab.unsavedChanges.set(true);
-        }
-      });
-      this.interactionPane.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
+          public final void onChanged(
+              final javafx.collections.MapChangeListener.Change<? extends Integer, ? extends Integer> change) {
+            tab.unsavedChanges.set(true);
+          }
+        });
+      if (tab != null)
+        this.interactionPane.addEventHandler(
+            MouseEvent.MOUSE_EXITED,
+            new EventHandler<MouseEvent>() {
 
-        public final void handle(final MouseEvent event) {
-          tab.conceptGraph.highlight(false, tab.conceptGraph.highlightRequests.dehighlight());
-        }
-      });
+              public final void handle(final MouseEvent event) {
+                tab.conceptGraph.highlight(
+                    false,
+                    tab.conceptGraph.highlightRequests.dehighlight());
+              }
+            });
     }
 
     protected final ContextCell createCell(final int row, final int column) {
@@ -218,17 +244,21 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       super(rowHeaderPane, row, 0, Pos.CENTER_RIGHT, TextAlignment.RIGHT, false, null);
       if (view == null) {
         view = ImageViewBuilder.create().build();
-        this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+        this.contentPane.get().getChildren().add(
+            LabelBuilder.create().graphic(
+                view).build());
         this.contentPane.get().text.setOpacity(0);
       }
       this.dehighlightColor = Color.WHITE;
       this.contentPane.get().background.setFill(dehighlightColor);
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+      this.interactionPane.get().addEventHandler(
+          MouseEvent.MOUSE_CLICKED,
+          new EventHandler<MouseEvent>() {
 
-        @SuppressWarnings("incomplete-switch")
-        public final void handle(final MouseEvent event) {
-          switch (event.getButton()) {
-          case PRIMARY:
+            @SuppressWarnings("incomplete-switch")
+            public final void handle(final MouseEvent event) {
+              switch (event.getButton()) {
+              case PRIMARY:
 //                if (rowHeaderPane.rowOpacityMap.containsKey(contentCoordinates.get().x())) {
 //                  rowHeaderPane.rowOpacityMap.remove(contentCoordinates.get().x());
 ////                final G object = context.getDomain().get(contentCoordinates.get().x());
@@ -238,81 +268,103 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 ////                final G object = context.getDomain().get(contentCoordinates.get().x());
 ////                context.deselectObject(object);
 //                }
-            break;
-          case SECONDARY:
-            if (MatrixContextWidget.this instanceof StringMatrixContextWidget) {
-              System.out.println("edit mode");
-              final G object = context.rowHeads().get(contentCoordinates.get().x());
-              final TextField textField = TextFieldBuilder.create().text((String) object).build();
-              textField.addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
+                break;
+              case SECONDARY:
+                if (MatrixContextWidget.this instanceof StringMatrixContextWidget) {
+                  System.out.println("edit mode");
+                  final G object = context.rowHeads().get(
+                      contentCoordinates.get().x());
+                  final TextField textField = TextFieldBuilder.create().text(
+                      (String) object).build();
+                  textField.addEventHandler(
+                      KeyEvent.KEY_RELEASED,
+                      new EventHandler<KeyEvent>() {
 
-                @SuppressWarnings({ "unchecked" })
-                public final void handle(final KeyEvent event) {
-                  switch (event.getCode()) {
-                  case ENTER:
+                        @SuppressWarnings({ "unchecked" })
+                        public final void handle(final KeyEvent event) {
+                          switch (event.getCode()) {
+                          case ENTER:
 //                    cache.clearObject(contentCoordinates.get().x());
-                    context.rowHeads().set(object, (G) textField.getText().trim());
-                    tab.unsavedChanges.set(true);
-                  case ESCAPE:
-                    interactionPane.get().getChildren().remove(textField);
-                  }
-                };
-              });
-              interactionPane.get().getChildren().add(textField);
-              textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
+                            context.rowHeads().set(
+                                object,
+                                (G) textField.getText().trim());
+                            if (tab != null)
+                              tab.unsavedChanges.set(true);
+                          case ESCAPE:
+                            interactionPane.get().getChildren().remove(
+                                textField);
+                          }
+                        };
+                      });
+                  interactionPane.get().getChildren().add(
+                      textField);
+                  textField.focusedProperty().addListener(
+                      new ChangeListener<Boolean>() {
 
-                public final void changed(
-                    final ObservableValue<? extends Boolean> observable,
-                    final Boolean oldValue,
-                    final Boolean newValue) {
-                  new Timer().schedule(new TimerTask() {
+                        public final void changed(
+                            final ObservableValue<? extends Boolean> observable,
+                            final Boolean oldValue,
+                            final Boolean newValue) {
+                          new Timer().schedule(
+                              new TimerTask() {
 
-                    public final void run() {
-                      Platform.runLater(new Runnable() {
+                                public final void run() {
+                                  Platform.runLater(new Runnable() {
 
-                        public final void run() {
-                          textField.selectAll();
+                                    public final void run() {
+                                      textField.selectAll();
+                                    }
+                                  });
+                                }
+                              },
+                              20);
                         }
                       });
-                    }
-                  }, 20);
+                  textField.requestFocus();
+                } else {
+                  System.out.println("no instance of MatrixContextWidget");
                 }
-              });
-              textField.requestFocus();
+              }
             }
-            else{
-              System.out.println("no instance of MatrixContextWidget");
+          });
+      if (tab != null)
+        this.interactionPane.get().addEventHandler(
+            MouseEvent.MOUSE_ENTERED,
+            new EventHandler<MouseEvent>() {
+
+              public final void handle(final MouseEvent event) {
+                if (highlight.get())
+                  tab.conceptGraph.highlight(
+                      true,
+                      tab.conceptGraph.highlightRequests.object(context.rowHeads().get(
+                          contentCoordinates.get().x())));
+              }
+            });
+      context.addEventHandler(
+          new RelationEventHandler<G, M>() {
+
+            public final void handle(final RelationEvent<G, M> event) {
+              updateContent();
             }
-          }
-        }
-      });
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
-
-        public final void handle(final MouseEvent event) {
-          if (highlight.get())
-            tab.conceptGraph.highlight(
-                true,
-                tab.conceptGraph.highlightRequests.object(context.rowHeads().get(contentCoordinates.get().x())));
-        }
-      });
-      context.addEventHandler(new RelationEventHandler<G, M>() {
-
-        public final void handle(final RelationEvent<G, M> event) {
-          updateContent();
-        }
-      }, RelationEvent.ROWS_SET);
+          },
+          RelationEvent.ROWS_SET);
     }
 
     public final void updateContent() {
-      final String string = context.rowHeads().get(contentCoordinates.get().x()).toString();
+      final String string = context.rowHeads().get(
+          contentCoordinates.get().x()).toString();
       textContent.set(string);
       try {
         if (view == null) {
           view = ImageViewBuilder.create().build();
-          this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+          this.contentPane.get().getChildren().add(
+              LabelBuilder.create().graphic(
+                  view).build());
           this.contentPane.get().text.setOpacity(0);
         }
-        view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
+        view.setImage(LaTeX.toFXImage(
+            string,
+            (float) (16d * zoomFactor.get())));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -327,104 +379,154 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       super(colHeaderPane, 0, column, Pos.CENTER_LEFT, TextAlignment.LEFT, true, null);
       if (view == null) {
         view = ImageViewBuilder.create().build();
-        this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+        this.contentPane.get().getChildren().add(
+            LabelBuilder.create().graphic(
+                view).build());
         this.contentPane.get().text.setOpacity(0);
       }
       this.dehighlightColor = Color.WHITE;
       this.contentPane.get().background.setFill(dehighlightColor);
 //      if (!tab.fca.context.selectedAttributes().contains(tab.fca.context.colHeads().get(contentCoordinates.get().y())))
 //        colHeaderPane.columnOpacityMap.put(contentCoordinates.get().y(), Constants.HIDE_OPACITY);
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+      this.interactionPane.get().addEventHandler(
+          MouseEvent.MOUSE_CLICKED,
+          new EventHandler<MouseEvent>() {
 
-        @SuppressWarnings("incomplete-switch")
-        public final synchronized void handle(final MouseEvent event) {
-          switch (event.getButton()) {
-          case PRIMARY:
-            synchronized (colHeaderPane.columnOpacityMap) {
-              if (colHeaderPane.columnOpacityMap.containsKey(contentCoordinates.get().y())) {
-                tab.conceptGraph.highlight(false, tab.conceptGraph.highlightRequests.dehighlight());
-                colHeaderPane.columnOpacityMap.remove(contentCoordinates.get().y());
-                tab.select(context.colHeads().get(contentCoordinates.get().y()));
-              } else {
-                tab.conceptGraph.highlight(false, tab.conceptGraph.highlightRequests.dehighlight());
-                colHeaderPane.columnOpacityMap.put(contentCoordinates.get().y(), Constants.HIDE_OPACITY);
-                tab.ignore(context.colHeads().get(contentCoordinates.get().y()));
-              }
-            }
-            break;
-          case SECONDARY:
-            if (MatrixContextWidget.this instanceof StringMatrixContextWidget) {
-              final M attribute = context.colHeads().get(contentCoordinates.get().y());
-              final TextField textField = TextFieldBuilder.create().text((String) attribute).build();
-              textField.addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
-
-                @SuppressWarnings({ "unchecked" })
-                public final void handle(final KeyEvent event) {
-                  switch (event.getCode()) {
-                  case ENTER:
-                    context.colHeads().set(attribute, (M) textField.getText().trim());
-                    tab.unsavedChanges.set(true);
-                  case ESCAPE:
-                    interactionPane.get().getChildren().remove(textField);
+            @SuppressWarnings("incomplete-switch")
+            public final synchronized void handle(final MouseEvent event) {
+              switch (event.getButton()) {
+              case PRIMARY:
+                synchronized (colHeaderPane.columnOpacityMap) {
+                  if (colHeaderPane.columnOpacityMap.containsKey(contentCoordinates.get().y())) {
+                    if (tab != null)
+                      tab.conceptGraph.highlight(
+                          false,
+                          tab.conceptGraph.highlightRequests.dehighlight());
+                    colHeaderPane.columnOpacityMap.remove(contentCoordinates.get().y());
+                    if (tab != null)
+                      tab.select(context.colHeads().get(
+                          contentCoordinates.get().y()));
+                  } else {
+                    if (tab != null)
+                      tab.conceptGraph.highlight(
+                          false,
+                          tab.conceptGraph.highlightRequests.dehighlight());
+                    colHeaderPane.columnOpacityMap.put(
+                        contentCoordinates.get().y(),
+                        Constants.HIDE_OPACITY);
+                    if (tab != null)
+                      tab.ignore(context.colHeads().get(
+                          contentCoordinates.get().y()));
                   }
-                };
-              });
-              textField.rotateProperty().set(-90);
-              textField.setMinSize(colHeaderPane.rowHeight.get(), cellSize.get());
-              textField.setMaxSize(colHeaderPane.rowHeight.get(), cellSize.get());
-              interactionPane.get().getChildren().add(textField);
-              textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
+                }
+                break;
+              case SECONDARY:
+                if (MatrixContextWidget.this instanceof StringMatrixContextWidget) {
+                  final M attribute = context.colHeads().get(
+                      contentCoordinates.get().y());
+                  final TextField textField = TextFieldBuilder.create().text(
+                      (String) attribute).build();
+                  textField.addEventHandler(
+                      KeyEvent.KEY_RELEASED,
+                      new EventHandler<KeyEvent>() {
 
-                public final void changed(
-                    final ObservableValue<? extends Boolean> observable,
-                    final Boolean oldValue,
-                    final Boolean newValue) {
-                  new Timer().schedule(new TimerTask() {
+                        @SuppressWarnings({ "unchecked" })
+                        public final void handle(final KeyEvent event) {
+                          switch (event.getCode()) {
+                          case ENTER:
+                            context.colHeads().set(
+                                attribute,
+                                (M) textField.getText().trim());
+                            if (tab != null)
+                              tab.unsavedChanges.set(true);
+                          case ESCAPE:
+                            interactionPane.get().getChildren().remove(
+                                textField);
+                          }
+                        };
+                      });
+                  textField.rotateProperty().set(
+                      -90);
+                  textField.setMinSize(
+                      colHeaderPane.rowHeight.get(),
+                      cellSize.get());
+                  textField.setMaxSize(
+                      colHeaderPane.rowHeight.get(),
+                      cellSize.get());
+                  interactionPane.get().getChildren().add(
+                      textField);
+                  textField.focusedProperty().addListener(
+                      new ChangeListener<Boolean>() {
 
-                    public final void run() {
-                      Platform.runLater(new Runnable() {
+                        public final void changed(
+                            final ObservableValue<? extends Boolean> observable,
+                            final Boolean oldValue,
+                            final Boolean newValue) {
+                          new Timer().schedule(
+                              new TimerTask() {
 
-                        public final void run() {
-                          textField.selectAll();
+                                public final void run() {
+                                  Platform.runLater(new Runnable() {
+
+                                    public final void run() {
+                                      textField.selectAll();
+                                    }
+                                  });
+                                }
+                              },
+                              20);
                         }
                       });
-                    }
-                  }, 20);
+                  textField.requestFocus();
                 }
-              });
-              textField.requestFocus();
+              }
             }
-          }
-        }
-      });
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
+          });
+      if (tab != null)
+        this.interactionPane.get().addEventHandler(
+            MouseEvent.MOUSE_ENTERED,
+            new EventHandler<MouseEvent>() {
 
-        public final void handle(final MouseEvent event) {
-          if (highlight.get()) {
-            final M m = context.colHeads().get(contentCoordinates.get().y());
-            if (context.selectedAttributes().contains(m))
-              tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.attribute(m));
-          }
-        }
-      });
-      context.addEventHandler(new RelationEventHandler<G, M>() {
+              public final void handle(final MouseEvent event) {
+                if (highlight.get()) {
+                  final M m = context.colHeads().get(
+                      contentCoordinates.get().y());
+                  if (context.selectedAttributes().contains(
+                      m))
+                    tab.conceptGraph.highlight(
+                        true,
+                        tab.conceptGraph.highlightRequests.attribute(m));
+                }
+              }
+            });
+      context.addEventHandler(
+          new RelationEventHandler<G, M>() {
 
-        public final void handle(final RelationEvent<G, M> event) {
-          updateContent();
-        }
-      }, RelationEvent.COLUMNS_SET);
+            public final void handle(final RelationEvent<G, M> event) {
+              updateContent();
+            }
+          },
+          RelationEvent.COLUMNS_SET);
     }
 
     public final void updateContent() {
-      final String string = context.colHeads().get(contentCoordinates.get().y()).toString();
+      final M m = context.colHeads().get(
+          contentCoordinates.get().y());
+      // TODO: The type check for OWLClassExpression is currently just a workaround.
+      final String string =
+          m instanceof OWLClassExpression ? OWLtoString.toString((OWLClassExpression) m) : m.toString();
       textContent.set(string);
       try {
         if (view == null) {
           view = ImageViewBuilder.create().build();
-          this.contentPane.get().getChildren().add(LabelBuilder.create().graphic(view).build());
+          this.contentPane.get().getChildren().add(
+              LabelBuilder.create().graphic(
+                  view).build());
           this.contentPane.get().text.setOpacity(0);
         }
-        view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
+        view.setImage(LaTeX.toFXImage(
+            string,
+            (float) (16d * zoomFactor.get())));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -435,36 +537,95 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
     private ContextCell(final int row, final int column) {
       super(contextPane, row, column, Pos.CENTER, TextAlignment.CENTER, false, null);
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+      if (tab != null)
+        this.interactionPane.get().addEventHandler(
+            MouseEvent.MOUSE_CLICKED,
+            new EventHandler<MouseEvent>() {
 
-        public final void handle(final MouseEvent event) {
-          final G g = context.rowHeads().get(contentCoordinates.get().x());
-          final M m = context.colHeads().get(contentCoordinates.get().y());
-          tab.conceptGraph.highlight(false, tab.conceptGraph.highlightRequests.dehighlight());
-          tab.flip(g, m);
-          tab.unsavedChanges.set(true);
-        }
-      });
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
+              public final void handle(final MouseEvent event) {
+                final G g = context.rowHeads().get(
+                    contentCoordinates.get().x());
+                final M m = context.colHeads().get(
+                    contentCoordinates.get().y());
+                tab.conceptGraph.highlight(
+                    false,
+                    tab.conceptGraph.highlightRequests.dehighlight());
+                tab.flip(
+                    g,
+                    m);
+                tab.unsavedChanges.set(true);
+              }
+            });
+      else
+        this.interactionPane.get().addEventHandler(
+            MouseEvent.MOUSE_CLICKED,
+            event -> {
+              final G g = context.rowHeads().get(
+                  contentCoordinates.get().x());
+              final M m = context.colHeads().get(
+                  contentCoordinates.get().y());
+              if (context.contains(
+                  g,
+                  m))
+                context.remove(
+                    g,
+                    m);
+              else
+                context.add(
+                    g,
+                    m);
+            });
+      if (tab != null)
+        this.interactionPane.get().addEventHandler(
+            MouseEvent.MOUSE_ENTERED,
+            new EventHandler<MouseEvent>() {
 
-        public final void handle(final MouseEvent event) {
-          if (highlight.get()) {
-            final G g = context.rowHeads().get(contentCoordinates.get().x());
-            final M m = context.colHeads().get(contentCoordinates.get().y());
-            if (context.selectedAttributes().contains(m))
-              if (textContent.get().equals(Constants.CROSS_CHARACTER))
-                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.incidence(g, m));
-              else if (textContent.get().equals(Constants.DOWN_ARROW_CHARACTER))
-                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.downArrow(g, m));
-              else if (textContent.get().equals(Constants.UP_ARROW_CHARACTER))
-                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.upArrow(g, m));
-              else if (textContent.get().equals(Constants.BOTH_ARROW_CHARACTER))
-                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.bothArrow(g, m));
-              else if (textContent.get().equals(Constants.NO_CROSS_CHARACTER))
-                tab.conceptGraph.highlight(true, tab.conceptGraph.highlightRequests.nonIncidence(g, m));
-          }
-        }
-      });
+              public final void handle(final MouseEvent event) {
+                if (highlight.get()) {
+                  final G g = context.rowHeads().get(
+                      contentCoordinates.get().x());
+                  final M m = context.colHeads().get(
+                      contentCoordinates.get().y());
+                  if (context.selectedAttributes().contains(
+                      m))
+                    if (textContent.get().equals(
+                        Constants.CROSS_CHARACTER))
+                      tab.conceptGraph.highlight(
+                          true,
+                          tab.conceptGraph.highlightRequests.incidence(
+                              g,
+                              m));
+                    else if (textContent.get().equals(
+                        Constants.DOWN_ARROW_CHARACTER))
+                      tab.conceptGraph.highlight(
+                          true,
+                          tab.conceptGraph.highlightRequests.downArrow(
+                              g,
+                              m));
+                    else if (textContent.get().equals(
+                        Constants.UP_ARROW_CHARACTER))
+                      tab.conceptGraph.highlight(
+                          true,
+                          tab.conceptGraph.highlightRequests.upArrow(
+                              g,
+                              m));
+                    else if (textContent.get().equals(
+                        Constants.BOTH_ARROW_CHARACTER))
+                      tab.conceptGraph.highlight(
+                          true,
+                          tab.conceptGraph.highlightRequests.bothArrow(
+                              g,
+                              m));
+                    else if (textContent.get().equals(
+                        Constants.NO_CROSS_CHARACTER))
+                      tab.conceptGraph.highlight(
+                          true,
+                          tab.conceptGraph.highlightRequests.nonIncidence(
+                              g,
+                              m));
+                }
+              }
+            });
       context.addEventHandler(
           new RelationEventHandler<G, M>() {
 
@@ -480,10 +641,17 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
     @SuppressWarnings("incomplete-switch")
     public final void updateContent() {
-      final G g = context.rowHeads().get(contentCoordinates.get().x());
-      final M m = context.colHeads().get(contentCoordinates.get().y());
-      if (context.selectedAttributes().contains(m)) {
-        final Pair<Incidence, Incidence> p = context.selection.getValue(g, m, showArrows.get(), showPaths.get());
+      final G g = context.rowHeads().get(
+          contentCoordinates.get().x());
+      final M m = context.colHeads().get(
+          contentCoordinates.get().y());
+      if (context.selectedAttributes().contains(
+          m)) {
+        final Pair<Incidence, Incidence> p = context.selection.getValue(
+            g,
+            m,
+            showArrows.get(),
+            showPaths.get());
         final Incidence first = p.first();
         final Incidence second = p.second();
         ContextCell.this.textContent.set(second != null && first == Incidence.NO_CROSS
@@ -514,13 +682,16 @@ public class MatrixContextWidget<G, M> extends BorderPane {
             break;
           }
       } else {
-        ContextCell.this.textContent.set(context.getValue(g, m, false).first().toString());
+        ContextCell.this.textContent.set(context.getValue(
+            g,
+            m,
+            false).first().toString());
         ContextCell.this.contentPane.get().text.setRotate(0d);
       }
     }
   }
 
-  protected final FCAInstance<G, M>   tab;
+  protected final FCADataset<G, M>    tab;
   protected final MatrixContext<G, M> context;
   protected final GridPane            centerPane            = new GridPane();
   public final RowHeaderPane          rowHeaderPane;
@@ -529,12 +700,16 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   protected final ScrollBar           rowScrollBar;
   protected final ScrollBar           colScrollBar;
 //  public final ListSpinner<Integer> zoomSpinner =new ListSpinner<Integer>(-4, 4, 1);
-  public final Slider                 zoomSlider            = SliderBuilder.create().min(-4d).max(4d).value(0d)
+  public final Slider                 zoomSlider            = SliderBuilder.create().min(
+                                                                -4d).max(
+                                                                4d).value(
+                                                                0d)
 //                                                                .showTickMarks(true)
 //                                                                .minorTickCount(17)
 //                                                                .majorTickUnit(1d)
 //                                                                .snapToTicks(true)
-                                                                .blockIncrement(0.25d)
+                                                                .blockIncrement(
+                                                                    0.25d)
                                                                 .build();
   public final DoubleProperty         zoomFactor            = new SimpleDoubleProperty(0.01d);
   public final IntegerProperty        rowHeaderSizeDefault  = new SimpleIntegerProperty(40);
@@ -545,7 +720,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   public final IntegerBinding         cellSize              = new IntegerBinding() {
 
                                                               {
-                                                                super.bind(zoomFactor, cellSizeDefault);
+                                                                super.bind(
+                                                                    zoomFactor,
+                                                                    cellSizeDefault);
                                                               }
 
                                                               protected int computeValue() {
@@ -556,7 +733,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   public final IntegerBinding         textSize              = new IntegerBinding() {
 
                                                               {
-                                                                super.bind(zoomFactor, textSizeDefault);
+                                                                super.bind(
+                                                                    zoomFactor,
+                                                                    textSizeDefault);
                                                               }
 
                                                               protected int computeValue() {
@@ -567,7 +746,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   public final IntegerBinding         incidenceSize         = new IntegerBinding() {
 
                                                               {
-                                                                super.bind(zoomFactor, textSizeDefault);
+                                                                super.bind(
+                                                                    zoomFactor,
+                                                                    textSizeDefault);
                                                               }
 
                                                               protected int computeValue() {
@@ -581,14 +762,26 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   public final ToggleButton           highlightToggleButton = new ToggleButton();
   public final DoubleBinding          height;
 
-  public MatrixContextWidget(final FCAInstance<G, M> fcaInstance) {
+  public MatrixContextWidget(final FCADataset<G, M> fcaInstance) {
     this(fcaInstance, true);
   }
 
-  public MatrixContextWidget(final FCAInstance<G, M> fcaInstance, final boolean withToolbar) {
+  /**
+   * @param fcaInstance
+   * @param withToolbar
+   * @param orContext
+   *          may only be set if fcaInstance is null, otherwise unexpected behaviour may occur.
+   */
+  public MatrixContextWidget(
+      final FCADataset<G, M> fcaInstance,
+      final boolean withToolbar,
+      final MatrixContext<G, M>... orContext) {
     super();
     this.tab = fcaInstance;
-    this.context = fcaInstance.context;
+    if (fcaInstance == null && orContext[0] != null)
+      this.context = orContext[0];
+    else
+      this.context = fcaInstance.context;
     this.rowHeaderPane = new RowHeaderPane();
     this.colHeaderPane = new ColHeaderPane();
     this.contextPane = new ContextPane();
@@ -600,53 +793,92 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     colHeaderPane.colorScheme.setValue(ColorScheme.JAVA_FX);
     contextPane.colorScheme.setValue(ColorScheme.JAVA_FX);
     final RowConstraints firstRowConstraints = new RowConstraints();
-    firstRowConstraints.minHeightProperty().bind(colHeaderPane.rowHeight);
-    firstRowConstraints.maxHeightProperty().bind(colHeaderPane.rowHeight);
+    firstRowConstraints.minHeightProperty().bind(
+        colHeaderPane.rowHeight);
+    firstRowConstraints.maxHeightProperty().bind(
+        colHeaderPane.rowHeight);
     final RowConstraints secondRowConstraints = new RowConstraints();
-    secondRowConstraints.minHeightProperty().bind(cellSize);
-    secondRowConstraints.prefHeightProperty().bind(new IntegerBinding() {
+    secondRowConstraints.minHeightProperty().bind(
+        cellSize);
+    secondRowConstraints.prefHeightProperty().bind(
+        new IntegerBinding() {
 
-      {
-        super.bind(rowHeaderPane.maxRows, cellSize);
-      }
+          {
+            super.bind(
+                rowHeaderPane.maxRows,
+                cellSize);
+          }
 
-      protected final int computeValue() {
-        return context.rowHeads().size() * cellSize.get();
-      }
-    });
+          protected final int computeValue() {
+            return context.rowHeads().size() * cellSize.get();
+          }
+        });
     final RowConstraints thirdRowConstraints = new RowConstraints();
-    thirdRowConstraints.minHeightProperty().bind(cellSize);
-    thirdRowConstraints.maxHeightProperty().bind(cellSize);
-    centerPane.getRowConstraints().addAll(firstRowConstraints, secondRowConstraints, thirdRowConstraints);
+    thirdRowConstraints.minHeightProperty().bind(
+        cellSize);
+    thirdRowConstraints.maxHeightProperty().bind(
+        cellSize);
+    centerPane.getRowConstraints().addAll(
+        firstRowConstraints,
+        secondRowConstraints,
+        thirdRowConstraints);
     final ColumnConstraints firstColumnConstraints = new ColumnConstraints();
-    firstColumnConstraints.minWidthProperty().bind(rowHeaderPane.columnWidth);
-    firstColumnConstraints.maxWidthProperty().bind(rowHeaderPane.columnWidth);
+    firstColumnConstraints.minWidthProperty().bind(
+        rowHeaderPane.columnWidth);
+    firstColumnConstraints.maxWidthProperty().bind(
+        rowHeaderPane.columnWidth);
     final ColumnConstraints secondColumnConstraints = new ColumnConstraints();
-    secondColumnConstraints.minWidthProperty().bind(cellSize);
-    secondColumnConstraints.maxWidthProperty().bind(new IntegerBinding() {
+    secondColumnConstraints.minWidthProperty().bind(
+        cellSize);
+    secondColumnConstraints.maxWidthProperty().bind(
+        new IntegerBinding() {
 
-      {
-        super.bind(colHeaderPane.maxColumns, cellSize);
-      }
+          {
+            super.bind(
+                colHeaderPane.maxColumns,
+                cellSize);
+          }
 
-      protected final int computeValue() {
-        return context.colHeads().size() * cellSize.get();
-      }
-    });
+          protected final int computeValue() {
+            return context.colHeads().size() * cellSize.get();
+          }
+        });
     final ColumnConstraints thirdColumnConstraints = new ColumnConstraints();
-    thirdColumnConstraints.minWidthProperty().bind(cellSize);
-    thirdColumnConstraints.maxWidthProperty().bind(cellSize);
-    centerPane.getColumnConstraints().addAll(firstColumnConstraints, secondColumnConstraints, thirdColumnConstraints);
-    centerPane.add(contextPane.getContentAndInteractionStackPane(), 1, 1);
-    centerPane.add(rowHeaderPane.getContentAndInteractionStackPane(), 0, 1);
-    centerPane.add(colHeaderPane.getContentAndInteractionStackPane(), 1, 0);
-    centerPane.add(rowScrollBar, 2, 1);
-    centerPane.add(colScrollBar, 1, 2);
+    thirdColumnConstraints.minWidthProperty().bind(
+        cellSize);
+    thirdColumnConstraints.maxWidthProperty().bind(
+        cellSize);
+    centerPane.getColumnConstraints().addAll(
+        firstColumnConstraints,
+        secondColumnConstraints,
+        thirdColumnConstraints);
+    centerPane.add(
+        contextPane.getContentAndInteractionStackPane(),
+        1,
+        1);
+    centerPane.add(
+        rowHeaderPane.getContentAndInteractionStackPane(),
+        0,
+        1);
+    centerPane.add(
+        colHeaderPane.getContentAndInteractionStackPane(),
+        1,
+        0);
+    centerPane.add(
+        rowScrollBar,
+        2,
+        1);
+    centerPane.add(
+        colScrollBar,
+        1,
+        2);
     this.setCenter(centerPane);
     if (withToolbar)
       createToolBar();
     else
-      zoomFactor.set(Math.pow(2d, 0));
+      zoomFactor.set(Math.pow(
+          2d,
+          0));
     final ChangeListener<Boolean> updateContentListener = new ChangeListener<Boolean>() {
 
       public final void changed(
@@ -672,21 +904,22 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
       @Override
       protected double computeValue() {
-        System.out.println(colHeaderPane.rowHeight.get());
-        System.out.println(colHeaderPane.visibleRows.get());
-        System.out.println(contextPane.rowHeight.get());
-        System.out.println(contextPane.visibleRows.get());
+//        System.out.println(colHeaderPane.rowHeight.get());
+//        System.out.println(colHeaderPane.visibleRows.get());
+//        System.out.println(contextPane.rowHeight.get());
+//        System.out.println(contextPane.visibleRows.get());
         final int h =
             colHeaderPane.rowHeight.get() * colHeaderPane.visibleRows.get() + contextPane.rowHeight.get()
                 * contextPane.visibleRows.get();
-        System.out.println(h);
+//        System.out.println(h);
         return h;
       }
     };
     rowHeaderPane.toFront();
     colHeaderPane.toFront();
     final Timeline t = new Timeline();
-    t.getKeyFrames().add(new KeyFrame(Duration.millis(1000),
+    t.getKeyFrames().add(
+        new KeyFrame(Duration.millis(1000),
 //        new EventHandler<ActionEvent>() {
 //
 //      public final void handle(final ActionEvent event) {
@@ -702,7 +935,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 //        });
 //      }
 //    },
-        new KeyValue(zoomSlider.valueProperty(), 0d, Interpolator.EASE_IN)));
+            new KeyValue(zoomSlider.valueProperty(), 0d, Interpolator.EASE_IN)));
     Platform.runLater(new Runnable() {
 
       public void run() {
@@ -719,7 +952,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       }
 
       protected double computeValue() {
-        return Math.pow(2d, zoomSlider.valueProperty().get());
+        return Math.pow(
+            2d,
+            zoomSlider.valueProperty().get());
       }
     });
     final ToggleButton arrowsToggleButton =
@@ -733,24 +968,24 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     pathsToggleButton.setSelected(false);
     pathsToggleButton.setMinHeight(24);
     showPaths.bind(pathsToggleButton.selectedProperty());
-    arrowsToggleButton.addEventHandler(ActionEvent.ACTION, new EventHandler<ActionEvent>() {
+    arrowsToggleButton.addEventHandler(
+        ActionEvent.ACTION,
+        new EventHandler<ActionEvent>() {
 
-      @Override
-      public final void handle(final ActionEvent event) {
-        if (showArrows.get()) {
-          pathsToggleButton.setDisable(false);
-        } else {
-          pathsToggleButton.setSelected(false);
-          pathsToggleButton.setDisable(true);
-        }
-      }
-    });
+          @Override
+          public final void handle(final ActionEvent event) {
+            if (showArrows.get()) {
+              pathsToggleButton.setDisable(false);
+            } else {
+              pathsToggleButton.setSelected(false);
+              pathsToggleButton.setDisable(true);
+            }
+          }
+        });
     highlightToggleButton.setSelected(false);
     highlightToggleButton.setMinHeight(24);
-    highlightToggleButton.setGraphic(ImageViewBuilder
-        .create()
-        .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/flag.png")))
-        .build());
+    highlightToggleButton.setGraphic(ImageViewBuilder.create().image(
+        new Image(ConExpFX.class.getResourceAsStream("image/16x16/flag.png"))).build());
     rowHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());
     colHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());
     contextPane.highlight.bind(highlightToggleButton.selectedProperty());
@@ -759,9 +994,14 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     highlightToggleButton.setStyle("-fx-background-radius: 0 5 5 0, 0 5 5 0, 0 4 4 0, 0 3 3 0;");
     HBox showBox = new HBox();
     showBox.setPadding(new Insets(0d));
-    showBox.getChildren().addAll(arrowsToggleButton, pathsToggleButton, highlightToggleButton);
+    showBox.getChildren().addAll(
+        arrowsToggleButton,
+        pathsToggleButton,
+        highlightToggleButton);
     final ToolBar toolBar = new ToolBar();
-    toolBar.getItems().addAll(zoomSlider, showBox);
+    toolBar.getItems().addAll(
+        zoomSlider,
+        showBox);
     this.setTop(toolBar);
     toolBar.toFront();
   }
@@ -780,27 +1020,37 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   }
 
   public final void highlight(final Concept<G, M> concept) {
-    final Collection<Integer> domainIndices = context.rowHeads().indicesOf(concept.extent(), true);
-    final Collection<Integer> codomainIndices = context.colHeads().indicesOf(concept.intent(), true);
+    final Collection<Integer> domainIndices = context.rowHeads().indicesOf(
+        concept.extent(),
+        true);
+    final Collection<Integer> codomainIndices = context.colHeads().indicesOf(
+        concept.intent(),
+        true);
     contextPane.highlightConcept.set(true);
-    rowHeaderPane.highlightConcept(Collections2.transform(domainIndices, new Function<Integer, Integer>() {
+    rowHeaderPane.highlightConcept(Collections2.transform(
+        domainIndices,
+        new Function<Integer, Integer>() {
 
-      public final Integer apply(final Integer index) {
-        for (Entry<Integer, Integer> entry : contextPane.rowMap.get().entrySet())
-          if (entry.getValue().equals(index))
-            return entry.getKey();
-        return index;
-      }
-    }));
-    colHeaderPane.highlightConcept(Collections2.transform(codomainIndices, new Function<Integer, Integer>() {
+          public final Integer apply(final Integer index) {
+            for (Entry<Integer, Integer> entry : contextPane.rowMap.get().entrySet())
+              if (entry.getValue().equals(
+                  index))
+                return entry.getKey();
+            return index;
+          }
+        }));
+    colHeaderPane.highlightConcept(Collections2.transform(
+        codomainIndices,
+        new Function<Integer, Integer>() {
 
-      public final Integer apply(final Integer index) {
-        for (Entry<Integer, Integer> entry : contextPane.columnMap.get().entrySet())
-          if (entry.getValue().equals(index))
-            return entry.getKey();
-        return index;
-      }
-    }));
+          public final Integer apply(final Integer index) {
+            for (Entry<Integer, Integer> entry : contextPane.columnMap.get().entrySet())
+              if (entry.getValue().equals(
+                  index))
+                return entry.getKey();
+            return index;
+          }
+        }));
   }
 
   public final void highlightImplication(final Implication<M> implication) {

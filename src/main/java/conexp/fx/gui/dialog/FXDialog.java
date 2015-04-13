@@ -6,17 +6,7 @@ package conexp.fx.gui.dialog;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -76,78 +66,69 @@ public class FXDialog<T> {
 
   }
 
-  private final int        width;
-  private final Stage      stage        = StageBuilder.create().build();
-  private final BorderPane pane         = BorderPaneBuilder.create().build();
-  private final Text       text;
-  private final Style      style;
-  private Result           result       = Result.UNKNOWN;
-  protected T              value        = null;
-  private StackPane        topPane;
-  private StackPane        bottomPane;
-  private Rectangle        topBackground;
-  private Rectangle        bottomBackground;
-  private final Button     okButton     = ButtonBuilder
-                                            .create()
-                                            .text("OK")
-                                            .minHeight(20)
-                                            .minWidth(100)
-                                            .effect(new DropShadow())
-                                            .onAction(new EventHandler<ActionEvent>() {
+  private final int          width;
+  private final Stage        stage        = StageBuilder.create().build();
+  protected final BorderPane pane         = BorderPaneBuilder.create().build();
+  private final Text         text;
+  private final Style        style;
+  private Result             result       = Result.UNKNOWN;
+  protected T                value        = null;
+  private StackPane          topPane;
+  private StackPane          bottomPane;
+  private Rectangle          topBackground;
+  private Rectangle          bottomBackground;
+  private final Button       okButton     = ButtonBuilder.create().text(
+                                              "OK").minHeight(
+                                              20).minWidth(
+                                              100).effect(
+                                              new DropShadow()).onAction(
+                                              new EventHandler<ActionEvent>() {
 
-                                              @Override
-                                              public void handle(ActionEvent event) {
-                                                result = Result.OK;
-                                                stage.close();
-                                              }
-                                            })
-                                            .build();
-  private final Button     cancelButton = ButtonBuilder
-                                            .create()
-                                            .text("Cancel")
-                                            .minHeight(20)
-                                            .minWidth(100)
-                                            .effect(new DropShadow())
-                                            .onAction(new EventHandler<ActionEvent>() {
+                                                @Override
+                                                public void handle(ActionEvent event) {
+                                                  result = Result.OK;
+                                                  stage.close();
+                                                }
+                                              }).build();
+  private final Button       cancelButton = ButtonBuilder.create().text(
+                                              "Cancel").minHeight(
+                                              20).minWidth(
+                                              100).effect(
+                                              new DropShadow()).onAction(
+                                              new EventHandler<ActionEvent>() {
 
-                                              @Override
-                                              public void handle(ActionEvent event) {
-                                                result = Result.CANCEL;
-                                                stage.close();
-                                              }
-                                            })
-                                            .build();
-  private final Button     yesButton    = ButtonBuilder
-                                            .create()
-                                            .text("Yes")
-                                            .minHeight(20)
-                                            .minWidth(100)
-                                            .effect(new DropShadow())
-                                            .onAction(new EventHandler<ActionEvent>() {
+                                                @Override
+                                                public void handle(ActionEvent event) {
+                                                  result = Result.CANCEL;
+                                                  stage.close();
+                                                }
+                                              }).build();
+  private final Button       yesButton    = ButtonBuilder.create().text(
+                                              "Yes").minHeight(
+                                              20).minWidth(
+                                              100).effect(
+                                              new DropShadow()).onAction(
+                                              new EventHandler<ActionEvent>() {
 
-                                              @Override
-                                              public void handle(ActionEvent event) {
-                                                result = Result.YES;
-                                                stage.close();
-                                              }
-                                            })
-                                            .build();
-  private final Button     noButton     = ButtonBuilder
-                                            .create()
-                                            .text("No")
-                                            .minHeight(20)
-                                            .minWidth(100)
-                                            .effect(new DropShadow())
-                                            .onAction(new EventHandler<ActionEvent>() {
+                                                @Override
+                                                public void handle(ActionEvent event) {
+                                                  result = Result.YES;
+                                                  stage.close();
+                                                }
+                                              }).build();
+  private final Button       noButton     = ButtonBuilder.create().text(
+                                              "No").minHeight(
+                                              20).minWidth(
+                                              100).effect(
+                                              new DropShadow()).onAction(
+                                              new EventHandler<ActionEvent>() {
 
-                                              @Override
-                                              public void handle(ActionEvent event) {
-                                                result = Result.NO;
-                                                stage.close();
-                                              }
-                                            })
-                                            .build();
-  protected final Node     optionalCenterNode;
+                                                @Override
+                                                public void handle(ActionEvent event) {
+                                                  result = Result.NO;
+                                                  stage.close();
+                                                }
+                                              }).build();
 
   public FXDialog(
       final Stage primaryStage,
@@ -168,32 +149,32 @@ public class FXDialog<T> {
     super();
     this.width = width;
     this.style = style;
-    this.text =
-        TextBuilder
-            .create()
-            .effect(
-                DropShadowBuilder
-                    .create()
-                    .radius(1)
-                    .blurType(BlurType.GAUSSIAN)
-                    .color(Color.LIGHTGREY)
-                    .spread(1)
-                    .build())
-            .font(FontBuilder.create().size(16).build())
-            .wrappingWidth(width - 50)
-            .build();
+    this.text = TextBuilder.create().effect(
+        DropShadowBuilder.create().radius(
+            1).blurType(
+            BlurType.GAUSSIAN).color(
+            Color.LIGHTGREY).spread(
+            1).build()).font(
+        FontBuilder.create().size(
+            16).build()).wrappingWidth(
+        width - 50).build();
     stage.initOwner(primaryStage);
     stage.initStyle(StageStyle.UTILITY);
     stage.initModality(Modality.WINDOW_MODAL);
     stage.setTitle(title);
     stage.setResizable(false);
-    stage.setScene(SceneBuilder.create().width(width).root(pane).build());
+    stage.setScene(SceneBuilder.create().width(
+        width).root(
+        pane).build());
     text.setText(message);
-    this.optionalCenterNode = optionalCenterNode;
     createTop();
     if (optionalCenterNode != null)
       pane.setCenter(optionalCenterNode);
     createBottom();
+  }
+
+  public final void setCenterNode(final Node centerNode) {
+    pane.setCenter(centerNode);
   }
 
   public final static class Return<T> {
@@ -203,6 +184,7 @@ public class FXDialog<T> {
 
     private Return(final Result result, final T value) {
       super();
+      System.out.println("");
       this.result = result;
       this.value = value;
     }
@@ -217,79 +199,84 @@ public class FXDialog<T> {
   }
 
   public final Return<T> showAndWait() {
-    stage.showAndWait();
     bindHeight();
+    stage.showAndWait();
     return new Return<T>(result, value);
   }
 
   private final void bindHeight() {
-    topBackground.heightProperty().bind(new DoubleBinding() {
+    topBackground.heightProperty().bind(
+        new DoubleBinding() {
 
-      {
-        super.bind(text.layoutBoundsProperty());
-      }
+          {
+            super.bind(text.layoutBoundsProperty());
+          }
 
-      @Override
-      protected double computeValue() {
-        return text.getLayoutBounds().getHeight() + 20;
-      }
-    });
+          @Override
+          protected double computeValue() {
+            return text.getLayoutBounds().getHeight() + 20;
+          }
+        });
     final DoubleBinding height = new DoubleBinding() {
 
       {
-        super.bind(topBackground.heightProperty(), bottomBackground.heightProperty());
+        super.bind(
+            topBackground.heightProperty(),
+            bottomBackground.heightProperty());
       }
 
       @Override
       protected double computeValue() {
-        return topBackground.heightProperty().get() + bottomBackground.heightProperty().get();
+        return topBackground.heightProperty().get() + bottomBackground.heightProperty().get()
+            + ((pane.getCenter() != null) ? pane.getCenter().getLayoutBounds().getHeight() : 0d);
       }
     };
-    pane.minHeightProperty().bind(height);
-    pane.maxHeightProperty().bind(height);
-    stage.minHeightProperty().bind(pane.heightProperty());
-    stage.maxHeightProperty().bind(pane.heightProperty());
+    pane.minHeightProperty().bind(
+        height);
+    pane.maxHeightProperty().bind(
+        height);
+    stage.minHeightProperty().bind(
+        pane.heightProperty());
+    stage.maxHeightProperty().bind(
+        pane.heightProperty());
   }
 
   private final void createTop() {
-    topBackground = RectangleBuilder.create().fill(Color.WHITE).width(width).build();
-    topPane =
-        StackPaneBuilder
-            .create()
-            .children(
-                topBackground,
-                VBoxBuilder
-                    .create()
-                    .alignment(Pos.TOP_LEFT)
-                    .spacing(10)
-                    .padding(InsetsBuilder.create().left(10).top(10).right(10).bottom(10).build())
-                    .children(text)
-                    .build())
-            .build();
+    topBackground = RectangleBuilder.create().fill(
+        Color.WHITE).width(
+        width).build();
+    topPane = StackPaneBuilder.create().children(
+        topBackground,
+        VBoxBuilder.create().alignment(
+            Pos.TOP_LEFT).spacing(
+            10).padding(
+            InsetsBuilder.create().left(
+                10).top(
+                10).right(
+                10).bottom(
+                10).build()).children(
+            text).build()).build();
     if (text.getText().trim() != "")
       pane.setTop(topPane);
   }
 
   private final void createBottom() {
-    bottomBackground =
-        RectangleBuilder
-            .create()
-            .fill(
-                LinearGradientBuilder
-                    .create()
-                    .startX(0)
-                    .startY(0)
-                    .endX(0)
-                    .endY(1)
-                    .cycleMethod(CycleMethod.NO_CYCLE)
-                    .proportional(true)
-                    .stops(
-                        StopBuilder.create().color(Color.LIGHTGRAY).offset(1).build(),
-                        StopBuilder.create().color(Color.WHITE).offset(0).build())
-                    .build())
-            .height(50)
-            .width(width)
-            .build();
+    bottomBackground = RectangleBuilder.create().fill(
+        LinearGradientBuilder.create().startX(
+            0).startY(
+            0).endX(
+            0).endY(
+            1).cycleMethod(
+            CycleMethod.NO_CYCLE).proportional(
+            true).stops(
+            StopBuilder.create().color(
+                Color.LIGHTGRAY).offset(
+                1).build(),
+            StopBuilder.create().color(
+                Color.WHITE).offset(
+                0).build()).build()).height(
+        50).width(
+        width).build();
     final List<Button> buttons = new LinkedList<Button>();
     switch (style) {
     case INFO:
@@ -303,21 +290,17 @@ public class FXDialog<T> {
     case QUESTION:
       buttons.add(yesButton);
       buttons.add(noButton);
+      buttons.add(cancelButton);
       break;
     }
-    bottomPane =
-        StackPaneBuilder
-            .create()
-            .children(
-                bottomBackground,
-                HBoxBuilder
-                    .create()
-                    .alignment(Pos.CENTER_RIGHT)
-                    .spacing(10)
-                    .padding(InsetsBuilder.create().right(30).build())
-                    .children(buttons)
-                    .build())
-            .build();
+    bottomPane = StackPaneBuilder.create().children(
+        bottomBackground,
+        HBoxBuilder.create().alignment(
+            Pos.CENTER_RIGHT).spacing(
+            10).padding(
+            InsetsBuilder.create().right(
+                30).build()).children(
+            buttons).build()).build();
     pane.setBottom(bottomPane);
   }
 

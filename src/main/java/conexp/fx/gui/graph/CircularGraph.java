@@ -6,22 +6,10 @@ package conexp.fx.gui.graph;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
-
-import java.util.Random;
 import java.util.Set;
 
 import javafx.event.EventHandler;
@@ -41,11 +29,13 @@ import conexp.fx.core.context.ConceptLattice;
 
 public class CircularGraph<G, M> {
 
-  public void show(final ConceptLattice<G, M> lattice) {
-    final Stage primaryStage = new Stage();
+  private final Stage primaryStage;
+
+  public CircularGraph(final ConceptLattice<G, M> lattice) {
+    super();
+    this.primaryStage = new Stage();
     final Pane rootPane = new StackPane();
-    primaryStage.setScene(new Scene(rootPane, 1280, 800));
-    primaryStage.show();
+    this.primaryStage.setScene(new Scene(rootPane, 1280, 800));
     final Multimap<Concept<G, M>, Area> layers = computeLayers(lattice, 360d, 36d);
     final Multimap<Concept<G, M>, SuperNode> nodes = HashMultimap.<Concept<G, M>, SuperNode> create();
     for (Concept<G, M> c : layers.keySet())
@@ -55,6 +45,10 @@ public class CircularGraph<G, M> {
         rootPane.getChildren().add(n);
         addListener(c, n, nodes);
       }
+  }
+
+  public final void show() {
+    this.primaryStage.show();
   }
 
   private void addListener(final Concept<G, M> c, final SuperNode n, final Multimap<Concept<G, M>, SuperNode> nodes) {
@@ -77,8 +71,8 @@ public class CircularGraph<G, M> {
   }
 
   private Color fromHashCode(final Object o) {
-    int rnd = (int) (new Random().nextFloat() * 23f);
-    int h = o.hashCode() * rnd;
+//    int rnd = (int) (new Random().nextFloat() * 23f);
+    int h = o.hashCode();// * rnd;
     int m = 192;
     int r = (h * 7) % m;
     int g = (h * 17) % m;

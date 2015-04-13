@@ -6,17 +6,7 @@ package conexp.fx.gui.task;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -25,6 +15,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
@@ -38,6 +29,7 @@ import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
+import conexp.fx.gui.util.Platform2;
 
 public final class ExecutorStatusBar {
 
@@ -87,6 +79,7 @@ public final class ExecutorStatusBar {
       currentPane.setRight(timeLabel);
       timeLabel.setGraphic(stopButton);
       currentProgressBar.setPadding(new Insets(0, 5, 0, 5));
+//      bindTo(task);
     }
 
     private final void bindTo(final BlockingTask task) {
@@ -166,12 +159,12 @@ public final class ExecutorStatusBar {
             .right(overallPane)
             .build();
     scheduledTaskListView = new ListView<BlockingTask>();
-    scheduledTaskListView.setOnMouseClicked(e -> executor.clearFinished());
+//    scheduledTaskListView.setOnMouseClicked(e -> executor.clearFinished());
     scheduledTaskListView.setPrefSize(700, 200);
     scheduledTaskListView.setCellFactory(l -> {
       final ListCell<BlockingTask> cell = new ListCell<BlockingTask>() {
 
-        final TaskItem taskItem = new TaskItem();
+        private final TaskItem taskItem = new TaskItem();
 
         @Override
         protected void updateItem(BlockingTask p, boolean empty) {
@@ -197,6 +190,10 @@ public final class ExecutorStatusBar {
     });
   }
 
+  public final void setOnMouseExitedHandler(final Scene scene) {
+    scene.setOnMouseExited(scheduledTaskListView.getOnMouseExited());
+  }
+
   public void bindTo(final BlockingExecutor executor) {
     this.executor = executor;
     scheduledTaskListView.setItems(executor.scheduledTasks);
@@ -213,14 +210,16 @@ public final class ExecutorStatusBar {
           final ObservableValue<? extends BlockingTask> observable,
           final BlockingTask oldTask,
           final BlockingTask newTask) {
-        scheduledTaskListView.scrollTo(newTask);
-        overallStatusLabel.textProperty().bind(
-            Bindings.createStringBinding(
-                () -> executor.isIdleBinding.get() ? "" : newTask.titleProperty().get() + ": "
-                    + newTask.messageProperty().get(),
-                executor.isIdleBinding,
-                newTask.messageProperty(),
-                newTask.titleProperty()));
+        Platform2.runOnFXThread(() -> {
+          scheduledTaskListView.scrollTo(newTask);
+          overallStatusLabel.textProperty().bind(
+              Bindings.createStringBinding(
+                  () -> executor.isIdleBinding.get() ? "" : newTask.titleProperty().get() + ": "
+                      + newTask.messageProperty().get(),
+                  executor.isIdleBinding,
+                  newTask.messageProperty(),
+                  newTask.titleProperty()));
+        });
       }
     });
     overallProgressBar.progressProperty().bind(executor.overallProgressBinding);

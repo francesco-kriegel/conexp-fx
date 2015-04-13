@@ -1,0 +1,2 @@
+rsync target/jfx/native/*.msi francesco@tcs.inf.tu-dresden.de:conexp-fx/ --progress --stats --human-readable --force
+rsync target/jfx/native/*.exe francesco@tcs.inf.tu-dresden.de:conexp-fx/ --progress --stats --human-readable --force

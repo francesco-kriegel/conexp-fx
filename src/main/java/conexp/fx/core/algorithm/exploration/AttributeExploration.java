@@ -6,91 +6,82 @@ package conexp.fx.core.algorithm.exploration;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
+import conexp.fx.core.algorithm.nextclosure.NextImplication;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.implication.ImplicationSet;
-import de.tudresden.inf.tcs.fcalib.Implication;
+import conexp.fx.core.implication.Implication;
+import conexp.fx.gui.exploration.HumanExpert;
 
-public class AttributeExploration<G, M> {
+/**
+ * The standard attribute exploration algorithm. This implementation is wrapped around the NextImplication class, that
+ * computes the formal implications in the canonical base of a formal context by means of the NextClosure algorithm.
+ *
+ * @param <G>
+ *          the type of objects.
+ * @param <M>
+ *          the type of attributes.
+ */
+public final class AttributeExploration<G, M> {
 
-  protected final MatrixContext<G, M> cxt;
-  protected final Expert<G, M>        expert;
-
-  protected final ImplicationSet<M>   impls;
-//  protected final List<Set<M>>         intents;
-  protected final MatrixContext<G, M> counterexamples;
-  protected Set<M>                    b;
+  protected final MatrixContext<G, M>         context;
+  protected final Expert<G, M>                expert;
+  protected final Iterator<Implication<G, M>> iterator;
+  protected final Set<Implication<G, M>>      implications = new HashSet<Implication<G, M>>();
 
   public AttributeExploration(final MatrixContext<G, M> context, final Expert<G, M> expert) {
     super();
-    this.cxt = context;
-    cxt.pushAllChangedEvent();
+    this.context = context;
     this.expert = expert;
-    this.impls = new ImplicationSet<M>();
-    this.b = new HashSet<M>();
-//    this.intents = new LinkedList<Set<M>>();
-    this.counterexamples = this.cxt.clone();
-//    this.counterexamples = new MatrixContext<G, M>(false);
-//    this.counterexamples.colHeads().addAll(cxt.colHeads());
+    this.iterator = new NextImplication<G, M>(context).iterator();
+    showNextImplication();
   }
 
-  public void startExploration() {
-    for (Implication<M> impl = nextImplication(); impl != null; impl = nextImplication()) {
-      System.out.println("next implication: " + impl);
-      final Counterexample<G, M> counterexample = expert.askForCounterexample(impl);
-      if (counterexample == null) {
-        addImplication(impl);
-        final Set<M> c = impls.closure(b);
-        System.out.println(b + " with its linClosure: " + c);
-        if (b.equals(c))
-          return;
-        b = c;
-      } else
-        addCounterexample(counterexample);
+  protected final void showNextImplication() {
+    if (!iterator.hasNext())
+      return;
+    final Implication<G, M> next = iterator.next();
+    if (next == null)
+      return;
+    try {
+      final CounterExample<G, M> counterExample = expert.askForCounterexample(next);
+      if (counterExample == null)
+        implications.add(next);
+      else
+        addCounterExampleToContext(counterExample);
+    } catch (InterruptedException e) {
+      return;
     }
+    showNextImplication();
   }
 
-  protected Implication<M> nextImplication() {
-    final Implication<M> implication = new Implication<M>();
-    implication.getPremise().addAll(b);
-    final Set<M> bprime;
-    if (counterexamples.isEmpty())
-      bprime = counterexamples.colHeads();
-    else
-      bprime = counterexamples.intent(b);
-    System.out.println(b + " with its prime: " + bprime);
-    implication.getConclusion().addAll(bprime);
-    implication.getConclusion().removeAll(b);
-    return implication;
+  protected final void addCounterExampleToContext(final CounterExample<G, M> counterExample) {
+    context.rowHeads().add(
+        counterExample.getObject());
+    for (M m : counterExample.getAttributes())
+      context.add(
+          counterExample.getObject(),
+          m);
   }
 
-  protected void addImplication(Implication<M> impl) {
-    if (impl.getConclusion().isEmpty())
-      ;
-//      intents.add(impl.getPremise());
-    else
-      impls.add(impl);
+  public final Set<Implication<G, M>> getImplications() {
+    return implications;
   }
 
-  protected void addCounterexample(Counterexample<G, M> counterexample) {
-    counterexamples.rowHeads().add(counterexample.getObject());
-    counterexamples.row(counterexample.getObject()).addAll(counterexample.getAttributes());
+  /**
+   * This method may only be called within an instance of Concept Explorer FX.
+   * 
+   * @param context
+   * @return
+   */
+  public static final AttributeExploration<String, String> withHumanExpert(final MatrixContext<String, String> context) {
+    return new AttributeExploration<String, String>(context, new HumanExpert(context));
   }
 
 }

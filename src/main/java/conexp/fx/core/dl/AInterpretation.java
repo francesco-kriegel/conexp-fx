@@ -6,17 +6,7 @@ package conexp.fx.core.dl;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -78,20 +68,29 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
 
   @Override
   public boolean addConceptNameAssertion(final IRI conceptName, final IRI individual) {
-    return conceptNameExtensions.put(conceptName, individual);
+    return conceptNameExtensions.put(
+        conceptName,
+        individual);
   }
 
   public boolean addConceptNameAssertion(final String conceptName, final String individual) {
-    return addConceptNameAssertion(IRI.create(conceptName), IRI.create(individual));
+    return addConceptNameAssertion(
+        IRI.create(conceptName),
+        IRI.create(individual));
   }
 
   @Override
   public boolean addRoleNameAssertion(final IRI roleName, final IRI individual1, final IRI individual2) {
-    return roleNameExtensions.put(roleName, new Pair<IRI, IRI>(individual1, individual2));
+    return roleNameExtensions.put(
+        roleName,
+        new Pair<IRI, IRI>(individual1, individual2));
   }
 
   public boolean addRoleNameAssertion(final String roleName, final String individual1, final String individual2) {
-    return addRoleNameAssertion(IRI.create(roleName), IRI.create(individual1), IRI.create(individual2));
+    return addRoleNameAssertion(
+        IRI.create(roleName),
+        IRI.create(individual1),
+        IRI.create(individual2));
   }
 
   @Override
@@ -106,54 +105,85 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
 
   @Override
   public Set<IRI> getRoleSuccessors(final IRI roleName, final IRI individual) {
-    return getRoleSuccessorStream(roleName, individual).collect(Collectors.toSet());
+    return getRoleSuccessorStream(
+        roleName,
+        individual).collect(
+        Collectors.toSet());
   }
 
   @Override
   public Set<IRI> getRolePredecessors(final IRI roleName, final IRI individual) {
-    return getRolePredecessorStream(roleName, individual).collect(Collectors.toSet());
+    return getRolePredecessorStream(
+        roleName,
+        individual).collect(
+        Collectors.toSet());
   }
 
   @Override
   public Set<IRI> getConceptExpressionExtension(C conceptExpression) {
-    return getDomain()
-        .parallelStream()
-        .filter(individual -> isInstanceOf(individual, conceptExpression))
-        .collect(Collectors.toSet());
+    return getDomain().parallelStream().filter(
+        individual -> isInstanceOf(
+            individual,
+            conceptExpression)).collect(
+        Collectors.toSet());
   }
 
   @Override
   public boolean subsumes(final C subsumer, final C subsumee) {
-    return getConceptExpressionExtension(subsumer).containsAll(getConceptExpressionExtension(subsumee));
+    return getConceptExpressionExtension(
+        subsumer).containsAll(
+        getConceptExpressionExtension(subsumee));
   }
 
   @Override
   public boolean isSubsumedBy(final C subsumee, final C subsumer) {
-    return getConceptExpressionExtension(subsumer).containsAll(getConceptExpressionExtension(subsumee));
+    return getConceptExpressionExtension(
+        subsumer).containsAll(
+        getConceptExpressionExtension(subsumee));
   }
 
   @Override
-  public Set<C> getAllMostSpecificConcepts(final int roleDepth) {
+  public Set<C> getAllMostSpecificConcepts(
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
     final Set<C> mmscs = new HashSet<C>();
-    final Iterator<Set<IRI>> it =
-        new NextClosure<IRI>(new HashSetArrayList<IRI>(domain), getClosureOperator(roleDepth)).iterator();
+    final Iterator<Set<IRI>> it = new NextClosure<IRI>(new HashSetArrayList<IRI>(domain), getClosureOperator(
+        roleDepth,
+        maxCardinality,
+        constructors)).iterator();
     it.forEachRemaining(extension -> {
-      mmscs.add(getMostSpecificConcept(extension, roleDepth));
+      mmscs.add(getMostSpecificConcept(
+          extension,
+          roleDepth,
+          maxCardinality,
+          constructors));
     });
     return mmscs;
   }
 
-  protected abstract SetList<C> getAttributeSetForInducedContext(final int roleDepth);
+  protected abstract SetList<C> getAttributeSetForInducedContext(
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors);
 
   @Override
-  public Context<IRI, C> getInducedContext(final int roleDepth) {
+  public Context<IRI, C> getInducedContext(
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
     checkRoleDepth(roleDepth);
     final SetList<IRI> _domain = new HashSetArrayList<IRI>(domain);
-    final SetList<C> _codomain = getAttributeSetForInducedContext(roleDepth);
+    final SetList<C> _codomain = getAttributeSetForInducedContext(
+        roleDepth,
+        maxCardinality,
+        constructors);
     final Context<IRI, C> inducedContext = new SparseContext<IRI, C>(_domain, _codomain, false);
     for (C mmsc : _codomain)
       for (IRI individual : getConceptExpressionExtension(mmsc))
-        inducedContext.add(individual, mmsc);
+        inducedContext.add(
+            individual,
+            mmsc);
     return inducedContext;
   }
 
@@ -162,7 +192,10 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
       final T backgroundTBox);
 
   @Override
-  public final ClosureOperator<IRI> getClosureOperator(final int roleDepth) {
+  public final ClosureOperator<IRI> getClosureOperator(
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
     return new ClosureOperator<IRI>() {
 
       @Override
@@ -177,7 +210,11 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
 
       @Override
       public final Set<IRI> closure(final Set<IRI> set) {
-        return getConceptExpressionExtension(getMostSpecificConcept(set, roleDepth));
+        return getConceptExpressionExtension(getMostSpecificConcept(
+            set,
+            roleDepth,
+            maxCardinality,
+            constructors));
       }
 
     };
@@ -195,11 +232,19 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
   }
 
   protected Stream<IRI> getRoleSuccessorStream(final IRI roleName, final IRI individual) {
-    return getRoleNameExtension(roleName).parallelStream().filter(p -> p.x().equals(individual)).map(p -> p.y());
+    return getRoleNameExtension(
+        roleName).parallelStream().filter(
+        p -> p.x().equals(
+            individual)).map(
+        p -> p.y());
   }
 
   protected Stream<IRI> getRolePredecessorStream(final IRI roleName, final IRI individual) {
-    return getRoleNameExtension(roleName).parallelStream().filter(p -> p.y().equals(individual)).map(p -> p.x());
+    return getRoleNameExtension(
+        roleName).parallelStream().filter(
+        p -> p.y().equals(
+            individual)).map(
+        p -> p.x());
   }
 
   /**
@@ -209,9 +254,15 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
     conceptNamesPerIndividual.clear();
     roleSuccessors.clear();
     for (Entry<IRI, IRI> entry : conceptNameExtensions.entries())
-      conceptNamesPerIndividual.put(entry.getValue(), entry.getKey());
+      conceptNamesPerIndividual.put(
+          entry.getValue(),
+          entry.getKey());
     for (Entry<IRI, Pair<IRI, IRI>> entry : roleNameExtensions.entries())
-      roleSuccessors.put(entry.getValue().x(), Pair.of(entry.getKey(), entry.getValue().y()));
+      roleSuccessors.put(
+          entry.getValue().x(),
+          Pair.of(
+              entry.getKey(),
+              entry.getValue().y()));
   }
 
   @Override
@@ -221,18 +272,15 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
       return false;
     @SuppressWarnings("rawtypes")
     final Interpretation other = (Interpretation) obj;
-    return this.getDomain().equals(other.getDomain())
-        && this.getSignature().equals(other.getSignature())
-        && getSignature()
-            .getConceptNames()
-            .parallelStream()
-            .allMatch(
-                conceptName -> this.getConceptNameExtension(conceptName).equals(
-                    other.getConceptNameExtension(conceptName)))
-        && getSignature()
-            .getRoleNames()
-            .parallelStream()
-            .allMatch(roleName -> this.getRoleNameExtension(roleName).equals(other.getRoleNameExtension(roleName)));
+    return this.getDomain().equals(
+        other.getDomain()) && this.getSignature().equals(
+        other.getSignature()) && getSignature().getConceptNames().parallelStream().allMatch(
+        conceptName -> this.getConceptNameExtension(
+            conceptName).equals(
+            other.getConceptNameExtension(conceptName))) && getSignature().getRoleNames().parallelStream().allMatch(
+        roleName -> this.getRoleNameExtension(
+            roleName).equals(
+            other.getRoleNameExtension(roleName)));
   }
 
   @Override
@@ -248,9 +296,11 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
     sb.append("on signature:\r\n" + getSignature().toString() + "\r\n");
     sb.append("with primitive extensions:\r\n");
     for (IRI conceptName : signature.getConceptNames())
-      sb.append(conceptName + " :: " + getConceptNameExtension(conceptName).toString() + "\r\n");
+      sb.append(conceptName + " :: " + getConceptNameExtension(
+          conceptName).toString() + "\r\n");
     for (IRI roleName : signature.getRoleNames())
-      sb.append(roleName + " :: " + getRoleNameExtension(roleName).toString() + "\r\n");
+      sb.append(roleName + " :: " + getRoleNameExtension(
+          roleName).toString() + "\r\n");
     return sb.toString();
   }
 

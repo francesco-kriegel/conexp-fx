@@ -6,17 +6,7 @@ package conexp.fx.cli;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 import java.io.BufferedWriter;
@@ -37,10 +27,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import conexp.fx.core.algorithm.nextclosures.NextClosures6;
-import conexp.fx.core.algorithm.nextclosures.NextClosures6.Result;
+import conexp.fx.core.algorithm.nextclosures.Result6;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter2;
+import conexp.fx.gui.ConExpFX;
 
 public class CLI {
 
@@ -48,12 +39,16 @@ public class CLI {
     try {
       final CommandLine commandLine = parseArgs(args);
       printUnrecognizedOptions(commandLine);
-      if (commandLine.hasOption(HELP.getLongOpt()))
+      if (commandLine.getOptions().length == 0 || commandLine.hasOption(GUI.getLongOpt()))
+        ConExpFX.main(new String[] {});
+      else if (commandLine.hasOption(HELP.getLongOpt()))
         printHelp();
-      else if (commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt()))
-        computeImplications(commandLine);
 //      else if (commandLine.hasOption(TEST.getLongOpt()))
 //        test(commandLine);
+//      else if (commandLine.hasOption(BENCHMARK.getLongOpt()))
+//        NextClosures6Benchmark.main(new String[] {});
+      else if (commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt()))
+        computeImplications(commandLine);
       else
         runCLI(commandLine);
     } catch (ParseException e) {
@@ -64,6 +59,13 @@ public class CLI {
 //  private static final void test(final CommandLine commandLine) {
 //    final String path = commandLine.getOptionValue(CLI.TEST.getLongOpt());
 //    NextClosuresTest.run(path);
+//    TestSuite.main(new String[] {});
+////    -Xms256m
+////    -Xmx2048m
+////    -Djub.customkey=oracle-1.7.0_45
+////    -Djub.consumers=CONSOLE,H2,XML
+////    -Djub.db.file=benchmarks/.benchmarks
+////    -Djub.xml.file=benchmarks/latest.xml    
 //  }
 
   private static final void computeImplications(final CommandLine commandLine) {
@@ -74,7 +76,7 @@ public class CLI {
     final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
     CXTImporter2.read(cxt, input);
     final long start = System.currentTimeMillis();
-    final Result<String, String> implicationalBase = NextClosures6.compute(cxt, true);
+    final Result6<String, String> implicationalBase = NextClosures6.compute(cxt, true);
     final long duration = System.currentTimeMillis() - start;
     final File output =
         new File(input.getParentFile(), input.getName().substring(0, input.getName().lastIndexOf(".")) + ".nxc");
@@ -84,7 +86,7 @@ public class CLI {
 
   private static final void exportImplications(
       final String description,
-      final Result<String, String> result,
+      final Result6<String, String> result,
       final File file) {
     System.out.println("writing to " + file.getAbsolutePath());
     FileWriter fw = null;
@@ -139,7 +141,7 @@ public class CLI {
     HelpFormatter helpFormatter = new HelpFormatter();
     helpFormatter.printHelp(
         120,
-        "java -jar conexp-fx-VERSION.jar [OPTIONS]",
+        "java -jar conexp-fx-VERSION-jar-with_dependencies.jar [OPTIONS]",
         "Available command line options for Concept Explorer FX",
         OPTIONS,
         "");
@@ -192,15 +194,15 @@ public class CLI {
                                                        .hasArg(false)
                                                        .withDescription("computes implicational base")
                                                        .create("imp");
-//  @SuppressWarnings("static-access")
-//  protected static final Option  CALC_ASSOCIATIONS = OptionBuilder
-//                                                       .isRequired(false)
-//                                                       .withLongOpt("calculateAssociations")
-//                                                       .hasArg(true)
-//                                                       .withArgName("supp")
-//                                                       .withArgName("conf")
-//                                                       .withDescription("computes all association rules")
-//                                                       .create("ass");
+  @SuppressWarnings("static-access")
+  protected static final Option  CALC_ASSOCIATIONS = OptionBuilder
+                                                       .isRequired(false)
+                                                       .withLongOpt("calculateAssociations")
+                                                       .hasArg(true)
+                                                       .withArgName("supp")
+                                                       .withArgName("conf")
+                                                       .withDescription("computes all association rules")
+                                                       .create("ass");
   @SuppressWarnings("static-access")
   protected static final Option  PRINT_TO_CONSOLE  = OptionBuilder
                                                        .isRequired(false)
@@ -220,24 +222,42 @@ public class CLI {
                                                            .withDescription(
                                                                "exports labeled and layouted concept lattice to SVG document (*.svg)")
                                                            .create("out");
+  @SuppressWarnings("static-access")
+  protected static final Option  GUI               = OptionBuilder
+                                                       .isRequired(false)
+                                                       .hasArg(false)
+                                                       .withDescription("starts the JavaFX gui")
+                                                       .withLongOpt("startGUI")
+                                                       .create("gui");
 //  @SuppressWarnings("static-access")
 //  protected static final Option  TEST              = OptionBuilder
 //                                                       .isRequired(false)
 //                                                       .hasArg(true)
 //                                                       .withArgName("path")
+//                                                       .withDescription("runs the test suite")
 //                                                       .withLongOpt("runTestSuite")
 //                                                       .create("test");
+//  @SuppressWarnings("static-access")
+//  protected static final Option  BENCHMARK         = OptionBuilder
+//                                                       .isRequired(false)
+//                                                       .hasArg(true)
+//                                                       .withArgName("path")
+//                                                       .withDescription("runs the benchmark suite")
+//                                                       .withLongOpt("runBenchmarkSuite")
+//                                                       .create("bench");
 
   static {
+    OPTIONS.addOption(GUI);
     OPTIONS.addOption(HELP);
     OPTIONS.addOption(IMPORT_CXT);
     OPTIONS.addOption(CALC_CONCEPTS);
     OPTIONS.addOption(CALC_NEIGHBORHOOD);
     OPTIONS.addOption(CALC_LAYOUT);
     OPTIONS.addOption(CALC_IMPLICATIONS);
-//    OPTIONS.addOption(CALC_ASSOCIATIONS);
+    OPTIONS.addOption(CALC_ASSOCIATIONS);
     OPTIONS.addOption(PRINT_TO_CONSOLE);
     OPTIONS.addOption(EXPORT);
 //    OPTIONS.addOption(TEST);
+//    OPTIONS.addOption(BENCHMARK);
   }
 }

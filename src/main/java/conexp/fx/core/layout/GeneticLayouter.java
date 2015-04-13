@@ -6,17 +6,7 @@ package conexp.fx.core.layout;
  * %%
  * Copyright (C) 2010 - 2015 Francesco Kriegel
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
@@ -51,6 +41,7 @@ public final class GeneticLayouter<G, M> {
       final int generationCount,
       final int populationSize,
       final boolean threeDimensions,
+      final boolean polar,
       final ConflictDistance<G, M> conflictDistance,
       final ThreadPoolExecutor tpe) {
     return new BlockingTask(id + " - Genetic Layouter") {
@@ -107,100 +98,106 @@ public final class GeneticLayouter<G, M> {
 
           @Override
           public void run() {
-            final ConceptLayout<G, M> candidate = new ConceptLayout<G, M>(layout.lattice, null);
-            final Set<Set<Set<Integer>>> chains = chainDecomposer.randomChainDecomposition();
-            final int w = chains.size();
-            if (w == 1) {
-              final Point3D seed = new Point3D(0d, 1d, 0d);
-              for (M m : Collections2.transform(
-                  Iterables.getOnlyElement(chains),
-                  candidate.lattice.context.selection._firstAttribute))
-                candidate.seeds.put(m, seed);
-            } else {
-              final int ww = w * w;
-              final BitSetSet usedX = new BitSetSet();
-              for (Set<Set<Integer>> chain : chains) {
-                int _x;
-                for (_x = rng.nextInt(ww + 1); usedX.contains(_x) || usedX.contains(_x + 1)
-                    || (_x != 0 && usedX.contains(_x - 1)); _x = rng.nextInt(ww + 1));
-                usedX.add(_x);
-                final int __x = _x - ww / 2;
-                final Point3D seed =
-                    new Point3D((double) __x, (double) (rng.nextInt(Math.abs(__x + 1) + 1) + 1), threeDimensions
-                        ? (double) (rng.nextInt(Math.abs(__x + 1) + 1) - __x / 2) : 0d);
-                for (M m : Collections2.transform(chain, candidate.lattice.context.selection._firstAttribute))
+            if (polar) {} else {
+              final ConceptLayout<G, M> candidate = new ConceptLayout<G, M>(layout.lattice, null);
+              final Set<Set<Set<Integer>>> chains = chainDecomposer.randomChainDecomposition();
+              final int w = chains.size();
+              if (w == 1) {
+                final Point3D seed = new Point3D(0d, 1d, 0d);
+                for (M m : Collections2.transform(
+                    Iterables.getOnlyElement(chains),
+                    candidate.lattice.context.selection._firstAttribute))
                   candidate.seeds.put(m, seed);
+              } else {
+                final int ww = w * w;
+                final BitSetSet usedX = new BitSetSet();
+                for (Set<Set<Integer>> chain : chains) {
+                  int _x;
+                  for (_x = rng.nextInt(ww + 1); usedX.contains(_x) || usedX.contains(_x + 1)
+                      || (_x != 0 && usedX.contains(_x - 1)); _x = rng.nextInt(ww + 1));
+                  usedX.add(_x);
+                  final int __x = _x - ww / 2;
+                  final Point3D seed =
+                      new Point3D((double) __x, (double) (rng.nextInt(Math.abs(__x + 1) + 1) + 1), threeDimensions
+                          ? (double) (rng.nextInt(Math.abs(__x + 1) + 1) - __x / 2) : 0d);
+                  for (M m : Collections2.transform(chain, candidate.lattice.context.selection._firstAttribute))
+                    candidate.seeds.put(m, seed);
+                }
               }
-            }
-            synchronized (layouts) {
-              layouts.add(candidate);
-            }
-            final double result = conflictDistance.apply(candidate).second();
-            if (result > currentQuality) {
-              currentQuality = result;
-              currentBest = candidate;
+              synchronized (layouts) {
+                layouts.add(candidate);
+              }
+              final double result = conflictDistance.apply(candidate).second();
+              if (result > currentQuality) {
+                currentQuality = result;
+                currentBest = candidate;
+              }
             }
           }
         };
       }
 
       private final void evolvePopulation() {
-        for (int i = 0; i < generationCount; i++) {
-          if (currentBest != layout)
-            layout.updateSeeds(currentBest.seeds);
-          updateProgress(0.3d + 0.7d * ((double) i) / (double) generationCount, 1d);
-          updateMessage("Evolving Seeds: " + i + " of " + generationCount + " Generations...");
-          evolveGeneration();
-        }
-        try {
-          if (currentBest != layout)
-            layout.updateSeeds(currentBest.seeds);
-        } catch (Exception e) {
-          System.err.println(currentBest);
-          System.err.println(layout);
-          e.printStackTrace();
+        if (polar) {} else {
+          for (int i = 0; i < generationCount; i++) {
+            if (currentBest != layout)
+              layout.updateSeeds(currentBest.seeds);
+            updateProgress(0.3d + 0.7d * ((double) i) / (double) generationCount, 1d);
+            updateMessage("Evolving Seeds: " + i + " of " + generationCount + " Generations...");
+            evolveGeneration();
+          }
+          try {
+            if (currentBest != layout)
+              layout.updateSeeds(currentBest.seeds);
+          } catch (Exception e) {
+            System.err.println(currentBest);
+            System.err.println(layout);
+            e.printStackTrace();
+          }
         }
       }
 
       private final void evolveGeneration() {
-        currentQuality = -1d;
-        for (ConceptLayout<G, M> candidate : layouts) {
-          LayoutEvolution<G, M>.Value v =
-              new LayoutEvolution<G, M>(
-                  candidate,
-                  conflictDistance.apply(candidate).first(),
-                  ConceptMovement.INTENT_CHAIN_SEEDS,
-                  4d,
-                  4d,
-                  2,
-                  2,
-                  1,
-                  conflictDistance,
-                  tpe).calculate();
-          if (!candidate.updateSeeds(v.seeds)) {
-            if (rng.nextBoolean())
-              v =
-                  new LayoutEvolution<G, M>(candidate, candidate.lattice.attributeConcepts.get(Collections3.random(
-                      candidate.seeds.keySet(),
-                      rng)), ConceptMovement.LABEL_CHAIN_SEEDS, 4d, 4d, 2, 2, 1, conflictDistance, tpe).calculate();
-            else
-              v =
-                  new LayoutEvolution<G, M>(
-                      candidate,
-                      Collections3.random(candidate.lattice.rowHeads(), rng),
-                      ConceptMovement.INTENT_CHAIN_SEEDS,
-                      4d,
-                      4d,
-                      2,
-                      2,
-                      1,
-                      conflictDistance,
-                      tpe).calculate();
-            candidate.updateSeeds(v.seeds);
-          }
-          if (v.result > currentQuality) {
-            currentQuality = v.result;
-            currentBest = candidate;
+        if (polar) {} else {
+          currentQuality = -1d;
+          for (ConceptLayout<G, M> candidate : layouts) {
+            LayoutEvolution<G, M>.Value v =
+                new LayoutEvolution<G, M>(
+                    candidate,
+                    conflictDistance.apply(candidate).first(),
+                    ConceptMovement.INTENT_CHAIN_SEEDS,
+                    4d,
+                    4d,
+                    2,
+                    2,
+                    1,
+                    conflictDistance,
+                    tpe).calculate();
+            if (!candidate.updateSeeds(v.seeds)) {
+              if (rng.nextBoolean())
+                v =
+                    new LayoutEvolution<G, M>(candidate, candidate.lattice.attributeConcepts.get(Collections3.random(
+                        candidate.seeds.keySet(),
+                        rng)), ConceptMovement.LABEL_CHAIN_SEEDS, 4d, 4d, 2, 2, 1, conflictDistance, tpe).calculate();
+              else
+                v =
+                    new LayoutEvolution<G, M>(
+                        candidate,
+                        Collections3.random(candidate.lattice.rowHeads(), rng),
+                        ConceptMovement.INTENT_CHAIN_SEEDS,
+                        4d,
+                        4d,
+                        2,
+                        2,
+                        1,
+                        conflictDistance,
+                        tpe).calculate();
+              candidate.updateSeeds(v.seeds);
+            }
+            if (v.result > currentQuality) {
+              currentQuality = v.result;
+              currentBest = candidate;
+            }
           }
         }
       }
