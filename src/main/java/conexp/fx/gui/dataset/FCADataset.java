@@ -164,6 +164,16 @@ public final class FCADataset<G, M> extends Dataset {
           }
         },
         RelationEvent.ALL_CHANGED);
+    context.addEventHandler(
+        event -> {
+          unsavedChanges.set(true);
+          lattice.rowHeads().clear();
+          concepts.clear();
+          implications.clear();
+          partialImplications.clear();
+          initialize2();
+        },
+        RelationEvent.ROWS);
     views.add(new DatasetView<Context<G, M>>("Context", contextWidget, context));
     views.add(new DatasetView<ConceptLayout<G, M>>("Lattice", conceptGraph, layout));
     views.add(new DatasetView<List<Concept<G, M>>>("Concepts", conceptWidget, concepts));
@@ -172,8 +182,14 @@ public final class FCADataset<G, M> extends Dataset {
     actions.add(new DatasetAction("Polar Layout", () -> polarLayout()));
     actions.add(new DatasetAction("Circular Layout", () -> circularLayout()));
     if (editable)
-      actions.add(new DatasetAction("Explore...", () -> AttributeExploration
-          .withHumanExpert((MatrixContext<String, String>) context)));
+      actions.add(new DatasetAction("Explore...", () -> {
+        try {
+          AttributeExploration.withHumanExpert(
+              (MatrixContext<String, String>) context).start();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }));
     this.initialize2();
   }
 

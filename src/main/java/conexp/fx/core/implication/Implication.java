@@ -87,7 +87,8 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
     if (cit.hasNext())
       s.append(cit.next());
     cit.forEachRemaining(m -> s.append(" " + UnicodeSymbols.WEDGE + " " + m));
-    s.append(" (" + ((int) (100d * confidence)) + "%)");
+    if (confidence < 1d)
+      s.append(" (" + ((int) (100d * confidence)) + "%)");
     return s.toString();
   }
 

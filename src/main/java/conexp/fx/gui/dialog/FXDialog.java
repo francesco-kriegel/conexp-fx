@@ -28,6 +28,7 @@ import javafx.scene.effect.DropShadowBuilder;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
 import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.StackPaneBuilder;
 import javafx.scene.layout.VBoxBuilder;
@@ -199,8 +200,8 @@ public class FXDialog<T> {
   }
 
   public final Return<T> showAndWait() {
-    bindHeight();
     stage.showAndWait();
+    bindHeight();
     return new Return<T>(result, value);
   }
 
@@ -223,12 +224,18 @@ public class FXDialog<T> {
         super.bind(
             topBackground.heightProperty(),
             bottomBackground.heightProperty());
+        if (pane.getCenter() != null && pane.getCenter() instanceof Pane) {
+          super.bind(((Pane) pane.getCenter()).minHeightProperty());
+        }
       }
 
       @Override
       protected double computeValue() {
-        return topBackground.heightProperty().get() + bottomBackground.heightProperty().get()
-            + ((pane.getCenter() != null) ? pane.getCenter().getLayoutBounds().getHeight() : 0d);
+        return topBackground.heightProperty().get()
+            + bottomBackground.heightProperty().get()
+            + ((pane.getCenter() != null && pane.getCenter() instanceof Pane) ? ((Pane) pane.getCenter())
+                .minHeightProperty()
+                .get() : 0d);
       }
     };
     pane.minHeightProperty().bind(

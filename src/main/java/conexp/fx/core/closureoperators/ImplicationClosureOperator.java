@@ -20,15 +20,25 @@ import conexp.fx.core.implication.Implication;
 public class ImplicationClosureOperator<G, M> implements ClosureOperator<M> {
 
   private final Set<Implication<G, M>> implications;
+  private final boolean                includePseudoClosures;
+
+  public ImplicationClosureOperator(final boolean concurrent, final boolean includePseudoClosures) {
+    this(concurrent ? Collections.newSetFromMap(new ConcurrentHashMap<Implication<G, M>, Boolean>())
+        : new HashSet<Implication<G, M>>(), includePseudoClosures);
+  }
+
+  public ImplicationClosureOperator(final Set<Implication<G, M>> implications, final boolean includePseudoClosures) {
+    super();
+    this.implications = implications;
+    this.includePseudoClosures = includePseudoClosures;
+  }
 
   public ImplicationClosureOperator(final boolean concurrent) {
-    this(concurrent ? Collections.newSetFromMap(new ConcurrentHashMap<Implication<G, M>, Boolean>())
-        : new HashSet<Implication<G, M>>());
+    this(concurrent, false);
   }
 
   public ImplicationClosureOperator(final Set<Implication<G, M>> implications) {
-    super();
-    this.implications = implications;
+    this(implications, false);
   }
 
   public final Set<Implication<G, M>> getImplications() {
@@ -56,7 +66,7 @@ public class ImplicationClosureOperator<G, M> implements ClosureOperator<M> {
     while (changed) {
       changed = false;
       for (Implication<G, M> i : implications)
-        if (closure.containsAll(i.getPremise()))
+        if (closure.containsAll(i.getPremise()) && (!includePseudoClosures || closure.size() > i.getPremise().size()))
           changed |= closure.addAll(i.getConclusion());
     }
     return closure;
