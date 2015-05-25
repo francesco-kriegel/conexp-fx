@@ -107,7 +107,11 @@ public class ModelAssistent extends Assistent<Result> {
     roleLabel.setPadding(new Insets(4, 4, 1, 4));
     conceptListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     roleListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    isaRoleChoiceBox.setItems(FXCollections.observableArrayList(dataset.getRoles()));
+    try{
+      isaRoleChoiceBox.setItems(FXCollections.observableArrayList(dataset.getRoles()));
+    } catch (NullPointerException e){
+      System.out.println();
+    }
     final HBox rbox = new HBox(isARoleLabel, isaRoleChoiceBox);
     final VBox vbox = new VBox(rbox, conceptLabel, conceptListView, roleLabel, roleListView);
     pane.setCenter(vbox);

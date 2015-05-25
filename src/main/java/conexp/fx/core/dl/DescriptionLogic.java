@@ -25,7 +25,7 @@ public enum DescriptionLogic {
       Constructor.EXISTENTIAL_RESTRICTION,
       Constructor.VALUE_RESTRICTION,
       Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-      Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+      Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
 
   public final Constructor[] constructors;
 

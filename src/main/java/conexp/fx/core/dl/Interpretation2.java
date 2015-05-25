@@ -180,7 +180,7 @@ public class Interpretation2 {
             case QUALIFIED_AT_LEAST_RESTRICTION:
 //              conjuncts.add(df.getOWLObjectMinCardinality(cardinality, role, getMMSC(successor, roleDepth - 1, dl)));
               break;
-            case QUALIFIED_AT_MOST_RESTRICTION:
+            case UNQUALIFIED_AT_MOST_RESTRICTION:
 //              conjuncts.add(df.getOWLObjectMaxCardinality(cardinality, role, getMMSC(successor, roleDepth - 1, dl)));
               break;
             case CONJUNCTION:
@@ -246,7 +246,7 @@ public class Interpretation2 {
       return Collections.singleton(successors);
     case QUALIFIED_AT_LEAST_RESTRICTION:
       return Collections.emptySet();
-    case QUALIFIED_AT_MOST_RESTRICTION:
+    case UNQUALIFIED_AT_MOST_RESTRICTION:
       return Collections.emptySet();
     case CONJUNCTION:
     default:
@@ -288,7 +288,7 @@ public class Interpretation2 {
                 mmscConjuncts.add(df.getOWLObjectAllValuesFrom(role, mmsc));
                 break;
               case QUALIFIED_AT_LEAST_RESTRICTION:
-              case QUALIFIED_AT_MOST_RESTRICTION:
+              case UNQUALIFIED_AT_MOST_RESTRICTION:
               case CONJUNCTION:
               default:
               }

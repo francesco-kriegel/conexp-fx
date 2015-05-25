@@ -299,7 +299,7 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
         }
         if (Arrays.asList(
             constructors).contains(
-            Constructor.QUALIFIED_AT_MOST_RESTRICTION)) {
+            Constructor.UNQUALIFIED_AT_MOST_RESTRICTION)) {
           for (int cardinality = 1; cardinality < maxCardinality; cardinality++)
             for (Set<IRI> successors : getSuccessorSetsQLR(
                 individuals,
@@ -641,20 +641,28 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
               Stream::concat).ifPresent(
               stream -> _codomain.addAll(stream.collect(Collectors.toSet())));
           break;
-        case QUALIFIED_AT_MOST_RESTRICTION:
+        case UNQUALIFIED_AT_MOST_RESTRICTION:
           Stream.iterate(
               0,
               n -> n + 1).limit(
-              maxCardinality).skip(
-              1).map(
-              cardinality -> Collections2.transform(
-                  mmscs,
-                  mmsc -> df.getOWLObjectMaxCardinality(
-                      cardinality,
-                      df.getOWLObjectProperty(roleName),
-                      mmsc)).stream()).reduce(
-              Stream::concat).ifPresent(
-              stream -> _codomain.addAll(stream.collect(Collectors.toSet())));
+              maxCardinality).map(
+              cardinality -> df.getOWLObjectMaxCardinality(
+                  cardinality,
+                  df.getOWLObjectProperty(roleName))).forEach(
+              _codomain::add);
+//          Stream.iterate(
+//              0,
+//              n -> n + 1).limit(
+//              maxCardinality).skip(
+//              1).map(
+//              cardinality -> Collections2.transform(
+//                  mmscs,
+//                  mmsc -> df.getOWLObjectMaxCardinality(
+//                      cardinality,
+//                      df.getOWLObjectProperty(roleName),
+//                      mmsc)).stream()).reduce(
+//              Stream::concat).ifPresent(
+//              stream -> _codomain.addAll(stream.collect(Collectors.toSet())));
           break;
         case EXISTENTIAL_SELF_RESTRICTION:
           _codomain.add(df.getOWLObjectHasSelf(df.getOWLObjectProperty(roleName)));
@@ -843,8 +851,8 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
           chainEnded = true;
       }
       if (!chain.isEmpty())
-        System.out.println("found chain of size "+chain.size()+" "+chain);
-      final int j = chain.size()+1;//i;
+        System.out.println("found chain of size " + chain.size() + " " + chain);
+      final int j = chain.size() + 1;// i;
       final Optional<Triple<Integer, IRI, Integer>> opt = e.getValue().parallelStream().filter(
           t -> t.getFirst().equals(
               1) && t.getThird().equals(

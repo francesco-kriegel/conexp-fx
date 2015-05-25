@@ -406,7 +406,7 @@ public class OWLInterpretationTest {
         Constructor.EXISTENTIAL_SELF_RESTRICTION,
         Constructor.VALUE_RESTRICTION,
         Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-        Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+        Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
     System.out.println(OWLtoString.toString(mmsc1));
     System.out.println(OWLtoString.toString(OWLMinimizer.minimizeConjunction(mmsc1)));
     System.out.println();
@@ -419,7 +419,7 @@ public class OWLInterpretationTest {
         Constructor.EXISTENTIAL_SELF_RESTRICTION,
         Constructor.VALUE_RESTRICTION,
         Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-        Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+        Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
     System.out.println(OWLtoString.toString(mmsc2));
     System.out.println(OWLtoString.toString(OWLMinimizer.minimizeConjunction(mmsc2)));
     System.out.println();
@@ -432,7 +432,7 @@ public class OWLInterpretationTest {
         Constructor.EXISTENTIAL_SELF_RESTRICTION,
         Constructor.VALUE_RESTRICTION,
         Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-        Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+        Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
     System.out.println(OWLtoString.toString(mmsc3));
     System.out.println(OWLtoString.toString(OWLMinimizer.minimizeConjunction(mmsc3)));
     System.out.println();
@@ -447,7 +447,7 @@ public class OWLInterpretationTest {
         Constructor.EXISTENTIAL_SELF_RESTRICTION,
         Constructor.VALUE_RESTRICTION,
         Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-        Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+        Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
     System.out.println(OWLtoString.toString(mmsc4));
     System.out.println(OWLtoString.toString(OWLMinimizer.minimizeConjunction(mmsc4)));
     System.out.println();
@@ -462,7 +462,7 @@ public class OWLInterpretationTest {
         Constructor.EXISTENTIAL_SELF_RESTRICTION,
         Constructor.VALUE_RESTRICTION,
         Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-        Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+        Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
     System.out.println(OWLtoString.toString(mmsc5));
     System.out.println(OWLtoString.toString(OWLMinimizer.minimizeConjunction(mmsc5)));
     System.out.println();
@@ -477,7 +477,7 @@ public class OWLInterpretationTest {
         Constructor.EXISTENTIAL_SELF_RESTRICTION,
         Constructor.VALUE_RESTRICTION,
         Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-        Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+        Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
     System.out.println(OWLtoString.toString(mmsc6));
     System.out.println(OWLtoString.toString(OWLMinimizer.minimizeConjunction(mmsc6)));
     System.out.println();
@@ -490,7 +490,7 @@ public class OWLInterpretationTest {
         Constructor.EXISTENTIAL_SELF_RESTRICTION,
         Constructor.VALUE_RESTRICTION,
         Constructor.QUALIFIED_AT_LEAST_RESTRICTION,
-        Constructor.QUALIFIED_AT_MOST_RESTRICTION);
+        Constructor.UNQUALIFIED_AT_MOST_RESTRICTION);
     System.out.println(OWLtoString.toString(mmsc7));
     System.out.println(OWLtoString.toString(OWLMinimizer.minimizeConjunction(mmsc7)));
     System.out.println();
