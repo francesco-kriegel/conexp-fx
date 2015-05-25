@@ -358,27 +358,27 @@
 						</execution>
 					</executions>
 				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.9.1</version>
-					<executions>
-						<execution>
-							<id>regex-property</id>
-							<phase>initialize</phase>
-							<goals>
-								<goal>regex-property</goal>
-							</goals>
-							<configuration>
-								<name>setup.version</name>
-								<value>${project.version}</value>
-								<regex>(.*)-(SNAPSHOT)</regex>
-								<replacement>$1</replacement>
-								<failIfNoMatch>false</failIfNoMatch>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.codehaus.mojo</groupId> -->
+<!-- 					<artifactId>build-helper-maven-plugin</artifactId> -->
+<!-- 					<version>1.9.1</version> -->
+<!-- 					<executions> -->
+<!-- 						<execution> -->
+<!-- 							<id>regex-property</id> -->
+<!-- 							<phase>initialize</phase> -->
+<!-- 							<goals> -->
+<!-- 								<goal>regex-property</goal> -->
+<!-- 							</goals> -->
+<!-- 							<configuration> -->
+<!-- 								<name>setup.version</name> -->
+<!-- 								<value>${project.version}</value> -->
+<!-- 								<regex>(.*)-(SNAPSHOT)</regex> -->
+<!-- 								<replacement>$1</replacement> -->
+<!-- 								<failIfNoMatch>false</failIfNoMatch> -->
+<!-- 							</configuration> -->
+<!-- 						</execution> -->
+<!-- 					</executions> -->
+<!-- 				</plugin> -->
 				<plugin>
 					<groupId>com.zenjava</groupId>
 					<artifactId>javafx-maven-plugin</artifactId>
@@ -403,7 +403,7 @@
 						<!-- <certOrgUnit>Francesco Kriegel</certOrgUnit> -->
 						<!-- <certState>Germany</certState> -->
 						<!-- <overwriteKeyStore>true</overwriteKeyStore> -->
-						<nativeReleaseVersion>${setup.version}</nativeReleaseVersion>
+<!-- 						<nativeReleaseVersion>${setup.version}</nativeReleaseVersion> -->
 						<embeddedHeight>100%</embeddedHeight>
 						<embeddedWidth>100%</embeddedWidth>
 						<templates>
