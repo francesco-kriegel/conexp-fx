@@ -39,7 +39,7 @@ public abstract class Request<G, M> {
     return context;
   }
 
-  public abstract void setContent();
+  public abstract void setContent() throws Exception;
 
   public String getId() {
     return type.title + " " + IdGenerator.getNextId();

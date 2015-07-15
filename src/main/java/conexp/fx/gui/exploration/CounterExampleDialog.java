@@ -21,7 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import conexp.fx.core.algorithm.exploration.CounterExample;
+import conexp.fx.core.algorithm.nextclosure.exploration.CounterExample;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.implication.Implication;
 import conexp.fx.core.util.IdGenerator;

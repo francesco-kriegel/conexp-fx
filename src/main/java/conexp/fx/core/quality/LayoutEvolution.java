@@ -17,10 +17,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+
+import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.context.Concept;
+import conexp.fx.core.layout.ConceptLayout;
+import conexp.fx.core.layout.ConceptMovement;
+import conexp.fx.core.math.Points;
+import conexp.fx.gui.task.TimeTask;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -31,23 +40,16 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import javafx.geometry.Rectangle2D;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-
-import conexp.fx.core.collections.pair.Pair;
-import conexp.fx.core.context.Concept;
-import conexp.fx.core.layout.ConceptLayout;
-import conexp.fx.core.layout.ConceptMovement;
-import conexp.fx.core.math.Points;
-import conexp.fx.gui.task.BlockingTask;
-
 public final class LayoutEvolution<G, M> {
 
-  public static final <G, M> BlockingTask calculate(final LayoutEvolution<G, M> qualityChart) {
-    return new BlockingTask("Quality Measure Chart") {
+  public static final <G, M> TimeTask<Void> calculate(final LayoutEvolution<G, M> qualityChart) {
+    return new TimeTask<Void>("Quality Measure Chart") {
 
       @Override
-      protected final void _call() {
+      protected final Void call() {
+        updateProgress(0d, 1d);
+        if (isCancelled())
+          return null;
         updateMessage("Simulating Concept Movement...");
         qualityChart.progressProperty.addListener(new ChangeListener<Number>() {
 
@@ -60,6 +62,8 @@ public final class LayoutEvolution<G, M> {
           }
         });
         qualityChart.calculate();
+        updateProgress(1d, 1d);
+        return null;
       }
     };
   }
@@ -105,21 +109,21 @@ public final class LayoutEvolution<G, M> {
     }
   }
 
-  private final ThreadPoolExecutor     tpe;
-  private final ConflictDistance<G, M> conflictDistance;
-  private final ConceptLayout<G, M>    layout;
-  private final Concept<G, M>          concept;
-  private final ConceptMovement        movement;
-  private double                       minY;
-  private final int                    toSide;
-  private final int                    zoomInto;
-  private final int                    steps;
-  public final DoubleProperty          progressProperty = new SimpleDoubleProperty(0d);
-  public Value                         best;
-  public final ObservableSet<Value>    values           = FXCollections.observableSet(new HashSet<Value>());
-  private final List<Value>            lastValues;
-  private final Set<Value>             nextValues       = new HashSet<Value>();
-  private final double                 numPerDim;
+  private final AbstractExecutorService tpe;
+  private final ConflictDistance<G, M>  conflictDistance;
+  private final ConceptLayout<G, M>     layout;
+  private final Concept<G, M>           concept;
+  private final ConceptMovement         movement;
+  private double                        minY;
+  private final int                     toSide;
+  private final int                     zoomInto;
+  private final int                     steps;
+  public final DoubleProperty           progressProperty = new SimpleDoubleProperty(0d);
+  public Value                          best;
+  public final ObservableSet<Value>     values           = FXCollections.observableSet(new HashSet<Value>());
+  private final List<Value>             lastValues;
+  private final Set<Value>              nextValues       = new HashSet<Value>();
+  private final double                  numPerDim;
 
   public LayoutEvolution(
       final ConceptLayout<G, M> layout,
@@ -131,7 +135,7 @@ public final class LayoutEvolution<G, M> {
       final int steps,
       final int zoomInto,
       final ConflictDistance<G, M> conflictDistance,
-      final ThreadPoolExecutor tpe) {
+      final AbstractExecutorService tpe) {
     super();
     this.layout = layout;
     this.concept = concept;
@@ -188,12 +192,16 @@ public final class LayoutEvolution<G, M> {
       values.remove(nextValue);
       final double tileWidth = nextValue.rectangle.getWidth() / numPerDim;
       final double tileHeight = nextValue.rectangle.getHeight() / numPerDim;
-      final Value value =
-          new Value(nextValue.delta, new Rectangle2D(
+      final Value value = new Value(
+          nextValue.delta,
+          new Rectangle2D(
               nextValue.rectangle.getMinX() + toSide * tileWidth,
               nextValue.rectangle.getMinY() + toSide * tileHeight,
               tileWidth,
-              tileHeight), nextValue.result, nextValue.hint, nextValue.seeds);
+              tileHeight),
+          nextValue.result,
+          nextValue.hint,
+          nextValue.seeds);
       values.add(value);
       lastValues.add(value);
       for (double i = -toSide; i <= toSide; i++)
@@ -214,12 +222,8 @@ public final class LayoutEvolution<G, M> {
     lastValues.clear();
   }
 
-  private final Runnable create(
-      final Value nextValue,
-      final double i,
-      final double j,
-      final double tileWidth,
-      final double tileHeight) {
+  private final Runnable
+      create(final Value nextValue, final double i, final double j, final double tileWidth, final double tileHeight) {
     return new Runnable() {
 
       @Override
@@ -229,12 +233,15 @@ public final class LayoutEvolution<G, M> {
           return;
         final ConceptLayout<G, M> movedLayout = layout.clone();
         movedLayout.move(concept, movement, delta);
-        final Value value =
-            new Value(delta, new Rectangle2D(
+        final Value value = new Value(
+            delta,
+            new Rectangle2D(
                 nextValue.rectangle.getMinX() + (i + toSide) * tileWidth,
                 nextValue.rectangle.getMinY() + (j + toSide) * tileHeight,
                 tileWidth,
-                tileHeight), conflictDistance.apply(movedLayout), movedLayout._seeds);
+                tileHeight),
+            conflictDistance.apply(movedLayout),
+            movedLayout._seeds);
         synchronized (values) {
           values.add(value);
         }

@@ -16,11 +16,11 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures6C;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresC;
 import conexp.fx.core.algorithm.nextclosures.ResultC;
 import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.importer.CXTImporter2;
+import conexp.fx.core.importer.CXTImporter;
 
 public class NextClosuresCTest {
 
@@ -49,7 +49,7 @@ public class NextClosuresCTest {
       space += " ";
     System.out.print(file.getName() + space + " -- ");
     final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
-    CXTImporter2.read(cxt, file);
+    CXTImporter.read(cxt, file);
     if (!file.getName().equals("algorithms.cxt")
         && (cxt.colHeads().size() > 30 || cxt.colHeads().isEmpty() || cxt.rowHeads().isEmpty())) {
       System.out.println("skipped");
@@ -65,7 +65,7 @@ public class NextClosuresCTest {
     ResultC<String, String> result3 = null;
     double runTime3;
     try {
-      result3 = NextClosures6C.compute(cxt, new ClosureOperator<String>() {
+      result3 = NextClosuresC.compute(cxt, new ClosureOperator<String>() {
 
         @Override
         public boolean isClosed(Set<String> set) {

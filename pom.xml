@@ -4,7 +4,7 @@
 
 	<groupId>conexp-fx</groupId>
 	<artifactId>conexp-fx</artifactId>
-	<version>5.2-SNAPSHOT</version>
+	<version>5.3-SNAPSHOT</version>
 	<name>Concept Explorer FX</name>
 	<description>Software for Formal Concept Analysis with Description Logics Extensions</description>
 	<packaging>jar</packaging>

@@ -12,17 +12,6 @@ package conexp.fx.gui.assistent;
 
 import java.util.Arrays;
 
-import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import jfxtras.scene.control.ListSpinner;
-
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 
@@ -36,7 +25,17 @@ import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.assistent.InducedContextAssistent.Result;
 import conexp.fx.gui.dataset.DLDataset;
 import conexp.fx.gui.dataset.FCADataset;
-import conexp.fx.gui.task.BlockingTask;
+import conexp.fx.gui.task.TimeTask;
+import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import jfxtras.scene.control.ListSpinner;
 
 public class InducedContextAssistent extends Assistent<Result> {
 
@@ -50,9 +49,8 @@ public class InducedContextAssistent extends Assistent<Result> {
   private final DLDataset             dataset;
   private final ListSpinner<Integer>  roleDepthSpinner      = new ListSpinner<Integer>(0, 3);
   private final ListSpinner<Integer>  maxCardinalitySpinner = new ListSpinner<Integer>(1, 10);
-  private final ListView<Constructor> constructorListView   = new ListView<Constructor>(
-                                                                FXCollections.observableList(Arrays.asList(Constructor
-                                                                    .values())));
+  private final ListView<Constructor> constructorListView   =
+      new ListView<Constructor>(FXCollections.observableList(Arrays.asList(Constructor.values())));
 
   public InducedContextAssistent(DLDataset dataset) {
     super(
@@ -103,18 +101,14 @@ public class InducedContextAssistent extends Assistent<Result> {
     constructorLabel.setPadding(new Insets(4, 4, 1, 4));
     roleDepthLabel.setMinWidth(100);
     maxCardinalityLabel.setMinWidth(100);
-    roleDepthLabel.minWidthProperty().bind(
-        maxCardinalityLabel.widthProperty());
+    roleDepthLabel.minWidthProperty().bind(maxCardinalityLabel.widthProperty());
     final HBox rbox = new HBox(roleDepthLabel, roleDepthSpinner);
     final HBox cbox = new HBox(maxCardinalityLabel, maxCardinalitySpinner);
     final VBox vbox = new VBox(rbox, cbox, constructorLabel, constructorListView);
     pane.setCenter(vbox);
-    constructorListView.getSelectionModel().setSelectionMode(
-        SelectionMode.MULTIPLE);
-    constructorListView.getSelectionModel().select(
-        Constructor.CONJUNCTION);
-    constructorListView.getSelectionModel().select(
-        Constructor.EXISTENTIAL_RESTRICTION);
+    constructorListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    constructorListView.getSelectionModel().select(Constructor.CONJUNCTION);
+    constructorListView.getSelectionModel().select(Constructor.EXISTENTIAL_RESTRICTION);
     return pane;
   }
 
@@ -126,35 +120,38 @@ public class InducedContextAssistent extends Assistent<Result> {
     this.resultProperty.get().selectedRoleDepth = roleDepthSpinner.getValue();
     this.resultProperty.get().selectedMaxCardinality = maxCardinalitySpinner.getValue();
     this.resultProperty.get().selectedConstructors =
-        constructorListView.getSelectionModel().getSelectedItems().toArray(
-            new Constructor[] {});
-    ConExpFX.instance.exe.submit(new BlockingTask("Creating new Induced Context") {
+        constructorListView.getSelectionModel().getSelectedItems().toArray(new Constructor[] {});
+    ConExpFX.instance.executor.execute(new TimeTask<Void>("Creating new Induced Context") {
 
       @Override
-      protected void _call() {
+      protected Void call() {
+        updateProgress(0d, 1d);
+        if (isCancelled())
+          return null;
         final Context<IRI, OWLClassExpression> inducedContext = dataset.interpretation.getInducedContext(
             resultProperty.get().selectedRoleDepth,
             resultProperty.get().selectedMaxCardinality,
             resultProperty.get().selectedConstructors);
-        ConExpFX.instance.treeView.addDataset(new FCADataset<IRI, OWLClassExpression>(
-            dataset,
-            new Request<IRI, OWLClassExpression>(Type.INDUCED_CONTEXT, Source.NULL) {
+        ConExpFX.instance.treeView.addDataset(
+            new FCADataset<IRI, OWLClassExpression>(
+                dataset,
+                new Request<IRI, OWLClassExpression>(Type.INDUCED_CONTEXT, Source.NULL) {
 
-              @Override
-              public MatrixContext<IRI, OWLClassExpression> createContext() {
-                MatrixContext<IRI, OWLClassExpression> cxt = new MatrixContext<IRI, OWLClassExpression>(false);
-                return cxt;
-              }
+          @Override
+          public MatrixContext<IRI, OWLClassExpression> createContext() {
+            MatrixContext<IRI, OWLClassExpression> cxt = new MatrixContext<IRI, OWLClassExpression>(false);
+            return cxt;
+          }
 
-              @Override
-              public void setContent() {
-                this.context.rowHeads().addAll(
-                    inducedContext.rowHeads());
-                this.context.colHeads().addAll(
-                    inducedContext.colHeads());
-                context.addAll(inducedContext);
-              }
-            }));
+          @Override
+          public void setContent() {
+            this.context.rowHeads().addAll(inducedContext.rowHeads());
+            this.context.colHeads().addAll(inducedContext.colHeads());
+            context.addAll(inducedContext);
+          }
+        }));
+        updateProgress(1d, 1d);
+        return null;
       }
     });
   }

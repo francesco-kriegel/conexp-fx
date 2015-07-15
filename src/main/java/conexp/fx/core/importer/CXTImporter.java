@@ -1,6 +1,3 @@
-/*
- * @author Francesco.Kriegel@gmx.de
- */
 package conexp.fx.core.importer;
 
 /*
@@ -13,67 +10,63 @@ package conexp.fx.core.importer;
  * #L%
  */
 
-
 import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 
 import org.ujmp.core.booleanmatrix.BooleanMatrix;
+import org.ujmp.core.exceptions.MatrixException;
 
+import conexp.fx.core.collections.setlist.HashSetArrayList;
+import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.util.IterableFile;
 
 public class CXTImporter {
 
-  public static void importt(MatrixContext<String, String> context, File file) {
-    importt(context, new IterableFile(file));
+  public static final MatrixContext<String, String> read(final File file) throws Exception {
+    final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
+    read(cxt, file);
+    return cxt;
   }
 
-  public static void importt(MatrixContext<String, String> context, String content) {
-    importt(context, Arrays.asList(content.split("\\r?\\n")));
-  }
-
-  public static void importt(MatrixContext<String, String> context, Iterable<String> lines) {
-    int linenumber = 0;
-    int objectCount = 0;
-    int attributeCount = 0;
-    List<String> objects = new LinkedList<String>();
-    List<String> attributes = new LinkedList<String>();
-    BooleanMatrix matrix = null;
-    for (String line : lines) {
-      if (line != null && !line.startsWith("EOF")) {
-        if (linenumber == 2) {
-          objectCount = Integer.parseInt(line);
-          System.out.println(objectCount + " objects");
-        }
-        if (linenumber == 3) {
-          attributeCount = Integer.parseInt(line);
-          System.out.println(attributeCount + " attributes");
-        }
-        if (linenumber >= 5 && linenumber < 5 + objectCount)
-          objects.add(line);
-        if (linenumber == 5 + objectCount)
-          context.rowHeads().addAll(objects);
-        if (linenumber >= 5 + objectCount && linenumber < 5 + objectCount + attributeCount)
-          attributes.add(line);
-        if (linenumber == 5 + objectCount + attributeCount) {
-          context.colHeads().addAll(attributes);
-          matrix = context.matrix();
-        }
-        if (linenumber >= 5 + objectCount + attributeCount
-            && linenumber < 5 + objectCount + attributeCount + objectCount) {
-          int row = linenumber - (5 + objectCount + attributeCount);
-          int column = 0;
-          for (char c : line.toCharArray()) {
-            if (c == 'X')
-              matrix.setBoolean(true, row, column);
-            column++;
-          }
-        }
-        linenumber++;
+  public static final void read(final MatrixContext<String, String> context, final File file) throws Exception {
+    try {
+      if (!context.id.isBound())
+        context.id.set(file.getName());
+      final Iterator<String> lineIterator = new IterableFile(file).iterator();
+      final String[] firstLines = new String[5];
+      int i = 0;
+      while (lineIterator.hasNext() && i < 5) {
+        firstLines[i++] = lineIterator.next();
       }
+      final int rows = Integer.valueOf(firstLines[2]);
+      final int cols = Integer.valueOf(firstLines[3]);
+      final SetList<String> objs = new HashSetArrayList<String>();
+      final SetList<String> atts = new HashSetArrayList<String>();
+
+      while (lineIterator.hasNext() && i < 5 + rows) {
+        objs.add(lineIterator.next());
+        i++;
+      }
+      while (lineIterator.hasNext() && i < 5 + rows + cols) {
+        atts.add(lineIterator.next());
+        i++;
+      }
+
+      context.rowHeads().addAll(objs);
+      context.colHeads().addAll(atts);
+
+      final BooleanMatrix mat = context.matrix();// BooleanMatrix2D.factory.zeros(rows, cols);
+
+      while (lineIterator.hasNext() && i < 5 + rows + cols + rows) {
+        final char[] line = lineIterator.next().toCharArray();
+        final int row = i - 5 - rows - cols;
+        for (int col = 0; col < cols; col++)
+          mat.setBoolean(line[col] == 'X' || line[col] == 'x', row, col);
+        i++;
+      }
+    } catch (NumberFormatException | MatrixException e) {
+      throw new Exception("Could not read formal context from " + file, e);
     }
-    context.pushAllChangedEvent();
   }
 }

@@ -3,17 +3,6 @@
  */
 package conexp.fx.core.algorithm.nextclosure;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,25 +22,24 @@ import conexp.fx.core.collections.setlist.SetLists;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.importer.CXTImporter;
-import conexp.fx.gui.task.BlockingTask;
+import conexp.fx.gui.task.TimeTask;
 
 public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
 
-  public static final <G, M> BlockingTask concepts(final ConceptLattice<G, M> lattice) {
-    return new BlockingTask("NextConcept") {
+  public static final <G, M> TimeTask<Void> concepts(final ConceptLattice<G, M> lattice) {
+    return new TimeTask<Void>("NextConcept") {
 
       private final Comparator<Concept<G, M>> intentSizeComparator = new Comparator<Concept<G, M>>() {
 
-                                                                     public final int compare(
-                                                                         final Concept<G, M> c1,
-                                                                         final Concept<G, M> c2) {
-                                                                       return (int) Math.signum(c1.intent().size()
-                                                                           - c2.intent().size());
-                                                                     }
-                                                                   };
+        public final int compare(final Concept<G, M> c1, final Concept<G, M> c2) {
+          return (int) Math.signum(c1.intent().size() - c2.intent().size());
+        }
+      };
 
-      protected final void _call() {
+      protected final Void call() {
+        updateProgress(0d, 1d);
+        if (isCancelled())
+          return null;
         updateMessage("Computing Formal Concepts...");
         lattice.dispose();
         updateProgress(0.05d, 1d);
@@ -78,6 +66,8 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
         lattice.rowHeads().addAll(concepts);
         updateMessage("Pushing Changes...");
 //        lattice.pushAllChangedEvent();
+        updateProgress(1d, 1d);
+        return null;
       }
     };
   }
@@ -120,7 +110,7 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
     return Iterators.transform(new UnmodifiableIterator<BitSetSet>() {
 
       private final int rows = reduced.rowHeads().size();
-      private BitSetSet _A   = Collections3.newBitSetSet(reduced._colAnd(SetLists.integers(reduced.colHeads().size())));
+      private BitSetSet _A = Collections3.newBitSetSet(reduced._colAnd(SetLists.integers(reduced.colHeads().size())));
 
       public final boolean hasNext() {
         return _A != null;
@@ -146,9 +136,12 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
       }
 
       private final BitSetSet _APlusG(final int _g) {
-        return Collections3.newBitSetSet(hullOp.closure(Collections3.iterable(Iterators.concat(
-            Iterators.filter(_A.iterator(), Collections3.isSmaller(_g)),
-            Iterators.singletonIterator(_g)))));
+        return Collections3.newBitSetSet(
+            hullOp.closure(
+                Collections3.iterable(
+                    Iterators.concat(
+                        Iterators.filter(_A.iterator(), Collections3.isSmaller(_g)),
+                        Iterators.singletonIterator(_g)))));
       }
 
       private final boolean _AisLexicSmallerG(final BitSetSet _B, final int _g) {
@@ -159,20 +152,27 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
             return false;
         return true;
       }
-    },
-        new Function<BitSetSet, Concept<G, M>>() {
+    }, new Function<BitSetSet, Concept<G, M>>() {
 
-          public final Concept<G, M> apply(final BitSetSet _extent) {
-            return new Concept<G, M>(selection.rowHeads().getAll(
-                selection._colAnd(Collections3.iterable(Iterators.concat(Iterators.transform(
-                    reduced.colHeads().getAll(reduced._rowAnd(_extent), true).iterator(),
-                    Collections3.<Integer> setToIterator())))),
-                true), selection.colHeads().getAll(
-                selection._rowAnd(Collections3.iterable(Iterators.concat(Iterators.transform(
-                    reduced.rowHeads().getAll(_extent, true).iterator(),
-                    Collections3.<Integer> setToIterator())))),
+      public final Concept<G, M> apply(final BitSetSet _extent) {
+        return new Concept<G, M>(
+            selection.rowHeads().getAll(
+                selection._colAnd(
+                    Collections3.iterable(
+                        Iterators.concat(
+                            Iterators.transform(
+                                reduced.colHeads().getAll(reduced._rowAnd(_extent), true).iterator(),
+                                Collections3.<Integer> setToIterator())))),
+                true),
+            selection.colHeads().getAll(
+                selection._rowAnd(
+                    Collections3.iterable(
+                        Iterators.concat(
+                            Iterators.transform(
+                                reduced.rowHeads().getAll(_extent, true).iterator(),
+                                Collections3.<Integer> setToIterator())))),
                 true));
-          }
-        });
+      }
+    });
   }
 }

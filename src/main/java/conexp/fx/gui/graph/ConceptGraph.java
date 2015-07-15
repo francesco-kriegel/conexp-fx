@@ -1179,9 +1179,9 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     fca.layout.lattice.addEventHandler(new RelationEventHandler<Concept<G, M>, Concept<G, M>>() {
 
       public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
-        Platform.runLater(new Runnable() {
-
-          public final void run() {
+//        Platform.runLater(new Runnable() {
+//
+//          public final void run() {
             controller.graphLock.lock();
             front.getChildren().clear();
             // edges.clear();
@@ -1194,8 +1194,8 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
             // pendingEdges.clear();
             controller.polarBottom = null;
             controller.graphLock.unlock();
-          }
-        });
+//          }
+//        });
       }
     }, RelationEvent.ROWS_CLEARED);
   }
@@ -1204,28 +1204,30 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     fca.layout.lattice.addEventHandler(new RelationEventHandler<Concept<G, M>, Concept<G, M>>() {
 
       public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
-        synchronized (fca.layout.generators) {
+//        synchronized (fca.layout.generators) {
           for (final Concept<G, M> concept : event.getRows())
             if (fca.layout.generators.containsKey(concept)) {
+              synchronized (fca.layout.generators) {
               final Concept<G, M> generator = fca.layout.generators.remove(concept);
               final Circle gContent = vertices.get(generator).node;
-              new ConceptVertex(concept, gContent.translateXProperty().get(), gContent.translateYProperty().get());
+              new ConceptVertex(concept, gContent.translateXProperty().get(), gContent.translateYProperty().get());}
             } else
               new ConceptVertex(concept, null, null);
-        }
+//        }
       }
     }, RelationEvent.ROWS_ADDED);
     fca.layout.lattice.addEventHandler(new RelationEventHandler<Concept<G, M>, Concept<G, M>>() {
 
       public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
-        synchronized (fca.layout.generators) {
+//        synchronized (fca.layout.generators) {
           for (Concept<G, M> concept : event.getRows())
             if (fca.layout.generators.containsKey(concept)) {
+              synchronized (fca.layout.generators) {
               final Concept<G, M> generator = fca.layout.generators.remove(concept);
-              controller.disposeVertex(concept, generator);
+              controller.disposeVertex(concept, generator);}
             } else
               controller.disposeVertex(concept, null);
-        }
+//        }
       }
     }, RelationEvent.ROWS_REMOVED);
   }

@@ -16,21 +16,66 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import conexp.fx.core.util.FileFormat;
+import conexp.fx.gui.ConExpFX;
+import conexp.fx.gui.ConExpFX.DatasetTreeView;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Control;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import conexp.fx.core.util.FileFormat;
-import conexp.fx.gui.ConExpFX;
-import conexp.fx.gui.ConExpFX.DatasetTreeView;
+import javafx.scene.layout.HBox;
 
 public abstract class Dataset {
+
+  public final class DatasetTreeItem extends TreeItem<Control> {
+
+    public DatasetTreeItem(DatasetTreeView treeView) {
+      super();
+      final Label label = new Label(id.get());
+      label.textProperty().bind(
+          Bindings.createStringBinding(() -> id.get() + (unsavedChanges.get() ? "*" : ""), id, unsavedChanges));
+      label.setStyle("-fx-font-weight: bold;");
+      final ProgressIndicator progressIndicator = new ProgressIndicator();
+      progressIndicator.setMinSize(12, 12);
+      progressIndicator.setMaxSize(12, 12);
+      progressIndicator.setPadding(new Insets(0d));
+      progressIndicator.progressProperty().bind(
+          Bindings.createDoubleBinding(
+              () -> ConExpFX.instance.executor.datasetProgressBinding(Dataset.this).get() == 1d ? 1d : -1d,
+              ConExpFX.instance.executor.datasetProgressBinding(Dataset.this)));
+      progressIndicator.visibleProperty().bind(progressIndicator.progressProperty().lessThan(1d));
+      this.setValue(label);
+      final Hyperlink closeLink = new Hyperlink("x");
+      closeLink.setOnAction(e -> treeView.close(Dataset.this));
+      closeLink.setPadding(new Insets(0));
+      final HBox hBox = new HBox(closeLink, progressIndicator);
+      hBox.setSpacing(4d);
+      hBox.setAlignment(Pos.CENTER);
+      label.setGraphic(hBox);
+      label.setContentDisplay(ContentDisplay.RIGHT);
+      this.setGraphic(new ImageView(new Image(ConExpFX.class.getResourceAsStream("image/context.gif"))));
+      views.forEach(view -> getChildren().add(view.getTreeItem()));
+      actions.forEach(action -> {
+        this.getChildren().add(action.getTreeItem());
+      });
+    }
+
+    public final Dataset getDataset() {
+      return Dataset.this;
+    }
+
+  }
 
   public File                       file;
   public FileFormat                 format;
@@ -59,7 +104,7 @@ public abstract class Dataset {
   }
 
   public final void addToTree(final DatasetTreeView treeView) {
-    this.treeItem = new DatasetTreeItem();
+    this.treeItem = new DatasetTreeItem(treeView);
     treeView.getParentItem(Dataset.this).getChildren().add(treeItem);
     treeView.getParentItem(Dataset.this).setExpanded(true);
     treeItem.setExpanded(true);
@@ -76,27 +121,5 @@ public abstract class Dataset {
   public abstract void export();
 
   public abstract void close();
-
-  public final class DatasetTreeItem extends TreeItem<Control> {
-
-    public DatasetTreeItem() {
-      super();
-      final Label label = new Label(id.get());
-      label.textProperty().bind(
-          Bindings.createStringBinding(() -> id.get() + (unsavedChanges.get() ? "*" : ""), id, unsavedChanges));
-      label.setStyle("-fx-font-weight: bold;");
-      this.setValue(label);
-      this.setGraphic(new ImageView(new Image(ConExpFX.class.getResourceAsStream("image/context.gif"))));
-      views.forEach(view -> getChildren().add(view.getTreeItem()));
-      actions.forEach(action -> {
-        this.getChildren().add(action.getTreeItem());
-      });
-    }
-
-    public final Dataset getDataset() {
-      return Dataset.this;
-    }
-
-  }
 
 }

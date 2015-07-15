@@ -1,5 +1,7 @@
 package conexp.fx.gui.task;
 
+import conexp.fx.gui.util.Platform2;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -29,74 +31,58 @@ import javafx.scene.control.ProgressIndicatorBuilder;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderPaneBuilder;
-import conexp.fx.gui.util.Platform2;
+import javafx.scene.layout.HBox;
 
 public final class ExecutorStatusBar {
 
   private final class TaskItem {
 
-//    private final ProgressIndicator currentProgressIndicator = ProgressIndicatorBuilder
-//                                                                 .create()
-//                                                                 .minHeight(height - 2 * padding)
-//                                                                 .maxHeight(height - 2 * padding)
-//                                                                 .minWidth(height - 2 * padding)
-//                                                                 .maxWidth(height - 2 * padding)
-//                                                                 .build();
     private final ProgressBar currentProgressBar = ProgressBarBuilder
-                                                     .create()
-                                                     .minHeight(height - 2 * padding)
-                                                     .maxHeight(height - 2 * padding)
-                                                     .minWidth(100)
-                                                     .maxWidth(100)
-                                                     .build();
-    private final Label       currentStatusLabel = LabelBuilder.create()
-//        .graphic(currentProgressIndicator)
-                                                     .minWidth(490)
-                                                     .maxWidth(490)
-                                                     .minHeight(height - 2 * padding)
-                                                     .maxHeight(height - 2 * padding)
-                                                     .build();
+        .create()
+        .minHeight(height - 2 * padding)
+        .maxHeight(height - 2 * padding)
+        .minWidth(100)
+        .maxWidth(100)
+        .build();
+    private final Label       currentStatusLabel = LabelBuilder
+        .create()
+        .minWidth(478)
+        .maxWidth(478)
+        .minHeight(height - 2 * padding)
+        .maxHeight(height - 2 * padding)
+        .build();
     private final Label       timeLabel          = LabelBuilder
-                                                     .create()
-                                                     .minWidth(80)
-                                                     .maxWidth(80)
-                                                     .minHeight(height - 2 * padding)
-                                                     .maxHeight(height - 2 * padding)
-                                                     .build();
-    private final Button      stopButton         = ButtonBuilder.create()
-                                                 // .text("stop")
-                                                     .style("-fx-base: red")
-                                                     .maxHeight(12)
-                                                     .maxWidth(12)
-                                                     .minHeight(12)
-                                                     .minWidth(12)
-                                                     .build();
+        .create()
+        .minWidth(80)
+        .maxWidth(80)
+        .minHeight(height - 2 * padding)
+        .maxHeight(height - 2 * padding)
+        .build();
+    private final Button      stopButton         =
+        ButtonBuilder.create().style("-fx-base: red").maxHeight(12).maxWidth(12).minHeight(12).minWidth(12).build();
     private final BorderPane  currentPane        = new BorderPane();
 
     public TaskItem() {
       currentPane.setLeft(currentStatusLabel);
-      currentPane.setCenter(currentProgressBar);
+      currentPane.setCenter(new HBox(currentProgressBar, stopButton));
       currentPane.setRight(timeLabel);
-      timeLabel.setGraphic(stopButton);
       currentProgressBar.setPadding(new Insets(0, 5, 0, 5));
-//      bindTo(task);
     }
 
-    private final void bindTo(final BlockingTask task) {
-//      currentProgressIndicator.progressProperty().bind(task.progressProperty());
+    private final void bindTo(final TimeTask<?> task) {
       currentStatusLabel.textProperty().bind(task.titleProperty());
       timeLabel.textProperty().bind(
-          Bindings.createStringBinding(() -> formatTime(task.runTimeMillis.get()), task.runTimeMillis));
+          Bindings.createStringBinding(
+              () -> task.isCancelled() ? "cancelled" : formatTime(task.runTimeMillisProperty().get()),
+              task.runTimeMillisProperty(),
+              task.stateProperty()));
       timeLabel.alignmentProperty().bind(
           Bindings.createObjectBinding(
               () -> task.isDone() || task.isRunning() ? Pos.BASELINE_RIGHT : Pos.BASELINE_LEFT,
               task.stateProperty()));
       currentProgressBar.progressProperty().bind(task.progressProperty());
-      stopButton.setOnAction(e -> task.cancel());
-      timeLabel.graphicProperty().bind(
-          Bindings.createObjectBinding(
-              () -> task.isDone() || task.isRunning() ? null : stopButton,
-              task.stateProperty()));
+      stopButton.setOnAction(e -> task.cancel(true));
+      stopButton.visibleProperty().bind(Bindings.createObjectBinding(() -> !task.isDone(), task.stateProperty()));
     }
   }
 
@@ -116,58 +102,53 @@ public final class ExecutorStatusBar {
     return String.format("%03dms", ms);
   }
 
-  private BlockingExecutor             executor;
-  public final BorderPane              statusBar;
-  private final int                    height                   = 20;
-  private final int                    padding                  = 2;
-  private final ProgressIndicator      overallProgressIndicator = ProgressIndicatorBuilder
-                                                                    .create()
-                                                                    .minHeight(height - 2 * padding)
-                                                                    .maxHeight(height - 2 * padding)
-                                                                    .minWidth(height - 2 * padding)
-                                                                    .maxWidth(height - 2 * padding)
-                                                                    .build();
-  private final ProgressBar            overallProgressBar       = ProgressBarBuilder
-                                                                    .create()
-                                                                    .minHeight(height - 2 * padding)
-                                                                    .maxHeight(height - 2 * padding)
-                                                                    .minWidth(200)
-                                                                    .maxWidth(200)
-                                                                    .build();
-  private final Label                  overallStatusLabel       = LabelBuilder
-                                                                    .create()
-                                                                    .graphic(overallProgressIndicator)
-                                                                    .minHeight(height - 2 * padding)
-                                                                    .maxHeight(height - 2 * padding)
-                                                                    .build();
+  private BlockingExecutor        executor;
+  public final BorderPane         statusBar;
+  private final int               height                   = 20;
+  private final int               padding                  = 2;
+  private final ProgressIndicator overallProgressIndicator = ProgressIndicatorBuilder
+      .create()
+      .minHeight(height - 2 * padding)
+      .maxHeight(height - 2 * padding)
+      .minWidth(height - 2 * padding)
+      .maxWidth(height - 2 * padding)
+      .build();
+  private final ProgressBar       overallProgressBar       = ProgressBarBuilder
+      .create()
+      .minHeight(height - 2 * padding)
+      .maxHeight(height - 2 * padding)
+      .minWidth(200)
+      .maxWidth(200)
+      .build();
+  private final Label             overallStatusLabel       = LabelBuilder
+      .create()
+      .graphic(overallProgressIndicator)
+      .minHeight(height - 2 * padding)
+      .maxHeight(height - 2 * padding)
+      .build();
 
-  private final ListView<BlockingTask> scheduledTaskListView;
-
-  private final void stopCurrentTask() {
-    this.executor.currentTaskProperty.getValue().cancel();
-  }
+  private final ListView<TimeTask<?>> scheduledTaskListView;
 
   public ExecutorStatusBar(AnchorPane overlayPane) {
     final BorderPane overallPane =
         BorderPaneBuilder.create().left(overallStatusLabel).right(overallProgressBar).build();
-    statusBar =
-        BorderPaneBuilder
-            .create()
-            .padding(new Insets(padding, padding, padding, padding))
-            .minHeight(height)
-            .maxHeight(height)
-            .right(overallPane)
-            .build();
-    scheduledTaskListView = new ListView<BlockingTask>();
+    statusBar = BorderPaneBuilder
+        .create()
+        .padding(new Insets(padding, padding, padding, padding))
+        .minHeight(height)
+        .maxHeight(height)
+        .right(overallPane)
+        .build();
+    scheduledTaskListView = new ListView<TimeTask<?>>();
 //    scheduledTaskListView.setOnMouseClicked(e -> executor.clearFinished());
     scheduledTaskListView.setPrefSize(700, 200);
     scheduledTaskListView.setCellFactory(l -> {
-      final ListCell<BlockingTask> cell = new ListCell<BlockingTask>() {
+      final ListCell<TimeTask<?>> cell = new ListCell<TimeTask<?>>() {
 
         private final TaskItem taskItem = new TaskItem();
 
         @Override
-        protected void updateItem(BlockingTask p, boolean empty) {
+        protected void updateItem(TimeTask<?> p, boolean empty) {
           if (empty)
             return;
           taskItem.bindTo(p);
@@ -204,21 +185,23 @@ public final class ExecutorStatusBar {
             executor.overallProgressBinding));
     overallProgressIndicator.visibleProperty().bind(
         Bindings.createBooleanBinding(() -> !executor.isIdleBinding.get(), executor.isIdleBinding));
-    executor.currentTaskProperty.addListener(new ChangeListener<BlockingTask>() {
+    executor.currentTaskProperty.addListener(new ChangeListener<TimeTask<?>>() {
 
       public final void changed(
-          final ObservableValue<? extends BlockingTask> observable,
-          final BlockingTask oldTask,
-          final BlockingTask newTask) {
+          final ObservableValue<? extends TimeTask<?>> observable,
+          final TimeTask<?> oldTask,
+          final TimeTask<?> newTask) {
         Platform2.runOnFXThread(() -> {
           scheduledTaskListView.scrollTo(newTask);
-          overallStatusLabel.textProperty().bind(
-              Bindings.createStringBinding(
-                  () -> executor.isIdleBinding.get() ? "" : newTask.titleProperty().get() + ": "
-                      + newTask.messageProperty().get(),
-                  executor.isIdleBinding,
-                  newTask.messageProperty(),
-                  newTask.titleProperty()));
+          overallStatusLabel
+              .textProperty()
+              .bind(
+                  Bindings.createStringBinding(
+                      () -> executor.isIdleBinding.get() ? "" : newTask.titleProperty().get()
+                          + (newTask.messageProperty().get().equals("") ? "" : ": " + newTask.messageProperty().get()),
+                      executor.isIdleBinding,
+                      newTask.messageProperty(),
+                      newTask.titleProperty()));
         });
       }
     });

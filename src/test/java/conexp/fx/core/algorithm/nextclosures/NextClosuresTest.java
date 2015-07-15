@@ -18,12 +18,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import conexp.fx.core.algorithm.nextclosure.NextClosure2;
-import conexp.fx.core.algorithm.nextclosures.NextClosures6;
+import conexp.fx.core.algorithm.nextclosures.NextClosures;
 import conexp.fx.core.algorithm.nextclosures.Result4;
-import conexp.fx.core.algorithm.nextclosures.Result6;
+import conexp.fx.core.algorithm.nextclosures.Result;
 import conexp.fx.core.algorithm.nextclosures.ResultC;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.importer.CXTImporter2;
+import conexp.fx.core.importer.CXTImporter;
 
 public class NextClosuresTest {
 
@@ -58,7 +58,7 @@ public class NextClosuresTest {
       space += " ";
     System.out.print(file.getName() + space + " -- ");
     final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
-    CXTImporter2.read(cxt, file);
+    CXTImporter.read(cxt, file);
     if (!file.getName().equals("algorithms.cxt")
         && (cxt.colHeads().size() > 125 || cxt.colHeads().isEmpty() || cxt.rowHeads().isEmpty())) {
       System.out.println("skipped");
@@ -101,10 +101,10 @@ public class NextClosuresTest {
     }
 
     final double startTime4 = System.currentTimeMillis();
-    Result6<String, String> result4 = null;
+    Result<String, String> result4 = null;
     double runTime4;
     try {
-      result4 = NextClosures6.compute(cxt, false);
+      result4 = NextClosures.compute(cxt, false);
       runTime4 = System.currentTimeMillis() - startTime4;
     } catch (Exception e) {
       runTime4 = -1;

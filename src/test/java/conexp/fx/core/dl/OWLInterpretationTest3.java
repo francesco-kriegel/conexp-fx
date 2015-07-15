@@ -22,8 +22,8 @@ import org.semanticweb.elk.util.collections.Triple;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures6;
-import conexp.fx.core.algorithm.nextclosures.Result6;
+import conexp.fx.core.algorithm.nextclosures.NextClosures;
+import conexp.fx.core.algorithm.nextclosures.Result;
 import conexp.fx.core.context.SparseContext;
 import conexp.fx.core.util.OWLtoString;
 
@@ -89,7 +89,7 @@ public class OWLInterpretationTest3 {
 //        triple -> {
 //          System.out.println(triple.getFirst() + "-" + triple.getSecond() + "-" + triple.getThird());
 //        });
-    final Result6<ArrayList<IRI>, Triple<Integer, IRI, Integer>> base = NextClosures6.compute(
+    final Result<ArrayList<IRI>, Triple<Integer, IRI, Integer>> base = NextClosures.compute(
         cxt,
         true);
     base.implications.entrySet().stream().filter(

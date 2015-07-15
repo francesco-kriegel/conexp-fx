@@ -17,9 +17,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures6;
+import conexp.fx.core.algorithm.nextclosures.NextClosures;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.importer.CXTImporter2;
+import conexp.fx.core.importer.CXTImporter;
 
 public class NextClosures6Benchmark {
 
@@ -96,12 +96,12 @@ public class NextClosures6Benchmark {
     System.out.println("Cores: " + Arrays.toString(cores));
     System.out.println("Results file: " + resultsFile);
     final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
-    CXTImporter2.read(cxt, cxtFile);
+    CXTImporter.read(cxt, cxtFile);
     final Writer writer = new BufferedWriter(new FileWriter(resultsFile, true));
     for (int core : cores) {
       for (int it = 0; it < iterations; it++) {
         final long start = System.currentTimeMillis();
-        NextClosures6.compute(cxt, false, core);
+        NextClosures.compute(cxt, false, core);
         final long duration = System.currentTimeMillis() - start;
 //        final long duration = (long) (((double) (System.currentTimeMillis() - start)) / (double) iterations);
         System.out.println("Runtime: " + duration + "ms @ " + core + "cpus");

@@ -10,8 +10,8 @@ package conexp.fx.gui.exploration;
  * #L%
  */
 
-import conexp.fx.core.algorithm.exploration.CounterExample;
-import conexp.fx.core.algorithm.exploration.Expert;
+import conexp.fx.core.algorithm.nextclosure.exploration.CounterExample;
+import conexp.fx.core.algorithm.nextclosure.exploration.Expert;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.implication.Implication;
 import conexp.fx.gui.dialog.FXDialog.Return;

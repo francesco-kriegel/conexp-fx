@@ -1,4 +1,4 @@
-package conexp.fx.core.algorithm.exploration;
+package conexp.fx.core.algorithm.nextclosure.exploration;
 
 import conexp.fx.core.implication.Implication;
 
@@ -12,10 +12,9 @@ import conexp.fx.core.implication.Implication;
  * #L%
  */
 
-public class NoExpert<G, M> implements Expert<G, M> {
+@FunctionalInterface
+public interface Expert<G, M> {
 
-  public CounterExample<G, M> askForCounterexample(Implication<G, M> impl) {
-    return null;
-  }
+  public CounterExample<G, M> askForCounterexample(final Implication<G, M> impl) throws InterruptedException;
 
 }

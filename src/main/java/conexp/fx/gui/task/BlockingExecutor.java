@@ -1,167 +1,118 @@
 package conexp.fx.gui.task;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ForkJoinPool;
 
+import conexp.fx.gui.ConExpFX;
+import conexp.fx.gui.dataset.Dataset;
+import conexp.fx.gui.dialog.ErrorDialog;
+import conexp.fx.gui.util.Platform2;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Worker.State;
-import conexp.fx.gui.util.Platform2;
 
-public final class BlockingExecutor {
+public class BlockingExecutor {
 
-//  public void clearFinished() {
-//    scheduledTasks.removeIf(t -> t.isDone());
-//  }
+  public final AbstractExecutorService     tpe                 =
+      new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
+  public final BooleanBinding              isIdleBinding;
+  public final DoubleBinding               overallProgressBinding;
+  public final ObservableList<TimeTask<?>> scheduledTasks      =
+      FXCollections.observableList(Collections.synchronizedList(new LinkedList<TimeTask<?>>()));
+  public final Property<TimeTask<?>>       currentTaskProperty = new SimpleObjectProperty<TimeTask<?>>();
 
-//  public final LongProperty                        executionTimeMillis     = new SimpleLongProperty(0l);
-  public final DoubleBinding                       overallProgressBinding;
-  public final BooleanBinding                      isIdleBinding;
-  public final ObservableList<BlockingTask>        scheduledTasks          =
-                                                                               FXCollections
-                                                                                   .observableList(Collections
-                                                                                       .synchronizedList(new LinkedList<BlockingTask>()));
-  public final ConcurrentLinkedQueue<BlockingTask> taskQueue               = new ConcurrentLinkedQueue<BlockingTask>();
-  public final Property<BlockingTask>              currentTaskProperty     = new SimpleObjectProperty<BlockingTask>(
-                                                                               BlockingTask.NULL);
-  public final ThreadPoolExecutor                  tpe                     = new ThreadPoolExecutor(
-                                                                               Runtime
-                                                                                   .getRuntime()
-                                                                                   .availableProcessors(),
-                                                                               Runtime
-                                                                                   .getRuntime()
-                                                                                   .availableProcessors(),
-                                                                               60,
-                                                                               TimeUnit.SECONDS,
-                                                                               new LinkedBlockingQueue<Runnable>());
-  public final IntegerProperty                     doneTasksProperty       = new SimpleIntegerProperty(0);
-  public final DoubleProperty                      currentProgressProperty = new SimpleDoubleProperty(1d);
-  public final IntegerProperty                     scheduledTasksProperty  = new SimpleIntegerProperty(0);
+  private final Map<Dataset, DoubleBinding> datasetProgressBindings = new ConcurrentHashMap<>();
 
   public BlockingExecutor() {
-    currentTaskProperty.getValue().run();
-    tpe.prestartAllCoreThreads();
-    overallProgressBinding = new DoubleBinding() {
-
-      {
-        super.bind(
-            doneTasksProperty,
-            currentProgressProperty,
-            scheduledTasksProperty);
+    overallProgressBinding = Bindings.createDoubleBinding(() -> {
+      if (scheduledTasks.isEmpty())
+        return 1d;
+      double progress = 0d;
+      for (TimeTask<?> task : scheduledTasks) {
+        if (task.isDone())
+          progress += 1d;
+        else if (task.getProgress() > 0)
+          progress += task.getProgress();
       }
-
-      protected final double computeValue() {
-        final double doneTasks = doneTasksProperty.get();
-        final double p = doneTasks + currentProgressProperty.get();
-        final double n = doneTasks + 1 + scheduledTasksProperty.get();
-        return p / n;
-      }
-    };
-    overallProgressBinding.addListener(new ChangeListener<Number>() {
-
-      public final void changed(
-          final ObservableValue<? extends Number> observable,
-          final Number oldProgress,
-          final Number newProgress) {
-        if (newProgress.doubleValue() == 1d && scheduledTasksProperty.get() == 0
-            && currentTaskProperty.getValue().isDone()) {
-          doneTasksProperty.set(0);
-          currentProgressProperty.unbind();
-          currentProgressProperty.set(1d);
-        }
-      }
-    });
-    isIdleBinding = new BooleanBinding() {
-
-      {
-        super.bind(
-            currentProgressProperty,
-            scheduledTasksProperty);
-      }
-
-      protected boolean computeValue() {
-        return scheduledTasksProperty.get() == 0 && currentProgressProperty.get() == 1d;
-      }
-    };
-    currentTaskProperty.addListener(new ChangeListener<BlockingTask>() {
-
-      public void changed(
-          final ObservableValue<? extends BlockingTask> observable,
-          final BlockingTask oldTask,
-          final BlockingTask newTask) {
-        currentProgressProperty.bind(newTask.progressProperty());
-        newTask.stateProperty().addListener(
-            new ChangeListener<State>() {
-
-              @SuppressWarnings("incomplete-switch")
-              public final void changed(
-                  final ObservableValue<? extends State> observable,
-                  final State oldState,
-                  final State newState) {
-                switch (newState) {
-                case SUCCEEDED:
-                case CANCELLED:
-                case FAILED:
-//              executionTimeMillis.set(executionTimeMillis.get() + newTask.runTimeMillis.get());
-//              executionsTimeMillisMap.add(Pair.of(newTask.titleProperty().get(), newTask.runTimeMillis()));
-                  doneTasksProperty.set(doneTasksProperty.get() + 1);
-                  BlockingExecutor.this.next();
-                  break;
-                }
-              };
-            });
-        tpe.submit(newTask);
+      return progress / (double) scheduledTasks.size();
+    } , scheduledTasks, currentTaskProperty);
+    isIdleBinding = Bindings.createBooleanBinding(() -> overallProgressBinding.get() == 1d, overallProgressBinding);
+    currentTaskProperty.addListener((__, ___, task) -> {
+      if (task.isDone())
+        next();
+      else {
+        task.exceptionProperty().addListener(
+            (____, _____, exception) -> new ErrorDialog(ConExpFX.instance.primaryStage, exception).showAndWait());
+        task.setOnCancelled(____ -> next());
+        task.setOnFailed(____ -> next());
+        task.setOnSucceeded(____ -> next());
+        tpe.submit(task);
       }
     });
   }
 
-  public final void submit(final BlockingTask task) {
+  public final void execute(final TimeTask<?> task) {
     Platform2.runOnFXThread(() -> {
-      synchronized (taskQueue) {
-        scheduledTasks.add(task);
-        if (currentTaskProperty.getValue().isDone() && taskQueue.isEmpty())
+      synchronized (scheduledTasks) {
+        if (isIdleBinding.get())
           currentTaskProperty.setValue(task);
-        else {
-          scheduledTasksProperty.set(scheduledTasksProperty.get() + 1);
-          taskQueue.offer(task);
-//          scheduledTasks.add(task);
-        }
+        scheduledTasks.add(task);
+        task.progressProperty().addListener((__, ___, ____) -> {
+          overallProgressBinding.invalidate();
+          datasetProgressBindings.values().forEach(DoubleBinding::invalidate);
+        });
+        task.stateProperty().addListener((__, ___, ____) -> {
+          overallProgressBinding.invalidate();
+          datasetProgressBindings.values().forEach(DoubleBinding::invalidate);
+        });
       }
     });
   }
 
   private final void next() {
-    synchronized (taskQueue) {
-      if (taskQueue.isEmpty()) {
-//        currentTaskProperty.setValue(null);
-        return;
-      }
-      currentTaskProperty.setValue(taskQueue.poll());
-      scheduledTasksProperty.set(scheduledTasksProperty.get() - 1);
+    synchronized (scheduledTasks) {
+      if (!isIdleBinding.get())
+        currentTaskProperty.setValue(scheduledTasks.get(scheduledTasks.indexOf(currentTaskProperty.getValue()) + 1));
     }
   }
+
+  public final DoubleBinding datasetProgressBinding(final Dataset dataset) {
+    if (datasetProgressBindings.containsKey(dataset))
+      return datasetProgressBindings.get(dataset);
+    final DoubleBinding datasetProgressBinding = Bindings.createDoubleBinding(() -> {
+      if (scheduledTasks.isEmpty())
+        return 1d;
+      double progress = 0d;
+      double tasks = 0d;
+      for (TimeTask<?> task : scheduledTasks)
+        if (task.getDataset() != null && task.getDataset().equals(dataset)) {
+          if (task.isDone())
+            progress += 1d;
+          else if (task.getProgress() > 0)
+            progress += task.getProgress();
+          tasks++;
+        }
+      if (tasks > 0)
+        return progress / tasks;
+      return 1d;
+    } , scheduledTasks, currentTaskProperty);
+    datasetProgressBindings.put(dataset, datasetProgressBinding);
+    return datasetProgressBinding;
+  }
+
+  public final void cancel(final Dataset dataset) {
+    scheduledTasks.filtered(task -> task.getDataset() != null && task.getDataset().equals(dataset)).forEach(
+        task -> task.cancel());
+    scheduledTasks.removeIf(task -> task.getDataset() != null && task.getDataset().equals(dataset));
+    datasetProgressBindings.remove(dataset);
+  }
+
 }

@@ -14,7 +14,8 @@ import javafx.stage.Stage;
 
 public final class ErrorDialog extends FXDialog<Void> {
 
-  public ErrorDialog(final Stage parent, final Exception e) {
+  public ErrorDialog(final Stage parent, final Throwable e) {
     super(parent, Style.ERROR, e.getMessage(), e.toString(), null);
+    e.printStackTrace();
   }
 }

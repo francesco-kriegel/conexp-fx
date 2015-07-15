@@ -11,125 +11,147 @@ package conexp.fx.gui.dataset;
  */
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-
+import org.openrdf.model.Statement;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.owlapi.model.IRI;
 
+import conexp.fx.core.builder.Requests;
 import conexp.fx.core.dl.OWLInterpretation;
-import conexp.fx.core.dl.Signature;
+import conexp.fx.core.importer.RDFImporter;
 import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.assistent.ModelAssistent;
-import conexp.fx.gui.task.BlockingTask;
+import conexp.fx.gui.task.TimeTask;
+import info.aduna.iteration.Iterations;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
 
 public class RDFDataset extends Dataset {
 
-  private ObservableList<IRI[]> triples;
-  private List<IRI>             roles;
+  private final Repository                repository = new SailRepository(new MemoryStore());
+  private final ObservableList<Statement> statements = FXCollections.observableArrayList();
 
-  public RDFDataset(final File rdfFile, final FileFormat format) {
-    super(null, rdfFile, format);
-    this.triples = FXCollections.observableArrayList();
-    ConExpFX.instance.exe.submit(new BlockingTask("Importing " + file.getName()) {
-
-      @Override
-      protected void _call() {
-        this.updateProgress(30, 100);
-        try {
-          readTriples();
-          this.updateProgress(80, 100);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    });
-    views.add(new DatasetView<List<IRI[]>>("Triples", createTriplesListView(), triples));
+  public RDFDataset(final File file, final FileFormat format) {
+    super(null, file, format);
+    try {
+      repository.initialize();
+    } catch (RepositoryException e) {
+      throw new RuntimeException(e);
+    }
+    views.add(new DatasetView<Repository>("Triples", createTriplesView(), repository));
+    views.add(new DatasetView<Repository>("Query", createQueryView(), repository));
     defaultActiveViews.add("Triples");
-    actions.add(new DatasetAction("New Model...", () -> new ModelAssistent(this).showAndWait()));
+    actions.add(new DatasetAction("New SPARQL Context...", () -> {
+      return;
+    }));
+    actions.add(new DatasetAction("New DL Model...", () -> new ModelAssistent(this).showAndWait()));
+    initialize();
   }
 
-  private final ListView<IRI[]> createTriplesListView() {
-    final ListView<IRI[]> listView = new ListView<IRI[]>();
-    listView.setItems(triples);
-    listView.setCellFactory(l -> new ListCell<IRI[]>() {
+  public final void initialize() {
+    if (format.equals(FileFormat.CSVT))
+      ConExpFX.execute(TimeTask.create(this, "Importing RDF Dataset", () -> RDFImporter.readCSV(repository, file)));
+    else
+      ConExpFX.execute(TimeTask.create(this, "Importing RDF Dataset", () -> RDFImporter.read(repository, file)));
+    ConExpFX.execute(TimeTask.create(this, "Preparing Statements View", () -> {
+      try {
+        RepositoryConnection connection = repository.getConnection();
+        Iterations.addAll(connection.getStatements(null, null, null, true), statements);
+        connection.close();
 
-      @Override
-      protected void updateItem(final IRI[] value, final boolean empty) {
-        if (!empty)
-          this.setText(value[0] + " " + value[1] + " " + value[2]);
+      } catch (RepositoryException e) {
+        throw new RuntimeException(e);
+      }
+    }));
+  }
+
+  private final TableView<Statement> createTriplesView() {
+    TableView<Statement> table = new TableView<>(statements);
+    final TableColumn<Statement, String> subjectColumn = new TableColumn<Statement, String>("Subject");
+    final TableColumn<Statement, String> predicateColumn = new TableColumn<Statement, String>("Predicate");
+    final TableColumn<Statement, String> objectColumn = new TableColumn<Statement, String>("Object");
+    subjectColumn.setCellValueFactory(f -> new ReadOnlyStringWrapper(f.getValue().getSubject().stringValue()));
+    predicateColumn.setCellValueFactory(f -> new ReadOnlyStringWrapper(f.getValue().getPredicate().stringValue()));
+    objectColumn.setCellValueFactory(f -> new ReadOnlyStringWrapper(f.getValue().getObject().stringValue()));
+    table.getColumns().addAll(subjectColumn, predicateColumn, objectColumn);
+    return table;
+  }
+
+  private final Pane createQueryView() {
+    final BorderPane repositoryView = new BorderPane();
+    final TextArea queryArea = new TextArea();
+    queryArea.setFont(Font.font(java.awt.Font.MONOSPACED, 14));
+    final Button queryButton = new Button("Query");
+    repositoryView.setTop(new BorderPane(queryArea, null, queryButton, null, null));
+    final TableView<BindingSet> table = new TableView<BindingSet>(FXCollections.observableArrayList());
+    repositoryView.setCenter(table);
+    queryButton.setOnAction(__ -> {
+      try {
+        final RepositoryConnection connection = repository.getConnection();
+        final TupleQuery query = connection.prepareTupleQuery(QueryLanguage.SPARQL, queryArea.getText());
+        final TupleQueryResult result = query.evaluate();
+        table.getColumns().clear();
+        result.getBindingNames().forEach(b -> {
+          final TableColumn<BindingSet, String> column = new TableColumn<BindingSet, String>(b);
+          column.setCellValueFactory(f -> new ReadOnlyStringWrapper(f.getValue().getValue(b).stringValue()));
+          table.getColumns().add(column);
+        });
+        table.getItems().clear();
+        while (result.hasNext())
+          table.getItems().add(result.next());
+        result.close();
+        connection.close();
+      } catch (RepositoryException | MalformedQueryException | QueryEvaluationException e) {
+        throw new RuntimeException(e);
       }
     });
-    return listView;
+    return repositoryView;
   }
 
-  public final void readTriples() throws IOException {
-//    triples =
-    Files
-        .lines(FileSystems.getDefault().getPath(file.getAbsolutePath()))
-        .map(line -> line.replace("<", "").replace(">", ""))
-        .map(line -> line.split(" "))
-        .filter(tuple -> tuple.length > 2)
-        .map(triple -> new IRI[] { IRI.create(triple[0]), IRI.create(triple[1]), IRI.create(triple[2]) })
-        .forEach(triples::add);
-//            .collect(Collectors.toList());
-    roles = triples.parallelStream().map(triple -> triple[1]).distinct().sorted().collect(Collectors.toList());
+  public final ObservableList<Statement> getTriples() {
+    return statements;
   }
 
-  public final List<IRI[]> getTriples() {
-    return triples;
+  public final Set<IRI> getRoles() {
+    return statements.parallelStream().map(s -> IRI.create(s.getPredicate().stringValue())).collect(Collectors.toSet());
   }
 
-  public final List<IRI> getRoles() {
-    return roles;
+  public final void createFormalContextFromSPARQLQuery(final String query) {
+    ConExpFX.execute(TimeTask.create(this, "Extracting SPARQL Context", () -> {
+      ConExpFX.instance.treeView.addDataset(
+          new FCADataset<>(RDFDataset.this, new Requests.Import.ImportSPARQLFromRepository(repository, query)));
+    }));
   }
 
-  public final OWLInterpretation extractInterpretation(
-      final List<IRI> selectedConceptNames,
-      final List<IRI> selectedRoleNames,
-      final IRI selectedIsARoleName) {
-    final Signature signature = new Signature(null);
-    signature.getConceptNames().addAll(selectedConceptNames);
-    signature.getRoleNames().addAll(selectedRoleNames);
-    signature.getIndividualNames().addAll(
-        getTriples()
-            .parallelStream()
-            .filter(triple -> triple[1].equals(selectedIsARoleName) && signature.getConceptNames().contains(triple[2]))
-            .map(triple -> triple[0])
-            .collect(Collectors.toSet()));
-//          signature.getIndividualNames().addAll(
-//              triples.parallelStream().filter(
-//                  triple -> signature.getRoleNames().contains(
-//                      triple[1])).map(
-//                  triple -> triple[0]).collect(
-//                  Collectors.toSet()));
-//          signature.getIndividualNames().addAll(
-//              triples.parallelStream().filter(
-//                  triple -> signature.getRoleNames().contains(
-//                      triple[1])).map(
-//                  triple -> triple[2]).collect(
-//                  Collectors.toSet()));
-    final OWLInterpretation i = new OWLInterpretation(signature);
-    getTriples().stream().forEach(
-        triple -> {
-          if (triple[1].equals(selectedIsARoleName)) {
-            if (signature.getConceptNames().contains(triple[2]) && signature.getIndividualNames().contains(triple[0])) {
-              i.addConceptNameAssertion(triple[2], triple[0]);
-            }
-          } else if (signature.getRoleNames().contains(triple[1]) && signature.getIndividualNames().contains(triple[0])
-              && signature.getIndividualNames().contains(triple[2])) {
-            i.addRoleNameAssertion(triple[1], triple[0], triple[2]);
-          }
-        });
-    return i;
+  public final void
+      createDLModel(List<IRI> selectedConceptNames, List<IRI> selectedRoleNames, IRI selectedIsARoleName) {
+    ConExpFX.execute(TimeTask.create(this, "Extracting DL Model", () -> {
+      final OWLInterpretation i =
+          RDFImporter.extractInterpretation(statements, selectedConceptNames, selectedRoleNames, selectedIsARoleName);
+      ConExpFX.instance.treeView.addDataset(new DLDataset(RDFDataset.this, i));
+    }));
   }
 
   @Override

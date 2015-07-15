@@ -14,6 +14,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.semanticweb.owlapi.model.IRI;
+
+import com.google.common.collect.Collections2;
+
+import conexp.fx.core.dl.OWLInterpretation;
+import conexp.fx.gui.ConExpFX;
+import conexp.fx.gui.assistent.ModelAssistent.Result;
+import conexp.fx.gui.dataset.DLDataset;
+import conexp.fx.gui.dataset.RDFDataset;
+import conexp.fx.gui.task.TimeTask;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -25,17 +35,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
-import org.semanticweb.owlapi.model.IRI;
-
-import com.google.common.collect.Collections2;
-
-import conexp.fx.core.dl.OWLInterpretation;
-import conexp.fx.gui.ConExpFX;
-import conexp.fx.gui.assistent.ModelAssistent.Result;
-import conexp.fx.gui.dataset.DLDataset;
-import conexp.fx.gui.dataset.RDFDataset;
-import conexp.fx.gui.task.BlockingTask;
 
 public class ModelAssistent extends Assistent<Result> {
 
@@ -81,18 +80,10 @@ public class ModelAssistent extends Assistent<Result> {
     resultProperty.get().selectedConceptNames = conceptListView.getSelectionModel().getSelectedItems();
     resultProperty.get().selectedRoleNames = roleListView.getSelectionModel().getSelectedItems();
     resultProperty.get().selectedIsARoleName = isaRoleChoiceBox.getSelectionModel().getSelectedItem();
-    ConExpFX.instance.exe.submit(new BlockingTask("Creating new Model") {
-
-      @Override
-      protected void _call() {
-        final OWLInterpretation i =
-            dataset.extractInterpretation(
-                resultProperty.get().selectedConceptNames,
-                resultProperty.get().selectedRoleNames,
-                resultProperty.get().selectedIsARoleName);
-        ConExpFX.instance.treeView.addDataset(new DLDataset(dataset, i));
-      }
-    });
+    dataset.createDLModel(
+        conceptListView.getSelectionModel().getSelectedItems(),
+        roleListView.getSelectionModel().getSelectedItems(),
+        isaRoleChoiceBox.getSelectionModel().getSelectedItem());
   }
 
   @Override
@@ -107,35 +98,29 @@ public class ModelAssistent extends Assistent<Result> {
     roleLabel.setPadding(new Insets(4, 4, 1, 4));
     conceptListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     roleListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    try{
+    try {
       isaRoleChoiceBox.setItems(FXCollections.observableArrayList(dataset.getRoles()));
-    } catch (NullPointerException e){
+    } catch (NullPointerException e) {
       System.out.println();
     }
     final HBox rbox = new HBox(isARoleLabel, isaRoleChoiceBox);
     final VBox vbox = new VBox(rbox, conceptLabel, conceptListView, roleLabel, roleListView);
     pane.setCenter(vbox);
-    isaRoleChoiceBox
-        .getSelectionModel()
-        .selectedItemProperty()
-        .addListener(
-            (observable, oldValue, newValue) -> {
-              final List<IRI> concepts =
-                  dataset
-                      .getTriples()
-                      .parallelStream()
-                      .filter(triple -> triple[1].equals(newValue))
-                      .map(triple -> triple[2])
-                      .distinct()
-                      .sorted()
-                      .collect(Collectors.toList());
-              conceptListView.setItems(FXCollections.observableArrayList(concepts));
-              roleListView.setItems(FXCollections.observableArrayList(Collections2.filter(
-                  dataset.getRoles(),
-                  role -> !role.equals(newValue))));
-              conceptListView.getSelectionModel().selectAll();
-              roleListView.getSelectionModel().selectAll();
-            });
+    isaRoleChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+      final List<IRI> concepts = dataset
+          .getTriples()
+          .parallelStream()
+          .filter(triple -> IRI.create(triple.getPredicate().stringValue()).equals(newValue))
+          .map(triple -> IRI.create(triple.getObject().stringValue()))
+          .distinct()
+          .sorted()
+          .collect(Collectors.toList());
+      conceptListView.setItems(FXCollections.observableArrayList(concepts));
+      roleListView.setItems(
+          FXCollections.observableArrayList(Collections2.filter(dataset.getRoles(), role -> !role.equals(newValue))));
+      conceptListView.getSelectionModel().selectAll();
+      roleListView.getSelectionModel().selectAll();
+    });
     return pane;
   }
 

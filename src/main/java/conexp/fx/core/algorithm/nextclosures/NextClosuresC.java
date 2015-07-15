@@ -23,31 +23,35 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Context;
+import conexp.fx.core.implication.Implication;
 
-public final class NextClosures {
+public final class NextClosuresC {
 
-  public static final class Result<G, M> {
+  public static final class ResultC<G, M> {
 
-    public final Set<Concept<G, M>>      concepts     = Collections3.newConcurrentHashSet();
-    public final Map<Set<M>, Set<M>>     implications = new ConcurrentHashMap<Set<M>, Set<M>>();
-    public final Map<Set<M>, Set<G>>     supports     = new ConcurrentHashMap<Set<M>, Set<G>>();
-    protected final Map<Set<M>, Integer> candidates   = new ConcurrentHashMap<Set<M>, Integer>();
-    private final Set<Set<M>>            processed    = Collections3.newConcurrentHashSet();
-    protected int                        cardinality  = 0;
+    public final Set<Concept<G, M>>  concepts     = Collections3.newConcurrentHashSet();
+    public final Map<Set<M>, Set<M>> implications = new ConcurrentHashMap<Set<M>, Set<M>>();
+    final Map<Set<M>, Integer>       candidates   = new ConcurrentHashMap<Set<M>, Integer>();
+    private final Set<Set<M>>        processed    = Collections3.newConcurrentHashSet();
+    int                              cardinality  = 0;
+    private final ClosureOperator<M> clop;
 
-    public Result() {
-      candidates.put(
-          new HashSet<M>(),
-          0);
+    public ResultC(ClosureOperator<M> clop) {
+      this.clop = clop;
+      candidates.put(new HashSet<M>(), 0);
     }
 
     private final boolean isClosed(final Set<M> candidate) {
+      if (!clop.isClosed(candidate))
+        return false;
       for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
         if (candidate.size() > implication.getKey().size() && candidate.containsAll(implication.getKey())
             && !candidate.containsAll(implication.getValue()))
@@ -64,6 +68,7 @@ public final class NextClosures {
           closure.addAll(implication.getValue());
           changed = true;
         }
+      changed |= !clop.close(closure);
       while (changed) {
         changed = false;
         for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
@@ -72,6 +77,7 @@ public final class NextClosures {
             closure.addAll(implication.getValue());
             changed = true;
           }
+        changed |= !clop.close(closure);
       }
       return closure;
     }
@@ -87,6 +93,7 @@ public final class NextClosures {
             closure.addAll(implication.getValue());
             changed = true;
           }
+        changed |= !clop.close(closure);
       }
       return closure;
     }
@@ -101,23 +108,29 @@ public final class NextClosures {
 
   }
 
-  public static final <G, M> Result<G, M> compute(
+  public static final <G, M> ResultC<G, M> compute(
       final Context<G, M> cxt,
+      final ClosureOperator<M> clop,
       final boolean verbose,
       final ThreadPoolExecutor tpe) {
     if (verbose)
-      System.out.println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize()
-          + " cores...");
-    final Result<G, M> result = new Result<G, M>();
+      System.out
+          .println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize() + " cores...");
+    final ResultC<G, M> result = new ResultC<G, M>(clop);
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
       if (verbose) {
         final int p = (int) ((100f * (float) result.cardinality) / ((float) maxCardinality));
         System.out.print("current cardinality: " + result.cardinality + "/" + maxCardinality + " (" + p + "%)");
       }
-      final Collection<Set<M>> candidatesN = new HashSet<Set<M>>(Collections2.filter(
-          result.candidates.keySet(),
-          candidate -> candidate.size() == result.cardinality));
+      final Collection<Set<M>> candidatesN =
+          new HashSet<Set<M>>(Collections2.filter(result.candidates.keySet(), new Predicate<Set<M>>() {
+
+            @Override
+            public final boolean apply(final Set<M> candidate) {
+              return candidate.size() == result.cardinality;
+            }
+          }));
       if (verbose)
         System.out.println("     " + candidatesN.size() + " candidates will be processed...");
       final Set<Future<?>> futures = new HashSet<Future<?>>();
@@ -126,39 +139,24 @@ public final class NextClosures {
 
           @Override
           public final void run() {
-            final Set<M> closure = result.fastClosure(
-                candidate,
-                result.candidates.get(candidate));
+            final Set<M> closure = result.fastClosure(candidate, result.candidates.get(candidate));
             if (closure.equals(candidate)) {
-              final Set<G> candidateI = new HashSet<G>(cxt.colAnd(candidate));
-              final Set<M> candidateII = new HashSet<M>(cxt.rowAnd(candidateI));
+              final Set<M> candidateII = clop.closure(cxt.intent(candidate));
               if (result.addToProcessed(candidateII)) {
-                for (M m : Sets.difference(
-                    cxt.colHeads(),
-                    candidateII)) {
+                for (M m : Sets.difference(cxt.colHeads(), candidateII)) {
                   final Set<M> candidateM = new HashSet<M>(candidateII);
                   candidateM.add(m);
-                  result.candidates.put(
-                      candidateM,
-                      0);
+                  result.candidates.put(candidateM, 0);
                 }
               }
               if (candidateII.size() == candidate.size()) {
-                result.concepts.add(new Concept<G, M>(candidateI, candidate));
+                result.concepts.add(new Concept<G, M>(cxt.colAnd(candidate), candidate));
               } else {
-                result.concepts.add(new Concept<G, M>(candidateI, candidateII));
                 candidateII.removeAll(candidate);
-                result.implications.put(
-                    candidate,
-                    candidateII);
-                result.supports.put(
-                    candidate,
-                    candidateI);
+                result.implications.put(candidate, candidateII);
               }
             } else {
-              result.candidates.put(
-                  closure,
-                  result.cardinality);
+              result.candidates.put(closure, result.cardinality);
             }
           }
         }));
@@ -169,8 +167,7 @@ public final class NextClosures {
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
-      result.candidates.keySet().removeAll(
-          candidatesN);
+      result.candidates.keySet().removeAll(candidatesN);
     }
     if (verbose) {
       System.out.println(result.concepts.size() + " concepts found");
@@ -179,30 +176,53 @@ public final class NextClosures {
     return result;
   }
 
-  public static final <G, M> Result<G, M> compute(final Context<G, M> cxt, final boolean verbose, final int cores) {
+  public static final <G, M> ResultC<G, M>
+      compute(final Context<G, M> cxt, final ClosureOperator<M> clop, final boolean verbose, final int cores) {
     if (cores > Runtime.getRuntime().availableProcessors())
-      throw new IllegalArgumentException("Requested pool size is too large. VM has only "
-          + Runtime.getRuntime().availableProcessors() + " available cpus, thus a thread pool with " + cores
-          + " cores cannot be used here.");
+      throw new IllegalArgumentException(
+          "Requested pool size is too large. VM has only " + Runtime.getRuntime().availableProcessors()
+              + " available cpus, thus a thread pool with " + cores + " cores cannot be used here.");
     final ThreadPoolExecutor tpe =
         new ThreadPoolExecutor(cores, cores, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     tpe.prestartAllCoreThreads();
-    final Result<G, M> result = compute(
-        cxt,
-        verbose,
-        tpe);
+    final ResultC<G, M> result = compute(cxt, clop, verbose, tpe);
     tpe.purge();
     tpe.shutdown();
     return result;
   }
 
-  public static final <G, M> Result<G, M> compute(final Context<G, M> cxt, final boolean verbose) {
+  public static final <G, M> ResultC<G, M>
+      compute(final Context<G, M> cxt, final ClosureOperator<M> clop, final boolean verbose) {
     final int maxc = Runtime.getRuntime().availableProcessors();
     final int cores = maxc < 9 ? maxc : (maxc * 3) / 4;
-    return compute(
-        cxt,
-        verbose,
-        cores);
+    return compute(cxt, clop, verbose, cores);
+  }
+
+  public static final <G, M> ResultC<G, M> computeWithBackgroundImplications(
+      final Context<G, M> cxt,
+      final Set<Implication<G, M>> backgroundImplications,
+      final boolean verbose) {
+    return compute(cxt, ClosureOperator.fromImplications(backgroundImplications, false, true), verbose);
+  }
+
+  public static final <G, M> ResultC<G, M>
+      computeIceberg(final Context<G, M> cxt, final int minSupp, final boolean verbose) {
+    return compute(cxt, ClosureOperator.byMinimalSupport(minSupp, cxt), verbose);
+  }
+
+  public static final <G, M> ResultC<G, M>
+      computeByMaxCard(final Context<G, M> cxt, final int maxCard, final boolean verbose) {
+    return compute(cxt, ClosureOperator.byMaximalCardinality(maxCard, cxt.colHeads()), verbose);
+  }
+
+  public static final <G, M> ResultC<G, M>
+      computeBelow(final Context<G, M> cxt, final Collection<M> elements, final boolean verbose) {
+    return compute(cxt, ClosureOperator.isSubsetOf(elements, cxt.colHeads()), verbose);
+  }
+
+  public static final <G, M> ResultC<G, M>
+      computeAbove(final Context<G, M> cxt, final Collection<M> elements, final boolean verbose) {
+    return compute(cxt, ClosureOperator.containsAllFrom(elements, cxt.colHeads()), verbose);
   }
 
 }

@@ -32,6 +32,15 @@ public final class CSVImporter {
     return csvImporter.getTuples();
   }
 
+  public static final void importContext(
+      final File file,
+      final MatrixContext<String, String> context,
+      final String delimiter) throws Exception {
+    final CSVImporter csvImporter = new CSVImporter(file, delimiter);
+    csvImporter.readFile();
+    csvImporter.toContext2(context);
+  }
+
   private final File           file;
   private final String         delimiter;
   private final List<String[]> tuples;
@@ -60,8 +69,12 @@ public final class CSVImporter {
     return tuples;
   }
 
-  public final MatrixContext<String, String> toContext() throws Exception {
-    MatrixContext<String, String> context = new MatrixContext<String, String>(false);
+  public final void toContext2(final MatrixContext<String, String> context) {
+    for (String[] row : tuples)
+      context.add(row[0], row[1]);
+  }
+
+  public final void toContext(final MatrixContext<String, String> context) throws Exception {
     final String[][] array = tuples.toArray(new String[][] {});
     final int rows = array.length - 1;
     final int cols = array[0].length - 2;
@@ -81,6 +94,11 @@ public final class CSVImporter {
       for (int c = 2; c < cols + 2; c++)
         if (Integer.valueOf(array[r][c].trim()).equals(1))
           context.matrix().setBoolean(true, r - 1, c - 2);
+  }
+
+  public final MatrixContext<String, String> toContext() throws Exception {
+    MatrixContext<String, String> context = new MatrixContext<String, String>(false);
+    toContext(context);
     return context;
   }
 }

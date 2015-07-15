@@ -25,17 +25,18 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.NotImplementedException;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures6;
-import conexp.fx.core.algorithm.nextclosures.Result6;
+import conexp.fx.core.algorithm.nextclosures.NextClosures;
+import conexp.fx.core.algorithm.nextclosures.NextClosures.Result;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.importer.CXTImporter2;
+import conexp.fx.core.importer.CXTImporter;
 import conexp.fx.gui.ConExpFX;
 
 public class CLI {
 
-  public static void main(final String[] args) throws RuntimeException {
+  public static void main(final String[] args) throws Exception {
     try {
       final CommandLine commandLine = parseArgs(args);
       printUnrecognizedOptions(commandLine);
@@ -50,7 +51,7 @@ public class CLI {
       else if (commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt()))
         computeImplications(commandLine);
       else
-        runCLI(commandLine);
+        throw new NotImplementedException("");
     } catch (ParseException e) {
       throw new RuntimeException("Unable to parse command line arguments. Please check supplied arguments!", e);
     }
@@ -68,26 +69,26 @@ public class CLI {
 ////    -Djub.xml.file=benchmarks/latest.xml    
 //  }
 
-  private static final void computeImplications(final CommandLine commandLine) {
+  private static final void computeImplications(final CommandLine commandLine) throws Exception {
     if (!commandLine.hasOption(IMPORT_CXT.getLongOpt()))
       throw new IllegalArgumentException(
           "Unable to instanciate FCA service without formal context. Please specify a file in Burmeister formatting by adding a command line prefix\r\n\t--importContextFromCXT <path_to_file>");
     final File input = new File(commandLine.getOptionValue(CLI.IMPORT_CXT.getLongOpt()));
     final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
-    CXTImporter2.read(cxt, input);
+    CXTImporter.read(cxt, input);
     final long start = System.currentTimeMillis();
-    final Result6<String, String> implicationalBase = NextClosures6.compute(cxt, true);
+    final Result<String, String> implicationalBase = NextClosures.compute(cxt, true);
     final long duration = System.currentTimeMillis() - start;
     final File output =
         new File(input.getParentFile(), input.getName().substring(0, input.getName().lastIndexOf(".")) + ".nxc");
-    exportImplications("Result from NextClosures for " + input.getName() + "\n" + "computation time: " + duration
-        + "ms", implicationalBase, output);
+    exportImplications(
+        "Result from NextClosures for " + input.getName() + "\n" + "computation time: " + duration + "ms",
+        implicationalBase,
+        output);
   }
 
-  private static final void exportImplications(
-      final String description,
-      final Result6<String, String> result,
-      final File file) {
+  private static final void
+      exportImplications(final String description, final Result<String, String> result, final File file) {
     System.out.println("writing to " + file.getAbsolutePath());
     FileWriter fw = null;
     BufferedWriter bw = null;
@@ -113,13 +114,6 @@ public class CLI {
         e.printStackTrace();
       }
     }
-  }
-
-  private static final void runCLI(final CommandLine commandLine) throws IllegalArgumentException {
-    if (!commandLine.hasOption(IMPORT_CXT.getLongOpt()))
-      throw new IllegalArgumentException(
-          "Unable to instanciate FCA service without formal context. Please specify a file in Burmeister formatting by adding a command line prefix\r\n\t--importContextFromCXT <path_to_file>");
-    new CLIInstance(commandLine).run();
   }
 
   private static final CommandLine parseArgs(final String[] args) throws ParseException {
@@ -150,85 +144,80 @@ public class CLI {
   protected static final Options OPTIONS           = new Options();
   @SuppressWarnings("static-access")
   protected static final Option  HELP              = OptionBuilder
-                                                       .isRequired(false)
-                                                       .withLongOpt("showHelp")
-                                                       .hasArg(false)
-                                                       .withDescription(
-                                                           "shows available command line options and their arguments.")
-                                                       .create("help");
+      .isRequired(false)
+      .withLongOpt("showHelp")
+      .hasArg(false)
+      .withDescription("shows available command line options and their arguments.")
+      .create("help");
   @SuppressWarnings("static-access")
-  protected static final Option  IMPORT_CXT        =
-                                                       OptionBuilder
-                                                           .isRequired(false)
-                                                           .withLongOpt("importContextFromCXT")
-                                                           .hasArg(true)
-                                                           .withArgName("file")
-                                                           .withDescription(
-                                                               "imports formal context file in Burmeister formatting (*.cxt)")
-                                                           .create("fromCXT");
+  protected static final Option  IMPORT_CXT        = OptionBuilder
+      .isRequired(false)
+      .withLongOpt("importContextFromCXT")
+      .hasArg(true)
+      .withArgName("file")
+      .withDescription("imports formal context file in Burmeister formatting (*.cxt)")
+      .create("fromCXT");
   @SuppressWarnings("static-access")
   protected static final Option  CALC_CONCEPTS     = OptionBuilder
-                                                       .isRequired(false)
-                                                       .withLongOpt("calculateConcepts")
-                                                       .hasArg(false)
-                                                       .withDescription("computes all formal concepts")
-                                                       .create("bk");
+      .isRequired(false)
+      .withLongOpt("calculateConcepts")
+      .hasArg(false)
+      .withDescription("computes all formal concepts")
+      .create("bk");
   @SuppressWarnings("static-access")
   protected static final Option  CALC_NEIGHBORHOOD = OptionBuilder
-                                                       .isRequired(false)
-                                                       .withLongOpt("calculateNeighborhood")
-                                                       .hasArg(false)
-                                                       .withDescription("computes the neighborhood relation")
-                                                       .create("bvk");
+      .isRequired(false)
+      .withLongOpt("calculateNeighborhood")
+      .hasArg(false)
+      .withDescription("computes the neighborhood relation")
+      .create("bvk");
   @SuppressWarnings("static-access")
   protected static final Option  CALC_LAYOUT       = OptionBuilder
-                                                       .isRequired(false)
-                                                       .withLongOpt("calculateLayout")
-                                                       .hasArg(false)
-                                                       .withDescription("computes a concept layout")
-                                                       .create("blk");
+      .isRequired(false)
+      .withLongOpt("calculateLayout")
+      .hasArg(false)
+      .withDescription("computes a concept layout")
+      .create("blk");
   @SuppressWarnings("static-access")
   protected static final Option  CALC_IMPLICATIONS = OptionBuilder
-                                                       .isRequired(false)
-                                                       .withLongOpt("calculateImplications")
-                                                       .hasArg(false)
-                                                       .withDescription("computes implicational base")
-                                                       .create("imp");
+      .isRequired(false)
+      .withLongOpt("calculateImplications")
+      .hasArg(false)
+      .withDescription("computes implicational base")
+      .create("imp");
   @SuppressWarnings("static-access")
   protected static final Option  CALC_ASSOCIATIONS = OptionBuilder
-                                                       .isRequired(false)
-                                                       .withLongOpt("calculateAssociations")
-                                                       .hasArg(true)
-                                                       .withArgName("supp")
-                                                       .withArgName("conf")
-                                                       .withDescription("computes all association rules")
-                                                       .create("ass");
+      .isRequired(false)
+      .withLongOpt("calculateAssociations")
+      .hasArg(true)
+      .withArgName("supp")
+      .withArgName("conf")
+      .withDescription("computes all association rules")
+      .create("ass");
   @SuppressWarnings("static-access")
   protected static final Option  PRINT_TO_CONSOLE  = OptionBuilder
-                                                       .isRequired(false)
-                                                       .withLongOpt("printToConsole")
-                                                       .hasArg(false)
-                                                       .withDescription("prints all results to console")
-                                                       .create("print");
+      .isRequired(false)
+      .withLongOpt("printToConsole")
+      .hasArg(false)
+      .withDescription("prints all results to console")
+      .create("print");
   @SuppressWarnings("static-access")
-  protected static final Option  EXPORT            =
-                                                       OptionBuilder
-                                                           .isRequired(false)
-                                                           .withLongOpt("export")
-                                                           .hasArgs(2)
-                                                           .withValueSeparator(' ')
-                                                           .withArgName("format")
-                                                           .withArgName("file")
-                                                           .withDescription(
-                                                               "exports labeled and layouted concept lattice to SVG document (*.svg)")
-                                                           .create("out");
+  protected static final Option  EXPORT            = OptionBuilder
+      .isRequired(false)
+      .withLongOpt("export")
+      .hasArgs(2)
+      .withValueSeparator(' ')
+      .withArgName("format")
+      .withArgName("file")
+      .withDescription("exports labeled and layouted concept lattice to SVG document (*.svg)")
+      .create("out");
   @SuppressWarnings("static-access")
   protected static final Option  GUI               = OptionBuilder
-                                                       .isRequired(false)
-                                                       .hasArg(false)
-                                                       .withDescription("starts the JavaFX gui")
-                                                       .withLongOpt("startGUI")
-                                                       .create("gui");
+      .isRequired(false)
+      .hasArg(false)
+      .withDescription("starts the JavaFX gui")
+      .withLongOpt("startGUI")
+      .create("gui");
 //  @SuppressWarnings("static-access")
 //  protected static final Option  TEST              = OptionBuilder
 //                                                       .isRequired(false)

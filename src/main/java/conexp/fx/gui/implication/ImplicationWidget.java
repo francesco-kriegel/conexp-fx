@@ -1,5 +1,14 @@
 package conexp.fx.gui.implication;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+
+import conexp.fx.core.collections.Collections3;
+import conexp.fx.core.implication.Implication;
+import conexp.fx.core.math.Isomorphism;
+import conexp.fx.core.util.OWLtoString;
+import conexp.fx.gui.dataset.FCADataset;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -30,8 +39,6 @@ import javafx.scene.control.ToolBarBuilder;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
-import conexp.fx.core.implication.Implication;
-import conexp.fx.gui.dataset.FCADataset;
 
 public class ImplicationWidget<G, M> extends BorderPane {
 
@@ -50,12 +57,9 @@ public class ImplicationWidget<G, M> extends BorderPane {
     confidenceSlider.setSnapToTicks(true);
     confidenceSlider.setMajorTickUnit(1);
     final Label confidenceValue = new Label();
-    confidenceValue
-        .textProperty()
-        .bind(
-            Bindings.createStringBinding(
-                () -> ((int) confidenceSlider.getValue()) + "%",
-                confidenceSlider.valueProperty()));
+    confidenceValue.textProperty().bind(
+        Bindings
+            .createStringBinding(() -> ((int) confidenceSlider.getValue()) + "%", confidenceSlider.valueProperty()));
     final HBox confidenceBox = new HBox(confidenceLabel, confidenceSlider, confidenceValue);
 
     final Label supportLabel = new Label("Support");
@@ -67,82 +71,94 @@ public class ImplicationWidget<G, M> extends BorderPane {
     supportValue.textProperty().bind(
         Bindings.createStringBinding(() -> ((int) supportSlider.getValue()) + "%", supportSlider.valueProperty()));
     final HBox supportBox = new HBox(supportLabel, supportSlider, supportValue);
-    this.table =
-        TableViewBuilder
-            .<Implication<G, M>> create()
-            .columns(
-                TableColumnBuilder
-                    .<Implication<G, M>, Integer> create()
-                    .text("Support")
-                    .cellValueFactory(
-                        new Callback<CellDataFeatures<Implication<G, M>, Integer>, ObservableValue<Integer>>() {
+    this.table = TableViewBuilder
+        .<Implication<G, M>> create()
+        .columns(
+            TableColumnBuilder
+                .<Implication<G, M>, Integer> create()
+                .text("Support")
+                .cellValueFactory(
+                    new Callback<CellDataFeatures<Implication<G, M>, Integer>, ObservableValue<Integer>>() {
+
+                      @Override
+                      public ObservableValue<Integer> call(CellDataFeatures<Implication<G, M>, Integer> param) {
+                        return new ObservableValueBase<Integer>() {
 
                           @Override
-                          public ObservableValue<Integer> call(CellDataFeatures<Implication<G, M>, Integer> param) {
-                            return new ObservableValueBase<Integer>() {
-
-                              @Override
-                              public Integer getValue() {
-                                return param.getValue().getSupport().size();
-                              }
-                            };
+                          public Integer getValue() {
+                            return param.getValue().getSupport().size();
                           }
-                        })
-                    .build(),
-                TableColumnBuilder
-                    .<Implication<G, M>, Integer> create()
-                    .text("Confidence")
-                    .cellValueFactory(
-                        new Callback<CellDataFeatures<Implication<G, M>, Integer>, ObservableValue<Integer>>() {
+                        };
+                      }
+                    })
+                .build(),
+            TableColumnBuilder
+                .<Implication<G, M>, Integer> create()
+                .text("Confidence")
+                .cellValueFactory(
+                    new Callback<CellDataFeatures<Implication<G, M>, Integer>, ObservableValue<Integer>>() {
+
+                      @Override
+                      public ObservableValue<Integer> call(CellDataFeatures<Implication<G, M>, Integer> param) {
+                        return new ObservableValueBase<Integer>() {
 
                           @Override
-                          public ObservableValue<Integer> call(CellDataFeatures<Implication<G, M>, Integer> param) {
-                            return new ObservableValueBase<Integer>() {
-
-                              @Override
-                              public Integer getValue() {
-                                return (int) (100d * param.getValue().getConfidence());
-                              }
-                            };
+                          public Integer getValue() {
+                            return (int) (100d * param.getValue().getConfidence());
                           }
-                        })
-                    .build(),
-                TableColumnBuilder
-                    .<Implication<G, M>, String> create()
-                    .text("Premise")
-                    .cellValueFactory(
-                        new Callback<CellDataFeatures<Implication<G, M>, String>, ObservableValue<String>>() {
+                        };
+                      }
+                    })
+                .build(),
+            TableColumnBuilder
+                .<Implication<G, M>, String> create()
+                .text("Premise")
+                .cellValueFactory(new Callback<CellDataFeatures<Implication<G, M>, String>, ObservableValue<String>>() {
 
-                          @Override
-                          public ObservableValue<String> call(CellDataFeatures<Implication<G, M>, String> param) {
-                            return new SimpleStringProperty(param.getValue().getPremise().toString());
-                          }
-                        })
-                    .build(),
-                TableColumnBuilder
-                    .<Implication<G, M>, String> create()
-                    .text("Conclusion")
-                    .cellValueFactory(
-                        new Callback<CellDataFeatures<Implication<G, M>, String>, ObservableValue<String>>() {
+                  @Override
+                  public ObservableValue<String> call(CellDataFeatures<Implication<G, M>, String> param) {
+                    if (!param.getValue().getPremise().isEmpty()
+                        && param.getValue().getPremise().iterator().next() instanceof OWLClassExpression)
+                      return new SimpleStringProperty(
+                          OWLtoString.toString(
+                              OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
+                                  Collections3.transform(
+                                      param.getValue().getPremise(),
+                                      Isomorphism.create(x -> (OWLClassExpression) x, null)))));
+                    return new SimpleStringProperty(param.getValue().getPremise().toString());
+                  }
+                })
+                .build(),
+            TableColumnBuilder
+                .<Implication<G, M>, String> create()
+                .text("Conclusion")
+                .cellValueFactory(new Callback<CellDataFeatures<Implication<G, M>, String>, ObservableValue<String>>() {
 
-                          @Override
-                          public ObservableValue<String> call(CellDataFeatures<Implication<G, M>, String> param) {
-                            return new SimpleStringProperty(param.getValue().getConclusion().toString());
-                          }
-                        })
-                    .build())
-            .items(fca.implications)
-            .build();
-    table
-        .itemsProperty()
-        .bind(
-            Bindings.createObjectBinding(
-                () -> fca.implications.filtered(impl -> impl.getConfidence() >= confidenceSlider.getValue() / 100d
-                    && (int) (100d * (((double) impl.getSupport().size()) / ((double) fca.context.rowHeads().size()))) >= (int) supportSlider
-                        .getValue()),
-                fca.implications,
-                confidenceSlider.valueProperty(),
-                supportSlider.valueProperty()));
+                  @Override
+                  public ObservableValue<String> call(CellDataFeatures<Implication<G, M>, String> param) {
+                    if (!param.getValue().getConclusion().isEmpty()
+                        && param.getValue().getConclusion().iterator().next() instanceof OWLClassExpression)
+                      return new SimpleStringProperty(
+                          OWLtoString.toString(
+                              OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
+                                  Collections3.transform(
+                                      param.getValue().getConclusion(),
+                                      Isomorphism.create(x -> (OWLClassExpression) x, null)))));
+                    return new SimpleStringProperty(param.getValue().getConclusion().toString());
+                  }
+                })
+                .build())
+        .items(fca.implications)
+        .build();
+    table.itemsProperty().bind(
+        Bindings.createObjectBinding(
+            () -> fca.implications.filtered(
+                impl -> impl.getConfidence() >= confidenceSlider.getValue() / 100d
+                    && (int) (100d * (((double) impl.getSupport().size())
+                        / ((double) fca.context.rowHeads().size()))) >= (int) supportSlider.getValue()),
+            fca.implications,
+            confidenceSlider.valueProperty(),
+            supportSlider.valueProperty()));
     this.setCenter(table);
     final Button computeButton = ButtonBuilder.create().text("Refresh").onAction(new EventHandler<ActionEvent>() {
 

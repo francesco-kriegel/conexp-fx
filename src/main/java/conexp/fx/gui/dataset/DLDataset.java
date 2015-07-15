@@ -98,7 +98,7 @@ public class DLDataset extends Dataset {
         .getSignature()
         .getRoleNames()));
     this.defaultActiveViews.add("Individuals");
-    this.actions.add(new DatasetAction("New Context...", () -> new InducedContextAssistent(this).showAndWait()));
+    this.actions.add(new DatasetAction("New Induced Context...", () -> new InducedContextAssistent(this).showAndWait()));
   }
 
   @Override

@@ -17,10 +17,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
-
-import javafx.collections.ObservableSet;
-import javafx.geometry.Point3D;
+import java.util.concurrent.AbstractExecutorService;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -37,8 +34,10 @@ import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.math.Points;
 import conexp.fx.core.quality.ConflictDistance;
 import conexp.fx.core.quality.LayoutEvolution;
-import conexp.fx.gui.task.BlockingTask;
+import conexp.fx.gui.task.TimeTask;
 import conexp.fx.gui.util.Platform2;
+import javafx.collections.ObservableSet;
+import javafx.geometry.Point3D;
 
 public final class IFox<G, M> {
 
@@ -68,9 +67,11 @@ public final class IFox<G, M> {
     for (Set<Integer> _n : context.selection._attributes)
       if (_n.contains(_m))
         if (_n.size() > 1)
-          return new Attribute<M>(Type.EQUIVALENT, Collections2.transform(
-              Sets.difference(_n, Collections.singleton(_m)),
-              context.selection.colHeads().index().inverse()));
+          return new Attribute<M>(
+              Type.EQUIVALENT,
+              Collections2.transform(
+                  Sets.difference(_n, Collections.singleton(_m)),
+                  context.selection.colHeads().index().inverse()));
         else if (context.selection._irreducibleAttributes.contains(_n))
           return new Attribute<M>(Type.IRREDUCIBLE);
         else
@@ -82,19 +83,18 @@ public final class IFox<G, M> {
       final ConceptLayout<G, M> layout,
       final M m,
       final ConflictDistance<G, M> conflictDistance,
-      final ThreadPoolExecutor tpe) {
-    LayoutEvolution<G, M>.Value v =
-        new LayoutEvolution<G, M>(
-            layout,
-            layout.lattice.attributeConcepts.get(m),
-            ConceptMovement.LABEL_SEED,
-            2d,
-            2d,
-            1,
-            1,
-            1,
-            conflictDistance,
-            tpe).calculate();
+      final AbstractExecutorService tpe) {
+    LayoutEvolution<G, M>.Value v = new LayoutEvolution<G, M>(
+        layout,
+        layout.lattice.attributeConcepts.get(m),
+        ConceptMovement.LABEL_SEED,
+        2d,
+        2d,
+        1,
+        1,
+        1,
+        conflictDistance,
+        tpe).calculate();
     layout.updateSeeds(v.seeds);
 //    v =
 //        new LayoutEvolution<G, M>(
@@ -111,20 +111,23 @@ public final class IFox<G, M> {
 //    layout.updateSeeds(v.seeds);
   }
 
-  public static final <G, M> BlockingTask select(
+  public static final <G, M> TimeTask<Void> select(
       final String id,
       final ConceptLayout<G, M> layout,
       final M m,
       final ConflictDistance<G, M> conflictDistance,
-      final ThreadPoolExecutor tpe) {
-    return new BlockingTask(id + " - iFox Select") {
+      final AbstractExecutorService tpe) {
+    return new TimeTask<Void>(id + " - iFox Select") {
 
       private MatrixContext<G, M> I;
       private MatrixContext<G, M> IuJ;
-      private Set<G>              mJ;
-      private Attribute<M>        attribute;
+      private Set<G> mJ;
+      private Attribute<M> attribute;
 
-      protected void _call() {
+      protected Void call() {
+        updateProgress(0d, 1d);
+        if (isCancelled())
+          return null;
         updateMessage("Calculating Incremental Update...");
         I = layout.lattice.context.selection;
         mJ = new HashSet<G>(layout.lattice.context.col(m));
@@ -144,6 +147,8 @@ public final class IFox<G, M> {
         }
         layout.invalidate();
         layout.lattice.pushAllChangedEvent();
+        updateProgress(1d, 1d);
+        return null;
       }
 
       private void equivalent() {
@@ -287,18 +292,21 @@ public final class IFox<G, M> {
     };
   }
 
-  public static final <G, M> BlockingTask ignore(
+  public static final <G, M> TimeTask<Void> ignore(
       final String id,
       final ConceptLayout<G, M> layout,
       final M m,
       final ConflictDistance<G, M> conflictDistance,
-      final ThreadPoolExecutor tpe) {
-    return new BlockingTask(id + " - iFox Ignore") {
+      final AbstractExecutorService tpe) {
+    return new TimeTask<Void>(id + " - iFox Ignore") {
 
       private MatrixContext<G, M> I;
-      private Attribute<M>        attribute;
+      private Attribute<M> attribute;
 
-      protected void _call() {
+      protected Void call() {
+        updateProgress(0d, 1d);
+        if (isCancelled())
+          return null;
         updateMessage("Calculating Incremental Update...");
         attribute = attribute(layout.lattice.context, m);
         layout.lattice.context.deselectAttribute(m);
@@ -316,6 +324,8 @@ public final class IFox<G, M> {
         }
         layout.invalidate();
         layout.lattice.pushAllChangedEvent();
+        updateProgress(1d, 1d);
+        return null;
       }
 
       private void equivalent() {

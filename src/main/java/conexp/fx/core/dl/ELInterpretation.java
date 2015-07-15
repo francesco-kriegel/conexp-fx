@@ -26,8 +26,8 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures6C;
-import conexp.fx.core.algorithm.nextclosures.ResultC;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresC;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresC.ResultC;
 import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
@@ -280,7 +280,7 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
     final Set<Implication<IRI, ELConceptDescription>> backgroundImplications = getBackgroundImplications(
         inducedContext,
         backgroundTBox);
-    final ResultC<IRI, ELConceptDescription> result = NextClosures6C.computeWithBackgroundImplications(
+    final ResultC<IRI, ELConceptDescription> result = NextClosuresC.computeWithBackgroundImplications(
         inducedContext,
         backgroundImplications,
         false);

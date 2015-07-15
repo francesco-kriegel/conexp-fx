@@ -57,20 +57,25 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
     if (obj == null)
       return false;
     if (obj instanceof FCAImplication)
-      return super.equals((FCAImplication<?>) obj);
+      return super.equals(
+          (FCAImplication<?>) obj);
     if (!(obj instanceof Implication))
       return false;
     final Implication<?, ?> other = (Implication<?, ?>) obj;
     return this.getPremise().equals(
-        other.getPremise()) && this.getConclusion().equals(
-        other.getConclusion()) && this.getSupport().equals(
-        other.getSupport()) && this.getConfidence() == other.getConfidence();
+        other.getPremise())
+        && this.getConclusion().equals(
+            other.getConclusion())
+        && this.getSupport().equals(
+            other.getSupport())
+        && this.getConfidence() == other.getConfidence();
   }
 
   @Override
   public int hashCode() {
-    return 2 * getPremise().hashCode() + 3 * getConclusion().hashCode() + 5 * getSupport().hashCode()
-        + (int) (8191d * confidence);
+    return getPremise().hashCode() + getConclusion().hashCode();
+//    return 2 * getPremise().hashCode() + 3 * getConclusion().hashCode() + 5 * getSupport().hashCode()
+//        + (int) (8191d * confidence);
   }
 
   @Override
@@ -78,17 +83,25 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
     final StringBuilder s = new StringBuilder();
     final Iterator<M> pit = getPremise().iterator();
     if (pit.hasNext())
-      s.append(pit.next());
-    pit.forEachRemaining(m -> s.append(" " + UnicodeSymbols.WEDGE + " " + m));
-    s.append(" " + UnicodeSymbols.TO + " ");
+      s.append(
+          pit.next());
+    pit.forEachRemaining(
+        m -> s.append(
+            " " + UnicodeSymbols.WEDGE + " " + m));
+    s.append(
+        " " + UnicodeSymbols.TO + " ");
     final Iterator<M> cit = Sets.difference(
         getConclusion(),
         getPremise()).iterator();
     if (cit.hasNext())
-      s.append(cit.next());
-    cit.forEachRemaining(m -> s.append(" " + UnicodeSymbols.WEDGE + " " + m));
+      s.append(
+          cit.next());
+    cit.forEachRemaining(
+        m -> s.append(
+            " " + UnicodeSymbols.WEDGE + " " + m));
     if (confidence < 1d)
-      s.append(" (" + ((int) (100d * confidence)) + "%)");
+      s.append(
+          " (" + ((int) (100d * confidence)) + "%)");
     return s.toString();
   }
 

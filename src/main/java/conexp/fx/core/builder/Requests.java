@@ -24,8 +24,9 @@ import conexp.fx.core.collections.setlist.SetLists;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CEXImporter;
 import conexp.fx.core.importer.CFXImporter;
-import conexp.fx.core.importer.CXTImporter2;
-import conexp.fx.core.importer.SPARQLImporter;
+import conexp.fx.core.importer.CSVImporter;
+import conexp.fx.core.importer.CXTImporter;
+import conexp.fx.core.importer.RDFImporter;
 import conexp.fx.core.math.BooleanMatrices;
 
 public final class Requests {
@@ -84,6 +85,12 @@ public final class Requests {
         Metatype.IMPORT,
         false,
         Source.FILE),
+    IMPORT_CSV_CONTEXT(
+        "Local File (Comma Separated Values, *.csv)",
+        "Imports a Formal Context from a *.csv File.",
+        Metatype.IMPORT,
+        false,
+        Source.FILE),
     IMPORT_SPARQL_CONTEXT(
         "SPARQL Result from an Ontology",
         "Imports a Formal Context from an Ontology.",
@@ -130,10 +137,10 @@ public final class Requests {
 //        Source.CONTEXT_DOUBLE),
 //    APPROXIMATION_CONTEXT("Meschke's Approximation Context", "", Metatype.OTHER, false, Source.CONTEXT_SET_SET),
 //    BINARY_RELATIONS_CONTEXT("Binary Relations Context", "", Metatype.OTHER, false, Source.INT_LIST);
-    public final String       title;
-    public final String       description;
-    public final Metatype     type;
-    public final boolean      homogen;
+    public final String title;
+    public final String description;
+    public final Metatype type;
+    public final boolean homogen;
     public final List<Source> sources;
 
     private Type(
@@ -192,11 +199,9 @@ public final class Requests {
 
       public final void setContent() {
         for (int row = 0; row < objects; row++)
-          context.rowHeads().add(
-              "Object " + row);
+          context.rowHeads().add("Object " + row);
         for (int column = 0; column < attributes; column++)
-          context.colHeads().add(
-              "Attribute " + column);
+          context.colHeads().add("Attribute " + column);
         context.pushAllChangedEvent();
       }
     }
@@ -212,8 +217,7 @@ public final class Requests {
 
       public final void setContent() {
         for (int row = 0; row < elements; row++)
-          context.rowHeads().add(
-              "Element " + row);
+          context.rowHeads().add("Element " + row);
         context.pushAllChangedEvent();
       }
     }
@@ -228,10 +232,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        CFXImporter.importt(
-            context,
-            null,
-            file);
+        CFXImporter.importt(context, null, file);
       }
     }
 
@@ -241,11 +242,24 @@ public final class Requests {
         super(Type.IMPORT_CXT_CONTEXT, file);
       }
 
-      public final void setContent() {
-        CXTImporter2.read(
-            context,
-            file);
-//        CXTImporter.importt(context, file);
+      public final void setContent() throws Exception {
+        CXTImporter.read(context, file);
+      }
+    }
+
+    public static final class ImportCSVB extends FileRequest {
+
+      public ImportCSVB(final File file) {
+        super(Type.IMPORT_CSV_CONTEXT, file);
+      }
+
+      @Override
+      public void setContent() {
+        try {
+          CSVImporter.importContext(file, context, ";");
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
     }
 
@@ -259,10 +273,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        CEXImporter.importt(
-            context,
-            null,
-            file);
+        CEXImporter.importt(context, null, file);
       }
     }
 
@@ -278,10 +289,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        SPARQLImporter.importXML(
-            context,
-            url,
-            query);
+        RDFImporter.importXML(context, url, query);
       }
     }
 
@@ -297,10 +305,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        SPARQLImporter.importURL(
-            context,
-            url,
-            query);
+        RDFImporter.importURL(context, url, query);
       }
     }
 
@@ -316,10 +321,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        SPARQLImporter.importFile(
-            context,
-            file,
-            query);
+        RDFImporter.importFile(context, file, query);
       }
     }
 
@@ -335,10 +337,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        SPARQLImporter.importRepository(
-            context,
-            repo,
-            query);
+        RDFImporter.importRepository(context, repo, query);
       }
     }
   }
@@ -352,12 +351,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            SetLists.create(
-                true,
-                false),
-            null,
-            BooleanMatrices.identity(2));
+        context.setContent(SetLists.create(true, false), null, BooleanMatrices.identity(2));
       }
     }
 
@@ -371,10 +365,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            SetLists.powerSet(SetLists.integers(n)),
-            null,
-            BooleanMatrices.booleann(n));
+        context.setContent(SetLists.powerSet(SetLists.integers(n)), null, BooleanMatrices.booleann(n));
       }
     }
 
@@ -388,10 +379,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            SetLists.powerSet(s),
-            null,
-            BooleanMatrices.booleann(s.size()));
+        context.setContent(SetLists.powerSet(s), null, BooleanMatrices.booleann(s.size()));
       }
     }
 
@@ -405,10 +393,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            SetLists.integers(n),
-            null,
-            BooleanMatrices.identity(n));
+        context.setContent(SetLists.integers(n), null, BooleanMatrices.identity(n));
       }
     }
 
@@ -422,10 +407,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            s,
-            null,
-            BooleanMatrices.identity(s.size()));
+        context.setContent(s, null, BooleanMatrices.identity(s.size()));
       }
     }
 
@@ -439,10 +421,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            SetLists.integers(n),
-            null,
-            BooleanMatrices.negativeIdentity(n));
+        context.setContent(SetLists.integers(n), null, BooleanMatrices.negativeIdentity(n));
       }
     }
 
@@ -456,10 +435,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            s,
-            null,
-            BooleanMatrices.negativeIdentity(s.size()));
+        context.setContent(s, null, BooleanMatrices.negativeIdentity(s.size()));
       }
     }
 
@@ -473,10 +449,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            SetLists.integers(n),
-            null,
-            BooleanMatrices.upperDiagonal(n));
+        context.setContent(SetLists.integers(n), null, BooleanMatrices.upperDiagonal(n));
       }
     }
 
@@ -490,10 +463,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            s,
-            null,
-            BooleanMatrices.upperDiagonal(s.size()));
+        context.setContent(s, null, BooleanMatrices.upperDiagonal(s.size()));
       }
     }
 
@@ -541,10 +511,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            c.rowHeads(),
-            null,
-            BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
+        context.setContent(c.rowHeads(), null, BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
       }
     }
 
@@ -560,12 +527,9 @@ public final class Requests {
       public final void setContent() {
         context.setContent(
             SetLists.integers(n),
-            SetLists.disjointUnion(
-                SetLists.integers(n),
-                SetLists.integers(n)),
-            BooleanMatrices.apposition(
-                BooleanMatrices.upperDiagonal(n),
-                BooleanMatrices.dual(BooleanMatrices.upperDiagonal(n))));
+            SetLists.disjointUnion(SetLists.integers(n), SetLists.integers(n)),
+            BooleanMatrices
+                .apposition(BooleanMatrices.upperDiagonal(n), BooleanMatrices.dual(BooleanMatrices.upperDiagonal(n))));
       }
     }
 
@@ -581,9 +545,7 @@ public final class Requests {
       public final void setContent() {
         context.setContent(
             s,
-            SetLists.disjointUnion(
-                s,
-                s),
+            SetLists.disjointUnion(s, s),
             BooleanMatrices.apposition(
                 BooleanMatrices.upperDiagonal(s.size()),
                 BooleanMatrices.dual(BooleanMatrices.upperDiagonal(s.size()))));
@@ -602,12 +564,8 @@ public final class Requests {
       public final void setContent() {
         context.setContent(
             c.rowHeads(),
-            SetLists.disjointUnion(
-                c.colHeads(),
-                c.colHeads()),
-            BooleanMatrices.apposition(
-                c.matrix(),
-                BooleanMatrices.dual(c.matrix())));
+            SetLists.disjointUnion(c.colHeads(), c.colHeads()),
+            BooleanMatrices.apposition(c.matrix(), BooleanMatrices.dual(c.matrix())));
       }
     }
 
@@ -623,9 +581,7 @@ public final class Requests {
       public final void setContent() {
         context.setContent(
             SetLists.integers(n),
-            SetLists.disjointUnion(
-                SetLists.integers(n),
-                SetLists.integers(n)),
+            SetLists.disjointUnion(SetLists.integers(n), SetLists.integers(n)),
             BooleanMatrices.apposition(
                 BooleanMatrices.complement(BooleanMatrices.dual(BooleanMatrices.upperDiagonal(n))),
                 BooleanMatrices.complement(BooleanMatrices.upperDiagonal(n))));
@@ -644,9 +600,7 @@ public final class Requests {
       public final void setContent() {
         context.setContent(
             s,
-            SetLists.disjointUnion(
-                s,
-                s),
+            SetLists.disjointUnion(s, s),
             BooleanMatrices.apposition(
                 BooleanMatrices.complement(BooleanMatrices.dual(BooleanMatrices.upperDiagonal(s.size()))),
                 BooleanMatrices.complement(BooleanMatrices.upperDiagonal(s.size()))));
@@ -665,9 +619,7 @@ public final class Requests {
       public final void setContent() {
         context.setContent(
             c.rowHeads(),
-            SetLists.disjointUnion(
-                c.colHeads(),
-                c.colHeads()),
+            SetLists.disjointUnion(c.colHeads(), c.colHeads()),
             BooleanMatrices.apposition(
                 BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())),
                 BooleanMatrices.complement(c.matrix())));
@@ -687,15 +639,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(
-                order1.rowHeads(),
-                order2.rowHeads()),
-            SetLists.disjointUnion(
-                order1.colHeads(),
-                order2.colHeads()),
-            BooleanMatrices.horizontalSum(
-                order1.matrix(),
-                order2.matrix()));
+            SetLists.disjointUnion(order1.rowHeads(), order2.rowHeads()),
+            SetLists.disjointUnion(order1.colHeads(), order2.colHeads()),
+            BooleanMatrices.horizontalSum(order1.matrix(), order2.matrix()));
       }
     }
 
@@ -712,15 +658,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(
-                order1.rowHeads(),
-                order2.rowHeads()),
-            SetLists.disjointUnion(
-                order1.colHeads(),
-                order2.colHeads()),
-            BooleanMatrices.semiProduct(
-                order1.matrix(),
-                order2.matrix()));
+            SetLists.cartesianProduct(order1.rowHeads(), order2.rowHeads()),
+            SetLists.disjointUnion(order1.colHeads(), order2.colHeads()),
+            BooleanMatrices.semiProduct(order1.matrix(), order2.matrix()));
       }
     }
   }
@@ -737,10 +677,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            c.rowHeads(),
-            c.colHeads(),
-            BooleanMatrices.complement(c.matrix()));
+        context.setContent(c.rowHeads(), c.colHeads(), BooleanMatrices.complement(c.matrix()));
       }
     }
 
@@ -754,10 +691,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            c.colHeads(),
-            c.rowHeads(),
-            BooleanMatrices.dual(c.matrix()));
+        context.setContent(c.colHeads(), c.rowHeads(), BooleanMatrices.dual(c.matrix()));
       }
     }
 
@@ -771,10 +705,7 @@ public final class Requests {
       }
 
       public final void setContent() {
-        context.setContent(
-            c.colHeads(),
-            c.rowHeads(),
-            BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
+        context.setContent(c.colHeads(), c.rowHeads(), BooleanMatrices.complement(BooleanMatrices.dual(c.matrix())));
       }
     }
 
@@ -791,15 +722,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.intersection(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.disjointUnion(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.apposition(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.intersection(context1.rowHeads(), context2.rowHeads()),
+            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.apposition(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -816,15 +741,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.intersection(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.subposition(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
+            SetLists.intersection(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.subposition(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -850,26 +769,14 @@ public final class Requests {
       public final void setContent() {
         context.setContent(
             SetLists.disjointUnion(
-                SetLists.intersection(
-                    upperLeft.rowHeads(),
-                    upperRight.rowHeads()),
-                SetLists.intersection(
-                    lowerLeft.rowHeads(),
-                    lowerRight.rowHeads())),
+                SetLists.intersection(upperLeft.rowHeads(), upperRight.rowHeads()),
+                SetLists.intersection(lowerLeft.rowHeads(), lowerRight.rowHeads())),
             SetLists.intersection(
-                SetLists.disjointUnion(
-                    upperLeft.colHeads(),
-                    upperRight.colHeads()),
-                SetLists.disjointUnion(
-                    lowerLeft.colHeads(),
-                    lowerRight.colHeads())),
+                SetLists.disjointUnion(upperLeft.colHeads(), upperRight.colHeads()),
+                SetLists.disjointUnion(lowerLeft.colHeads(), lowerRight.colHeads())),
             BooleanMatrices.subposition(
-                BooleanMatrices.apposition(
-                    upperLeft.matrix(),
-                    upperRight.matrix()),
-                BooleanMatrices.apposition(
-                    lowerLeft.matrix(),
-                    lowerRight.matrix())));
+                BooleanMatrices.apposition(upperLeft.matrix(), upperRight.matrix()),
+                BooleanMatrices.apposition(lowerLeft.matrix(), lowerRight.matrix())));
       }
     }
 
@@ -886,15 +793,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.disjointUnion(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.horizontalSum(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
+            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.horizontalSum(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -911,15 +812,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.disjointUnion(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.verticalSum(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
+            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.verticalSum(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -936,15 +831,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.disjointUnion(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.disjointUnion(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.directSum(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.disjointUnion(context1.rowHeads(), context2.rowHeads()),
+            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.directSum(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -961,15 +850,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.cartesianProduct(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.directProduct(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.cartesianProduct(context1.rowHeads(), context2.rowHeads()),
+            SetLists.cartesianProduct(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.directProduct(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -986,15 +869,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.cartesianProduct(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.biProduct(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.cartesianProduct(context1.rowHeads(), context2.rowHeads()),
+            SetLists.cartesianProduct(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.biProduct(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -1011,15 +888,9 @@ public final class Requests {
 
       public final void setContent() {
         context.setContent(
-            SetLists.cartesianProduct(
-                context1.rowHeads(),
-                context2.rowHeads()),
-            SetLists.disjointUnion(
-                context1.colHeads(),
-                context2.colHeads()),
-            BooleanMatrices.semiProduct(
-                context1.matrix(),
-                context2.matrix()));
+            SetLists.cartesianProduct(context1.rowHeads(), context2.rowHeads()),
+            SetLists.disjointUnion(context1.colHeads(), context2.colHeads()),
+            BooleanMatrices.semiProduct(context1.matrix(), context2.matrix()));
       }
     }
 
@@ -1044,29 +915,18 @@ public final class Requests {
 
       public final void setContent() {
         System.out.println("substitution sum");
-        final int i = context1.rowHeads().indexOf(
-            object);
-        final int j = context1.colHeads().indexOf(
-            attribute);
+        final int i = context1.rowHeads().indexOf(object);
+        final int j = context1.colHeads().indexOf(attribute);
         System.out.println(i + ":" + j);
-        final BooleanMatrix matrix = BooleanMatrices.substitutionSum(
-            context1.matrix(),
-            context2.matrix(),
-            i,
-            j,
-            context1._row(i),
-            context1._col(j));
+        final BooleanMatrix matrix = BooleanMatrices
+            .substitutionSum(context1.matrix(), context2.matrix(), i, j, context1._row(i), context1._col(j));
         System.out.println(matrix);
         context.setContent(
             SetLists.disjointUnion(
-                SetLists.difference(
-                    context1.rowHeads(),
-                    Collections.singleton(object)),
+                SetLists.difference(context1.rowHeads(), Collections.singleton(object)),
                 context2.rowHeads()),
             SetLists.disjointUnion(
-                SetLists.difference(
-                    context1.colHeads(),
-                    Collections.singleton(attribute)),
+                SetLists.difference(context1.colHeads(), Collections.singleton(attribute)),
                 context2.colHeads()),
             matrix);
         System.out.println(context);

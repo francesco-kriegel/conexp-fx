@@ -15,14 +15,16 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
-import javafx.stage.FileChooser.ExtensionFilter;
 import conexp.fx.core.collections.pair.Pair;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public enum FileFormat {
   ANY("All Files", "*"),
   CXT("Burmeister Format (Only Context)", "cxt"),
   CEX("ConExp Format (Only Context)", "cex"),
   CFX("ConExpFX Format (Context & Lattice)", "cfx"),
+  CSVB("Comma Separated Values (pairs)", "csv"),
+  CSVT("Comma Separated Values (triples)", "csv"),
   RDF("RDF Format (Graph Data)", "rdf", "rdfs", "owl", "xml"),
   NT("N-Triples", "nt"),
   N3("N3", "n3"),
@@ -40,8 +42,8 @@ public enum FileFormat {
   SVG("Scalable Vector Graphics (Only Lattice)", "svg"),
   TEX("Ganter's fca.sty TeX Format (Context & Lattice)", "tex");
 
-  public final String          title;
-  public final String[]        suffix;
+  public final String title;
+  public final String[] suffix;
   public final ExtensionFilter extensionFilter;
 
   private FileFormat(final String title, final String... suffix) {
@@ -50,12 +52,9 @@ public enum FileFormat {
     String suffixes = "";
     for (String s : suffix)
       suffixes += ", *." + s;
-    this.extensionFilter =
-        new ExtensionFilter(title + suffixes, Arrays
-            .asList(suffix)
-            .parallelStream()
-            .map(s -> "*." + s)
-            .collect(Collectors.toList()));
+    this.extensionFilter = new ExtensionFilter(
+        title + suffixes,
+        Arrays.asList(suffix).parallelStream().map(s -> "*." + s).collect(Collectors.toList()));
   }
 
   @Override

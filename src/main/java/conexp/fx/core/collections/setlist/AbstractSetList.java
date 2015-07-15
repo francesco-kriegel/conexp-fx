@@ -266,7 +266,7 @@ public abstract class AbstractSetList<E> implements SetList<E> {
         && (this == o || (o instanceof SetList && size() == ((SetList<?>) o).size() && containsAll((SetList<?>) o)));
   }
 
-  public final int hashCode() {
+  public int hashCode() {
     int hashCode = 1;
     for (E e : this)
       hashCode = 23 * hashCode + (e == null ? 0 : e.hashCode());

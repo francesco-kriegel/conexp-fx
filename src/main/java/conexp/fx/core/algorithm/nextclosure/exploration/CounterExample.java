@@ -1,4 +1,4 @@
-package conexp.fx.core.algorithm.exploration;
+package conexp.fx.core.algorithm.nextclosure.exploration;
 
 /*
  * #%L

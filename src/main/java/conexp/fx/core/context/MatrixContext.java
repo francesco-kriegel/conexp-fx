@@ -551,13 +551,13 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
 
         public final void handle(final RelationEvent<G, M> event) {
           if (!lock) {
-            final long start = System.currentTimeMillis();
+//            final long start = System.currentTimeMillis();
             reduce();
 //            System.out.println("reducing done in " + (System.currentTimeMillis() - start) + " ms.");
           }
         }
       }, RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
-      final long start = System.currentTimeMillis();
+//      final long start = System.currentTimeMillis();
       reduce();
 //      System.out.println("reducing done in " + (System.currentTimeMillis() - start) + " ms.");
       break;
@@ -566,13 +566,13 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
 
         public final void handle(final RelationEvent<G, M> event) {
           if (!lock) {
-            final long start = System.currentTimeMillis();
+//            final long start = System.currentTimeMillis();
             clean();
 //            System.out.println("cleaning done in " + (System.currentTimeMillis() - start) + " ms.");
           }
         }
       }, RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
-      final long startt = System.currentTimeMillis();
+//      final long startt = System.currentTimeMillis();
       clean();
 //      System.out.println("cleaning done in " + (System.currentTimeMillis() - startt) + " ms.");
       break;
@@ -622,7 +622,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
                   j));
         return false;
       }
-    }.clone();
+    };//.clone();
     _upArrows = new AbstractRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
       public final boolean contains(final Object object, final Object attribute) {
@@ -635,7 +635,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
               _intent(Collections.singleton(_j), i, Collections2.filter(j, Predicates.not(Predicates.equalTo(_j)))));
         return false;
       }
-    }.clone();
+    };//.clone();
     _irreducibleObjects.clear();
     _irreducibleObjects.addAll(_objects.filter(_isIrreducibleObject));
     _irreducibleAttributes.clear();

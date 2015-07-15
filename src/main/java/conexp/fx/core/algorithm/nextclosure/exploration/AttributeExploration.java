@@ -1,4 +1,4 @@
-package conexp.fx.core.algorithm.exploration;
+package conexp.fx.core.algorithm.nextclosure.exploration;
 
 /*
  * #%L
@@ -11,13 +11,11 @@ package conexp.fx.core.algorithm.exploration;
  */
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.google.common.collect.Lists;
 
-import conexp.fx.core.closureoperators.ImplicationClosureOperator;
+import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.implication.Implication;
 import conexp.fx.gui.exploration.HumanExpert;
@@ -39,14 +37,27 @@ public final class AttributeExploration<G, M> {
    * @param context
    * @return
    */
-  public static final AttributeExploration<String, String> withHumanExpert(final MatrixContext<String, String> context) {
+  public static final AttributeExploration<String, String>
+      withHumanExpert(final MatrixContext<String, String> context) {
     return new AttributeExploration<String, String>(context, new HumanExpert(context));
+  }
+
+  public static final <G, M> Set<Implication<G, M>> getCanonicalBase(final MatrixContext<G, M> context) {
+    final AttributeExploration<G, M> attributeExploration = new AttributeExploration<G, M>(context, __ -> null);
+    try {
+      attributeExploration.start();
+    } catch (InterruptedException e) {}
+    return attributeExploration.getImplicationalBase();
   }
 
   protected final MatrixContext<G, M>    context;
   protected final Expert<G, M>           expert;
   protected Set<M>                       pseudoClosure = new HashSet<M>();
   protected final Set<Implication<G, M>> implications  = new HashSet<Implication<G, M>>();
+  private final ClosureOperator<M>       clop          = ClosureOperator.fromImplications(
+      implications,
+      true,
+      true);
 
   /**
    * Constructs a new attribute exploration process. It has to be started by a call to the method run.
@@ -69,25 +80,28 @@ public final class AttributeExploration<G, M> {
    */
   public final void start() throws InterruptedException {
     while (pseudoClosure.size() < context.colHeads().size()) {
-      final Set<M> closure = context.intent(pseudoClosure);
+//      final Set<M> closure = context.intent(pseudoClosure);
+      final Set<M> closure = context.rowAnd(
+          context.colAnd(
+              pseudoClosure));
       if (closure.size() == pseudoClosure.size()) {
         nextPseudoClosure();
       } else {
+        closure.removeAll(
+            pseudoClosure);
         final Implication<G, M> implication = new Implication<G, M>(pseudoClosure, closure);
-        final CounterExample<G, M> counterExample = expert.askForCounterexample(implication);
+        final CounterExample<G, M> counterExample = expert.askForCounterexample(
+            implication);
         if (counterExample == null) {
-          addImplication(implication);
+          implications.add(
+              implication);
           nextPseudoClosure();
         } else {
-          addCounterExample(counterExample);
+          addCounterExample(
+              counterExample);
         }
       }
     }
-    System.out.println(context.rowHeads());
-  }
-
-  private final void addImplication(final Implication<G, M> implication) {
-    implications.add(implication);
   }
 
   private final void addCounterExample(final CounterExample<G, M> counterExample) {
@@ -100,45 +114,24 @@ public final class AttributeExploration<G, M> {
   }
 
   private final void nextPseudoClosure() {
-    pseudoClosure = nextClosure(pseudoClosure);
-  }
-
-  private final Set<M> nextClosure(final Set<M> set) {
-    final ImplicationClosureOperator<G, M> clop = new ImplicationClosureOperator<>(implications, true);
-    for (M m : Lists.reverse(context.colHeads())) {
-      final Set<M> s = clop.closure(LexicalOrder.oplus(
-          context.colHeads(),
-          set,
-          m));
+    for (M m : Lists.reverse(
+        context.colHeads())) {
+      final Set<M> s = clop.closure(
+          LexicalOrder.oplus(
+              context.colHeads(),
+              pseudoClosure,
+              m));
       if (LexicalOrder.isSmaller(
           context.colHeads(),
-          set,
+          pseudoClosure,
           s,
-          m))
-        return s;
+          m)) {
+        pseudoClosure = s;
+        return;
+      }
     }
     throw new RuntimeException();
   }
-
-//  private final Set<M> nextClosure(final Set<M> set) {
-//    final ImplicationClosureOperator<G, M> clop = new ImplicationClosureOperator<>(implications, true);
-//    final Function<M, Function<Set<M>, Set<M>>> f = m -> (s -> clop.closure(_APlusG(
-//        s,
-//        m)));
-//
-//    final Optional<M> max = context.colHeads().parallelStream().filter(
-//        m -> isLexicSmaller(
-//            set,
-//            f.apply(
-//                m).apply(
-//                set),
-//            m)).findFirst();
-//    if (max.isPresent())
-//      return clop.closure(_APlusG(
-//          set,
-//          max.get()));
-//    throw new RuntimeException();
-//  }
 
   /**
    * @return the implicational base, that was constructed during the attribute exploration.

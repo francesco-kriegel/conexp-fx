@@ -1,4 +1,4 @@
-package conexp.fx.core.algorithm.nextclosures;
+package conexp.fx.core.algorithm.nextclosures.mn;
 
 /*
  * #%L

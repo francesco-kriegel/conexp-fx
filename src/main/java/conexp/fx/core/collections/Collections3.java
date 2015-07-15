@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.ujmp.core.collections.BitSetSet;
 
@@ -37,6 +38,10 @@ import com.google.common.collect.Lists;
 import conexp.fx.core.math.Isomorphism;
 
 public final class Collections3 {
+
+  public static final <E> Set<E> newConcurrentHashSet() {
+    return Collections.newSetFromMap(new ConcurrentHashMap<E, Boolean>());
+  }
 
   public static final <E extends Number & Comparable<? super E>> double sum(final Collection<? extends E> c) {
     double s = 0;
@@ -53,7 +58,8 @@ public final class Collections3 {
     return new AbstractCollection<E>() {
 
       public final Iterator<E> iterator() {
-        return Iterables.concat(c).iterator();
+        return Iterables.concat(
+            c).iterator();
       }
 
       public final int size() {
@@ -74,7 +80,9 @@ public final class Collections3 {
     return new AbstractCollection<E>() {
 
       public final Iterator<E> iterator() {
-        return Iterators.concat(c1.iterator(), c2.iterator());
+        return Iterators.concat(
+            c1.iterator(),
+            c2.iterator());
       }
 
       public final int size() {
@@ -84,11 +92,15 @@ public final class Collections3 {
   }
 
   public static final <E> Collection<E> intersection(final Collection<E> c1, final Collection<? extends E> c2) {
-    return Collections2.filter(c1, Predicates.in(c2));
+    return Collections2.filter(
+        c1,
+        Predicates.in(c2));
   }
 
   public static final <E> Collection<E> difference(final Collection<E> c1, final Collection<? extends E> c2) {
-    return Collections2.<E> filter(c1, Predicates.not(Predicates.in(c2)));
+    return Collections2.<E> filter(
+        c1,
+        Predicates.not(Predicates.in(c2)));
   }
 
   public static final <T, E> Set<E> transform(final Set<T> s, final Isomorphism<T, E> f) {
@@ -96,7 +108,9 @@ public final class Collections3 {
 
       @Override
       public final Iterator<E> iterator() {
-        return Iterators.transform(s.iterator(), f);
+        return Iterators.transform(
+            s.iterator(),
+            f);
       }
 
       @Override
@@ -124,7 +138,9 @@ public final class Collections3 {
   public static final <E> E random(final Collection<? extends E> c, final Predicate<E> p, final Random rng) {
     E e;
     while (true) {
-      e = random(c, rng);
+      e = random(
+          c,
+          rng);
       if (p.apply(e))
         break;
     }
@@ -139,17 +155,23 @@ public final class Collections3 {
 
   public static final <E> List<E> sort(final Iterable<? extends E> i, final Comparator<? super E> c) {
     final ArrayList<E> l = Lists.newArrayList(i);
-    Collections.sort(l, c);
+    Collections.sort(
+        l,
+        c);
     return l;
   }
 
   public static final <E, T extends E> Collection<T> elementsBySubClass(final Collection<E> c, final Class<T> clazz) {
-    return Collections2.transform(Collections2.filter(c, Predicates.instanceOf(clazz)), new Function<E, T>() {
+    return Collections2.transform(
+        Collections2.filter(
+            c,
+            Predicates.instanceOf(clazz)),
+        new Function<E, T>() {
 
-      public final T apply(final E e) {
-        return clazz.cast(e);
-      }
-    });
+          public final T apply(final E e) {
+            return clazz.cast(e);
+          }
+        });
   }
 
   public static final <E> Function<Set<E>, Iterator<E>> setToIterator() {
@@ -203,11 +225,17 @@ public final class Collections3 {
     return new AbstractList<E>() {
 
       public final E get(final int index) {
-        return Iterables.get(Iterables.filter(l, p), index);
+        return Iterables.get(
+            Iterables.filter(
+                l,
+                p),
+            index);
       }
 
       public final int size() {
-        return Iterables.size(Iterables.filter(l, p));
+        return Iterables.size(Iterables.filter(
+            l,
+            p));
       }
     };
   }

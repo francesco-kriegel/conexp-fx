@@ -1,88 +1,159 @@
 package conexp.fx.core.algorithm.nextclosure;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Function;
 
-import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 
+import conexp.fx.core.algorithm.nextclosure.exploration.LexicalOrder;
 import conexp.fx.core.closureoperators.ClosureOperator;
+import conexp.fx.core.collections.either.Either;
+import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.collections.setlist.SetList;
+import conexp.fx.core.context.Concept;
+import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.implication.Implication;
 
-public class NextClosure<T> implements Iterable<Set<T>> {
+public class NextClosure {
 
-  private final SetList<T>         base;
-  private final ClosureOperator<T> clop;
-
-  public NextClosure(final SetList<T> base, final ClosureOperator<T> clop) {
-    super();
-    this.base = base;
-    this.clop = clop;
+  public static <G, M> Iterable<Concept<G, M>> intents(final MatrixContext<G, M> cxt) {
+    final Function<Set<M>, Concept<G, M>> clop = set -> {
+      final Set<G> extent = cxt.colAnd(
+          set);
+      final Set<M> intent = cxt.rowAnd(
+          extent);
+      return new Concept<G, M>(extent, intent);
+    };
+    return enumerate(
+        cxt.colHeads(),
+        clop.apply(
+            new HashSet<M>()),
+        clop,
+        concept -> concept.getIntent());
   }
 
-  public final Iterator<Set<T>> iterator() {
+  public static <G, M> Iterable<Either<Concept<G, M>, Implication<G, M>>> implications(final MatrixContext<G, M> cxt) {
+    final Set<Implication<G, M>> implications = Sets.newHashSet();
+    final ClosureOperator<M> clop = ClosureOperator.fromImplications(
+        implications,
+        true,
+        true);
+    final Function<Set<M>, Either<Concept<G, M>, Implication<G, M>>> clop2 = set -> {
+      final Set<M> quasiIntent = clop.closure(
+          set);
+      final Set<G> extent = cxt.colAnd(
+          quasiIntent);
+      final Set<M> intent = cxt.rowAnd(
+          extent);
+      if (quasiIntent.size() != intent.size()) {
+        intent.removeAll(
+            quasiIntent);
+        final Implication<G, M> implication = new Implication<G, M>(quasiIntent, intent, extent);
+        implications.add(
+            implication);
+        return Either.<Concept<G, M>, Implication<G, M>> ofRight(
+            implication);
+      } else
+        return Either.<Concept<G, M>, Implication<G, M>> ofLeft(
+            new Concept<G, M>(extent, intent));
+    };
+    return enumerate(
+        cxt.colHeads(),
+        clop2.apply(
+            new HashSet<M>()),
+        clop2,
+        e -> e.getLeft().isPresent() ? e.getLeft().get().getIntent() : e.getRight().get().getPremise());
+  }
 
-    return new UnmodifiableIterator<Set<T>>() {
+  public static <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
+      conceptsAndImplications(final MatrixContext<G, M> cxt) {
+    final Set<Concept<G, M>> concepts = Sets.newHashSet();
+    final Set<Implication<G, M>> implications = Sets.newHashSet();
+    enumerate(
+        cxt.colHeads(),
+        ClosureOperator.fromImplications(
+            implications,
+            true,
+            true)).forEach(
+                quasiIntent -> {
+                  final Set<G> extent = cxt.colAnd(
+                      quasiIntent);
+                  final Set<M> intent = cxt.rowAnd(
+                      extent);
+                  if (quasiIntent.size() != intent.size()) {
+                    intent.removeAll(
+                        quasiIntent);
+                    implications.add(
+                        new Implication<G, M>(quasiIntent, intent, extent));
+                  } else
+                    concepts.add(
+                        new Concept<G, M>(extent, intent));
+                });
+    return Pair.of(
+        concepts,
+        implications);
+  }
 
-      private final int n = base.size();
-      private Set<T>    c = clop.closure(new HashSet<T>());
+  public static <T> Iterable<Set<T>> enumerate(final SetList<T> base, final ClosureOperator<T> clop) {
+    return enumerate(
+        base,
+        new HashSet<T>(),
+        clop::closure,
+        t -> t);
+  }
 
-      public final boolean hasNext() {
-        return c != null;
-      }
+  public static <T, U> Iterable<U> enumerate(
+      final SetList<T> base,
+      final U first,
+      final Function<Set<T>, U> clop,
+      final Function<U, Set<T>> inverse) {
+    return new Iterable<U>() {
 
-      public final Set<T> next() {
-        final Set<T> _nextExtent = c;
-        _APlus();
-        return _nextExtent;
-      }
+      public final Iterator<U> iterator() {
 
-      private final void _APlus() {
-        Set<T> _APlus;
-        for (int i = n - 1; i > -1; --i) {
-          final T e = base.get(i);
-          if (!c.contains(e)) {
-            _APlus = _APlusG(e);
-            if (_AisLexicSmallerG(_APlus, e)) {
-              c = _APlus;
-              return;
+        return new UnmodifiableIterator<U>() {
+
+          private U nextClosure = first;
+          private boolean isFirst = true;
+
+          public final boolean hasNext() {
+            return isFirst || inverse.apply(
+                nextClosure).size() < base.size();
+          }
+
+          public final U next() {
+            if (isFirst)
+              isFirst = false;
+            else if (inverse.apply(
+                nextClosure).size() < base.size()) {
+              for (T m : Lists.reverse(
+                  base)) {
+                final U s = clop.apply(
+                    LexicalOrder.oplus(
+                        base,
+                        inverse.apply(
+                            nextClosure),
+                        m));
+                if (LexicalOrder.isSmaller(
+                    base,
+                    inverse.apply(
+                        nextClosure),
+                    inverse.apply(
+                        s),
+                    m)) {
+                  nextClosure = s;
+                  return nextClosure;
+                }
+              }
+              throw new RuntimeException();
             }
+            return nextClosure;
           }
-        }
-        c = null;
-      }
-
-      private final Set<T> _APlusG(final T e) {
-        return clop.closure(Sets.union(Sets.filter(c, new Predicate<T>() {
-
-          private final int i = base.indexOf(e);
-
-          public final boolean apply(final T input) {
-            return base.indexOf(input) < i;
-          }
-        }), Collections.singleton(e)));
-      }
-
-      private final boolean _AisLexicSmallerG(final Set<T> s, final T e) {
-        for (T x : s)
-          if (x == e)
-            break;
-          else if (!c.contains(x))
-            return false;
-        return true;
+        };
       }
     };
   }

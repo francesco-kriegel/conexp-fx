@@ -14,39 +14,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javafx.beans.binding.ObjectBinding;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.InsetsBuilder;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBuilder;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ChoiceBoxBuilder;
-import javafx.scene.control.Label;
-import javafx.scene.control.LabelBuilder;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextAreaBuilder;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFieldBuilder;
-import javafx.scene.control.TitledPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.GridPaneBuilder;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.FontBuilder;
-import jfxtras.scene.control.ListSpinner;
-
 import org.openrdf.repository.http.HTTPRepository;
 
 import conexp.fx.core.builder.Request;
@@ -65,6 +32,7 @@ import conexp.fx.core.builder.Requests.Construct.SubstitutionSum;
 import conexp.fx.core.builder.Requests.Construct.VerticalSum;
 import conexp.fx.core.builder.Requests.Import.ImportCEX;
 import conexp.fx.core.builder.Requests.Import.ImportCFX;
+import conexp.fx.core.builder.Requests.Import.ImportCSVB;
 import conexp.fx.core.builder.Requests.Import.ImportCXT;
 import conexp.fx.core.builder.Requests.Import.ImportSPARQLFromEndpoint;
 import conexp.fx.core.builder.Requests.Import.ImportSPARQLFromFile;
@@ -100,6 +68,38 @@ import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.InsetsBuilder;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Accordion;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ChoiceBoxBuilder;
+import javafx.scene.control.Label;
+import javafx.scene.control.LabelBuilder;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextAreaBuilder;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFieldBuilder;
+import javafx.scene.control.TitledPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.GridPaneBuilder;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.FontBuilder;
+import jfxtras.scene.control.ListSpinner;
 
 @SuppressWarnings("deprecation")
 public class TypePage extends AssistentPage<Request<?, ?>> {
@@ -107,8 +107,7 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
   public final class FileChooseBox extends HBox {
 
     public final ObjectProperty<Pair<File, FileFormat>> fileProperty =
-                                                                         new SimpleObjectProperty<Pair<File, FileFormat>>(
-                                                                             null);
+        new SimpleObjectProperty<Pair<File, FileFormat>>(null);
 
     public FileChooseBox(final String title, final FileFormat... fileFormats) {
       super();
@@ -340,13 +339,12 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
 
   private final SourcePane orderPane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> orderChoice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.orders)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> orderChoice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.orders)
+        .build();
     pane.add(LabelBuilder.create().text("Order Context:").build(), 0, 0);
     pane.add(orderChoice, 1, 0);
     return new SourcePane(Source.ORDER, pane, new ObjectBinding<Request<?, ?>>() {
@@ -373,20 +371,18 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
 
   private final SourcePane orderOrderPane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> order1Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.orders)
-            .build();
-    final ChoiceBox<MatrixContext<?, ?>> order2Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.orders)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> order1Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.orders)
+        .build();
+    final ChoiceBox<MatrixContext<?, ?>> order2Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.orders)
+        .build();
     pane.add(LabelBuilder.create().text("First Order Context:").build(), 0, 0);
     pane.add(order1Choice, 1, 0);
     pane.add(LabelBuilder.create().text("Second Order Context:").build(), 0, 1);
@@ -413,13 +409,12 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
 
   private final SourcePane contextPane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> contextChoice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> contextChoice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
     pane.add(LabelBuilder.create().text("Formal Context:").build(), 0, 0);
     pane.add(contextChoice, 1, 0);
     return new SourcePane(Source.CONTEXT, pane, new ObjectBinding<Request<?, ?>>() {
@@ -446,13 +441,12 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
 
   private final SourcePane contextDoublePane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> contextChoice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> contextChoice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
     pane.add(LabelBuilder.create().text("Formal Context:").build(), 0, 0);
     pane.add(contextChoice, 1, 0);
     final ListSpinner<Integer> toleranceSpinner = new ListSpinner<Integer>(0, 100);
@@ -480,20 +474,18 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
 
   private final SourcePane contextContextPane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> context1Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
-    final ChoiceBox<MatrixContext<?, ?>> context2Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> context1Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
+    final ChoiceBox<MatrixContext<?, ?>> context2Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
     pane.add(LabelBuilder.create().text("First Formal Context:").build(), 0, 0);
     pane.add(context1Choice, 1, 0);
     pane.add(LabelBuilder.create().text("Second Formal Context:").build(), 0, 1);
@@ -532,34 +524,30 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
 
   private final SourcePane contextContextContextContextPane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> context1Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
-    final ChoiceBox<MatrixContext<?, ?>> context2Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
-    final ChoiceBox<MatrixContext<?, ?>> context3Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
-    final ChoiceBox<MatrixContext<?, ?>> context4Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> context1Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
+    final ChoiceBox<MatrixContext<?, ?>> context2Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
+    final ChoiceBox<MatrixContext<?, ?>> context3Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
+    final ChoiceBox<MatrixContext<?, ?>> context4Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
     pane.add(LabelBuilder.create().text("First Formal Context:").build(), 0, 0);
     pane.add(context1Choice, 1, 0);
     pane.add(LabelBuilder.create().text("Second Formal Context:").build(), 0, 1);
@@ -597,20 +585,18 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private final SourcePane contextContextObjectObjectPane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> context1Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
-    final ChoiceBox<MatrixContext<?, ?>> context2Choice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> context1Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
+    final ChoiceBox<MatrixContext<?, ?>> context2Choice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
     final ChoiceBox objectChoice = ChoiceBoxBuilder.create().minWidth(320).maxWidth(320).build();
     final ChoiceBox attributeChoice = ChoiceBoxBuilder.create().minWidth(320).maxWidth(320).build();
     objectChoice.itemsProperty().bind(new ObjectBinding<ObservableList<?>>() {
@@ -672,13 +658,12 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
 
   private final SourcePane contextSetSetPane() {
     final GridPane pane = newGridPane();
-    final ChoiceBox<MatrixContext<?, ?>> contextChoice =
-        ChoiceBoxBuilder
-            .<MatrixContext<?, ?>> create()
-            .minWidth(320)
-            .maxWidth(320)
-            .items(ConExpFX.instance.contexts)
-            .build();
+    final ChoiceBox<MatrixContext<?, ?>> contextChoice = ChoiceBoxBuilder
+        .<MatrixContext<?, ?>> create()
+        .minWidth(320)
+        .maxWidth(320)
+        .items(ConExpFX.instance.contexts)
+        .build();
     pane.add(LabelBuilder.create().text("Formal Context:").build(), 0, 0);
     pane.add(contextChoice, 1, 0);
     // TODO
@@ -713,6 +698,9 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
     case IMPORT_CEX_CONTEXT:
       fileChooseBox = new FileChooseBox("Import Concept Explorer File", FileFormat.CEX);
       break;
+    case IMPORT_CSV_CONTEXT:
+      fileChooseBox = new FileChooseBox("Import Binary CSV File", FileFormat.CSVB);
+      break;
     default:
       fileChooseBox = null;
       break;
@@ -735,6 +723,8 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
           return new ImportCXT(fileChooseBox.fileProperty.get().first());
         case IMPORT_CEX_CONTEXT:
           return new ImportCEX(fileChooseBox.fileProperty.get().first());
+        case IMPORT_CSV_CONTEXT:
+          return new ImportCSVB(fileChooseBox.fileProperty.get().first());
         default:
           return null;
         }
@@ -745,46 +735,41 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
   private final SourcePane queryURLPane() {
     final GridPane pane = newGridPane();
     pane.getColumnConstraints().add(0, new ColumnConstraints(80));
-    final ChoiceBox<String> sampleURLChoice =
-        ChoiceBoxBuilder
-            .<String> create()
-            .items(FXCollections.observableArrayList("FactForge.net", "LinkedLifeData.com"))
-            .build();
-    final TextField urlField =
-        TextFieldBuilder
-            .create()
-            .text(
-                "http://factforge.net/sparql.xml?query=<QUERY>&_implicit=false&implicit=true&_equivalent=false&_form=%2Fsparql")
-            .build();
+    final ChoiceBox<String> sampleURLChoice = ChoiceBoxBuilder
+        .<String> create()
+        .items(FXCollections.observableArrayList("FactForge.net", "LinkedLifeData.com"))
+        .build();
+    final TextField urlField = TextFieldBuilder
+        .create()
+        .text(
+            "http://factforge.net/sparql.xml?query=<QUERY>&_implicit=false&implicit=true&_equivalent=false&_form=%2Fsparql")
+        .build();
     final TextArea queryArea = TextAreaBuilder.create().minHeight(230).build();
     sampleURLChoice.valueProperty().addListener(new ChangeListener<String>() {
 
-      public final void changed(
-          final ObservableValue<? extends String> observable,
-          final String oldValue,
-          final String newValue) {
+      public final void
+          changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
         switch (newValue) {
         case "FactForge.net":
-          urlField
-              .setText("http://factforge.net/sparql.xml?query=<QUERY>&_implicit=false&implicit=true&_equivalent=false&_form=%2Fsparql");
+          urlField.setText(
+              "http://factforge.net/sparql.xml?query=<QUERY>&_implicit=false&implicit=true&_equivalent=false&_form=%2Fsparql");
           break;
         case "LinkedLifeData.com":
-          urlField
-              .setText("http://linkedlifedata.com/sparql.xml?query=<QUERY>&_implicit=false&implicit=true&_form=%2Fsparql");
+          urlField.setText(
+              "http://linkedlifedata.com/sparql.xml?query=<QUERY>&_implicit=false&implicit=true&_form=%2Fsparql");
           break;
         }
       }
     });
-    pane
-        .add(
-            LabelBuilder
-                .create()
-                .wrapText(true)
-                .text(
-                    "Enter an URL that computes a SPARQL XML Result. Specify the position of the SPARQL Query with the variable <QUERY>. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
-                .build(),
-            1,
-            0);
+    pane.add(
+        LabelBuilder
+            .create()
+            .wrapText(true)
+            .text(
+                "Enter an URL that computes a SPARQL XML Result. Specify the position of the SPARQL Query with the variable <QUERY>. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
+            .build(),
+        1,
+        0);
     pane.add(sampleURLChoice, 1, 1);
     pane.add(LabelBuilder.create().text("URL: ").build(), 0, 2);
     pane.add(urlField, 1, 2);
@@ -807,16 +792,15 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
     pane.getColumnConstraints().add(0, new ColumnConstraints(80));
     final TextField urlField = TextFieldBuilder.create().build();
     final TextArea queryArea = TextAreaBuilder.create().minHeight(230).build();
-    pane
-        .add(
-            LabelBuilder
-                .create()
-                .wrapText(true)
-                .text(
-                    "Enter an URL of an ontology on the web. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
-                .build(),
-            1,
-            0);
+    pane.add(
+        LabelBuilder
+            .create()
+            .wrapText(true)
+            .text(
+                "Enter an URL of an ontology on the web. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
+            .build(),
+        1,
+        0);
     pane.add(LabelBuilder.create().text("URL: ").build(), 0, 1);
     pane.add(urlField, 1, 1);
     pane.add(LabelBuilder.create().text("SPARQL Query: ").build(), 0, 2);
@@ -838,16 +822,15 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
     pane.getColumnConstraints().add(0, new ColumnConstraints(80));
     final FileChooseBox fileChooseBox = new FileChooseBox("Select Ontology File", FileFormat.ANY);
     final TextArea queryArea = TextAreaBuilder.create().minHeight(230).build();
-    pane
-        .add(
-            LabelBuilder
-                .create()
-                .wrapText(true)
-                .text(
-                    "Choose a local ontology file. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
-                .build(),
-            1,
-            0);
+    pane.add(
+        LabelBuilder
+            .create()
+            .wrapText(true)
+            .text(
+                "Choose a local ontology file. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
+            .build(),
+        1,
+        0);
     pane.add(LabelBuilder.create().text("Ontology File: ").build(), 0, 1);
     pane.add(fileChooseBox, 1, 1);
     pane.add(LabelBuilder.create().text("SPARQL Query: ").build(), 0, 2);
@@ -872,16 +855,15 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
     final TextField urlField = TextFieldBuilder.create().build();
     final TextField repositoryField = TextFieldBuilder.create().build();
     final TextArea queryArea = TextAreaBuilder.create().minHeight(230).build();
-    pane
-        .add(
-            LabelBuilder
-                .create()
-                .wrapText(true)
-                .text(
-                    "Enter an URL of a Sesame Server and a name of a Repository. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
-                .build(),
-            1,
-            0);
+    pane.add(
+        LabelBuilder
+            .create()
+            .wrapText(true)
+            .text(
+                "Enter an URL of a Sesame Server and a name of a Repository. Within the Query, use the variables ?object and ?attribute to indicate the elements of the constructed formal context. Furthermore use numbered variables, e.g. ?object1, ?object2, ..., if tuples should be created.")
+            .build(),
+        1,
+        0);
     pane.add(LabelBuilder.create().text("Sesame Server URL: ").build(), 0, 1);
     pane.add(urlField, 1, 1);
     pane.add(LabelBuilder.create().text("Repository Name: ").build(), 0, 2);
@@ -895,9 +877,9 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
       }
 
       protected final Request<?, ?> computeValue() {
-        return new ImportSPARQLFromRepository(new HTTPRepository(urlField.textProperty().get(), repositoryField
-            .textProperty()
-            .get()), queryArea.textProperty().get());
+        return new ImportSPARQLFromRepository(
+            new HTTPRepository(urlField.textProperty().get(), repositoryField.textProperty().get()),
+            queryArea.textProperty().get());
       }
     });
   }

@@ -25,7 +25,9 @@ public abstract class AClosureOperator<T> implements ClosureOperator<T> {
 
   @Override
   public boolean isClosed(final Set<T> set) {
-    return set.containsAll(closure(set));
+//    return set.containsAll(closure(set));
+    return set.size() == closure(
+        set).size();
   }
 
 }
