@@ -17,17 +17,38 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
+
+import be.humphreys.simplevoronoi.GraphEdge;
+import conexp.fx.core.collections.Collections3;
+import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.math.Isomorphism;
+import conexp.fx.core.math.VoronoiGenerator;
+import conexp.fx.core.quality.LayoutEvolution;
+import conexp.fx.gui.graph.option.AnimationSpeed;
+import conexp.fx.gui.graph.option.EdgeHighlight;
+import conexp.fx.gui.graph.option.GraphTransformation;
+import conexp.fx.gui.graph.transformation.PolarTransformation;
+import conexp.fx.gui.graph.transformation.RotationXY;
+import conexp.fx.gui.lock.ALock;
+import conexp.fx.gui.util.LaTeX;
+import conexp.fx.gui.util.Platform2;
+import conexp.fx.gui.util.SynchronizedPane;
+import conexp.fx.gui.util.TransitionTimer;
 import javafx.animation.FadeTransitionBuilder;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.animation.Transition;
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.DoubleBinding;
@@ -67,29 +88,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import be.humphreys.simplevoronoi.GraphEdge;
-
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
-
-import conexp.fx.core.collections.Collections3;
-import conexp.fx.core.collections.pair.Pair;
-import conexp.fx.core.math.Isomorphism;
-import conexp.fx.core.math.VoronoiGenerator;
-import conexp.fx.core.quality.LayoutEvolution;
-import conexp.fx.gui.graph.option.AnimationSpeed;
-import conexp.fx.gui.graph.option.EdgeHighlight;
-import conexp.fx.gui.graph.option.GraphTransformation;
-import conexp.fx.gui.graph.transformation.PolarTransformation;
-import conexp.fx.gui.graph.transformation.RotationXY;
-import conexp.fx.gui.lock.ALock;
-import conexp.fx.gui.util.LaTeX;
-import conexp.fx.gui.util.Platform2;
-import conexp.fx.gui.util.SynchronizedPane;
-import conexp.fx.gui.util.TransitionTimer;
 
 public abstract class Graph<T, N extends Node> extends BorderPane {
 
@@ -101,10 +99,10 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     protected final T                          element;
     protected final N                          node;
     protected final ObservableValue<Point3D>   position;
-    protected final ObservableList<UpperLabel> upperLabels     = FXCollections
-                                                                   .observableList(new LinkedList<UpperLabel>());
-    protected final ObservableList<LowerLabel> lowerLabels     = FXCollections
-                                                                   .observableList(new LinkedList<LowerLabel>());
+    protected final ObservableList<UpperLabel> upperLabels     =
+        FXCollections.observableList(new LinkedList<UpperLabel>());
+    protected final ObservableList<LowerLabel> lowerLabels     =
+        FXCollections.observableList(new LinkedList<LowerLabel>());
     protected final Set<Pair<Vertex, Edge>>    pendingVertices = new HashSet<Pair<Vertex, Edge>>();
 
     protected Vertex(
@@ -159,7 +157,11 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
         return;
       synchronized (vertices) {
         lower = vertices.get(elements.x());
+        if (lower == null)
+          throw new NullPointerException();
         upper = vertices.get(elements.y());
+        if (upper == null)
+          throw new NullPointerException();
       }
       bindStart();
       bindEnd();
@@ -502,67 +504,40 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     }
   }
 
-  protected final class Cleaner {
-
-    private final class CleanTask extends TimerTask {
-
-      public void run() {
-        if (Platform.isFxApplicationThread())
-          clean();
-        else
-          Platform.runLater(new Runnable() {
-
-            public void run() {
-              clean();
-            }
-          });
-      }
-    }
-
-    private final Timer timer = new Timer();
-    private TimerTask   task  = new TimerTask() {
-
-                                public void run() {}
-                              };
-
-    protected final void schedule() {
-      task.cancel();
-      timer.purge();
-      task = new CleanTask();
-      timer.schedule(task, (int) (10d * speed.frameSize.toMillis()));
-    }
-
-    private final void clean() {
-      final Collection<Node> circles = Collections2.transform(vertices.values(), new Function<Vertex, Node>() {
-
-        public final Node apply(final Vertex v) {
-          return v.node;
-        }
-      });
-      final Collection<Node> lines = Collections2.transform(edges.values(), new Function<Edge, Node>() {
-
-        public final Node apply(final Edge e) {
-          return e.line;
-        }
-      });
-      final Collection<Node> labels =
-          Collections3.union(Collections2.transform(vertices.values(), new Function<Vertex, Collection<Node>>() {
-
-            public final Collection<Node> apply(final Vertex v) {
-              return Collections2.transform(
-                  Collections3.union(v.lowerLabels, v.upperLabels),
-                  new Function<Label, Node>() {
-
-                    public final Node apply(final Label l) {
-                      return l.content;
-                    }
-                  });
-            }
-          }));
-      if (front.getChildren().retainAll(Collections3.union(circles, lines, labels)))
-        System.out.println("garbage collected.");
-    }
-  }
+//  protected final class Cleaner {
+//
+////    private final class CleanTask extends TimerTask {
+////
+////      public void run() {
+////        if (Platform.isFxApplicationThread())
+////          clean();
+////        else
+////          Platform.runLater(new Runnable() {
+////
+////            public void run() {
+////              clean();
+////            }
+////          });
+////      }
+////    }
+////
+////    private final Timer timer = new Timer();
+////    private TimerTask   task  = new TimerTask() {
+////
+////      public void run() {}
+////    };
+////
+////    protected final void schedule() {
+////      task.cancel();
+////      timer.purge();
+////      task = new CleanTask();
+////      timer.schedule(task, (int) (10d * speed.frameSize.toMillis()));
+////    }
+//
+//    private Cleaner(final Observable... observable) {
+//      Arrays.asList(observable).forEach(o -> o.addListener(__ -> clean()));
+//    }
+//  }
 
   public class Controller {
 
@@ -571,7 +546,7 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     private boolean                       isDragging      = false;
     private AnimationSpeed                speedBeforeDrag;
     protected final BooleanProperty       showVoronoi     = new SimpleBooleanProperty(false);
-    protected final Cleaner               cleaner         = new Cleaner();
+//    protected final Cleaner               cleaner         = new Cleaner();
     protected final Queue<Vertex>         addVertices     = new ConcurrentLinkedQueue<Vertex>();
     protected final Queue<Edge>           addEdges        = new ConcurrentLinkedQueue<Edge>();
     protected final Queue<Label>          addLabels       = new ConcurrentLinkedQueue<Label>();
@@ -591,6 +566,7 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
           Arrays.asList(observable).forEach(this::bind);
           bind(front.widthProperty(), front.heightProperty(), transformation, showVoronoi, zoom, pan);
         }
+
         private Config value;
 
         protected Config computeValue() {
@@ -656,14 +632,17 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
             final Boolean oldValue,
             final Boolean newValue) {
           if (!newValue)
-            Platform2.runOnFXThread(new Runnable() {
-
-              public final void run() {
-                back.getChildren().clear();
-              }
-            });
+            Platform2.runOnFXThread(back.getChildren()::clear);
         }
       });
+      refresh();
+//      new Timer().schedule(new TimerTask() {
+//
+//        @Override
+//        public void run() {
+//          refresh();
+//        }
+//      }, 0, 2l * (long) speed.frameSize.toMillis());
     }
 
     public final GraphLock graphLock = new GraphLock();
@@ -700,7 +679,7 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     public final void dragDone() {
       isDragging = false;
       speed = speedBeforeDrag;
-      refresh();
+//      refresh();
     }
 
     public final boolean isDragging() {
@@ -720,19 +699,57 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     }
 
     protected final void clearBack() {
-      Platform2.runOnFXThread(new Runnable() {
+      Platform2.runOnFXThread(back::clear);
+    }
 
-        public final void run() {
-          back.clear();
-        }
-      });
+    private final void clean() {
+//      final Collection<Node> circles = Collections2.transform(vertices.values(), new Function<Vertex, Node>() {
+//
+//        public final Node apply(final Vertex v) {
+//          return v.node;
+//        }
+//      });
+//      final Collection<Node> lines = Collections2.transform(edges.values(), new Function<Edge, Node>() {
+//
+//        public final Node apply(final Edge e) {
+//          return e.line;
+//        }
+//      });
+//      final Collection<Node> labels =
+//          Collections3.union(Collections2.transform(vertices.values(), new Function<Vertex, Collection<Node>>() {
+//
+//            public final Collection<Node> apply(final Vertex v) {
+//              return Collections2
+//                  .transform(Collections3.union(v.lowerLabels, v.upperLabels), new Function<Label, Node>() {
+//
+//                public final Node apply(final Label l) {
+//                  return l.content;
+//                }
+//              });
+//            }
+//          }));
+////      Platform2.runOnFXThread(() -> front.getChildren().retainAll(Collections3.union(circles, lines, labels)));
+//      front.getChildren().retainAll(Collections3.union(circles, lines, labels));
+      final Set<Node> children = Collections3.newConcurrentHashSet();
+      synchronized (vertices) {
+        vertices.values().parallelStream().map(v -> v.node).forEach(children::add);
+        vertices.values().parallelStream().map(v -> v.lowerLabels.parallelStream()).reduce(Stream::concat).ifPresent(
+            s -> s.map(l -> l.content).forEach(children::add));
+        vertices.values().parallelStream().map(v -> v.upperLabels.parallelStream()).reduce(Stream::concat).ifPresent(
+            s -> s.map(l -> l.content).forEach(children::add));
+      }
+      synchronized (edges) {
+        edges.values().parallelStream().map(e -> e.line).forEach(children::add);
+      }
+      front.getChildren().retainAll(children);
     }
 
     public synchronized final void refresh() {
       if (isLocked)
         return;
-      final Config c = config.get();
       final Timeline t = new Timeline();
+//      if (!isLocked) {
+      final Config c = config.get();
       removeContent(t);
       addContent(t);
       refreshBottom(c, t);
@@ -741,13 +758,14 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
         refreshVoronoi(c, t);
       else
         refreshTiles(c, t);
-      Platform2.runOnFXThread(new Runnable() {
-
-        public void run() {
-          t.play();
-          cleaner.schedule();
-        }
+//      } else {
+//        t.getKeyFrames().add(new KeyFrame(speed.frameSize));
+//      }
+      t.setOnFinished(__ -> {
+        clean();
+//        refresh();
       });
+      Platform2.runOnFXThread(t::play);
     }
 
     private final void addContent(final Timeline t) {
@@ -755,33 +773,21 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
         while (!addVertices.isEmpty()) {
           final Vertex v = addVertices.poll();
           final Transition fadeIn = fadeIn(v.node);
-          t.getKeyFrames().add(new KeyFrame(Duration.ONE, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              front.add(v.node);
-              fadeIn.play();
-            }
+          t.getKeyFrames().add(new KeyFrame(Duration.ONE, __ -> {
+            front.add(v.node);
+            fadeIn.play();
           }));
         }
       }
       synchronized (addEdges) {
         while (!addEdges.isEmpty()) {
           final Edge e = addEdges.poll();
-          try {
+          e.initialize();
+          t.getKeyFrames().add(new KeyFrame(Duration.ONE, __ -> {
             e.initialize();
-          } catch (NullPointerException x) {}
-          t.getKeyFrames().add(new KeyFrame(Duration.ONE, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              try {
-                e.initialize();
-                front.add(e.line);
-                e.line.toBack();
-                fadeIn(e).play();
-              } catch (NullPointerException x) {
-                System.err.println("can not add edge " + e);
-              }
-            }
+            front.add(e.line);
+            e.line.toBack();
+            fadeIn(e).play();
           }));
         }
       }
@@ -789,22 +795,16 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
         while (!addLabels.isEmpty()) {
           final Label l = addLabels.poll();
           final Transition fadeIn = fadeIn(l.content);
-          fadeIn.setOnFinished(new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              l.content.toFront();
-              l.content.layoutXProperty().set(l.shift.getValue().getX() - l.content.widthProperty().get() / 2d);
-              l.content.layoutYProperty().set(
-                  l.shift.getValue().getY() + l.index.doubleValue() * l.content.heightProperty().get());
-              l.isInitialized = true;
-            }
+          fadeIn.setOnFinished(__ -> {
+            l.content.toFront();
+            l.content.layoutXProperty().set(l.shift.getValue().getX() - l.content.widthProperty().get() / 2d);
+            l.content.layoutYProperty().set(
+                l.shift.getValue().getY() + l.index.doubleValue() * l.content.heightProperty().get());
+            l.isInitialized = true;
           });
-          t.getKeyFrames().add(new KeyFrame(Duration.ONE, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              front.add(l.content);
-              fadeIn.play();
-            }
+          t.getKeyFrames().add(new KeyFrame(Duration.ONE, __ -> {
+            front.add(l.content);
+            fadeIn.play();
           }));
         }
       }
@@ -819,11 +819,13 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
             synchronized (edges) {
               edge = edges.remove(e);
             }
+//            if (edge != null) {
             edge.isDisposing = true;
             edge.line.opacityProperty().unbind();
             synchronized (pendingEdges) {
               pendingEdges.add(edge);
             }
+//            }
           }
         }
         for (Pair<T, T> v = removeVertices.poll(); v != null; v = removeVertices.poll()) {
@@ -852,11 +854,13 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
             synchronized (edges) {
               edge = edges.remove(v);
             }
+//            if (edge != null) {
             edge.isDisposing = true;
             edge.line.opacityProperty().unbind();
             synchronized (to.pendingVertices) {
               to.pendingVertices.add(Pair.of(vertex, edge));
             }
+//            }
           }
         }
       }
@@ -908,35 +912,49 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
             synchronized (v.lowerLabels) {
               for (LowerLabel l : v.lowerLabels)
                 if (l.isInitialized)
-                  t.getKeyFrames().add(
-                      new KeyFrame(speed.frameSize, translateX(l.content, p), translateY(l.content, p), fadeZ(
-                          l.content,
-                          p), layoutX(l), layoutY(l)));
+                  t.getKeyFrames().add(new KeyFrame(
+                      speed.frameSize,
+                      translateX(l.content, p),
+                      translateY(l.content, p),
+                      fadeZ(l.content, p),
+                      layoutX(l),
+                      layoutY(l)));
                 else
-                  t.getKeyFrames().add(
-                      new KeyFrame(speed.frameSize, translateX(l.content, p), translateY(l.content, p), fadeZ(
-                          l.content,
-                          p)));
+                  t.getKeyFrames().add(new KeyFrame(
+                      speed.frameSize,
+                      translateX(l.content, p),
+                      translateY(l.content, p),
+                      fadeZ(l.content, p)));
             }
             synchronized (v.upperLabels) {
               for (UpperLabel u : v.upperLabels)
                 if (u.isInitialized)
-                  t.getKeyFrames().add(
-                      new KeyFrame(speed.frameSize, translateX(u.content, p), translateY(u.content, p), fadeZ(
-                          u.content,
-                          p), layoutX(u), layoutY(u)));
+                  t.getKeyFrames().add(new KeyFrame(
+                      speed.frameSize,
+                      translateX(u.content, p),
+                      translateY(u.content, p),
+                      fadeZ(u.content, p),
+                      layoutX(u),
+                      layoutY(u)));
                 else
-                  t.getKeyFrames().add(
-                      new KeyFrame(speed.frameSize, translateX(u.content, p), translateY(u.content, p), fadeZ(
-                          u.content,
-                          p)));
+                  t.getKeyFrames().add(new KeyFrame(
+                      speed.frameSize,
+                      translateX(u.content, p),
+                      translateY(u.content, p),
+                      fadeZ(u.content, p)));
             }
             synchronized (v.pendingVertices) {
               for (Pair<Vertex, Edge> pv : v.pendingVertices)
-                t.getKeyFrames().add(
-                    new KeyFrame(speed.frameSize, dispose(v, pv), translateX(pv.first().node, p), translateY(
-                        pv.first().node,
-                        p), fadeZ(pv.first().node, p), fadeOut(pv.first().node), fadeOut(pv.second().line)));
+                t
+                    .getKeyFrames()
+                    .add(new KeyFrame(
+                        speed.frameSize,
+                        dispose(v, pv),
+                        translateX(pv.first().node, p),
+                        translateY(pv.first().node, p),
+                        fadeZ(pv.first().node, p),
+                        fadeOut(pv.first().node),
+                        fadeOut(pv.second().line)));
             }
           }
         }
@@ -968,36 +986,28 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     }
 
     private final void refreshVoronoi(final Config c, final Timeline t) {
-      t.getKeyFrames().add(new KeyFrame(Duration.ONE, new EventHandler<ActionEvent>() {
+      t.getKeyFrames().add(new KeyFrame(Duration.ONE, __ -> new TransitionTimer(speed.frameSize, ___ -> {
+        back.clear();
+        synchronized (vertices) {
+          for (GraphEdge e : VoronoiGenerator.generate(
+              Collections2.transform(
+                  Collections2.filter(vertices.values(), Predicates.not(Predicates.equalTo(polarBottom))),
+                  new Function<Vertex, Point3D>() {
 
-        public final void handle(final ActionEvent event) {
-          new TransitionTimer(speed.frameSize, new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              back.clear();
-              synchronized (vertices) {
-                for (GraphEdge e : VoronoiGenerator.generate(
-                    Collections2.transform(
-                        Collections2.filter(vertices.values(), Predicates.not(Predicates.equalTo(polarBottom))),
-                        new Function<Vertex, Point3D>() {
-
-                          public final Point3D apply(final Vertex v) {
-                            return new Point3D(v.node.translateXProperty().get(), v.node.translateYProperty().get(), 0);
-                          }
-                        }),
-                    0,
-                    c.w,
-                    0,
-                    c.h)) {
-                  final Line l = new Line(e.x1, e.y1, e.x2, e.y2);
-                  l.setStroke(Color.RED);
-                  back.add(l);
-                }
-              }
+            public final Point3D apply(final Vertex v) {
+              return new Point3D(v.node.translateXProperty().get(), v.node.translateYProperty().get(), 0);
             }
-          }).play();
+          }),
+              0,
+              c.w,
+              0,
+              c.h)) {
+            final Line l = new Line(e.x1, e.y1, e.x2, e.y2);
+            l.setStroke(Color.RED);
+            back.add(l);
+          }
         }
-      }));
+      }).play()));
     }
 
     protected final KeyValue translateX(final Node n, final Point3D p) {
@@ -1013,13 +1023,15 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     }
 
     private final KeyValue layoutX(final Label label) {
-      return new KeyValue(label.content.layoutXProperty(), label.shift.getValue().getX()
-          - label.content.widthProperty().get() / 2d);
+      return new KeyValue(
+          label.content.layoutXProperty(),
+          label.shift.getValue().getX() - label.content.widthProperty().get() / 2d);
     }
 
     private final KeyValue layoutY(final Label label) {
-      return new KeyValue(label.content.layoutYProperty(), label.shift.getValue().getY() + label.index.doubleValue()
-          * label.content.heightProperty().get());
+      return new KeyValue(
+          label.content.layoutYProperty(),
+          label.shift.getValue().getY() + label.index.doubleValue() * label.content.heightProperty().get());
     }
 
     protected final Transition fadeIn(final Node n) {
@@ -1034,12 +1046,9 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
           .node(e.line)
           .duration(speed.frameSize)
           .toValue(e.opacity.get())
-          .onFinished(new EventHandler<ActionEvent>() {
-
-            public final void handle(final ActionEvent event) {
-              if (!e.isDisposing)
-                e.bindOpacity();
-            }
+          .onFinished(__ -> {
+            if (!e.isDisposing)
+              e.bindOpacity();
           })
           .build();
     }
@@ -1049,77 +1058,65 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     }
 
     private final EventHandler<ActionEvent> dispose(final Vertex vertex) {
-      return new EventHandler<ActionEvent>() {
-
-        public final void handle(final ActionEvent event) {
-          synchronized (pendingVertices) {
-            pendingVertices.remove(vertex);
-          }
-          vertex.dispose();
-          front.remove(vertex.node);
-          synchronized (vertex.pendingVertices) {
-            if (!vertex.pendingVertices.isEmpty())
-              synchronized (pendingVertices) {
-                synchronized (pendingEdges) {
-                  for (Pair<Vertex, Edge> p : vertex.pendingVertices) {
-                    pendingVertices.add(p.first());
-                    pendingEdges.add(p.second());
-                  }
+      return __ -> {
+        synchronized (pendingVertices) {
+          pendingVertices.remove(vertex);
+        }
+        vertex.dispose();
+        front.remove(vertex.node);
+        synchronized (vertex.pendingVertices) {
+          if (!vertex.pendingVertices.isEmpty())
+            synchronized (pendingVertices) {
+              synchronized (pendingEdges) {
+                for (Pair<Vertex, Edge> p : vertex.pendingVertices) {
+                  pendingVertices.add(p.first());
+                  pendingEdges.add(p.second());
                 }
               }
-          }
+            }
         }
       };
     }
 
     private final EventHandler<ActionEvent> dispose(final Edge edge) {
-      return new EventHandler<ActionEvent>() {
-
-        public final void handle(final ActionEvent event) {
-          synchronized (pendingEdges) {
-            pendingEdges.remove(edge);
-          }
-          edge.dispose();
-          front.remove(edge.line);
+      return __ -> {
+        synchronized (pendingEdges) {
+          pendingEdges.remove(edge);
         }
+        edge.dispose();
+        front.remove(edge.line);
       };
     }
 
     private final EventHandler<ActionEvent> dispose(final Vertex v, final Pair<Vertex, Edge> pv) {
-      return new EventHandler<ActionEvent>() {
-
-        public final void handle(final ActionEvent event) {
-          synchronized (v.pendingVertices) {
-            v.pendingVertices.remove(pv);
-          }
-          pv.second().dispose();
-          pv.first().dispose();
-          front.remove(pv.second().line);
-          front.remove(pv.first().node);
-          synchronized (pv.first().pendingVertices) {
-            if (!pv.first().pendingVertices.isEmpty())
-              synchronized (pendingVertices) {
-                synchronized (pendingEdges) {
-                  for (Pair<Vertex, Edge> p : pv.first().pendingVertices) {
-                    pendingVertices.add(p.first());
-                    pendingEdges.add(p.second());
-                  }
+      return __ -> {
+        synchronized (v.pendingVertices) {
+          v.pendingVertices.remove(pv);
+        }
+        pv.second().dispose();
+        pv.first().dispose();
+        front.remove(pv.second().line);
+        front.remove(pv.first().node);
+        synchronized (pv.first().pendingVertices) {
+          if (!pv.first().pendingVertices.isEmpty())
+            synchronized (pendingVertices) {
+              synchronized (pendingEdges) {
+                for (Pair<Vertex, Edge> p : pv.first().pendingVertices) {
+                  pendingVertices.add(p.first());
+                  pendingEdges.add(p.second());
                 }
               }
-          }
+            }
         }
       };
     }
 
     private final EventHandler<ActionEvent> dispose(final Label label) {
-      return new EventHandler<ActionEvent>() {
-
-        public final void handle(final ActionEvent event) {
-          synchronized (removeLabels) {
-            removeLabels.remove(label);
-          }
-          front.remove(label.content);
+      return __ -> {
+        synchronized (removeLabels) {
+          removeLabels.remove(label);
         }
+        front.remove(label.content);
       };
     }
   }
@@ -1130,16 +1127,16 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
   protected final SynchronizedPane                    front          = new SynchronizedPane();
   protected final SynchronizedPane                    back           = new SynchronizedPane();
   protected AnimationSpeed                            speed          = AnimationSpeed.DEFAULT;
-  protected final ObjectProperty<GraphTransformation> transformation = new SimpleObjectProperty<GraphTransformation>(
-                                                                         GraphTransformation.GRAPH_3D);
+  protected final ObjectProperty<GraphTransformation> transformation =
+      new SimpleObjectProperty<GraphTransformation>(GraphTransformation.GRAPH_3D);
   protected final DoubleProperty                      zoom           = new SimpleDoubleProperty(1d);
-  protected final ObjectProperty<Point2D>             pan            = new SimpleObjectProperty<Point2D>(new Point2D(
-                                                                         0d,
-                                                                         0d));
+  protected final ObjectProperty<Point2D>             pan            =
+      new SimpleObjectProperty<Point2D>(new Point2D(0d, 0d));
 
   protected Graph(final Observable... observable) {
     super();
     this.controller = new Controller(observable);
+//    new Cleaner(observable);
     this.setCenter(StackPaneBuilder.create().children(back, front).build());
     front.addEventHandler(ScrollEvent.SCROLL, new EventHandler<ScrollEvent>() {
 
@@ -1207,7 +1204,17 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 
   protected abstract void resetPolarBottom(final Config c, final Timeline t);
 
-  public abstract void highlight(
-      boolean fadeComplement,
-      @SuppressWarnings("unchecked") Iterable<HighlightRequest>... requests);
+  public abstract void
+      highlight(boolean fadeComplement, @SuppressWarnings("unchecked") Iterable<HighlightRequest>... requests);
+
+  public void removeContent() {
+    front.getChildren().clear();
+    back.getChildren().clear();
+    edges.clear();
+    vertices.clear();
+//    edges.keySet().forEach(controller::disposeEdge);
+//    vertices.keySet().forEach(v -> controller.disposeVertex(v, null));
+//    edges.clear();
+//    vertices.clear();
+  }
 }

@@ -53,7 +53,7 @@ import conexp.fx.core.math.BooleanMatrices;
 import conexp.fx.core.math.Isomorphism;
 import conexp.fx.core.util.Constants;
 
-public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context<G, M> {
+public class MatrixContext<G, M> extends MatrixRelation<G, M>implements Context<G, M> {
 
   public enum Incidence {
     CROSS(Constants.CROSS_CHARACTER),
@@ -80,392 +80,225 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   public MatrixContext<G, M>                       selection               = this;
   public final SetList<Set<Integer>>               _objects                = new HashSetArrayList<Set<Integer>>();
   public final SetList<Set<Integer>>               _attributes             = new HashSetArrayList<Set<Integer>>();
-  private final Collection<Integer>                i                       = Collections2.transform(
-                                                                               _objects,
-                                                                               Collections3.<Integer> firstElement());
-  private final Collection<Integer>                j                       = Collections2.transform(
-                                                                               _attributes,
-                                                                               Collections3.<Integer> firstElement());
+  private final Collection<Integer>                i                       =
+      Collections2.transform(_objects, Collections3.<Integer> firstElement());
+  private final Collection<Integer>                j                       =
+      Collections2.transform(_attributes, Collections3.<Integer> firstElement());
   public final Context<Set<Integer>, Set<Integer>> _cleaned                =
-                                                                               new AbstractContext<Set<Integer>, Set<Integer>>(
-                                                                                   _objects,
-                                                                                   _attributes,
-                                                                                   false) {
+      new AbstractContext<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
-                                                                                 @SuppressWarnings("unchecked")
-                                                                                 public final boolean contains(
-                                                                                     final Object _i,
-                                                                                     final Object _j) {
-                                                                                   return matrix
-                                                                                       .getBoolean(
-                                                                                           (long) Collections3
-                                                                                               .firstElement((Set<Integer>) _i),
-                                                                                           (long) Collections3
-                                                                                               .firstElement((Set<Integer>) _j));
-                                                                                 }
+        @SuppressWarnings("unchecked")
+        public final boolean contains(final Object _i, final Object _j) {
+          return matrix.getBoolean(
+              (long) Collections3.firstElement((Set<Integer>) _i),
+              (long) Collections3.firstElement((Set<Integer>) _j));
+        }
 
-                                                                                 public final
-                                                                                     MatrixContext<Set<Integer>, Set<Integer>>
-                                                                                     clone() {
-                                                                                   return new MatrixContext<Set<Integer>, Set<Integer>>(
-                                                                                       _objects,
-                                                                                       _attributes,
-                                                                                       (BooleanMatrix) matrix
-                                                                                           .selectRows(Ret.NEW, i)
-                                                                                           .selectColumns(Ret.NEW, j),
-                                                                                       false);
-                                                                                 }
-                                                                               };
+        public final MatrixContext<Set<Integer>, Set<Integer>> clone() {
+          return new MatrixContext<Set<Integer>, Set<Integer>>(
+              _objects,
+              _attributes,
+              (BooleanMatrix) matrix.selectRows(Ret.NEW, i).selectColumns(Ret.NEW, j),
+              false);
+        }
+      };
   public Relation<Set<Integer>, Set<Integer>>      _downArrows             =
-                                                                               new AbstractRelation<Set<Integer>, Set<Integer>>(
-                                                                                   _objects,
-                                                                                   _attributes,
-                                                                                   false) {
+      new AbstractRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
-                                                                                 public final boolean contains(
-                                                                                     final Object object,
-                                                                                     final Object attribute) {
-                                                                                   @SuppressWarnings("unchecked")
-                                                                                   final int rowIndex =
-                                                                                       Collections3
-                                                                                           .firstElement((Set<Integer>) object);
-                                                                                   @SuppressWarnings("unchecked")
-                                                                                   final int columnIndex =
-                                                                                       Collections3
-                                                                                           .firstElement((Set<Integer>) attribute);
-                                                                                   if (!matrix.getBoolean(
-                                                                                       rowIndex,
-                                                                                       columnIndex))
-                                                                                     return _col(columnIndex, i)
-                                                                                         .containsAll(
-                                                                                             _extent(
-                                                                                                 Collections
-                                                                                                     .singleton(rowIndex),
-                                                                                                 Collections2
-                                                                                                     .filter(
-                                                                                                         i,
-                                                                                                         Predicates
-                                                                                                             .not(Predicates
-                                                                                                                 .equalTo(rowIndex))),
-                                                                                                 j));
-                                                                                   return false;
-                                                                                 }
-                                                                               };
+        public final boolean contains(final Object object, final Object attribute) {
+          @SuppressWarnings("unchecked")
+          final int rowIndex = Collections3.firstElement((Set<Integer>) object);
+          @SuppressWarnings("unchecked")
+          final int columnIndex = Collections3.firstElement((Set<Integer>) attribute);
+          if (!matrix.getBoolean(rowIndex, columnIndex))
+            return _col(columnIndex, i).containsAll(
+                _extent(
+                    Collections.singleton(rowIndex),
+                    Collections2.filter(i, Predicates.not(Predicates.equalTo(rowIndex))),
+                    j));
+          return false;
+        }
+      };
   public Relation<Set<Integer>, Set<Integer>>      _upArrows               =
-                                                                               new AbstractRelation<Set<Integer>, Set<Integer>>(
-                                                                                   _objects,
-                                                                                   _attributes,
-                                                                                   false) {
+      new AbstractRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
-                                                                                 public final boolean contains(
-                                                                                     final Object object,
-                                                                                     final Object attribute) {
-                                                                                   @SuppressWarnings("unchecked")
-                                                                                   final int _i =
-                                                                                       Collections3
-                                                                                           .firstElement((Set<Integer>) object);
-                                                                                   @SuppressWarnings("unchecked")
-                                                                                   final int _j =
-                                                                                       Collections3
-                                                                                           .firstElement((Set<Integer>) attribute);
-                                                                                   if (!matrix.getBoolean(_i, _j))
-                                                                                     return _row(_i, j)
-                                                                                         .containsAll(
-                                                                                             _intent(
-                                                                                                 Collections
-                                                                                                     .singleton(_j),
-                                                                                                 i,
-                                                                                                 Collections2
-                                                                                                     .filter(
-                                                                                                         j,
-                                                                                                         Predicates
-                                                                                                             .not(Predicates
-                                                                                                                 .equalTo(_j)))));
-                                                                                   return false;
-                                                                                 }
-                                                                               };                                      ;
+        public final boolean contains(final Object object, final Object attribute) {
+          @SuppressWarnings("unchecked")
+          final int _i = Collections3.firstElement((Set<Integer>) object);
+          @SuppressWarnings("unchecked")
+          final int _j = Collections3.firstElement((Set<Integer>) attribute);
+          if (!matrix.getBoolean(_i, _j))
+            return _row(_i, j).containsAll(
+                _intent(Collections.singleton(_j), i, Collections2.filter(j, Predicates.not(Predicates.equalTo(_j)))));
+          return false;
+        }
+      };;
   public Relation<Set<Integer>, Set<Integer>>      _downPaths;
   public Relation<Set<Integer>, Set<Integer>>      _upPaths;
   private final Predicate<Set<Integer>>            _isIrreducibleObject    = new Predicate<Set<Integer>>() {
 
-                                                                             public final boolean apply(
-                                                                                 final Set<Integer> i) {
-                                                                               for (Set<Integer> j : _attributes)
-                                                                                 if (_downArrows.contains(i, j))
-                                                                                   return true;
-                                                                               return false;
-                                                                             }
-                                                                           };
+    public final boolean apply(final Set<Integer> i) {
+      for (Set<Integer> j : _attributes)
+        if (_downArrows.contains(i, j))
+          return true;
+      return false;
+    }
+  };
   private final Predicate<Set<Integer>>            _isIrreducibleAttribute = new Predicate<Set<Integer>>() {
 
-                                                                             public final boolean apply(
-                                                                                 final Set<Integer> j) {
-                                                                               for (Set<Integer> i : _objects)
-                                                                                 if (_upArrows.contains(i, j))
-                                                                                   return true;
-                                                                               return false;
-                                                                             }
-                                                                           };
+    public final boolean apply(final Set<Integer> j) {
+      for (Set<Integer> i : _objects)
+        if (_upArrows.contains(i, j))
+          return true;
+      return false;
+    }
+  };
   public final SetList<Set<Integer>>               _irreducibleObjects     = new HashSetArrayList<Set<Integer>>();
   public final SetList<Set<Integer>>               _irreducibleAttributes  = new HashSetArrayList<Set<Integer>>();
   public final Context<Set<Integer>, Set<Integer>> _reduced                =
-                                                                               new AbstractContext<Set<Integer>, Set<Integer>>(
-                                                                                   _irreducibleObjects,
-                                                                                   _irreducibleAttributes,
-                                                                                   false) {
+      new AbstractContext<Set<Integer>, Set<Integer>>(_irreducibleObjects, _irreducibleAttributes, false) {
 
-                                                                                 @SuppressWarnings("unchecked")
-                                                                                 public final boolean contains(
-                                                                                     final Object _i,
-                                                                                     final Object _j) {
-                                                                                   return matrix
-                                                                                       .getBoolean(
-                                                                                           (long) Collections3
-                                                                                               .firstElement((Set<Integer>) _i),
-                                                                                           (long) Collections3
-                                                                                               .firstElement((Set<Integer>) _j));
-                                                                                 }
+        @SuppressWarnings("unchecked")
+        public final boolean contains(final Object _i, final Object _j) {
+          return matrix.getBoolean(
+              (long) Collections3.firstElement((Set<Integer>) _i),
+              (long) Collections3.firstElement((Set<Integer>) _j));
+        }
 
-                                                                                 public final
-                                                                                     MatrixContext<Set<Integer>, Set<Integer>>
-                                                                                     clone() {
-                                                                                   return new MatrixContext<Set<Integer>, Set<Integer>>(
-                                                                                       _irreducibleObjects,
-                                                                                       _irreducibleAttributes,
-                                                                                       (BooleanMatrix) matrix
-                                                                                           .selectRows(
-                                                                                               Ret.NEW,
-                                                                                               Collections2
-                                                                                                   .transform(
-                                                                                                       _irreducibleObjects,
-                                                                                                       Collections3
-                                                                                                           .<Integer> firstElement()))
-                                                                                           .selectColumns(
-                                                                                               Ret.NEW,
-                                                                                               Collections2
-                                                                                                   .transform(
-                                                                                                       _irreducibleAttributes,
-                                                                                                       Collections3
-                                                                                                           .<Integer> firstElement())),
-                                                                                       false);
-                                                                                 }
-                                                                               };                                      ;
-  public final Function<Iterable<Integer>, G>      _firstObject            = Functions.compose(
-                                                                               rowHeads.index().inverse(),
-                                                                               Collections3.<Integer> firstElement());
-  public final Function<Iterable<Integer>, M>      _firstAttribute         = Functions.compose(
-                                                                               colHeads.index().inverse(),
-                                                                               Collections3.<Integer> firstElement());
+        public final MatrixContext<Set<Integer>, Set<Integer>> clone() {
+          return new MatrixContext<Set<Integer>, Set<Integer>>(
+              _irreducibleObjects,
+              _irreducibleAttributes,
+              (BooleanMatrix) matrix
+                  .selectRows(
+                      Ret.NEW,
+                      Collections2.transform(_irreducibleObjects, Collections3.<Integer> firstElement()))
+                  .selectColumns(
+                      Ret.NEW,
+                      Collections2.transform(_irreducibleAttributes, Collections3.<Integer> firstElement())),
+              false);
+        }
+      };;
+  public final Function<Iterable<Integer>, G>      _firstObject            =
+      Functions.compose(rowHeads.index().inverse(), Collections3.<Integer> firstElement());
+  public final Function<Iterable<Integer>, M>      _firstAttribute         =
+      Functions.compose(colHeads.index().inverse(), Collections3.<Integer> firstElement());
   public final Isomorphism<Set<Integer>, Set<G>>   _allObjects             = new Isomorphism<Set<Integer>, Set<G>>() {
 
-                                                                             public final Set<G> apply(
-                                                                                 final Set<Integer> set) {
-                                                                               return Collections3.transform(
-                                                                                   set,
-                                                                                   Isomorphism.invert(rowHeads()
-                                                                                       .index()));
-                                                                             }
+    public final Set<G> apply(final Set<Integer> set) {
+      return Collections3.transform(set, Isomorphism.invert(rowHeads().index()));
+    }
 
-                                                                             public Set<Integer>
-                                                                                 invert(final Set<G> set) {
-                                                                               return Collections3.transform(
-                                                                                   set,
-                                                                                   rowHeads().index());
-                                                                             }
-                                                                           };
+    public Set<Integer> invert(final Set<G> set) {
+      return Collections3.transform(set, rowHeads().index());
+    }
+  };
   public final Isomorphism<Set<Integer>, Set<M>>   _allAttributes          = new Isomorphism<Set<Integer>, Set<M>>() {
 
-                                                                             public final Set<M> apply(
-                                                                                 final Set<Integer> set) {
-                                                                               return Collections3.transform(
-                                                                                   set,
-                                                                                   Isomorphism.invert(colHeads()
-                                                                                       .index()));
-                                                                             }
+    public final Set<M> apply(final Set<Integer> set) {
+      return Collections3.transform(set, Isomorphism.invert(colHeads().index()));
+    }
 
-                                                                             public Set<Integer>
-                                                                                 invert(final Set<M> set) {
-                                                                               return Collections3.transform(
-                                                                                   set,
-                                                                                   colHeads().index());
-                                                                             }
-                                                                           };
-  public final AbstractContext<Set<G>, Set<M>>     cleaned                 =
-                                                                               new AbstractContext<Set<G>, Set<M>>(
-                                                                                   SetLists.transform(
-                                                                                       _objects,
-                                                                                       _allObjects),
-                                                                                   SetLists.transform(
-                                                                                       _attributes,
-                                                                                       _allAttributes),
-                                                                                   false) {
+    public Set<Integer> invert(final Set<M> set) {
+      return Collections3.transform(set, colHeads().index());
+    }
+  };
+  public final AbstractContext<Set<G>, Set<M>>     cleaned                 = new AbstractContext<Set<G>, Set<M>>(
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
-                                                                                 @SuppressWarnings("unchecked")
-                                                                                 public boolean contains(
-                                                                                     Object o1,
-                                                                                     Object o2) {
-                                                                                   return _cleaned.contains(
-                                                                                       _allObjects.invert((Set<G>) o1),
-                                                                                       _allAttributes
-                                                                                           .invert((Set<M>) o2));
-                                                                                 }
-                                                                               };
+    @SuppressWarnings("unchecked")
+    public boolean contains(Object o1, Object o2) {
+      return _cleaned.contains(_allObjects.invert((Set<G>) o1), _allAttributes.invert((Set<M>) o2));
+    }
+  };
   public final AbstractContext<Set<G>, Set<M>>     reduced                 = new AbstractContext<Set<G>, Set<M>>(
-                                                                               SetLists.transform(
-                                                                                   _irreducibleObjects,
-                                                                                   _allObjects), SetLists.transform(
-                                                                                   _irreducibleAttributes,
-                                                                                   _allAttributes), false) {
+      SetLists.transform(_irreducibleObjects, _allObjects),
+      SetLists.transform(_irreducibleAttributes, _allAttributes),
+      false) {
 
-                                                                             @SuppressWarnings("unchecked")
-                                                                             public boolean contains(
-                                                                                 Object o1,
-                                                                                 Object o2) {
-                                                                               return _reduced.contains(
-                                                                                   _allObjects.invert((Set<G>) o1),
-                                                                                   _allAttributes.invert((Set<M>) o2));
-                                                                             }
-                                                                           };
-  public final AbstractRelation<Set<G>, Set<M>>    downArrows              =
-                                                                               new AbstractRelation<Set<G>, Set<M>>(
-                                                                                   SetLists.transform(
-                                                                                       _objects,
-                                                                                       _allObjects),
-                                                                                   SetLists.transform(
-                                                                                       _attributes,
-                                                                                       _allAttributes),
-                                                                                   false) {
+    @SuppressWarnings("unchecked")
+    public boolean contains(Object o1, Object o2) {
+      return _reduced.contains(_allObjects.invert((Set<G>) o1), _allAttributes.invert((Set<M>) o2));
+    }
+  };
+  public final AbstractRelation<Set<G>, Set<M>>    downArrows              = new AbstractRelation<Set<G>, Set<M>>(
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
-                                                                                 @SuppressWarnings("unchecked")
-                                                                                 public boolean contains(
-                                                                                     Object o1,
-                                                                                     Object o2) {
-                                                                                   return _downArrows.contains(
-                                                                                       _allObjects.invert((Set<G>) o1),
-                                                                                       _allAttributes
-                                                                                           .invert((Set<M>) o2));
-                                                                                 }
-                                                                               };
-  public final AbstractRelation<Set<G>, Set<M>>    upArrows                =
-                                                                               new AbstractRelation<Set<G>, Set<M>>(
-                                                                                   SetLists.transform(
-                                                                                       _objects,
-                                                                                       _allObjects),
-                                                                                   SetLists.transform(
-                                                                                       _attributes,
-                                                                                       _allAttributes),
-                                                                                   false) {
+    @SuppressWarnings("unchecked")
+    public boolean contains(Object o1, Object o2) {
+      return _downArrows.contains(_allObjects.invert((Set<G>) o1), _allAttributes.invert((Set<M>) o2));
+    }
+  };
+  public final AbstractRelation<Set<G>, Set<M>>    upArrows                = new AbstractRelation<Set<G>, Set<M>>(
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
-                                                                                 @SuppressWarnings("unchecked")
-                                                                                 public boolean contains(
-                                                                                     Object o1,
-                                                                                     Object o2) {
-                                                                                   return _upArrows.contains(
-                                                                                       _allObjects.invert((Set<G>) o1),
-                                                                                       _allAttributes
-                                                                                           .invert((Set<M>) o2));
-                                                                                 }
-                                                                               };
-  public final AbstractRelation<G, M>              DownArrows              = new AbstractRelation<G, M>(
-                                                                               rowHeads,
-                                                                               colHeads,
-                                                                               false) {
+    @SuppressWarnings("unchecked")
+    public boolean contains(Object o1, Object o2) {
+      return _upArrows.contains(_allObjects.invert((Set<G>) o1), _allAttributes.invert((Set<M>) o2));
+    }
+  };
+  public final AbstractRelation<G, M>              DownArrows              =
+      new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-                                                                             public boolean contains(
-                                                                                 Object o1,
-                                                                                 Object o2) {
-                                                                               return _downArrows.contains(
-                                                                                   _objectEquivalence().col(
-                                                                                       rowHeads().indexOf(o1)),
-                                                                                   _attributeEquivalence().col(
-                                                                                       colHeads().indexOf(o2)));
-                                                                             }
-                                                                           };
-  public final AbstractRelation<G, M>              UpArrows                = new AbstractRelation<G, M>(
-                                                                               rowHeads,
-                                                                               colHeads,
-                                                                               false) {
+        public boolean contains(Object o1, Object o2) {
+          return _downArrows.contains(
+              _objectEquivalence().col(rowHeads().indexOf(o1)),
+              _attributeEquivalence().col(colHeads().indexOf(o2)));
+        }
+      };
+  public final AbstractRelation<G, M>              UpArrows                =
+      new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-                                                                             public boolean contains(
-                                                                                 Object o1,
-                                                                                 Object o2) {
-                                                                               return _upArrows.contains(
-                                                                                   _objectEquivalence().col(
-                                                                                       rowHeads().indexOf(o1)),
-                                                                                   _attributeEquivalence().col(
-                                                                                       colHeads().indexOf(o2)));
-                                                                             }
-                                                                           };
-  public final AbstractRelation<Set<G>, Set<M>>    downPaths               =
-                                                                               new AbstractRelation<Set<G>, Set<M>>(
-                                                                                   SetLists.transform(
-                                                                                       _objects,
-                                                                                       _allObjects),
-                                                                                   SetLists.transform(
-                                                                                       _attributes,
-                                                                                       _allAttributes),
-                                                                                   false) {
+        public boolean contains(Object o1, Object o2) {
+          return _upArrows.contains(
+              _objectEquivalence().col(rowHeads().indexOf(o1)),
+              _attributeEquivalence().col(colHeads().indexOf(o2)));
+        }
+      };
+  public final AbstractRelation<Set<G>, Set<M>>    downPaths               = new AbstractRelation<Set<G>, Set<M>>(
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
-                                                                                 @SuppressWarnings("unchecked")
-                                                                                 public boolean contains(
-                                                                                     Object o1,
-                                                                                     Object o2) {
-                                                                                   return _downPaths.contains(
-                                                                                       _allObjects.invert((Set<G>) o1),
-                                                                                       _allAttributes
-                                                                                           .invert((Set<M>) o2));
-                                                                                 }
-                                                                               };
-  public final AbstractRelation<Set<G>, Set<M>>    upPaths                 =
-                                                                               new AbstractRelation<Set<G>, Set<M>>(
-                                                                                   SetLists.transform(
-                                                                                       _objects,
-                                                                                       _allObjects),
-                                                                                   SetLists.transform(
-                                                                                       _attributes,
-                                                                                       _allAttributes),
-                                                                                   false) {
+    @SuppressWarnings("unchecked")
+    public boolean contains(Object o1, Object o2) {
+      return _downPaths.contains(_allObjects.invert((Set<G>) o1), _allAttributes.invert((Set<M>) o2));
+    }
+  };
+  public final AbstractRelation<Set<G>, Set<M>>    upPaths                 = new AbstractRelation<Set<G>, Set<M>>(
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
-                                                                                 @SuppressWarnings("unchecked")
-                                                                                 public boolean contains(
-                                                                                     Object o1,
-                                                                                     Object o2) {
-                                                                                   return _upPaths.contains(
-                                                                                       _allObjects.invert((Set<G>) o1),
-                                                                                       _allAttributes
-                                                                                           .invert((Set<M>) o2));
-                                                                                 }
-                                                                               };
-  public final AbstractRelation<G, M>              DownPaths               = new AbstractRelation<G, M>(
-                                                                               rowHeads,
-                                                                               colHeads,
-                                                                               false) {
+    @SuppressWarnings("unchecked")
+    public boolean contains(Object o1, Object o2) {
+      return _upPaths.contains(_allObjects.invert((Set<G>) o1), _allAttributes.invert((Set<M>) o2));
+    }
+  };
+  public final AbstractRelation<G, M>              DownPaths               =
+      new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-                                                                             public boolean contains(
-                                                                                 Object o1,
-                                                                                 Object o2) {
-                                                                               return _downPaths.contains(
-                                                                                   _objectEquivalence().col(
-                                                                                       rowHeads().indexOf(o1)),
-                                                                                   _attributeEquivalence().col(
-                                                                                       colHeads().indexOf(o2)));
-                                                                             }
-                                                                           };
-  public final AbstractRelation<G, M>              UpPaths                 = new AbstractRelation<G, M>(
-                                                                               rowHeads,
-                                                                               colHeads,
-                                                                               false) {
+        public boolean contains(Object o1, Object o2) {
+          return _downPaths.contains(
+              _objectEquivalence().col(rowHeads().indexOf(o1)),
+              _attributeEquivalence().col(colHeads().indexOf(o2)));
+        }
+      };
+  public final AbstractRelation<G, M>              UpPaths                 =
+      new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-                                                                             public boolean contains(
-                                                                                 Object o1,
-                                                                                 Object o2) {
-                                                                               return _upPaths.contains(
-                                                                                   _objectEquivalence().col(
-                                                                                       rowHeads().indexOf(o1)),
-                                                                                   _attributeEquivalence().col(
-                                                                                       colHeads().indexOf(o2)));
-                                                                             }
-                                                                           };
+        public boolean contains(Object o1, Object o2) {
+          return _upPaths.contains(
+              _objectEquivalence().col(rowHeads().indexOf(o1)),
+              _attributeEquivalence().col(colHeads().indexOf(o2)));
+        }
+      };
   private final Set<M>                             ignoredAttributes       = new HashSet<M>();
   private final Set<G>                             ignoredObjects          = new HashSet<G>();
 
@@ -537,14 +370,14 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   }
 
   public void initHandlers(final boolean selfSelecting, final AutomaticMode auto) {
-//    if (selfSelecting) {
-//      addEventHandler(new RelationEventHandler<G, M>() {
-//        public final void handle(final RelationEvent<G, M> event) {
-//          select();
-//        }
-//      }, RelationEvent.SELECTION_CHANGED);
-//      select();
-//    }
+    if (selfSelecting) {
+      addEventHandler(new RelationEventHandler<G, M>() {
+        public final void handle(final RelationEvent<G, M> event) {
+          select();
+        }
+      }, RelationEvent.SELECTION_CHANGED);
+      select();
+    }
     switch (auto) {
     case REDUCE:
       addEventHandler(new RelationEventHandler<G, M>() {
@@ -590,12 +423,13 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
     } else if (selectedColHeads.isEmpty() && selectedRowHeads.isEmpty())
       selection = new MatrixContext<G, M>(false);
     else
-      selection =
-          new MatrixContext<G, M>(selectedRowHeads, selectedColHeads, (BooleanMatrix) matrix.selectColumns(
-              Ret.NEW,
-              MatrixContext.this.colHeads().indicesOf(selectedColHeads, false)).selectRows(
-              Ret.NEW,
-              MatrixContext.this.rowHeads().indicesOf(selectedRowHeads, false)), false);
+      selection = new MatrixContext<G, M>(
+          selectedRowHeads,
+          selectedColHeads,
+          (BooleanMatrix) matrix
+              .selectColumns(Ret.NEW, MatrixContext.this.colHeads().indicesOf(selectedColHeads, false))
+              .selectRows(Ret.NEW, MatrixContext.this.rowHeads().indicesOf(selectedRowHeads, false)),
+          false);
   }
 
   public synchronized final void clean() {
@@ -622,7 +456,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
                   j));
         return false;
       }
-    };//.clone();
+    };// .clone();
     _upArrows = new AbstractRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
       public final boolean contains(final Object object, final Object attribute) {
@@ -635,7 +469,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
               _intent(Collections.singleton(_j), i, Collections2.filter(j, Predicates.not(Predicates.equalTo(_j)))));
         return false;
       }
-    };//.clone();
+    };// .clone();
     _irreducibleObjects.clear();
     _irreducibleObjects.addAll(_objects.filter(_isIrreducibleObject));
     _irreducibleAttributes.clear();
@@ -752,14 +586,13 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
         return new IterableSet<Integer>() {
 
           public final Iterator<Integer> iterator() {
-            return Iterators.filter(
-                ListIterators.integers(0, MatrixContext.this.rowHeads.size()),
-                new Predicate<Integer>() {
+            return Iterators
+                .filter(ListIterators.integers(0, MatrixContext.this.rowHeads.size()), new Predicate<Integer>() {
 
-                  public final boolean apply(final Integer i2) {
-                    return row.equals(matrix.selectRows(Ret.LINK, i2));
-                  }
-                });
+              public final boolean apply(final Integer i2) {
+                return row.equals(matrix.selectRows(Ret.LINK, i2));
+              }
+            });
           }
         };
       }
@@ -781,14 +614,13 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
         return new IterableSet<Integer>() {
 
           public final Iterator<Integer> iterator() {
-            return Iterators.filter(
-                ListIterators.integers(0, MatrixContext.this.colHeads.size()),
-                new Predicate<Integer>() {
+            return Iterators
+                .filter(ListIterators.integers(0, MatrixContext.this.colHeads.size()), new Predicate<Integer>() {
 
-                  public final boolean apply(final Integer j2) {
-                    return col.equals(matrix.selectColumns(Ret.LINK, j2));
-                  }
-                });
+              public final boolean apply(final Integer j2) {
+                return col.equals(matrix.selectColumns(Ret.LINK, j2));
+              }
+            });
           }
         };
       }
@@ -878,22 +710,22 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   }
 
   public final Concept<G, M> topConcept() {
-    final Set<G> extent = rowHeads().clone();
+    final Set<G> extent = new HashSet<G>(rowHeads());
     return new Concept<G, M>(extent, rowAnd(extent));
   }
 
   public final Concept<G, M> bottomConcept() {
-    final Set<M> intent = colHeads().clone();
+    final Set<M> intent = new HashSet<M>(colHeads());
     return new Concept<G, M>(colAnd(intent), intent);
   }
 
   public final Concept<G, M> objectConcept(final G g) {
-    final Set<M> intent = row(g);
+    final Set<M> intent = new HashSet<M>(row(g));
     return new Concept<G, M>(colAnd(intent), intent);
   }
 
   public final Concept<G, M> attributeConcept(final M m) {
-    final Set<G> extent = col(m);
+    final Set<G> extent = new HashSet<G>(col(m));
     return new Concept<G, M>(extent, rowAnd(extent));
   }
 
@@ -971,10 +803,16 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
     return Sets.difference(rowHeads, ignoredObjects);
   }
 
+  @Override
+  public final MatrixContext<G, M> getSelection() {
+    return selection;
+  }
+
   public final Context<G, M> subRelation(final Collection<?> objects, final Collection<?> attributes) {
-    return new AbstractContext<G, M>(SetLists.intersection(rowHeads, objects), SetLists.intersection(
-        colHeads,
-        attributes), false) {
+    return new AbstractContext<G, M>(
+        SetLists.intersection(rowHeads, objects),
+        SetLists.intersection(colHeads, attributes),
+        false) {
 
       public final boolean contains(final Object object, final Object attribute) {
         return rowHeads().contains(object) && colHeads().contains(attribute)
@@ -985,11 +823,13 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
         // those two lines are wrong, they produce always empty subcontexts, independent of delivered input arguments
 //        if (rowHeads().isEmpty() || colHeads().isEmpty())
 //          return new MatrixContext<G, M>(false);
-        return new MatrixContext<G, M>(rowHeads(), colHeads(), (BooleanMatrix) MatrixContext.this.matrix.selectRows(
-            Ret.NEW,
-            MatrixContext.this.rowHeads().indicesOf(rowHeads(), false)).selectColumns(
-            Ret.NEW,
-            MatrixContext.this.colHeads().indicesOf(colHeads(), false)), false);
+        return new MatrixContext<G, M>(
+            rowHeads(),
+            colHeads(),
+            (BooleanMatrix) MatrixContext.this.matrix
+                .selectRows(Ret.NEW, MatrixContext.this.rowHeads().indicesOf(rowHeads(), false))
+                .selectColumns(Ret.NEW, MatrixContext.this.colHeads().indicesOf(colHeads(), false)),
+            false);
       }
     };
   }

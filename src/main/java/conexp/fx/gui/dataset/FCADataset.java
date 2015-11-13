@@ -24,7 +24,6 @@ import conexp.fx.core.builder.Request;
 import conexp.fx.core.builder.Requests.Source;
 import conexp.fx.core.builder.StringRequest;
 import conexp.fx.core.collections.relation.RelationEvent;
-import conexp.fx.core.collections.relation.RelationEventHandler;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.context.Context;
@@ -52,7 +51,6 @@ import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.concept.ConceptWidget;
 import conexp.fx.gui.context.MatrixContextWidget;
-import conexp.fx.gui.context.StringMatrixContextWidget;
 import conexp.fx.gui.dialog.FXDialog.Result;
 import conexp.fx.gui.dialog.FXDialog.Return;
 import conexp.fx.gui.dialog.TeXDialog;
@@ -62,6 +60,7 @@ import conexp.fx.gui.graph.PolarGraph;
 import conexp.fx.gui.implication.ImplicationWidget;
 import conexp.fx.gui.task.TimeTask;
 import conexp.fx.gui.util.Platform2;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.FileChooser;
@@ -101,7 +100,7 @@ public final class FCADataset<G, M> extends Dataset {
       unsavedChanges.set(true);
     else if (request instanceof FileRequest)
       file = ((FileRequest) request).file;
-    this.layout.observe();
+//    this.layout.observe();
 //    this.setContent(pane);
 //    this.setGraphic(ImageViewBuilder
 //        .create()
@@ -131,41 +130,19 @@ public final class FCADataset<G, M> extends Dataset {
 //    this.statusWidget = conExp.executorStatusBar.statusBar;
     if (request instanceof FileRequest) {
       this.editable = true;
-      this.contextWidget = (MatrixContextWidget<G, M>) new StringMatrixContextWidget((FCADataset<String, String>) this);
+//      this.contextWidget = (MatrixContextWidget<G, M>) new StringMatrixContextWidget((FCADataset<String, String>) this);
     } else if (request instanceof StringRequest) {
       this.editable = true;
-      this.contextWidget = (MatrixContextWidget<G, M>) new StringMatrixContextWidget((FCADataset<String, String>) this);
-    } else
-      this.contextWidget = new MatrixContextWidget<G, M>(this);
+//      this.contextWidget = (MatrixContextWidget<G, M>) new StringMatrixContextWidget((FCADataset<String, String>) this);
+    } // else
+    this.contextWidget = new MatrixContextWidget<G, M>(this);
     this.conceptGraph = new ConceptGraph<G, M>(this);
     this.conceptWidget = new ConceptWidget<G, M>(this);
     this.implicationWidget = new ImplicationWidget<G, M>(this);
-    lattice.addEventHandler(new RelationEventHandler<Concept<G, M>, Concept<G, M>>() {
-
-      @Override
-      public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
-        concepts.clear();
-        // Platform.runLater(new Runnable() {
-        //
-        // @Override
-        // public final void run() {
-        concepts.addAll(lattice.colHeads());
-        // }
-        // });
-      }
-    }, RelationEvent.ALL_CHANGED);
-    context.addEventHandler(event -> {
-      Platform2.runOnFXThread(() -> {
-        // unsavedChanges.set(
-        // true);
-        lattice.rowHeads().clear();
-        concepts.clear();
-        implications.clear();
-        partialImplications.clear();
-      });
-      // TODO: find conditions for necessary reinit. (this is a costly op!)
-      // initialize2();
-    } , RelationEvent.ROWS);
+    lattice.addEventHandler(event -> {
+      concepts.clear();
+      concepts.addAll(lattice.colHeads());
+    } , RelationEvent.ALL_CHANGED);
     views.add(new DatasetView<Context<G, M>>("Context", contextWidget, context));
     views.add(new DatasetView<ConceptLayout<G, M>>("Lattice", conceptGraph, layout));
     views.add(new DatasetView<List<Concept<G, M>>>("Concepts", conceptWidget, concepts));
@@ -181,7 +158,9 @@ public final class FCADataset<G, M> extends Dataset {
           e.printStackTrace();
         }
       }));
-    this.initializeWithNextClosures();
+    actions.add(new DatasetAction("Refresh", () -> reinitializeWithNextClosures()));
+    Platform2.runOnFXThread(() -> initializeWithNextClosures());
+
   }
 
   private final void polarLayout() {
@@ -222,7 +201,7 @@ public final class FCADataset<G, M> extends Dataset {
               updateProgress(0d, 1d);
               if (isCancelled())
                 return null;
-              select(context.colHeads().get(_col));
+              selectAttribute(context.colHeads().get(_col));
               updateProgress(1d, 1d);
               return null;
             }
@@ -235,12 +214,45 @@ public final class FCADataset<G, M> extends Dataset {
   }
 
   public final void initializeWithNextClosures() {
-    ConExpFX.execute(TimeTask.create(this, "Importing Formal Context", () -> request.setContent()));
+    ConExpFX.execute(TimeTask.create(this, "Importing Formal Context", () -> {
+      request.setContent();
+//      context.addEventHandler(__ -> reinitializeWithNextClosures(), RelationEvent.ROWS);
+    }));
+    _reinitializeWithNextClosures();
+  }
+
+  private final void reinitializeWithNextClosures() {
+    ConExpFX.execute(TimeTask.create(this, "Reinit", () -> {
+      lattice.objectConcepts.clear();
+      lattice.attributeConcepts.clear();
+      conceptGraph.removeContent();
+      lattice.rowHeads().clear();
+      concepts.clear();
+      implications.clear();
+      partialImplications.clear();
+    } , true));
+    _reinitializeWithNextClosures();
+  }
+
+  private final void _reinitializeWithNextClosures() {
+    ConExpFX.execute(new TimeTask<Void>(this, "Locking Graph") {
+
+      protected final Void call() {
+        updateProgress(0d, 1d);
+        if (isCancelled())
+          return null;
+        updateProgress(0.5d, 1d);
+        conceptGraph.controller.graphLock.lock();
+        conceptGraph.highlightLock.lock();
+        updateProgress(1d, 1d);
+        return null;
+      }
+    });
     ConExpFX.execute(TimeTask.create(this, "Reduce Formal Context", () -> context.pushAllChangedEvent()
-//            context.initHandlers(true, MatrixContext.AutomaticMode.REDUCE)
-//        final int rows = this.fcaInstance.context.rowHeads().size();
-//        final int cols = this.fcaInstance.context.colHeads().size();
-//        this.fcaInstance.context.initHandlers(true, MatrixContext.AutomaticMode.fromSize(rows,cols));
+//      context.initHandlers(true, MatrixContext.AutomaticMode.REDUCE)
+//  final int rows = this.fcaInstance.context.rowHeads().size();
+//  final int cols = this.fcaInstance.context.colHeads().size();
+//  this.fcaInstance.context.initHandlers(true, MatrixContext.AutomaticMode.fromSize(rows,cols));
     ));
     ConExpFX.execute(NextClosures2.createTask(this));
     ConExpFX.execute(
@@ -254,34 +266,52 @@ public final class FCADataset<G, M> extends Dataset {
                     .collect(Collectors.toList()))));
     ConExpFX.execute(GeneticLayouter.initialSeeds(this));
     ConExpFX.execute(IPred.neighborhoodP(this));
-    ConExpFX.execute(TimeTask.create(this, "Initialize Concept Lattice Graph", () -> lattice.pushAllChangedEvent()));
+    ConExpFX.execute(new TimeTask<Void>(this, "Unlocking Graph") {
+
+      protected final Void call() {
+        updateProgress(0d, 1d);
+        if (isCancelled())
+          return null;
+        updateProgress(0.5d, 1d);
+        conceptGraph.controller.graphLock.unlock();
+        conceptGraph.highlightLock.unlock();
+        updateProgress(1d, 1d);
+        return null;
+      }
+    });
+    ConExpFX.execute(TimeTask.create(this, "Initialize Concept Lattice Graph", () -> {
+      Platform2.runOnFXThread(() -> layout.invalidate());
+      lattice.pushAllChangedEvent();
+      Platform2.runOnFXThread(() -> layout.invalidate());
+    }));
     ConExpFX.execute(
         TimeTask.create(
             this,
             "Computing Partial Implications",
             () -> implications.addAll(lattice.luxenburgerBase(0d, true))));
-//    ConExpFX.execute(new TimeTask<Void>(this, "Computing Partial Implications") {
+//ConExpFX.execute(new TimeTask<Void>(this, "Computing Partial Implications") {
 //
-//      @Override
-//      protected Void call() {
-//        updateProgress(0d, 1d);
-//        if (isCancelled())
-//          return null;
-//        conceptGraph.controller.graphLock.lock();
-//        conceptGraph.highlightLock.lock();
-//        updateProgress(0.25d, 1d);
-//        implications.addAll(lattice.luxenburgerBase(0d, true));
-//        updateProgress(0.75d, 1d);
-//        conceptGraph.controller.graphLock.unlock();
-//        conceptGraph.highlightLock.unlock();
-//        updateProgress(1d, 1d);
-//        return null;
-//      }
-//    });
+//@Override
+//protected Void call() {
+//  updateProgress(0d, 1d);
+//  if (isCancelled())
+//    return null;
+//  conceptGraph.controller.graphLock.lock();
+//  conceptGraph.highlightLock.lock();
+//  updateProgress(0.25d, 1d);
+//  implications.addAll(lattice.luxenburgerBase(0d, true));
+//  updateProgress(0.75d, 1d);
+//  conceptGraph.controller.graphLock.unlock();
+//  conceptGraph.highlightLock.unlock();
+//  updateProgress(1d, 1d);
+//  return null;
+//}
+//});
     relayout(0, Constants.POPULATION);
+    ConExpFX.execute(TimeTask.create(this, "Initialize Concept Lattice Graph", layout::invalidate, true));
   }
 
-  public final void addObject(final G object) {
+  public final void addObject(final G object, final int index) {
     ConExpFX.execute(new TimeTask<Void>(this, "New Object") {
 
       protected final Void call() {
@@ -289,19 +319,25 @@ public final class FCADataset<G, M> extends Dataset {
         if (isCancelled())
           return null;
         updateProgress(0.5d, 1d);
-        conceptGraph.controller.graphLock.lock();
-        conceptGraph.highlightLock.lock();
-        unsavedChanges.set(true);
-        context.rowHeads().add(object);
-        context.pushAllChangedEvent();
-        lattice.rowHeads().clear();
+//        conceptGraph.controller.graphLock.lock();
+//        conceptGraph.highlightLock.lock();
+//        context.pushAllChangedEvent();
+        if (index == -1)
+          context.rowHeads().add(object);
+        else
+          context.rowHeads().add(index, object);
+        Platform2.runOnFXThread(() -> {
+          unsavedChanges.set(true);
+        });
+//        lattice.rowHeads().clear();
         updateProgress(1d, 1d);
         return null;
       }
     });
+    this.reinitializeWithNextClosures();
   }
 
-  public final void addAttribute(final M attribute) {
+  public final void addAttribute(final M attribute, final int index) {
     ConExpFX.execute(new TimeTask<Void>(this, "New Attribute") {
 
       protected final Void call() {
@@ -311,8 +347,11 @@ public final class FCADataset<G, M> extends Dataset {
         updateProgress(0.5d, 1d);
         conceptGraph.controller.graphLock.lock();
         conceptGraph.highlightLock.lock();
-        unsavedChanges.set(true);
-        context.colHeads().add(attribute);
+        Platform2.runOnFXThread(() -> unsavedChanges.set(true));
+        if (index == -1)
+          context.colHeads().add(attribute);
+        else
+          context.colHeads().add(index, attribute);
         context.deselectAttribute(attribute);
         context.pushAllChangedEvent();
         // select(attribute);
@@ -320,8 +359,7 @@ public final class FCADataset<G, M> extends Dataset {
         return null;
       }
     });
-    ConExpFX.instance.executor
-        .execute(IFox.select(id.get(), layout, attribute, conflictDistance, ConExpFX.instance.executor.tpe));
+    ConExpFX.execute(IFox.select(id.get(), layout, attribute, conflictDistance, ConExpFX.getThreadPool()));
     ConExpFX.execute(new TimeTask<Void>(this, "New Attribute") {
 
       protected final Void call() {
@@ -337,152 +375,204 @@ public final class FCADataset<G, M> extends Dataset {
     });
   }
 
-  public final void flip(final G object, final M attribute) {
-    ConExpFX.execute(new TimeTask<Void>(this, "Context Flip") {
+  public final void removeObject(final G object) {
+    ConExpFX.execute(new TimeTask<Void>(this, "Removing Object") {
 
       protected final Void call() {
         updateProgress(0d, 1d);
         if (isCancelled())
           return null;
         updateProgress(0.5d, 1d);
-        if (!context.selectedAttributes().contains(attribute)) {
-          if (context.contains(object, attribute))
-            context.remove(object, attribute);
-          else
-            context.addFast(object, attribute);
-          return null;
-        } else {
-          ConExpFX.execute(new TimeTask<Void>(FCADataset.this, "Flip Init") {
+        // conceptGraph.controller.graphLock.lock();
+        // conceptGraph.highlightLock.lock();
+        // context.pushAllChangedEvent();
+        context.rowHeads().remove(object);
+        Platform2.runOnFXThread(() -> unsavedChanges.set(true));
+        // lattice.rowHeads().clear();
+        updateProgress(1d, 1d);
+        return null;
+      }
+    });
+    this.reinitializeWithNextClosures();
+  }
 
-            protected final Void call() {
-              updateProgress(0d, 1d);
-              if (isCancelled())
-                return null;
-              updateProgress(0.5d, 1d);
-              if (!context.selectedAttributes().contains(attribute)) {
-                if (context.contains(object, attribute))
-                  context.remove(object, attribute);
-                else
-                  context.addFast(object, attribute);
+  public final void removeAttribute(final M attribute) {
+    ConExpFX.execute(TimeTask.create(this, "Removing Attribute", () -> {
+      conceptGraph.controller.graphLock.lock();
+      conceptGraph.highlightLock.lock();
+      Platform2.runOnFXThread(() -> unsavedChanges.set(true));
+//      context.deselectAttribute(attribute);
+//      context.pushAllChangedEvent();
+    }));
+    if (context.selectedAttributes().contains(attribute))
+      ConExpFX.execute(IFox.ignore(id.get(), layout, attribute, conflictDistance, ConExpFX.getThreadPool()));
+    ConExpFX.execute(TimeTask.create(this, "Removing Attribute", () -> {
+      context.colHeads().remove(attribute);
+      context.pushAllChangedEvent();
+      conceptGraph.controller.graphLock.unlock();
+      conceptGraph.highlightLock.unlock();
+    }));
+  }
+
+  public final void renameObject(final G oldName, final G newName) {
+    if (oldName.equals(newName))
+      return;
+    ConExpFX.execute(TimeTask.create(this, "Renaming Object", () -> {
+      context.rowHeads().set(oldName, newName);
+      Platform2.runOnFXThread(() -> unsavedChanges.set(true));
+    }));
+    this.reinitializeWithNextClosures();
+  }
+
+  public final void renameAttribute(final M oldName, final M newName) {
+    if (oldName.equals(newName))
+      return;
+    ConExpFX.execute(TimeTask.create(this, "Renaming Attribute", () -> {
+      context.colHeads().set(oldName, newName);
+      Platform2.runOnFXThread(() -> unsavedChanges.set(true));
+    }));
+    this.reinitializeWithNextClosures();
+  }
+
+  public final void flip(final G object, final M attribute) {
+    if (!context.selectedAttributes().contains(attribute) || !context.selectedObjects().contains(object)) {
+      if (context.contains(object, attribute))
+        context.remove(object, attribute);
+      else
+        context.addFast(object, attribute);
+    } else {
+      ConExpFX.execute(
+          TimeTask.compose(
+              FCADataset.this,
+              "Flipping Incidence",
+              new TimeTask<Void>(FCADataset.this, "Flip Init") {
+
+                protected final Void call() {
+                  updateProgress(0d, 1d);
+                  // if (isCancelled())
+                  // return null;
+                  updateProgress(0.5d, 1d);
+                  conceptGraph.controller.graphLock.lock();
+                  conceptGraph.highlightLock.lock();
+                  updateProgress(1d, 1d);
+                  return null;
+                }
+              },
+              IFox.ignore(id.get(), layout, attribute, conflictDistance, ConExpFX.getThreadPool()),
+              new TimeTask<Void>(FCADataset.this, "Context Flip") {
+
+                protected final Void call() {
+                  updateProgress(0d, 1d);
+                  // if (isCancelled())
+                  // return null;
+                  updateProgress(0.5d, 1d);
+                  conceptGraph.controller.graphLock.unlock();
+                  conceptGraph.highlightLock.unlock();
+                  if (layout.lattice.context.contains(object, attribute))
+                    layout.lattice.context.remove(object, attribute);
+                  else
+                    layout.lattice.context.addFast(object, attribute);
+                  conceptGraph.controller.graphLock.lock();
+                  conceptGraph.highlightLock.lock();
+                  updateProgress(1d, 1d);
+                  return null;
+                }
+              },
+              IFox.select(id.get(), layout, attribute, conflictDistance, ConExpFX.getThreadPool()),
+              new TimeTask<Void>(FCADataset.this, "Flip Finish") {
+
+                protected final Void call() {
+                  updateProgress(0d, 1d);
+                  // if (isCancelled())
+                  // return null;
+                  updateProgress(0.5d, 1d);
+                  conceptGraph.controller.graphLock.unlock();
+                  conceptGraph.highlightLock.unlock();
+                  updateProgress(1d, 1d);
+                  return null;
+                }
+              }));
+      relayout(2, 2);
+    }
+  }
+
+  public final void selectObject(final G object) {
+    ConExpFX.execute(TimeTask.create(this, "Selecting Object", () -> context.selectObject(object)));
+    this.reinitializeWithNextClosures();
+  }
+
+  public final void ignoreObject(final G object) {
+    ConExpFX.execute(TimeTask.create(this, "Unselecting Object", () -> context.deselectObject(object)));
+    this.reinitializeWithNextClosures();
+  }
+
+  public final void selectAttribute(final M attribute) {
+    ConExpFX.execute(TimeTask.compose(
+        FCADataset.this,
+        "Selecting Attribute",
+        new TimeTask<Void>(this, "Select Init") {
+
+          protected final Void call() {
+            updateProgress(0d, 1d);
+            if (isCancelled())
+              return null;
+            updateProgress(0.5d, 1d);
+            conceptGraph.controller.graphLock.lock();
+            conceptGraph.highlightLock.lock();
+            updateProgress(1d, 1d);
+            return null;
+          }
+        },
+        IFox.select(id.get(), layout, attribute, conflictDistance, ConExpFX.getThreadPool()),
+        new TimeTask<Void>(this, "Select Finish") {
+
+          protected final Void call() {
+            updateProgress(0d, 1d);
+            if (isCancelled())
+              return null;
+            updateProgress(0.5d, 1d);
+            conceptGraph.controller.graphLock.unlock();
+            conceptGraph.highlightLock.unlock();
+            updateProgress(1d, 1d);
+            return null;
+          }
+        }));
+    relayout(2, 2);
+  }
+
+  public final void ignoreAttribute(final M attribute) {
+    ConExpFX
+        .execute(TimeTask.compose(
+            FCADataset.this,
+            "Unselecting attribute",
+            new TimeTask<Void>(this, "Ignore Init") {
+
+              protected final Void call() {
+                updateProgress(0d, 1d);
+                if (isCancelled())
+                  return null;
+                updateProgress(0.5d, 1d);
+                conceptGraph.controller.graphLock.lock();
+                conceptGraph.highlightLock.lock();
+                updateProgress(1d, 1d);
                 return null;
               }
-              conceptGraph.controller.graphLock.lock();
-              conceptGraph.highlightLock.lock();
-              updateProgress(1d, 1d);
-              return null;
-            }
-          });
-          ConExpFX.instance.executor
-              .execute(IFox.ignore(id.get(), layout, attribute, conflictDistance, ConExpFX.instance.executor.tpe));
-          ConExpFX.execute(new TimeTask<Void>(FCADataset.this, "Context Flip") {
+            },
+            IFox.ignore(id.get(), layout, attribute, conflictDistance, ConExpFX.getThreadPool()),
+            new TimeTask<Void>(this, "Ignore Finish") {
 
-            protected final Void call() {
-              updateProgress(0d, 1d);
-              if (isCancelled())
+              protected final Void call() {
+                updateProgress(0d, 1d);
+                if (isCancelled())
+                  return null;
+                updateProgress(0.5d, 1d);
+                conceptGraph.controller.graphLock.unlock();
+                conceptGraph.highlightLock.unlock();
+                updateProgress(1d, 1d);
                 return null;
-              updateProgress(0.5d, 1d);
-              conceptGraph.controller.graphLock.unlock();
-              conceptGraph.highlightLock.unlock();
-              if (layout.lattice.context.contains(object, attribute))
-                layout.lattice.context.remove(object, attribute);
-              else
-                layout.lattice.context.addFast(object, attribute);
-              conceptGraph.controller.graphLock.lock();
-              conceptGraph.highlightLock.lock();
-              updateProgress(1d, 1d);
-              return null;
-            }
-          });
-          ConExpFX.instance.executor
-              .execute(IFox.select(id.get(), layout, attribute, conflictDistance, ConExpFX.instance.executor.tpe));
-
-          ConExpFX.execute(new TimeTask<Void>(FCADataset.this, "Flip Finish") {
-
-            protected final Void call() {
-              updateProgress(0d, 1d);
-              if (isCancelled())
-                return null;
-              updateProgress(0.5d, 1d);
-              conceptGraph.controller.graphLock.unlock();
-              conceptGraph.highlightLock.unlock();
-              updateProgress(1d, 1d);
-              return null;
-            }
-          });
-        }
-        updateProgress(1d, 1d);
-        return null;
-      }
-    });
-    refine(1);
-  }
-
-  public final void select(final M attribute) {
-
-    ConExpFX.execute(new TimeTask<Void>(this, "Select Init") {
-
-      protected final Void call() {
-        updateProgress(0d, 1d);
-        if (isCancelled())
-          return null;
-        updateProgress(0.5d, 1d);
-        conceptGraph.controller.graphLock.lock();
-        conceptGraph.highlightLock.lock();
-        updateProgress(1d, 1d);
-        return null;
-      }
-    });
-    ConExpFX.instance.executor
-        .execute(IFox.select(id.get(), layout, attribute, conflictDistance, ConExpFX.instance.executor.tpe));
-
-    ConExpFX.execute(new TimeTask<Void>(this, "Select Finish") {
-
-      protected final Void call() {
-        updateProgress(0d, 1d);
-        if (isCancelled())
-          return null;
-        updateProgress(0.5d, 1d);
-        conceptGraph.controller.graphLock.unlock();
-        conceptGraph.highlightLock.unlock();
-        updateProgress(1d, 1d);
-        return null;
-      }
-    });
-    refine(1);
-  }
-
-  public final void ignore(final M attribute) {
-
-    ConExpFX.execute(new TimeTask<Void>(this, "Ignore Init") {
-
-      protected final Void call() {
-        updateProgress(0d, 1d);
-        if (isCancelled())
-          return null;
-        updateProgress(0.5d, 1d);
-        conceptGraph.controller.graphLock.lock();
-        conceptGraph.highlightLock.lock();
-        updateProgress(1d, 1d);
-        return null;
-      }
-    });
-    ConExpFX.instance.executor
-        .execute(IFox.ignore(id.get(), layout, attribute, conflictDistance, ConExpFX.instance.executor.tpe));
-
-    ConExpFX.execute(new TimeTask<Void>(this, "Ignore Finish") {
-
-      protected final Void call() {
-        updateProgress(0d, 1d);
-        if (isCancelled())
-          return null;
-        updateProgress(0.5d, 1d);
-        conceptGraph.controller.graphLock.unlock();
-        conceptGraph.highlightLock.unlock();
-        updateProgress(1d, 1d);
-        return null;
-      }
-    });
-    refine(1);
+              }
+            }));
+    relayout(2, 2);
   }
 
   public final void relayout(final int generationCount, final int populationSize) {

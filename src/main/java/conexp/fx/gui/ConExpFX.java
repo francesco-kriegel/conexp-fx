@@ -330,7 +330,11 @@ public class ConExpFX extends Application {
       askForUnsavedChanges(dataset);
       getSelectionModel().clearSelection();
       datasets.remove(dataset);
-      executor.cancel(dataset);
+      execute(
+          TimeTask.create(
+              dataset,
+              "Closing " + dataset.id.get(),
+              () -> Platform2.runOnFXThread(() -> executor.cancel(dataset))));
     }
 
     public final void closeActiveDataset() {
@@ -516,7 +520,7 @@ public class ConExpFX extends Application {
         Style.QUESTION,
         "Unsaved Changes",
         dataset.id.get() + " has unsaved changes. Do you want to save?",
-        null).showAndWait().equals(Result.YES))
+        null).showAndWait().result().equals(Result.YES))
       dataset.save();
   }
 

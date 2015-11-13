@@ -44,22 +44,18 @@ import conexp.fx.core.math.Points;
 
 public final class ConceptLayout<G, M> implements Observable {
 
-  private boolean                                    observe          = false;
-  public final ConceptLattice<G, M>                  lattice;
-  public final Map<M, Point3D>                       _seeds           = new ConcurrentHashMap<M, Point3D>();
-  public final ObservableMap<M, Point3D>             seeds            = FXCollections.observableMap(_seeds);
-  public final Map<M, Point3D>                       seedHistory      = new ConcurrentHashMap<M, Point3D>();
-  private final Map<Concept<G, M>, Binding<Point3D>> positionBindings =
-                                                                          new ConcurrentHashMap<Concept<G, M>, Binding<Point3D>>();
-  public final Map<Concept<G, M>, Point3D>           positions        =
-                                                                          Maps
-                                                                              .transformValues(
-                                                                                  positionBindings,
-                                                                                  Functions
-                                                                                      .<Point3D> observableValueToCurrentValueFunction());
-  public final Map<Concept<G, M>, Concept<G, M>>     generators       =
-                                                                          new ConcurrentHashMap<Concept<G, M>, Concept<G, M>>();
-  private final Set<InvalidationListener>            listeners        = new HashSet<InvalidationListener>();
+  private boolean                                   observe          = false;
+  public final ConceptLattice<G, M>                 lattice;
+  public final Map<M, Point3D>                      _seeds           = new ConcurrentHashMap<M, Point3D>();
+  public final ObservableMap<M, Point3D>            seeds            = FXCollections.observableMap(_seeds);
+  public final Map<M, Point3D>                      seedHistory      = new ConcurrentHashMap<M, Point3D>();
+  public final Map<Concept<G, M>, Binding<Point3D>> positionBindings =
+      new ConcurrentHashMap<Concept<G, M>, Binding<Point3D>>();
+  public final Map<Concept<G, M>, Point3D>          positions        =
+      Maps.transformValues(positionBindings, Functions.<Point3D> observableValueToCurrentValueFunction());
+  public final Map<Concept<G, M>, Concept<G, M>>    generators       =
+      new ConcurrentHashMap<Concept<G, M>, Concept<G, M>>();
+  private final Set<InvalidationListener>           listeners        = new HashSet<InvalidationListener>();
 
   public ConceptLayout(final ConceptLattice<G, M> conceptLattice, final Map<M, Point3D> initialSeeds) {
     super();
@@ -88,7 +84,12 @@ public final class ConceptLayout<G, M> implements Observable {
       public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
         for (Concept<G, M> concept : event.getRows())
           synchronized (positionBindings) {
-            positionBindings.remove(concept).dispose();
+            final Binding<Point3D> posb = positionBindings.remove(concept);
+            try {
+              posb.dispose();
+            } catch (NullPointerException e) {
+              System.err.println("position binding not found: " + concept);
+            }
           }
       }
     }, RelationEvent.ROWS_REMOVED);
@@ -103,47 +104,51 @@ public final class ConceptLayout<G, M> implements Observable {
 
   public final Binding<Point3D> positionBinding(final Concept<G, M> c) {
     synchronized (positionBindings) {
-//      if (!positionBindings.containsKey(c))
-//        putNewPositionBinding(c);
+      // could possibly removed but then the position binding for bottom concept in interordinal scales could not be
+      // found.
+      if (!positionBindings.containsKey(c))
+        putNewPositionBinding(c);
       return positionBindings.get(c);
     }
   }
 
   private final void putNewPositionBinding(final Concept<G, M> concept) {
-    positionBindings.put(concept, new ObjectBinding<Point3D>() {
+    synchronized (positionBindings) {
+      positionBindings.put(concept, new ObjectBinding<Point3D>() {
 
-      {
-        if (observe)
-          bind(seeds, concept.intent());
-        else
-          bind(seeds);
-      }
+        {
+          if (observe)
+            bind(seeds, concept.intent());
+          else
+            bind(seeds);
+        }
 
-      public void dispose() {
-        if (observe)
-          unbind(seeds, concept.intent());
-        else
-          unbind(seeds);
-        super.dispose();
-      }
+        public void dispose() {
+          if (observe)
+            unbind(seeds, concept.intent());
+          else
+            unbind(seeds);
+          super.dispose();
+        }
 
-      protected final Point3D computeValue() {
-        double x = 0d;
-        double y = 0d;
-        double z = 0d;
-        synchronized (concept.intent()) {
-          synchronized (seeds) {
-            for (M m : Sets.intersection(seeds.keySet(), concept.intent())) {
-              final Point3D seed = seeds.get(m);
-              x += seed.getX();
-              y += seed.getY();
-              z += seed.getZ();
+        protected final Point3D computeValue() {
+          double x = 0d;
+          double y = 0d;
+          double z = 0d;
+          synchronized (concept.intent()) {
+            synchronized (seeds) {
+              for (M m : Sets.intersection(seeds.keySet(), concept.intent())) {
+                final Point3D seed = seeds.get(m);
+                x += seed.getX();
+                y += seed.getY();
+                z += seed.getZ();
+              }
             }
           }
+          return new Point3D(x, y, z);
         }
-        return new Point3D(x, y, z);
-      }
-    });
+      });
+    }
   }
 
   public final boolean updateSeeds(final Map<M, Point3D> seedUpdates) {
@@ -179,8 +184,8 @@ public final class ConceptLayout<G, M> implements Observable {
           final Point3D seed = seeds.get(affectedSeed);
           seeds.put(affectedSeed, new Point3D(seed.getX() + dx, Math.max(0.001d, seed.getY() + dy), seed.getZ() + dz));
         } catch (NoSuchElementException | IllegalArgumentException e) {
-          System.err.println(e.getStackTrace()[0]
-              + " Moving only label seeds, but there was none or more than one! Check this.");
+          System.err.println(
+              e.getStackTrace()[0] + " Moving only label seeds, but there was none or more than one! Check this.");
           System.err.println("\t" + Sets.intersection(lattice.attributeLabels(concept), seeds.keySet()));
         }
         break;
@@ -200,8 +205,8 @@ public final class ConceptLayout<G, M> implements Observable {
           for (M n : eq)
             seeds.put(n, t);
         } catch (NoSuchElementException | IllegalArgumentException e) {
-          System.err.println(e.getStackTrace()[0]
-              + " Moving only label seeds, but there was none or more than one! Check this.");
+          System.err.println(
+              e.getStackTrace()[0] + " Moving only label seeds, but there was none or more than one! Check this.");
           System.err.println("\t" + Sets.intersection(lattice.attributeLabels(concept), seeds.keySet()));
         }
         break;

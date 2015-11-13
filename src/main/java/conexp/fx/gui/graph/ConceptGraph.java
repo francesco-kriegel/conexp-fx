@@ -1049,7 +1049,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     }
 
     private final HBox createShowBox() {
-      highlight.setSelected(true);
+      highlight.setSelected(false);
       highlight.setMinHeight(24);
       labels.setSelected(true);
       labels.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -1883,5 +1883,12 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
 
   public final boolean polar() {
     return transformation.get().equals(GraphTransformation.POLAR);
+  }
+  
+  @Override
+  public void removeContent() {
+    super.removeContent();
+    objectLabels.clear();
+    attributeLabels.clear();
   }
 }

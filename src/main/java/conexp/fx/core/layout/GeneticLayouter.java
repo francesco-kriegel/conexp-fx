@@ -18,6 +18,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 
 import org.ujmp.core.collections.BitSetSet;
 import org.ujmp.core.util.RandomSimple;
@@ -46,7 +47,7 @@ public final class GeneticLayouter<G, M> {
           return null;
         final Random rng = new RandomSimple();
         updateMessage("Computing Infimum Irreducibles...");
-        final Set<M> infimumIrreducibles = dataset.layout.lattice.context.infimumIrreducibles();
+        final Set<M> infimumIrreducibles = dataset.layout.lattice.context.selection.infimumIrreducibles();
         updateProgress(0.2d, 1d);
         updateProgress(0.3d, 1d);
         updateMessage("Generating Layered Random Seeds...");
@@ -59,7 +60,7 @@ public final class GeneticLayouter<G, M> {
         updateMessage("Computing Attribute Labels...");
         for (Concept<G, M> c : dataset.layout.lattice.rowHeads()) {
           final Set<M> attributeLabels =
-              new HashSet<M>(dataset.layout.lattice.context.attributeLabels(c.extent(), c.intent()));
+              new HashSet<M>(dataset.layout.lattice.context.selection.attributeLabels(c.extent(), c.intent()));
           synchronized (dataset.layout.lattice.attributeConcepts) {
             for (M m : attributeLabels)
               dataset.layout.lattice.attributeConcepts.put(m, c);
@@ -69,7 +70,7 @@ public final class GeneticLayouter<G, M> {
         updateMessage("Computing Object Labels...");
         for (Concept<G, M> c : dataset.layout.lattice.rowHeads()) {
           final Set<G> objectLabels =
-              new HashSet<G>(dataset.layout.lattice.context.objectLabels(c.extent(), c.intent()));
+              new HashSet<G>(dataset.layout.lattice.context.selection.objectLabels(c.extent(), c.intent()));
           synchronized (dataset.layout.lattice.objectConcepts) {
             for (G g : objectLabels)
               dataset.layout.lattice.objectConcepts.put(g, c);
@@ -172,7 +173,7 @@ public final class GeneticLayouter<G, M> {
                 layouts.add(candidate);
               }
               final double result = dataset.conflictDistance.apply(candidate).second();
-              if (result > currentQuality) {
+              if (result > currentQuality || currentBest == null) {
                 currentQuality = result;
                 currentBest = candidate;
               }
@@ -217,10 +218,18 @@ public final class GeneticLayouter<G, M> {
                 dataset.conflictDistance,
                 ConExpFX.instance.executor.tpe).calculate();
             if (!candidate.updateSeeds(v.seeds)) {
-              if (rng.nextBoolean())
+              if (rng.nextBoolean()) {
+                final Concept<G, M> c = candidate.seeds
+                    .keySet()
+                    .parallelStream()
+                    .map(candidate.lattice.attributeConcepts::get)
+                    .filter(cn -> cn != null)
+                    .findAny()
+                    .get();
+//                    candidate.lattice.attributeConcepts.get(Collections3.random(candidate.seeds.keySet(), rng));
                 v = new LayoutEvolution<G, M>(
                     candidate,
-                    candidate.lattice.attributeConcepts.get(Collections3.random(candidate.seeds.keySet(), rng)),
+                    c,
                     ConceptMovement.LABEL_CHAIN_SEEDS,
                     4d,
                     4d,
@@ -229,7 +238,7 @@ public final class GeneticLayouter<G, M> {
                     1,
                     dataset.conflictDistance,
                     ConExpFX.instance.executor.tpe).calculate();
-              else
+              } else
                 v = new LayoutEvolution<G, M>(
                     candidate,
                     Collections3.random(candidate.lattice.rowHeads(), rng),

@@ -10,7 +10,6 @@ package conexp.fx.gui.cellpane;
  * #L%
  */
 
-
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -62,7 +61,7 @@ public final class CellPaneTest extends Application {
   private static final class TestCell extends Cell<TestCell, TestCellPane> {
 
     public TestCell(final int gridRow, final int gridColumn) {
-      super(THE_CELL_PANE, gridRow, gridColumn, Pos.CENTER, TextAlignment.CENTER, false, null);
+      super(THE_CELL_PANE, gridRow, gridColumn, Pos.CENTER, TextAlignment.CENTER, false, null, true);
     }
 
     @Override

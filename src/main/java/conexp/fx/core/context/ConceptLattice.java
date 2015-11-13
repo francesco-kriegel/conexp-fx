@@ -170,7 +170,7 @@ public final class ConceptLattice<G, M> extends MatrixRelation<Concept<G, M>, Co
                                                  .newSetFromMap(new ConcurrentHashMap<Implication<G, M>, Boolean>());
 
     private final Set<Implication<G, M>> get() {
-      recursion(context.topConcept());
+      recursion(context.selection.topConcept());
       return set;
     }
 

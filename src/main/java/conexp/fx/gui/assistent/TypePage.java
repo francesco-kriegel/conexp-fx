@@ -268,6 +268,7 @@ public class TypePage extends AssistentPage<Request<?, ?>> {
   private final SourcePane intListPane() {
     final GridPane pane = newGridPane();
     final ListSpinner<Integer> nSpinner = new ListSpinner<Integer>(0, 1024);
+    nSpinner.setMinWidth(100);
     pane.add(LabelBuilder.create().text("n = ").build(), 0, 0);
     pane.add(nSpinner, 1, 0);
     return new SourcePane(Source.INT_LIST, pane, new ObjectBinding<Request<?, ?>>() {

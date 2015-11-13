@@ -13,7 +13,6 @@ package conexp.fx.core.context;
  * #L%
  */
 
-
 import java.util.Collection;
 import java.util.Set;
 
@@ -34,4 +33,6 @@ public interface Context<G, M> extends Relation<G, M> {
   public Relation<M, M> attributeQuasiOrder();
 
   public MatrixContext<G, M> clone();
+
+  public Context<G, M> getSelection();
 }

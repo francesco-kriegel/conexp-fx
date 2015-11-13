@@ -112,57 +112,42 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
 
   public Color                                        dehighlightColor            = Color.TRANSPARENT;
   protected final TCellPane                           cellPane;
-  public final ReadOnlyLongProperty                   id                          = new ReadOnlyLongWrapper(
-                                                                                      IdGenerator.getNextId())
-                                                                                      .getReadOnlyProperty();
+  public final ReadOnlyLongProperty                   id                          =
+      new ReadOnlyLongWrapper(IdGenerator.getNextId()).getReadOnlyProperty();
   public final ReadOnlyObjectProperty<IntPair>        gridCoordinates;
   public final ObjectBinding<IntPair>                 contentCoordinates;
   protected final ObjectBinding<IntPair>              snapToCoordinates;
   protected final ObservableList<IntPair>             scrollDeltaCoordinatesQueue =
-                                                                                      FXCollections
-                                                                                          .observableList(Collections
-                                                                                              .synchronizedList(new LinkedList<IntPair>()));
+      FXCollections.observableList(Collections.synchronizedList(new LinkedList<IntPair>()));
   public final DoubleProperty                         width                       = new SimpleDoubleProperty();
   public final DoubleProperty                         height                      = new SimpleDoubleProperty();
   public final IntegerProperty                        textSize                    = new SimpleIntegerProperty();
   public final StringBinding                          textStyle                   = new StringBinding() {
 
-                                                                                    {
-                                                                                      super.bind(textSize);
-                                                                                    }
+    {
+      super.bind(textSize);
+    }
 
-                                                                                    @Override
-                                                                                    public String computeValue() {
-                                                                                      return "-fx-font-size: "
-                                                                                          + textSize.get() + ";";
-                                                                                    }
-                                                                                  };
+    @Override
+    public String computeValue() {
+      return "-fx-font-size: " + textSize.get() + ";";
+    }
+  };
   public final StringProperty                         textContent                 = new SimpleStringProperty();
   public final DoubleProperty                         opacity                     = new SimpleDoubleProperty();
   public final BooleanProperty                        highlight                   = new SimpleBooleanProperty();
   public final BooleanProperty                        animate                     = new SimpleBooleanProperty();
   protected final ObjectProperty<CellInteractionPane> interactionPane             =
-                                                                                      new SimpleObjectProperty<CellInteractionPane>(
-                                                                                          new CellInteractionPane());
-  protected final ObjectProperty<CellContentPane>     contentPane                 =
-                                                                                      new SimpleObjectProperty<CellContentPane>(
-                                                                                          new CellContentPane());
+      new SimpleObjectProperty<CellInteractionPane>(new CellInteractionPane());
+  public final ObjectProperty<CellContentPane>        contentPane                 =
+      new SimpleObjectProperty<CellContentPane>(new CellContentPane());
   private boolean                                     runningLoop                 = false;
   private ObjectProperty<TranslateTransition>         translateTransition         =
-                                                                                      new SimpleObjectProperty<TranslateTransition>(
-                                                                                          TranslateTransitionBuilder
-                                                                                              .create()
-                                                                                              .build());
+      new SimpleObjectProperty<TranslateTransition>(TranslateTransitionBuilder.create().build());
   private ObjectProperty<FillTransition>              fillTransition              =
-                                                                                      new SimpleObjectProperty<FillTransition>(
-                                                                                          FillTransitionBuilder
-                                                                                              .create()
-                                                                                              .build());
+      new SimpleObjectProperty<FillTransition>(FillTransitionBuilder.create().build());
   private ObjectProperty<FadeTransition>              fadeTransition              =
-                                                                                      new SimpleObjectProperty<FadeTransition>(
-                                                                                          FadeTransitionBuilder
-                                                                                              .create()
-                                                                                              .build());
+      new SimpleObjectProperty<FadeTransition>(FadeTransitionBuilder.create().build());
   private ChangeListener<IntPair>                     snapToCoordinatesChangeListener;
   private ListChangeListener<IntPair>                 scrollDeltaCoordinatesQueueChangeListener;
   private ChangeListener<IntPair>                     contentCoordinatesChangeListener;
@@ -201,7 +186,8 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
       final Pos alignment,
       final TextAlignment textAlignment,
       final boolean rotated,
-      final EventHandler<ActionEvent> onFinishedEventHandler) {
+      final EventHandler<ActionEvent> onFinishedEventHandler,
+      final boolean createTextSizeListener) {
     super();
     this.cellPane = cellPane;
     this.width.bind(cellPane.columnWidth);
@@ -251,8 +237,8 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
         final int gridColumn = cellPane.minColumn.get() + gridCoordinates.get().y();
         final Integer contentRow = cellPane.rowMap.get(gridRow);
         final Integer contentColumn = cellPane.columnMap.get(gridColumn);
-        return IntPair.valueOf(contentRow == null ? gridRow : contentRow, contentColumn == null ? gridColumn
-            : contentColumn);
+        return IntPair
+            .valueOf(contentRow == null ? gridRow : contentRow, contentColumn == null ? gridColumn : contentColumn);
       }
     };
     this.opacity.bind(new DoubleBinding() {
@@ -327,7 +313,7 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
 //      public void run() {
     cellPane.contentPane.add(getContentPane(), gridColumn, gridRow);
     cellPane.interactionPane.add(getInteractionPane(), gridColumn, gridRow);
-    updateContent();
+//    updateContent();
     fade(
         Constants.HIDE_OPACITY,
         opacity.getValue() == null ? Constants.SHOW_OPACITY : opacity.get(),
@@ -335,6 +321,17 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
         onFinishedEventHandler);
 //      }
 //    });
+    if (createTextSizeListener)
+      if (cellPane.autoSizeRows.get() || cellPane.autoSizeColumns.get())
+        contentPane.get().text.layoutBoundsProperty().addListener(new ChangeListener<Bounds>() {
+
+          @Override
+          public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
+            final double width = newValue.getWidth();
+            if (width > cellPane.maximalTextWidth.get())
+              cellPane.maximalTextWidth.set(width);
+          }
+        });
   }
 
   private final void createRotation() {
@@ -466,9 +463,10 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
 
       @Override
       public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-        highlight(newValue.booleanValue(),
-//            cellPane.isDragging.get() ? TransitionType.DISCRETE : newValue
-//            ? 
+        highlight(
+            newValue.booleanValue(),
+            // cellPane.isDragging.get() ? TransitionType.DISCRETE : newValue
+            // ?
             TransitionType.DISCRETE
 //                : TransitionType.DEFAULT
             ,
@@ -555,13 +553,15 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
       public void handle(MouseEvent event) {
         cellPane.highlight((TCell) Cell.this);
         final ClipboardContent clipboardContent = new ClipboardContent();
-        clipboardContent.put(CELL_COORDINATES_DATA_FORMAT, new CellCoordinates(
-            cellPane.id.get(),
-            event.getButton().equals(MouseButton.PRIMARY) ? MouseEventType.SCROLL : MouseEventType.DRAG,
-            gridCoordinates.get().x().intValue(),
-            gridCoordinates.get().y().intValue(),
-            contentCoordinates.get().x().intValue(),
-            contentCoordinates.get().y().intValue()));
+        clipboardContent.put(
+            CELL_COORDINATES_DATA_FORMAT,
+            new CellCoordinates(
+                cellPane.id.get(),
+                event.getButton().equals(MouseButton.PRIMARY) ? MouseEventType.SCROLL : MouseEventType.DRAG,
+                gridCoordinates.get().x().intValue(),
+                gridCoordinates.get().y().intValue(),
+                contentCoordinates.get().x().intValue(),
+                contentCoordinates.get().y().intValue()));
         contentPane.get().startDragAndDrop(TransferMode.MOVE).setContent(clipboardContent);
         event.consume();
       }
@@ -597,9 +597,8 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
             final int columnDelta = gridCoordinates.get().y() - sourceCellCoordinates.gridColumn;
             sourceCellCoordinates.gridRow = gridCoordinates.get().x();
             sourceCellCoordinates.gridColumn = gridCoordinates.get().y();
-            dragboard.setContent(Collections.<DataFormat, Object> singletonMap(
-                CELL_COORDINATES_DATA_FORMAT,
-                sourceCellCoordinates));
+            dragboard.setContent(
+                Collections.<DataFormat, Object> singletonMap(CELL_COORDINATES_DATA_FORMAT, sourceCellCoordinates));
             cellPane.minCoordinates.add(-rowDelta, -columnDelta);
 //            final boolean down = rowDelta < 0;
 //            final boolean right = columnDelta < 0;
@@ -615,10 +614,11 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
 //                cellPane.columnScrollBar.decrement();
             break;
           case DRAG:
-            cellPane.drag(sourceCellCoordinates.gridRow, sourceCellCoordinates.gridColumn, gridCoordinates
-                .get()
-                .x()
-                .intValue(), gridCoordinates.get().y().intValue());
+            cellPane.drag(
+                sourceCellCoordinates.gridRow,
+                sourceCellCoordinates.gridColumn,
+                gridCoordinates.get().x().intValue(),
+                gridCoordinates.get().y().intValue());
           }
         event.consume();
       }
@@ -640,10 +640,11 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
         case SCROLL:
           break;
         case DRAG:
-          cellPane.drop(sourceCellCoordinates.gridRow, sourceCellCoordinates.gridColumn, gridCoordinates
-              .get()
-              .x()
-              .intValue(), gridCoordinates.get().y().intValue());
+          cellPane.drop(
+              sourceCellCoordinates.gridRow,
+              sourceCellCoordinates.gridColumn,
+              gridCoordinates.get().x().intValue(),
+              gridCoordinates.get().y().intValue());
         }
         event.setDropCompleted(true);
         event.consume();
@@ -815,17 +816,17 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
       final double y,
       final TransitionType translationType,
       final EventHandler<ActionEvent> onFinishedEventHandler) {
-    final boolean smooth =
-        translationType == TransitionType.SMOOTH
-            || (translationType == TransitionType.DEFAULT && Cell.this.animate.get());
-    translateTransition.set(TranslateTransitionBuilder
-        .create()
-        .duration(smooth ? Constants.ANIMATION_DURATION : Duration.ONE)
-        .byX(x)
-        .byY(y)
-        .node(contentPane.get())
-        .onFinished(onFinishedEventHandler)
-        .build());
+    final boolean smooth = translationType == TransitionType.SMOOTH
+        || (translationType == TransitionType.DEFAULT && Cell.this.animate.get());
+    translateTransition.set(
+        TranslateTransitionBuilder
+            .create()
+            .duration(smooth ? Constants.ANIMATION_DURATION : Duration.ONE)
+            .byX(x)
+            .byY(y)
+            .node(contentPane.get())
+            .onFinished(onFinishedEventHandler)
+            .build());
   }
 
   protected final void toFront() {
@@ -838,17 +839,17 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
       final EventHandler<ActionEvent> onFinishedEventHandler) {
     if (highlight)
       toFront();
-    final boolean smooth =
-        translationType == TransitionType.SMOOTH
-            || (translationType == TransitionType.DEFAULT && Cell.this.animate.get());
-    fillTransition.set(FillTransitionBuilder
-        .create()
-        .fromValue(highlight ? dehighlightColor : cellPane.colorScheme.get().getColor(4))
-        .toValue(highlight ? cellPane.colorScheme.get().getColor(4) : dehighlightColor)
-        .duration(smooth ? Constants.ANIMATION_DURATION : Duration.ONE)
-        .shape(contentPane.get().background)
-        .onFinished(onFinishedEventHandler)
-        .build());
+    final boolean smooth = translationType == TransitionType.SMOOTH
+        || (translationType == TransitionType.DEFAULT && Cell.this.animate.get());
+    fillTransition.set(
+        FillTransitionBuilder
+            .create()
+            .fromValue(highlight ? dehighlightColor : cellPane.colorScheme.get().getColor(4))
+            .toValue(highlight ? cellPane.colorScheme.get().getColor(4) : dehighlightColor)
+            .duration(smooth ? Constants.ANIMATION_DURATION : Duration.ONE)
+            .shape(contentPane.get().background)
+            .onFinished(onFinishedEventHandler)
+            .build());
   }
 
   private final void
@@ -856,9 +857,8 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
     fade(Constants.HIDE_OPACITY, Constants.SHOW_OPACITY, translationType, onFinishedEventHandler);
   }
 
-  private final void fadeOut(
-      final TransitionType translationType,
-      final EventHandler<ActionEvent> onFinishedEventHandler) {
+  private final void
+      fadeOut(final TransitionType translationType, final EventHandler<ActionEvent> onFinishedEventHandler) {
     fade(Constants.SHOW_OPACITY, Constants.HIDE_OPACITY, translationType, onFinishedEventHandler);
   }
 
@@ -867,16 +867,16 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
       final double toValue,
       final TransitionType translationType,
       final EventHandler<ActionEvent> onFinishedEventHandler) {
-    final boolean smooth =
-        translationType == TransitionType.SMOOTH
-            || (translationType == TransitionType.DEFAULT && Cell.this.animate.get());
-    fadeTransition.set(FadeTransitionBuilder
-        .create()
-        .node(contentPane.get())
-        .duration(smooth ? Constants.ANIMATION_DURATION : Duration.ONE)
-        .fromValue(fromValue)
-        .toValue(toValue)
-        .onFinished(onFinishedEventHandler)
-        .build());
+    final boolean smooth = translationType == TransitionType.SMOOTH
+        || (translationType == TransitionType.DEFAULT && Cell.this.animate.get());
+    fadeTransition.set(
+        FadeTransitionBuilder
+            .create()
+            .node(contentPane.get())
+            .duration(smooth ? Constants.ANIMATION_DURATION : Duration.ONE)
+            .fromValue(fromValue)
+            .toValue(toValue)
+            .onFinished(onFinishedEventHandler)
+            .build());
   }
 }

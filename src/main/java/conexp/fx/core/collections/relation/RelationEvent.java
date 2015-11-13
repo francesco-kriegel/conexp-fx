@@ -50,7 +50,7 @@ public final class RelationEvent<R, C> {
   public static final Type      ANY               = Type.ANY;
   public static final Type      ROWS              = Type.ROWS;
   public static final Type      ROWS_ADDED        = Type.ROWS_ADDED;
-  public static final Type      ROWS_SET          = Type.COLUMNS_SET;
+  public static final Type      ROWS_SET          = Type.ROWS_SET;
   public static final Type      ROWS_REMOVED      = Type.ROWS_REMOVED;
   public static final Type      ROWS_CLEARED      = Type.ROWS_CLEARED;
   public static final Type      COLUMNS           = Type.COLUMNS;

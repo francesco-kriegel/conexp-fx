@@ -199,10 +199,12 @@ public final class NextClosures2 {
         if (isCancelled())
           return null;
         compute(
-            dataset.context,
+            dataset.context.getSelection(),
             ConExpFX.instance.executor.tpe,
             concept -> Platform2.runOnFXThread(() -> dataset.concepts.add(concept)),
             implication -> Platform2.runOnFXThread(() -> dataset.implications.add(implication)),
+            //            dataset.concepts::add,
+            //            dataset.implications::add,
             status -> updateMessage(status),
             progress -> updateProgress(progress, 1d),
             () -> isCancelled());

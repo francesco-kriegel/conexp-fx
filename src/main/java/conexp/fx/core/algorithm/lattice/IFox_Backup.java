@@ -19,13 +19,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.layout.ConceptLayout;
@@ -35,9 +37,10 @@ import conexp.fx.core.quality.ConflictDistance;
 import conexp.fx.core.quality.LayoutEvolution;
 import conexp.fx.gui.task.TimeTask;
 import conexp.fx.gui.util.Platform2;
+import javafx.collections.ObservableSet;
 import javafx.geometry.Point3D;
 
-public final class IFox<G, M> {
+public final class IFox_Backup<G, M> {
 
   private enum Type {
     EQUIVALENT,
@@ -157,8 +160,12 @@ public final class IFox<G, M> {
         // modify only label and intents
         for (final Concept<G, M> c : layout.lattice.rowHeads())
           if (mJ.containsAll(c.extent())) {
-            c.intent().add(m);
-//            Platform2.runOnFXThread(() -> c.intent().add(m));
+            Platform2.runOnFXThread(new Runnable() {
+
+              public void run() {
+                c.intent().add(m);
+              }
+            });
             if (mJ.size() == c.extent().size())
               synchronized (layout.lattice.attributeConcepts) {
                 layout.lattice.attributeConcepts.put(m, c);
@@ -170,6 +177,24 @@ public final class IFox<G, M> {
         // full update
         updateMessage("Determining old, varying and generating concepts...");
         updateProgress(0.1d, 1d);
+//        final Set<Concept<G, M>> olds = new HashSet<Concept<G, M>>();
+//        final Set<Concept<G, M>> vars = new HashSet<Concept<G, M>>();
+//        final Set<Concept<G, M>> gens = new HashSet<Concept<G, M>>();
+//        final Predicate<Concept<G, M>> varPredicate = new Predicate<Concept<G, M>>() {
+//
+//          public final boolean apply(final Concept<G, M> c) {
+//            return mJ.containsAll(c.extent());
+//          }
+//        };
+//        final Predicate<Concept<G, M>> genPredicate = new Predicate<Concept<G, M>>() {
+//
+//          public final boolean apply(final Concept<G, M> c) {
+//            return I.rowAnd(Sets.intersection(c.extent(), mJ)).equals(c.intent());
+//          }
+//        };
+//        vars.addAll(Collections2.filter(layout.lattice.rowHeads(), varPredicate));
+//        olds.addAll(Sets.difference(layout.lattice.rowHeads(), vars));
+//        gens.addAll(Collections2.filter(olds, genPredicate));
         final Set<Concept<G, M>> vars = layout.lattice
             .rowHeads()
             .parallelStream()
@@ -184,9 +209,13 @@ public final class IFox<G, M> {
         updateMessage("Updating varying concepts...");
         updateProgress(0.2d, 1d);
         for (final Concept<G, M> v : vars) {
-          v.intent().add(m);
-//          Platform2.runOnFXThread(() -> v.intent().add(m));
-          for (final Concept<G, M> g : gens)
+          Platform2.runOnFXThread(new Runnable() {
+
+            public void run() {
+              v.intent().add(m);
+            }
+          });
+          for (Concept<G, M> g : gens)
             layout.lattice.remove(v, g);
         }
         updateMessage("Creating new concepts...");
@@ -213,9 +242,12 @@ public final class IFox<G, M> {
               layout.lattice.objectConcepts.put(ol, n);
             }
           for (final Concept<G, M> v : vars)
-            if (v.smaller(g) && Stream
-                .concat(gens.parallelStream(), vars.parallelStream())
-                .noneMatch(c -> v.smaller(c) && c.smaller(g)))
+            if (v.smaller(g) && Sets.filter(Sets.union(gens, vars), new Predicate<Concept<G, M>>() {
+
+              public final boolean apply(final Concept<G, M> c) {
+                return v.smaller(c) && c.smaller(g);
+              }
+            }).isEmpty())
               layout.lattice.addFast(v, n);
           // layout.invalidate();
         }
@@ -225,8 +257,12 @@ public final class IFox<G, M> {
         for (final Entry<Concept<G, M>, Concept<G, M>> n1 : news.entrySet())
           for (final Entry<Concept<G, M>, Concept<G, M>> n2 : news.entrySet()) {
             updateProgress(0.55d + 0.25d * (i++ / Math.pow(news.size(), 2)), 1d);
-            if (n1.getValue().smaller(n2.getValue())
-                && gens.parallelStream().noneMatch(c -> n1.getValue().smaller(c) && c.smaller(n2.getValue())))
+            if (n1.getValue().smaller(n2.getValue()) && Sets.filter(gens, new Predicate<Concept<G, M>>() {
+
+              public final boolean apply(final Concept<G, M> c) {
+                return n1.getValue().smaller(c) && c.smaller(n2.getValue());
+              }
+            }).isEmpty())
               layout.lattice.addFast(n1.getKey(), n2.getKey());
           }
         // layout.invalidate();
@@ -236,7 +272,12 @@ public final class IFox<G, M> {
           updateMessage("Determining new Reducibles...");
           for (M n : layout.seeds.keySet()) {
             final int _n = IuJ.colHeads().indexOf(n);
-            final Set<Integer> eq = IuJ._attributes.parallelStream().filter(c -> c.contains(_n)).findAny().get();
+            final Set<Integer> eq = Iterables.find(IuJ._attributes, new Predicate<Collection<Integer>>() {
+
+              public final boolean apply(final Collection<Integer> c) {
+                return c.contains(_n);
+              }
+            });
             if (!IuJ._irreducibleAttributes.contains(eq)) {
               updateMessage("Backup seed: " + n);
               final Point3D oldSeed = layout.seeds.remove(n);
@@ -303,8 +344,12 @@ public final class IFox<G, M> {
           layout.lattice.attributeConcepts.remove(m);
         }
         for (Concept<G, M> c : layout.lattice.rowHeads())
-          c.intent().remove(m);
-//          Platform2.runOnFXThread(() -> c.intent().remove(m));
+          Platform2.runOnFXThread(new Runnable() {
+
+            public void run() {
+              c.intent().remove(m);
+            }
+          });
         synchronized (layout.seeds) {
           final Point3D seed = layout.seeds.remove(m);
           if (seed != null) {
@@ -321,39 +366,53 @@ public final class IFox<G, M> {
           layout.lattice.attributeConcepts.remove(m);
         }
         for (Concept<G, M> c : layout.lattice.rowHeads())
-          c.intent().remove(m);
-//          Platform2.runOnFXThread(() -> c.intent().remove(m));
+          Platform2.runOnFXThread(new Runnable() {
+
+            public void run() {
+              c.intent().remove(m);
+            }
+          });
       }
 
       private void irreducible() {
         // full update
         updateMessage("Determining old, varying and generating concepts...");
         updateProgress(0.1d, 1d);
-        final Set<Concept<G, M>> olds =
-            layout.lattice.rowHeads().parallelStream().filter(c -> !c.intent().contains(m)).collect(Collectors.toSet());
-        final Set<Concept<G, M>> vars = layout.lattice
-            .rowHeads()
-            .parallelStream()
-            .filter(
-                c -> !olds.contains(c)
-                    && c.extent().equals(I.colAnd(Sets.difference(c.intent(), Collections.singleton(m)))))
-            .collect(Collectors.toSet());
-        final Set<Concept<G, M>> _news =
-            layout.lattice.rowHeads().parallelStream().filter(c -> !olds.contains(c) && !vars.contains(c)).collect(
-                Collectors.toSet());
+        final Set<Concept<G, M>> olds = new HashSet<Concept<G, M>>();
+        final Set<Concept<G, M>> vars = new HashSet<Concept<G, M>>();
+        final Set<Concept<G, M>> _news = new HashSet<Concept<G, M>>();
+        final Map<Concept<G, M>, Concept<G, M>> news = new HashMap<Concept<G, M>, Concept<G, M>>();
+        final Set<Concept<G, M>> oldNonGens = new HashSet<Concept<G, M>>();
+        final Predicate<Concept<G, M>> oldPredicate = new Predicate<Concept<G, M>>() {
+
+          public final boolean apply(final Concept<G, M> c) {
+            return !c.intent().contains(m);
+          }
+        };
+        final Predicate<Concept<G, M>> varPredicate = new Predicate<Concept<G, M>>() {
+
+          public final boolean apply(final Concept<G, M> c) {
+            return !olds.contains(c)
+                && c.extent().equals(I.colAnd(Sets.difference(c.intent(), Collections.singleton(m))));
+          }
+        };
+        olds.addAll(Collections2.filter(layout.lattice.rowHeads(), oldPredicate));
+        vars.addAll(Collections2.filter(layout.lattice.rowHeads(), varPredicate));
+        _news.addAll(Sets.difference(layout.lattice.rowHeads(), Sets.union(olds, vars)));
         updateMessage("Computing generating concepts...");
         updateProgress(0.2d, 1d);
         synchronized (layout.lattice.attributeConcepts) {
           layout.lattice.attributeConcepts.remove(m);
         }
-        final Map<Concept<G, M>, Concept<G, M>> news = new HashMap<Concept<G, M>, Concept<G, M>>();
         for (Concept<G, M> n : _news) {
-          final Concept<G, M> g = olds
-              .parallelStream()
-//              .filter(c -> c.intent().containsAll(n.intent()) && c.intent().size() == n.intent().size() - 1)
-              .filter(c -> c.intent().equals(Sets.difference(n.intent(), Collections.singleton(m))))
-              .findAny()
-              .get();
+          final ObservableSet<M> intent = n.intent();
+          final Predicate<Concept<G, M>> genPredicate = new Predicate<Concept<G, M>>() {
+
+            public final boolean apply(final Concept<G, M> c) {
+              return c.intent().equals(Sets.difference(intent, Collections.singleton(m)));
+            }
+          };
+          final Concept<G, M> g = Iterators.find(olds.iterator(), genPredicate);
           synchronized (layout.lattice.objectConcepts) {
             final Set<G> nol = new HashSet<G>(layout.lattice.objectLabels(n));
             for (G ol : nol)
@@ -364,19 +423,28 @@ public final class IFox<G, M> {
             layout.generators.put(n, g);
           }
         }
-        final Set<Concept<G, M>> oldNonGens =
-            olds.parallelStream().filter(c -> !news.values().contains(c)).collect(Collectors.toSet());
+        oldNonGens.addAll(Collections3.difference(olds, news.values()));
         // layout.invalidate();
         updateMessage("Updating varying concepts...");
         updateProgress(0.3d, 1d);
         for (Concept<G, M> v : vars)
-          v.intent().remove(m);
-//          Platform2.runOnFXThread(() -> v.intent().remove(m));
+          Platform2.runOnFXThread(new Runnable() {
+
+            public void run() {
+              v.intent().remove(m);
+            }
+          });
         for (final Entry<Concept<G, M>, Concept<G, M>> n : news.entrySet())
-          for (final Concept<G, M> v : vars)
-            if (layout.lattice.contains(v, n.getKey())
-                && oldNonGens.parallelStream().noneMatch(c -> v.smaller(c) && c.smaller(n.getValue())))
+          for (final Concept<G, M> v : vars) {
+            final Predicate<Concept<G, M>> vnIntervalPredicate = new Predicate<Concept<G, M>>() {
+
+              public final boolean apply(final Concept<G, M> c) {
+                return v.smaller(c) && c.smaller(n.getValue());
+              }
+            };
+            if (layout.lattice.contains(v, n.getKey()) && Sets.filter(oldNonGens, vnIntervalPredicate).isEmpty())
               layout.lattice.addFast(v, n.getValue());
+          }
         // layout.invalidate();
         updateMessage("Removing concepts...");
         // layout.lattice.rowHeads().removeAll(news.keySet());
@@ -391,7 +459,6 @@ public final class IFox<G, M> {
         updateProgress(0.6d, 1d);
         synchronized (layout.seeds) {
           updateMessage("Backup seed: " + m);
-          // TODO: seed is sometimes not available in the map. check for a solution!
           final Point3D oldSeed = layout.seeds.remove(m);
           layout.seedHistory.put(m, oldSeed);
           Set<Integer> _seeds =
@@ -399,6 +466,7 @@ public final class IFox<G, M> {
           for (Set<Integer> eq : I._irreducibleAttributes)
             if (!Iterables.any(_seeds, Predicates.in(eq))) {
               // introduce new seed
+
               // interate over all possible attributes in the equivalence class!
 //              final M n = Collections2.transform(eq, I.colHeads().index().inverse()).iterator().next();
               for (M n : Collections2.transform(eq, I.colHeads().index().inverse())) {
@@ -406,9 +474,9 @@ public final class IFox<G, M> {
                 // read seed vector from current layout
                 final Concept<G, M> nc = I.attributeConcept(n);
                 if (layout.positionBindings.containsKey(nc)) {
-                  final Point3D np = Points.plus(layout.positionBinding(nc).getValue(), oldSeed);
+                  final Point3D np = Points.plus(layout.positionBindings.get(nc).getValue(), oldSeed);
                   final Point3D nnp =
-                      layout.positionBinding(Iterables.getOnlyElement(layout.lattice.row(nc))).getValue();
+                      layout.positionBindings.get(Iterables.getOnlyElement(layout.lattice.row(nc))).getValue();
                   final Point3D seed = Points.minus(np, nnp);
                   layout.seeds.put(n, seed);
                   updateProgress(0.8d, 1d);
