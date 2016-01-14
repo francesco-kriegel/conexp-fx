@@ -36,7 +36,7 @@ public final class BooleanMatrices
 
   public static final BooleanMatrix empty(final long rows, final long columns)
   {
-    return BooleanMatrix2D.factory.zeros(rows, columns);
+    return BooleanMatrix2D.Factory.zeros(rows, columns);
   }
 
   public static final BooleanMatrix full(final long size)
@@ -102,7 +102,7 @@ public final class BooleanMatrices
       return (BooleanMatrix) right.clone();
     if (right == null)
       return (BooleanMatrix) left.clone();
-    return (BooleanMatrix) left.appendHorizontally(right);
+    return (BooleanMatrix) left.appendHorizontally(Ret.NEW, right);
   }
 
   public static final BooleanMatrix subposition(final BooleanMatrix... ms)
@@ -121,7 +121,7 @@ public final class BooleanMatrices
       return (BooleanMatrix) lower.clone();
     if (lower == null)
       return (BooleanMatrix) upper.clone();
-    return (BooleanMatrix) upper.appendVertically(lower);
+    return (BooleanMatrix) upper.appendVertically(Ret.NEW, lower);
   }
 
   public static final BooleanMatrix quadPosition(

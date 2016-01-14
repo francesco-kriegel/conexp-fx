@@ -18,9 +18,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.Predicate;
 
-import org.ujmp.core.collections.BitSetSet;
+import org.ujmp.core.collections.set.BitSetSet;
 import org.ujmp.core.util.RandomSimple;
 
 import com.google.common.collect.Collections2;

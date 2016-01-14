@@ -121,7 +121,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         return false;
       super.remove(o);
       if (isEmpty())
-        matrix = BooleanMatrix2D.factory.zeros(0, 0);
+        matrix = BooleanMatrix2D.Factory.zeros(0, 0);
       else
         matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, i);
       push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, (R) o, null));
@@ -132,7 +132,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       final R row = super.remove(i);
       if (row != null) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, row, null));
@@ -148,7 +148,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
           changes.add(row);
       if (super.removeAll(c)) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, changes, null, null));
@@ -165,7 +165,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
           changes.add(row);
       if (super.retainAll(c)) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.selectRows(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, changes, null, null));
@@ -227,7 +227,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         public final void remove() {
           it.remove();
           if (isEmpty())
-            matrix = BooleanMatrix2D.factory.zeros(0, 0);
+            matrix = BooleanMatrix2D.Factory.zeros(0, 0);
           else
             matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, j);
           push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, pointer, null));
@@ -237,35 +237,35 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
 
     public final void clear() {
       super.clear();
-      matrix = BooleanMatrix2D.factory.zeros(0, 0);
+      matrix = BooleanMatrix2D.Factory.zeros(0, 0);
       push(new RelationEvent<R, C>(RelationEvent.ROWS_CLEARED));
     }
 
     private final void append(final boolean wasEmpty, final int rows) {
       if (colHeads == null)
         return;
-      final BooleanMatrix zeros = BooleanMatrix2D.factory.zeros(rows, colHeads.size());
+      final BooleanMatrix zeros = BooleanMatrix2D.Factory.zeros(rows, colHeads.size());
       if (wasEmpty)
         matrix = zeros;
       else
-        matrix = (BooleanMatrix) matrix.appendVertically(zeros);
+        matrix = (BooleanMatrix) matrix.appendVertically(Ret.NEW, zeros);
     }
 
     private final void insert(final int i, final int size0, final int rows) {
       if (colHeads == null)
         return;
       final int cols = colHeads.size();
-      final BooleanMatrix zeros = BooleanMatrix2D.factory.zeros(rows, cols);
+      final BooleanMatrix zeros = BooleanMatrix2D.Factory.zeros(rows, cols);
       if (size0 == 0)
         matrix = zeros;
       else if (i == 0)
-        matrix = (BooleanMatrix) zeros.appendVertically(matrix);
+        matrix = (BooleanMatrix) zeros.appendVertically(Ret.NEW, matrix);
       else if (i == size0)
-        matrix = (BooleanMatrix) matrix.appendVertically(zeros);
+        matrix = (BooleanMatrix) matrix.appendVertically(Ret.NEW, zeros);
       else {
         BooleanMatrix upper = matrix.subMatrix(Ret.LINK, 0, 0, i - 1, cols - 1).toBooleanMatrix();
         BooleanMatrix lower = matrix.subMatrix(Ret.LINK, i, 0, size0 - 1, cols - 1).toBooleanMatrix();
-        matrix = (BooleanMatrix) upper.appendVertically(zeros).appendVertically(lower);
+        matrix = (BooleanMatrix) upper.appendVertically(Ret.NEW, zeros).appendVertically(Ret.NEW, lower);
       }
     }
   }
@@ -343,7 +343,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         return false;
       super.remove(o);
       if (isEmpty())
-        matrix = BooleanMatrix2D.factory.zeros(0, 0);
+        matrix = BooleanMatrix2D.Factory.zeros(0, 0);
       else
         matrix = (BooleanMatrix) matrix.deleteColumns(Ret.NEW, i);
       push(new RelationEvent<R, C>(RelationEvent.COLUMNS_REMOVED, null, (C) o));
@@ -354,7 +354,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       final C col = super.remove(i);
       if (col != null) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.deleteColumns(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.COLUMNS_REMOVED, null, col));
@@ -370,7 +370,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
           changes.add(col);
       if (super.removeAll(c)) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.deleteColumns(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.COLUMNS_REMOVED, null, changes, null));
@@ -387,7 +387,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
           changes.add(col);
       if (super.retainAll(c)) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.selectColumns(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.COLUMNS_REMOVED, null, changes, null));
@@ -434,7 +434,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         public final void remove() {
           it.remove();
           if (isEmpty())
-            matrix = BooleanMatrix2D.factory.zeros(0, 0);
+            matrix = BooleanMatrix2D.Factory.zeros(0, 0);
           else
             matrix = (BooleanMatrix) matrix.deleteColumns(Ret.NEW, j);
           push(new RelationEvent<R, C>(RelationEvent.COLUMNS_REMOVED, null, pointer));
@@ -459,31 +459,31 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
 
     public final void clear() {
       super.clear();
-      matrix = BooleanMatrix2D.factory.zeros(0, 0);
+      matrix = BooleanMatrix2D.Factory.zeros(0, 0);
       push(new RelationEvent<R, C>(RelationEvent.COLUMNS_CLEARED));
     }
 
     private final void append(final boolean wasEmpty, final int cols) {
-      final BooleanMatrix zeros = BooleanMatrix2D.factory.zeros(rowHeads.size(), cols);
+      final BooleanMatrix zeros = BooleanMatrix2D.Factory.zeros(rowHeads.size(), cols);
       if (wasEmpty)
         matrix = zeros;
       else
-        matrix = (BooleanMatrix) matrix.appendHorizontally(zeros);
+        matrix = (BooleanMatrix) matrix.appendHorizontally(Ret.NEW, zeros);
     }
 
     private final void insert(final int i, final int size0, final int cols) {
       final int rows = rowHeads.size();
-      final BooleanMatrix zeros = BooleanMatrix2D.factory.zeros(rows, cols);
+      final BooleanMatrix zeros = BooleanMatrix2D.Factory.zeros(rows, cols);
       if (size0 == 0)
         matrix = zeros;
       else if (i == 0)
-        matrix = (BooleanMatrix) zeros.appendHorizontally(matrix);
+        matrix = (BooleanMatrix) zeros.appendHorizontally(Ret.NEW, matrix);
       else if (i == size0)
-        matrix = (BooleanMatrix) matrix.appendHorizontally(zeros);
+        matrix = (BooleanMatrix) matrix.appendHorizontally(Ret.NEW, zeros);
       else {
         final BooleanMatrix left = matrix.subMatrix(Ret.LINK, 0, 0, rows - 1, i - 1).toBooleanMatrix();
         final BooleanMatrix right = matrix.subMatrix(Ret.LINK, 0, i, rows - 1, size0 - 1).toBooleanMatrix();
-        matrix = (BooleanMatrix) left.appendHorizontally(zeros).appendHorizontally(right);
+        matrix = (BooleanMatrix) left.appendHorizontally(Ret.NEW, zeros).appendHorizontally(Ret.NEW, right);
       }
     }
   }
@@ -569,7 +569,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         return false;
       super.remove(o);
       if (isEmpty())
-        matrix = BooleanMatrix2D.factory.zeros(0, 0);
+        matrix = BooleanMatrix2D.Factory.zeros(0, 0);
       else
         matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, i).deleteColumns(Ret.NEW, i);
       push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, (R) o, null));
@@ -582,7 +582,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       final R head = super.remove(i);
       if (head != null) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, i).deleteColumns(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, head, null));
@@ -600,7 +600,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
           changes.add(head);
       if (super.removeAll(c)) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, i).deleteColumns(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, changes, null, null));
@@ -619,7 +619,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
           changes.add(head);
       if (super.removeAll(c)) {
         if (isEmpty())
-          matrix = BooleanMatrix2D.factory.zeros(0, 0);
+          matrix = BooleanMatrix2D.Factory.zeros(0, 0);
         else
           matrix = (BooleanMatrix) matrix.selectRows(Ret.NEW, i).selectColumns(Ret.NEW, i);
         push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, changes, null, null));
@@ -686,7 +686,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         public final void remove() {
           it.remove();
           if (isEmpty())
-            matrix = BooleanMatrix2D.factory.zeros(0, 0);
+            matrix = BooleanMatrix2D.Factory.zeros(0, 0);
           else
             matrix = (BooleanMatrix) matrix.deleteRows(Ret.NEW, j).deleteColumns(Ret.NEW, j);
           push(new RelationEvent<R, C>(RelationEvent.ROWS_REMOVED, pointer, null));
@@ -697,39 +697,39 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
 
     public final void clear() {
       super.clear();
-      matrix = BooleanMatrix2D.factory.zeros(0, 0);
+      matrix = BooleanMatrix2D.Factory.zeros(0, 0);
       push(new RelationEvent<R, C>(RelationEvent.ROWS_CLEARED));
       push(new RelationEvent<R, C>(RelationEvent.COLUMNS_CLEARED));
     }
 
     private final void append(final int size0, final int heads) {
       if (size0 == 0) {
-        matrix = BooleanMatrix2D.factory.zeros(heads, heads);
+        matrix = BooleanMatrix2D.Factory.zeros(heads, heads);
         return;
       }
-      final BooleanMatrix rows = BooleanMatrix2D.factory.zeros(heads, size0);
-      final BooleanMatrix cols = BooleanMatrix2D.factory.zeros(size0 + heads, heads);
-      matrix = (BooleanMatrix) matrix.appendVertically(rows).appendHorizontally(cols);
+      final BooleanMatrix rows = BooleanMatrix2D.Factory.zeros(heads, size0);
+      final BooleanMatrix cols = BooleanMatrix2D.Factory.zeros(size0 + heads, heads);
+      matrix = (BooleanMatrix) matrix.appendVertically(Ret.NEW, rows).appendHorizontally(Ret.NEW, cols);
     }
 
     private final void insert(final int i, final int size0, final int heads) {
       if (size0 == 0) {
-        matrix = BooleanMatrix2D.factory.zeros(heads, heads);
+        matrix = BooleanMatrix2D.Factory.zeros(heads, heads);
         return;
       }
-      final BooleanMatrix rows = BooleanMatrix2D.factory.zeros(heads, size0);
-      final BooleanMatrix cols = BooleanMatrix2D.factory.zeros(size0 + heads, heads);
+      final BooleanMatrix rows = BooleanMatrix2D.Factory.zeros(heads, size0);
+      final BooleanMatrix cols = BooleanMatrix2D.Factory.zeros(size0 + heads, heads);
       if (i == 0)
-        matrix = (BooleanMatrix) cols.appendHorizontally(rows.appendVertically(matrix));
+        matrix = (BooleanMatrix) cols.appendHorizontally(Ret.NEW, rows.appendVertically(Ret.NEW, matrix));
       else if (i == size0)
-        matrix = (BooleanMatrix) matrix.appendVertically(rows).appendHorizontally(cols);
+        matrix = (BooleanMatrix) matrix.appendVertically(Ret.NEW, rows).appendHorizontally(Ret.NEW, cols);
       else {
         final BooleanMatrix upper = (BooleanMatrix) matrix.subMatrix(Ret.LINK, 0, 0, i - 1, size0 - 1);
         final BooleanMatrix lower = (BooleanMatrix) matrix.subMatrix(Ret.LINK, i, 0, size0 - 1, size0 - 1);
-        matrix = (BooleanMatrix) upper.appendVertically(rows).appendVertically(lower);
+        matrix = (BooleanMatrix) upper.appendVertically(Ret.NEW, rows).appendVertically(Ret.NEW, lower);
         final BooleanMatrix left = (BooleanMatrix) matrix.subMatrix(Ret.LINK, 0, 0, size0 + heads - 1, i - 1);
         final BooleanMatrix right = (BooleanMatrix) matrix.subMatrix(Ret.LINK, 0, i, size0 + heads - 1, size0 - 1);
-        matrix = (BooleanMatrix) left.appendHorizontally(cols).appendHorizontally(right);
+        matrix = (BooleanMatrix) left.appendHorizontally(Ret.NEW, cols).appendHorizontally(Ret.NEW, right);
       }
     }
   }
@@ -738,11 +738,11 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   private final Map<RelationEvent.Type, List<RelationEventHandler<R, C>>> eventHandlers = new ConcurrentHashMap<>();
 
   public MatrixRelation(final boolean homogen) {
-    this(SetLists.<R> empty(), SetLists.<C> empty(), BooleanMatrix2D.factory.zeros(0, 0), homogen);
+    this(SetLists.<R> empty(), SetLists.<C> empty(), BooleanMatrix2D.Factory.zeros(0, 0), homogen);
   }
 
   public MatrixRelation(final SetList<R> rowHeads, final SetList<C> colHeads, final boolean homogen) {
-    this(rowHeads, colHeads, BooleanMatrix2D.factory.zeros(rowHeads.size(), colHeads.size()), homogen);
+    this(rowHeads, colHeads, BooleanMatrix2D.Factory.zeros(rowHeads.size(), colHeads.size()), homogen);
   }
 
   @SuppressWarnings("unchecked")

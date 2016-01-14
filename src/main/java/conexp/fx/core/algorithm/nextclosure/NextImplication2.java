@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.ujmp.core.collections.BitSetSet;
+import org.ujmp.core.collections.set.BitSetSet;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;

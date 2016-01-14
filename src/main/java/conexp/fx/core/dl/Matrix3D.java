@@ -18,8 +18,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.ujmp.core.Matrix;
-import org.ujmp.core.MatrixFactory;
+import org.ujmp.core.Matrix2D;
 import org.ujmp.core.enums.ValueType;
+import org.ujmp.core.matrix.factory.Matrix2DFactory;
+import org.ujmp.core.matrix.factory.MatrixMultiDFactory;
 
 import conexp.fx.core.collections.pair.Pair;
 
@@ -38,7 +40,7 @@ public class Matrix3D<G, M, W> {
 
   public Matrix3D(final int x, final int y, final int z) {
     super();
-    mat = MatrixFactory.zeros(ValueType.BOOLEAN, x, y, z);
+    mat = Matrix.Factory.zeros(ValueType.BOOLEAN, x, y, z);
     x1 = new HashMap<G, Integer>(x);
     y1 = new HashMap<M, Integer>(y);
     z1 = new HashMap<W, Integer>(z);

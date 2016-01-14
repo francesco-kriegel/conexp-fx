@@ -35,7 +35,7 @@ public class NegationScaling {
     ncxt.setMatrix(cxt
         .matrix()
         .clone()
-        .appendHorizontally(
+        .appendHorizontally(Ret.NEW,
             cxt.matrix().selectColumns(Ret.NEW, cxt.colHeads().indicesOf(attributes, false)).not(Ret.NEW))
         .toBooleanMatrix());
     return ncxt;

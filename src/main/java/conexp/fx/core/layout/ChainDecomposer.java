@@ -16,11 +16,12 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import org.ujmp.core.collections.BitSetSet;
+import org.ujmp.core.collections.set.BitSetSet;
 import org.ujmp.core.util.RandomSimple;
 
 import com.google.common.base.Predicate;
 
+import conexp.fx.core.collections.BitSetSet2;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.relation.MatrixRelation;
 
@@ -38,8 +39,8 @@ public final class ChainDecomposer<E>
 
   public final Set<Set<E>> randomChainDecomposition()
   {
-    final BitSetSet available = new BitSetSet();
-    available.set(0, num);
+    final BitSetSet2 available = new BitSetSet2();
+    available.getBitSet().set(0, num);
     final Set<Set<E>> chains = new HashSet<Set<E>>();
     while (!available.isEmpty())
       chains.add(nextChain(available));
