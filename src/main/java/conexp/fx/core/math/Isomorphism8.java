@@ -1,5 +1,15 @@
 package conexp.fx.core.math;
 
+/*
+ * #%L
+ * Concept Explorer FX
+ * %%
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * %%
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
+ * #L%
+ */
+
 import java.util.function.Function;
 
 public final class Isomorphism8<T, R> implements Function<T, R> {

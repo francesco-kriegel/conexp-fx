@@ -11,7 +11,7 @@ import conexp.fx.gui.util.Platform2;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -25,9 +25,9 @@ import javafx.concurrent.Task;
 public abstract class TimeTask<T> extends Task<T> {
 
   @FunctionalInterface
-  public static interface RunnableWithException {
+  public static interface RunnableWithException<E extends Exception> {
 
-    public void run() throws Exception;
+    public void run() throws E;
 
     public default Callable<Void> toCallable() {
       return () -> {

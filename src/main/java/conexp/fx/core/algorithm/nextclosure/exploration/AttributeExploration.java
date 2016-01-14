@@ -4,7 +4,7 @@ package conexp.fx.core.algorithm.nextclosure.exploration;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -54,10 +54,7 @@ public final class AttributeExploration<G, M> {
   protected final Expert<G, M>           expert;
   protected Set<M>                       pseudoClosure = new HashSet<M>();
   protected final Set<Implication<G, M>> implications  = new HashSet<Implication<G, M>>();
-  private final ClosureOperator<M>       clop          = ClosureOperator.fromImplications(
-      implications,
-      true,
-      true);
+  private final ClosureOperator<M>       clop          = ClosureOperator.fromImplications(implications, true, true);
 
   /**
    * Constructs a new attribute exploration process. It has to be started by a call to the method run.
@@ -81,51 +78,27 @@ public final class AttributeExploration<G, M> {
   public final void start() throws InterruptedException {
     while (pseudoClosure.size() < context.colHeads().size()) {
 //      final Set<M> closure = context.intent(pseudoClosure);
-      final Set<M> closure = context.rowAnd(
-          context.colAnd(
-              pseudoClosure));
+      final Set<M> closure = context.rowAnd(context.colAnd(pseudoClosure));
       if (closure.size() == pseudoClosure.size()) {
         nextPseudoClosure();
       } else {
-        closure.removeAll(
-            pseudoClosure);
+        closure.removeAll(pseudoClosure);
         final Implication<G, M> implication = new Implication<G, M>(pseudoClosure, closure);
-        final CounterExample<G, M> counterExample = expert.askForCounterexample(
-            implication);
-        if (counterExample == null) {
-          implications.add(
-              implication);
+        final Set<CounterExample<G, M>> counterExample = expert.askForCounterExample(implication);
+        if (counterExample.isEmpty()) {
+          implications.add(implication);
           nextPseudoClosure();
         } else {
-          addCounterExample(
-              counterExample);
+          counterExample.forEach(cex -> cex.insertIn(context));
         }
       }
     }
   }
 
-  private final void addCounterExample(final CounterExample<G, M> counterExample) {
-    context.rowHeads().add(
-        counterExample.getObject());
-    for (M m : counterExample.getAttributes())
-      context.add(
-          counterExample.getObject(),
-          m);
-  }
-
   private final void nextPseudoClosure() {
-    for (M m : Lists.reverse(
-        context.colHeads())) {
-      final Set<M> s = clop.closure(
-          LexicalOrder.oplus(
-              context.colHeads(),
-              pseudoClosure,
-              m));
-      if (LexicalOrder.isSmaller(
-          context.colHeads(),
-          pseudoClosure,
-          s,
-          m)) {
+    for (M m : Lists.reverse(context.colHeads())) {
+      final Set<M> s = clop.closure(LexicalOrder.oplus(context.colHeads(), pseudoClosure, m));
+      if (LexicalOrder.isSmaller(context.colHeads(), pseudoClosure, s, m)) {
         pseudoClosure = s;
         return;
       }

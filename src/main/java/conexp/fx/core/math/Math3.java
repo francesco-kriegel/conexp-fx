@@ -4,12 +4,11 @@ package conexp.fx.core.math;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
-
 
 import java.util.Collection;
 
@@ -59,5 +58,21 @@ public final class Math3 {
     for (Number n : c)
       s *= n.doubleValue();
     return s;
+  }
+
+  public static final String formatTime(final long time) {
+    if (time == 0)
+      return "";
+    final long ms = time % 1000;
+    final long s = (time / 1000) % 60;
+    final long m = (time / 60000) % 60;
+    final long h = (time / 3600000);
+    if (h > 0)
+      return String.format("%02dh %02dmin", h, m);
+    if (m > 0)
+      return String.format("%02dmin %02ds", m, s);
+    if (s > 0)
+      return String.format("%02ds %03dms", s, ms);
+    return String.format("%03dms", ms);
   }
 }

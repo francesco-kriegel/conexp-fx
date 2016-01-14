@@ -4,7 +4,7 @@ package conexp.fx.gui.cellpane;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -62,11 +62,11 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextBuilder;
@@ -124,15 +124,16 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
   public final IntegerProperty                        textSize                    = new SimpleIntegerProperty();
   public final StringBinding                          textStyle                   = new StringBinding() {
 
-    {
-      super.bind(textSize);
-    }
+                                                                                    {
+                                                                                      super.bind(textSize);
+                                                                                    }
 
-    @Override
-    public String computeValue() {
-      return "-fx-font-size: " + textSize.get() + ";";
-    }
-  };
+                                                                                    @Override
+                                                                                    public String computeValue() {
+                                                                                      return "-fx-font-size: "
+                                                                                          + textSize.get() + ";";
+                                                                                    }
+                                                                                  };
   public final StringProperty                         textContent                 = new SimpleStringProperty();
   public final DoubleProperty                         opacity                     = new SimpleDoubleProperty();
   public final BooleanProperty                        highlight                   = new SimpleBooleanProperty();
@@ -173,7 +174,7 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
     public final Text      text       = TextBuilder.create().build();                            // .fontSmoothingType(FontSmoothingType.GRAY)
   }
 
-  public class CellInteractionPane extends StackPane {
+  public class CellInteractionPane extends BorderPane {
 
     public final Rectangle interactionRectangle = RectangleBuilder.create().fill(Color.TRANSPARENT).build();
   }
@@ -259,7 +260,7 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
     this.contentPane.get().getChildren().addAll(contentPane.get().background, contentPane.get().text);
     this.contentPane.get().text.setTextAlignment(textAlignment);
     this.contentPane.get().text.styleProperty().bind(textStyle);
-    this.interactionPane.get().getChildren().addAll(interactionPane.get().interactionRectangle);
+    this.interactionPane.get().setCenter(interactionPane.get().interactionRectangle);
     this.interactionPane.get().minWidthProperty().bind(width);
     this.interactionPane.get().maxWidthProperty().bind(width);
     this.interactionPane.get().interactionRectangle.widthProperty().bind(width);
@@ -304,7 +305,8 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
     });
     this.createPropertyListeners();
     this.createMouseHandlers();
-    this.createDragAndDropHandlers();
+    if (cellPane.interactive)
+      this.createDragAndDropHandlers();
     cellPane.rows.put(gridRow, (TCell) Cell.this);
     cellPane.columns.put(gridColumn, (TCell) Cell.this);
 //    Platform.runLater(new Runnable() {
@@ -715,14 +717,16 @@ public abstract class Cell<TCell extends Cell<TCell, TCellPane>, TCellPane exten
         translateTransition.removeListener(translateTransitionChangeListener);
         fillTransition.removeListener(fillTransitionChangeListener);
         fadeTransition.removeListener(fadeTransitionChangeListener);
-        getInteractionPane().removeEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
+        if (cellPane.interactive) {
+          getInteractionPane().removeEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
 //        getInteractionPane().removeEventHandler(MouseEvent.MOUSE_EXITED, mouseExitedEventHandler);
-        getInteractionPane().removeEventHandler(MouseEvent.DRAG_DETECTED, dragDetectedEventHandler);
-        getInteractionPane().removeEventHandler(DragEvent.DRAG_OVER, dragOverEventHandler);
-        getInteractionPane().removeEventHandler(DragEvent.DRAG_ENTERED, dragEnteredEventHandler);
-        getInteractionPane().removeEventHandler(DragEvent.DRAG_EXITED, dragExitedEventHandler);
-        getInteractionPane().removeEventHandler(DragEvent.DRAG_DROPPED, dragDroppedEventHandler);
-        getInteractionPane().removeEventHandler(DragEvent.DRAG_DONE, dragDoneEventHandler);
+          getInteractionPane().removeEventHandler(MouseEvent.DRAG_DETECTED, dragDetectedEventHandler);
+          getInteractionPane().removeEventHandler(DragEvent.DRAG_OVER, dragOverEventHandler);
+          getInteractionPane().removeEventHandler(DragEvent.DRAG_ENTERED, dragEnteredEventHandler);
+          getInteractionPane().removeEventHandler(DragEvent.DRAG_EXITED, dragExitedEventHandler);
+          getInteractionPane().removeEventHandler(DragEvent.DRAG_DROPPED, dragDroppedEventHandler);
+          getInteractionPane().removeEventHandler(DragEvent.DRAG_DONE, dragDoneEventHandler);
+        }
       }
     });
   }

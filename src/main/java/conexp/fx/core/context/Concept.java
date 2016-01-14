@@ -7,7 +7,7 @@ package conexp.fx.core.context;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -22,16 +22,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import conexp.fx.core.math.PartialComparable;
 
-public final class Concept<G, M> implements de.tudresden.inf.tcs.fcaapi.Concept<M, G>,
-    PartialComparable<Concept<G, M>>, Cloneable {
+public final class Concept<G, M>
+    implements de.tudresden.inf.tcs.fcaapi.Concept<M, G>, PartialComparable<Concept<G, M>>, Cloneable {
 
   private final Set<G>           extent;
   private final ObservableSet<M> intent;
 
-  public Concept(final Collection<G> extent, final Collection<M> intent) {
+  public Concept(final Set<G> extent, final ObservableSet<M> intent) {
     super();
-    this.extent = new HashSet<G>(extent);
-    this.intent = FXCollections.observableSet(Collections.synchronizedSet(new HashSet<M>(intent)));
+    this.extent = extent;
+    this.intent = intent;
+  }
+
+  public Concept(final Set<G> extent, final Set<M> intent) {
+    this(extent, FXCollections.observableSet(Collections.synchronizedSet(intent)));
+  }
+
+  public Concept(final Collection<G> extent, final Collection<M> intent) {
+    this(new HashSet<G>(extent), new HashSet<M>(intent));
   }
 
   public final Set<G> extent() {

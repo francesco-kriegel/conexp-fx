@@ -4,7 +4,7 @@ package conexp.fx.gui.exploration;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -36,9 +36,15 @@ public class CounterExampleDialog extends FXDialog<CounterExample<String, String
 
 //  private final MatrixContext<String, String> counterExampleContext;
 
-  public CounterExampleDialog(final MatrixContext<String, String> context, final Implication<String, String> implication) {
-    super(ConExpFX.instance.primaryStage, Style.QUESTION, "Attribute Exploration", "Is the formal implication "
-        + implication + " correct? If no, then please provide a counterexample.", null);
+  public CounterExampleDialog(
+      final MatrixContext<String, String> context,
+      final Implication<String, String> implication) {
+    super(
+        ConExpFX.instance.primaryStage,
+        Style.QUESTION,
+        "Attribute Exploration",
+        "Is the formal implication " + implication + " correct? If no, then please provide a counterexample.",
+        null);
     this.context = context;
     this.implication = implication;
 //    this.counterExampleContext =
@@ -60,48 +66,41 @@ public class CounterExampleDialog extends FXDialog<CounterExample<String, String
     final TextField objectTextField = new TextField("Counterexample" + IdGenerator.getNextId());
     final HBox objectBox = new HBox(objectLabel, objectTextField);
     final ObservableList<String> selectedAttributes = FXCollections.observableArrayList();
-    final VBox checkBoxes = new VBox();
-    for (String m : context.colHeads()) {
-      final CheckBox checkBox = new CheckBox(m);
-      if (implication.getPremise().contains(
-          m)) {
-        checkBox.setSelected(true);
-        checkBox.setDisable(true);
-      } else {
-        checkBox.selectedProperty().addListener(
-            (__, ___, isSelected) -> {
-              if (isSelected)
-                selectedAttributes.add(checkBox.getText());
-              else
-                selectedAttributes.remove(checkBox.getText());
-            });
-      }
-      checkBoxes.getChildren().add(
-          checkBox);
-    }
     final ObservableValue<CounterExample<String, String>> counterExample = Bindings.createObjectBinding(
         () -> new CounterExample<String, String>(objectTextField.getText(), selectedAttributes),
         objectTextField.textProperty(),
         selectedAttributes);
-    counterExample
-        .addListener((__, ___, newValue) -> {
-          CounterExampleDialog.this.value = newValue;
-          final boolean illegal =
-              selectedAttributes.containsAll(implication.getPremise())
-                  && selectedAttributes.containsAll(implication.getConclusion());
-          if (illegal) {
-            checkBoxes.getChildren().stream().map(
-                child -> (CheckBox) child).forEach(
-                checkBox -> checkBox.setSelected(implication.getPremise().contains(
-                    checkBox.getText())));
-            new ErrorDialog(
-                ConExpFX.instance.primaryStage,
-                new IllegalArgumentException(
-                    "An illegal counterexample was entered. The counterexample must not have all attributes in the implication's conclusion."))
-                .showAndWait();
-          }
-        });
+    counterExample.addListener((__, ___, newValue) -> CounterExampleDialog.this.value = newValue);
     selectedAttributes.addAll(implication.getPremise());
+    final VBox checkBoxes = new VBox();
+    for (String m : context.colHeads()) {
+      final CheckBox checkBox = new CheckBox(m);
+      if (implication.getPremise().contains(m)) {
+        checkBox.setSelected(true);
+        checkBox.setDisable(true);
+      } else {
+        checkBox.selectedProperty().addListener((__, ___, isSelected) -> {
+          if (isSelected)
+            selectedAttributes.add(checkBox.getText());
+          else
+            selectedAttributes.remove(checkBox.getText());
+        });
+      }
+      checkBoxes.getChildren().add(checkBox);
+    }
+    counterExample.addListener((__, ___, newValue) -> {
+      final boolean illegal = selectedAttributes.containsAll(implication.getPremise())
+          && selectedAttributes.containsAll(implication.getConclusion());
+      if (illegal) {
+        checkBoxes.getChildren().stream().map(child -> (CheckBox) child).forEach(
+            checkBox -> checkBox.setSelected(implication.getPremise().contains(checkBox.getText())));
+        new ErrorDialog(
+            ConExpFX.instance.primaryStage,
+            new IllegalArgumentException(
+                "An illegal counterexample was entered. The counterexample must not have all attributes in the implication's conclusion."))
+                    .showAndWait();
+      }
+    });
     pane.setCenter(checkBoxes);
     pane.setTop(objectBox);
     return pane;

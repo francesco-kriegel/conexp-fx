@@ -4,7 +4,7 @@ package conexp.fx.core.collections;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -25,7 +25,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.ujmp.core.collections.BitSetSet;
+import org.ujmp.core.collections.set.BitSetSet;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -58,8 +58,7 @@ public final class Collections3 {
     return new AbstractCollection<E>() {
 
       public final Iterator<E> iterator() {
-        return Iterables.concat(
-            c).iterator();
+        return Iterables.concat(c).iterator();
       }
 
       public final int size() {
@@ -80,9 +79,7 @@ public final class Collections3 {
     return new AbstractCollection<E>() {
 
       public final Iterator<E> iterator() {
-        return Iterators.concat(
-            c1.iterator(),
-            c2.iterator());
+        return Iterators.concat(c1.iterator(), c2.iterator());
       }
 
       public final int size() {
@@ -92,15 +89,11 @@ public final class Collections3 {
   }
 
   public static final <E> Collection<E> intersection(final Collection<E> c1, final Collection<? extends E> c2) {
-    return Collections2.filter(
-        c1,
-        Predicates.in(c2));
+    return Collections2.filter(c1, Predicates.in(c2));
   }
 
   public static final <E> Collection<E> difference(final Collection<E> c1, final Collection<? extends E> c2) {
-    return Collections2.<E> filter(
-        c1,
-        Predicates.not(Predicates.in(c2)));
+    return Collections2.<E> filter(c1, Predicates.not(Predicates.in(c2)));
   }
 
   public static final <T, E> Set<E> transform(final Set<T> s, final Isomorphism<T, E> f) {
@@ -108,9 +101,7 @@ public final class Collections3 {
 
       @Override
       public final Iterator<E> iterator() {
-        return Iterators.transform(
-            s.iterator(),
-            f);
+        return Iterators.transform(s.iterator(), f);
       }
 
       @Override
@@ -138,9 +129,7 @@ public final class Collections3 {
   public static final <E> E random(final Collection<? extends E> c, final Predicate<E> p, final Random rng) {
     E e;
     while (true) {
-      e = random(
-          c,
-          rng);
+      e = random(c, rng);
       if (p.apply(e))
         break;
     }
@@ -155,23 +144,17 @@ public final class Collections3 {
 
   public static final <E> List<E> sort(final Iterable<? extends E> i, final Comparator<? super E> c) {
     final ArrayList<E> l = Lists.newArrayList(i);
-    Collections.sort(
-        l,
-        c);
+    Collections.sort(l, c);
     return l;
   }
 
   public static final <E, T extends E> Collection<T> elementsBySubClass(final Collection<E> c, final Class<T> clazz) {
-    return Collections2.transform(
-        Collections2.filter(
-            c,
-            Predicates.instanceOf(clazz)),
-        new Function<E, T>() {
+    return Collections2.transform(Collections2.filter(c, Predicates.instanceOf(clazz)), new Function<E, T>() {
 
-          public final T apply(final E e) {
-            return clazz.cast(e);
-          }
-        });
+      public final T apply(final E e) {
+        return clazz.cast(e);
+      }
+    });
   }
 
   public static final <E> Function<Set<E>, Iterator<E>> setToIterator() {
@@ -221,21 +204,21 @@ public final class Collections3 {
     return b;
   }
 
+  public static final BitSetSet2 newBitSetSet2(final Collection<Integer> c) {
+    final BitSetSet2 b = new BitSetSet2();
+    b.addAll(c);
+    return b;
+  }
+
   public static final <E> List<E> filter(final List<E> l, final Predicate<E> p) {
     return new AbstractList<E>() {
 
       public final E get(final int index) {
-        return Iterables.get(
-            Iterables.filter(
-                l,
-                p),
-            index);
+        return Iterables.get(Iterables.filter(l, p), index);
       }
 
       public final int size() {
-        return Iterables.size(Iterables.filter(
-            l,
-            p));
+        return Iterables.size(Iterables.filter(l, p));
       }
     };
   }

@@ -1,10 +1,12 @@
 package conexp.fx.core.implication;
 
+import java.util.Collection;
+
 /*
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -44,6 +46,10 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
     this.confidence = confidence;
   }
 
+  public Implication(final Collection<M> premise, final Collection<M> conclusion) {
+    this(new HashSet<M>(premise), new HashSet<M>(conclusion));
+  }
+
   public final Set<G> getSupport() {
     return support;
   }
@@ -52,23 +58,21 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
     return confidence;
   }
 
+  public final boolean isTrivial() {
+    return getPremise().containsAll(getConclusion());
+  }
+
   @Override
   public boolean equals(final Object obj) {
     if (obj == null)
       return false;
     if (obj instanceof FCAImplication)
-      return super.equals(
-          (FCAImplication<?>) obj);
+      return super.equals((FCAImplication<?>) obj);
     if (!(obj instanceof Implication))
       return false;
     final Implication<?, ?> other = (Implication<?, ?>) obj;
-    return this.getPremise().equals(
-        other.getPremise())
-        && this.getConclusion().equals(
-            other.getConclusion())
-        && this.getSupport().equals(
-            other.getSupport())
-        && this.getConfidence() == other.getConfidence();
+    return this.getPremise().equals(other.getPremise()) && this.getConclusion().equals(other.getConclusion());
+//        && this.getSupport().equals(other.getSupport()) && this.getConfidence() == other.getConfidence();
   }
 
   @Override
@@ -83,25 +87,15 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
     final StringBuilder s = new StringBuilder();
     final Iterator<M> pit = getPremise().iterator();
     if (pit.hasNext())
-      s.append(
-          pit.next());
-    pit.forEachRemaining(
-        m -> s.append(
-            " " + UnicodeSymbols.WEDGE + " " + m));
-    s.append(
-        " " + UnicodeSymbols.TO + " ");
-    final Iterator<M> cit = Sets.difference(
-        getConclusion(),
-        getPremise()).iterator();
+      s.append(pit.next());
+    pit.forEachRemaining(m -> s.append(" " + UnicodeSymbols.WEDGE + " " + m));
+    s.append(" " + UnicodeSymbols.TO + " ");
+    final Iterator<M> cit = Sets.difference(getConclusion(), getPremise()).iterator();
     if (cit.hasNext())
-      s.append(
-          cit.next());
-    cit.forEachRemaining(
-        m -> s.append(
-            " " + UnicodeSymbols.WEDGE + " " + m));
+      s.append(cit.next());
+    cit.forEachRemaining(m -> s.append(" " + UnicodeSymbols.WEDGE + " " + m));
     if (confidence < 1d)
-      s.append(
-          " (" + ((int) (100d * confidence)) + "%)");
+      s.append(" (" + ((int) (100d * confidence)) + "%)");
     return s.toString();
   }
 

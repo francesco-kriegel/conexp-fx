@@ -4,7 +4,7 @@ package conexp.fx.gui.cellpane;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -55,8 +55,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
@@ -70,53 +70,75 @@ public abstract class CellPane<TCellPane extends CellPane<TCellPane, TCell>, TCe
   public final ReadOnlyStringProperty              id;
   protected final StackPane                        contentAndInteractionStackPane = new StackPane() {
 
-    @Deprecated
-    public final BaseBounds impl_computeGeomBounds(final BaseBounds baseBounds, final BaseTransform baseTransform) {
-      synchronized (this) {
-        while (true)
-          try {
-            return super.impl_computeGeomBounds(baseBounds, baseTransform);
-          } catch (ConcurrentModificationException e) {
-//            System.err.println("ignore " + e.toString() + " in <CellPane>.contentAndInteractionStackPane.impl_computeGeomBounds(...)");
-          }
-      }
-    };
-  };
+                                                                                    @Deprecated
+                                                                                    public final BaseBounds
+                                                                                        impl_computeGeomBounds(
+                                                                                            final BaseBounds baseBounds,
+                                                                                            final BaseTransform baseTransform) {
+                                                                                      synchronized (this) {
+                                                                                        while (true)
+                                                                                          try {
+                                                                                            return super.impl_computeGeomBounds(
+                                                                                                baseBounds,
+                                                                                                baseTransform);
+                                                                                          } catch (ConcurrentModificationException e) {
+                                                                                            // System.err.println("ignore
+                                                                                            // " + e.toString() + " in
+                                                                                            // <CellPane>.contentAndInteractionStackPane.impl_computeGeomBounds(...)");
+                                                                                          }
+                                                                                      }
+                                                                                    };
+                                                                                  };
   protected final GridPane                         contentPane                    = new GridPane() {
 
-    @Deprecated
-    public final BaseBounds impl_computeGeomBounds(final BaseBounds baseBounds, final BaseTransform baseTransform) {
-      synchronized (this) {
-        while (true)
-          try {
-            return super.impl_computeGeomBounds(baseBounds, baseTransform);
-          } catch (ConcurrentModificationException e) {
-//            System.err.println("ignore " + e.toString() + " in <CellPane>.contentPane.impl_computeGeomBounds(...)");
-          }
-      }
-    };
-  };
+                                                                                    @Deprecated
+                                                                                    public final BaseBounds
+                                                                                        impl_computeGeomBounds(
+                                                                                            final BaseBounds baseBounds,
+                                                                                            final BaseTransform baseTransform) {
+                                                                                      synchronized (this) {
+                                                                                        while (true)
+                                                                                          try {
+                                                                                            return super.impl_computeGeomBounds(
+                                                                                                baseBounds,
+                                                                                                baseTransform);
+                                                                                          } catch (ConcurrentModificationException e) {
+                                                                                            // System.err.println("ignore
+                                                                                            // " + e.toString() + " in
+                                                                                            // <CellPane>.contentPane.impl_computeGeomBounds(...)");
+                                                                                          }
+                                                                                      }
+                                                                                    };
+                                                                                  };
   protected final GridPane                         interactionPane                = new GridPane() {
 
-    @Deprecated
-    public final BaseBounds impl_computeGeomBounds(final BaseBounds baseBounds, final BaseTransform baseTransform) {
-      synchronized (this) {
-        while (true)
-          try {
-            return super.impl_computeGeomBounds(baseBounds, baseTransform);
-          } catch (ConcurrentModificationException e) {
-//            System.err.println("ignore " + e.toString() + " in <CellPane>.interactionPane.impl_computeGeomBounds(...)");
-          }
-      }
-    };
-  };
+                                                                                    @Deprecated
+                                                                                    public final BaseBounds
+                                                                                        impl_computeGeomBounds(
+                                                                                            final BaseBounds baseBounds,
+                                                                                            final BaseTransform baseTransform) {
+                                                                                      synchronized (this) {
+                                                                                        while (true)
+                                                                                          try {
+                                                                                            return super.impl_computeGeomBounds(
+                                                                                                baseBounds,
+                                                                                                baseTransform);
+                                                                                          } catch (ConcurrentModificationException e) {
+                                                                                            // System.err.println("ignore
+                                                                                            // " + e.toString() + " in
+                                                                                            // <CellPane>.interactionPane.impl_computeGeomBounds(...)");
+                                                                                          }
+                                                                                      }
+                                                                                    };
+                                                                                  };
   private final EventHandler<MouseEvent>           dehighlightEventHandler        = new EventHandler<MouseEvent>() {
 
-    @Override
-    public void handle(MouseEvent event) {
-      dehighlight();
-    }
-  };
+                                                                                    @Override
+                                                                                    public void
+                                                                                        handle(MouseEvent event) {
+                                                                                      dehighlight();
+                                                                                    }
+                                                                                  };
   public final IntegerProperty                     maxRows                        = new SimpleIntegerProperty();
   public final IntegerProperty                     maxColumns                     = new SimpleIntegerProperty();
   public final BooleanProperty                     autoSizeRows                   = new SimpleBooleanProperty(false);
@@ -128,87 +150,129 @@ public abstract class CellPane<TCellPane extends CellPane<TCellPane, TCell>, TCe
   public final DoubleProperty                      maximalTextWidth               = new SimpleDoubleProperty(0);
   public final IntegerBinding                      rowHeight                      = new IntegerBinding() {
 
-    {
-      super.bind(zoomFactor, rowHeightDefault, maximalTextWidth);
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          zoomFactor,
+                                                                                          rowHeightDefault,
+                                                                                          maximalTextWidth);
+                                                                                    }
 
-    protected int computeValue() {
-      if (autoSizeRows.get())
-        return Math.min(250, (int) maximalTextWidth.get() + 10);
-      return (int) (zoomFactor.get() * (double) rowHeightDefault.get());
-    }
-  };
+                                                                                    protected int computeValue() {
+                                                                                      if (autoSizeRows.get())
+                                                                                        return (int) maximalTextWidth.get()
+                                                                                            + 10;
+//                                                                                        return Math.min(
+//                                                                                            250,
+//                                                                                            (int) maximalTextWidth.get()
+//                                                                                                + 10);
+                                                                                      return (int) (zoomFactor.get()
+                                                                                          * (double) rowHeightDefault
+                                                                                              .get());
+                                                                                    }
+                                                                                  };
   public final IntegerBinding                      columnWidth                    = new IntegerBinding() {
 
-    {
-      super.bind(zoomFactor, columnWidthDefault, maximalTextWidth);
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          zoomFactor,
+                                                                                          columnWidthDefault,
+                                                                                          maximalTextWidth);
+                                                                                    }
 
-    protected int computeValue() {
-      if (autoSizeColumns.get())
-        return Math.min(250, (int) maximalTextWidth.get() + 10);
-      return (int) (zoomFactor.get() * columnWidthDefault.get());
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      if (autoSizeColumns.get())
+                                                                                        return (int) maximalTextWidth.get()
+                                                                                            + 10;
+//                                                                                        return Math.min(
+//                                                                                            250,
+//                                                                                            (int) maximalTextWidth.get()
+//                                                                                                + 10);
+                                                                                      return (int) (zoomFactor.get()
+                                                                                          * columnWidthDefault.get());
+                                                                                    };
+                                                                                  };
   public final IntegerBinding                      textSize                       = new IntegerBinding() {
 
-    {
-      super.bind(zoomFactor, textSizeDefault);
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          zoomFactor,
+                                                                                          textSizeDefault);
+                                                                                    }
 
-    protected int computeValue() {
-      return (int) (zoomFactor.get() * (double) textSizeDefault.get());
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      return (int) (zoomFactor.get()
+                                                                                          * (double) textSizeDefault
+                                                                                              .get());
+                                                                                    };
+                                                                                  };
   protected final DoubleBinding                    prefHeight                     = new DoubleBinding() {
 
-    {
-      super.bind(rowHeight, maxRows);
-    }
+                                                                                    {
+                                                                                      super.bind(rowHeight, maxRows);
+                                                                                    }
 
-    @Override
-    protected double computeValue() {
-      return maxRows.doubleValue() * rowHeight.doubleValue();
-    }
-  };
+                                                                                    @Override
+                                                                                    protected double computeValue() {
+                                                                                      return maxRows.doubleValue()
+                                                                                          * rowHeight.doubleValue();
+                                                                                    }
+                                                                                  };
   protected final DoubleBinding                    prefWidth                      = new DoubleBinding() {
 
-    {
-      super.bind(columnWidth, maxColumns);
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          columnWidth,
+                                                                                          maxColumns);
+                                                                                    }
 
-    @Override
-    protected double computeValue() {
-      return maxColumns.doubleValue() * columnWidth.doubleValue();
-    }
-  };
+                                                                                    @Override
+                                                                                    protected double computeValue() {
+                                                                                      return maxColumns.doubleValue()
+                                                                                          * columnWidth.doubleValue();
+                                                                                    }
+                                                                                  };
   public final IntegerBinding                      visibleRows                    = new IntegerBinding() {
 
-    {
-      super.bind(contentAndInteractionStackPane.heightProperty(), maxRows, rowHeight);
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          contentAndInteractionStackPane
+                                                                                              .heightProperty(),
+                                                                                          maxRows,
+                                                                                          rowHeight);
+                                                                                    }
 
-    protected int computeValue() {
-      if (rowHeight.intValue() == 0)
-        return 0;
-      return Math
-          .min(contentAndInteractionStackPane.heightProperty().intValue() / rowHeight.intValue(), maxRows.intValue());
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      if (rowHeight.intValue() == 0)
+                                                                                        return 0;
+                                                                                      return Math.min(
+                                                                                          contentAndInteractionStackPane
+                                                                                              .heightProperty()
+                                                                                              .intValue()
+                                                                                              / rowHeight.intValue(),
+                                                                                          maxRows.intValue());
+                                                                                    };
+                                                                                  };
   public final IntegerBinding                      visibleColumns                 = new IntegerBinding() {
 
-    {
-      super.bind(contentAndInteractionStackPane.widthProperty(), maxColumns, columnWidth);
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          contentAndInteractionStackPane
+                                                                                              .widthProperty(),
+                                                                                          maxColumns,
+                                                                                          columnWidth);
+                                                                                    }
 
-    protected int computeValue() {
-      if (columnWidth.intValue() == 0)
-        return 0;
-      return Math.min(
-          contentAndInteractionStackPane.widthProperty().intValue() / columnWidth.intValue(),
-          maxColumns.intValue());
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      if (columnWidth.intValue() == 0)
+                                                                                        return 0;
+                                                                                      return Math.min(
+                                                                                          contentAndInteractionStackPane
+                                                                                              .widthProperty()
+                                                                                              .intValue()
+                                                                                              / columnWidth.intValue(),
+                                                                                          maxColumns.intValue());
+                                                                                    };
+                                                                                  };
   public final ObjectProperty<InteractionMode>     interactionMode                =
       new SimpleObjectProperty<InteractionMode>();
   public final ObjectProperty<ColorScheme>         colorScheme                    =
@@ -256,44 +320,56 @@ public abstract class CellPane<TCellPane extends CellPane<TCellPane, TCell>, TCe
       });
   public final IntegerBinding                      minRow                         = new IntegerBinding() {
 
-    {
-      super.bind(rowScrollBar.valueProperty());
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          rowScrollBar.valueProperty());
+                                                                                    }
 
-    protected int computeValue() {
-      return rowScrollBar.valueProperty().intValue();
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      return rowScrollBar
+                                                                                          .valueProperty()
+                                                                                          .intValue();
+                                                                                    };
+                                                                                  };
   public final IntegerBinding                      maxRow                         = new IntegerBinding() {
 
-    {
-      super.bind(minRow, visibleRows);
-    }
+                                                                                    {
+                                                                                      super.bind(minRow, visibleRows);
+                                                                                    }
 
-    protected int computeValue() {
-      return minRow.intValue() + visibleRows.intValue() - 1;
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      return minRow.intValue()
+                                                                                          + visibleRows.intValue() - 1;
+                                                                                    };
+                                                                                  };
   public final IntegerBinding                      minColumn                      = new IntegerBinding() {
 
-    {
-      super.bind(columnScrollBar.valueProperty());
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          columnScrollBar
+                                                                                              .valueProperty());
+                                                                                    }
 
-    protected int computeValue() {
-      return columnScrollBar.valueProperty().intValue();
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      return columnScrollBar
+                                                                                          .valueProperty()
+                                                                                          .intValue();
+                                                                                    };
+                                                                                  };
   public final IntegerBinding                      maxColumn                      = new IntegerBinding() {
 
-    {
-      super.bind(minColumn, visibleColumns);
-    }
+                                                                                    {
+                                                                                      super.bind(
+                                                                                          minColumn,
+                                                                                          visibleColumns);
+                                                                                    }
 
-    protected int computeValue() {
-      return minColumn.intValue() + visibleColumns.intValue() - 1;
-    };
-  };
+                                                                                    protected int computeValue() {
+                                                                                      return minColumn.intValue()
+                                                                                          + visibleColumns.intValue()
+                                                                                          - 1;
+                                                                                    };
+                                                                                  };
   protected final RowConstraints                   rowConstraints                 = new RowConstraints();
   protected final ColumnConstraints                columnConstraints              = new ColumnConstraints();
 
@@ -443,10 +519,17 @@ public abstract class CellPane<TCellPane extends CellPane<TCellPane, TCell>, TCe
     }
   }
 
+  public final boolean interactive;
+
   protected CellPane(final String id, final InteractionMode interactionMode) {
+    this(id, interactionMode, true);
+  }
+
+  protected CellPane(final String id, final InteractionMode interactionMode, final boolean interactive) {
     super();
     this.id = new ReadOnlyStringWrapper(id).getReadOnlyProperty();
     this.interactionMode.set(interactionMode);
+    this.interactive = interactive;
     this.zoomFactor.addListener(new ChangeListener<Number>() {
 
       @Override
@@ -966,9 +1049,8 @@ public abstract class CellPane<TCellPane extends CellPane<TCellPane, TCell>, TCe
       int newDragColumn = column;
       if (column == sourceColumn)
         newDragColumn = targetColumn;
-      else
-        if (column * sgnColumn >= (sourceColumn + sgnColumn) * sgnColumn
-            && column * sgnColumn <= targetColumn * sgnColumn)
+      else if (column * sgnColumn >= (sourceColumn + sgnColumn) * sgnColumn
+          && column * sgnColumn <= targetColumn * sgnColumn)
         newDragColumn = column - sgnColumn;
       switch (type) {
       case DRAG:

@@ -4,7 +4,7 @@ package conexp.fx.gui.dataset;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -24,6 +24,7 @@ import conexp.fx.core.builder.Request;
 import conexp.fx.core.builder.Requests.Source;
 import conexp.fx.core.builder.StringRequest;
 import conexp.fx.core.collections.relation.RelationEvent;
+import conexp.fx.core.collections.relation.RelationEventHandler;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.context.Context;
@@ -78,14 +79,14 @@ public final class FCADataset<G, M> extends Dataset {
       FXCollections.<Implication<G, M>> observableArrayList();
   public final ObservableList<Implication<G, M>> partialImplications = FXCollections.observableArrayList();
 
-  public final ConflictDistance<G, M> conflictDistance = new ConflictDistance<G, M>();
+  public final ConflictDistance<G, M>            conflictDistance    = new ConflictDistance<G, M>();
 //  public final EdgeIntersections<G, M> edgeIntersections = new EdgeIntersections<G, M>();
-  public boolean                      editable         = false;
+  public boolean                                 editable            = false;
 
-  public final MatrixContextWidget<G, M> contextWidget;
-  public final ConceptGraph<G, M>        conceptGraph;
-  public final ConceptWidget<G, M>       conceptWidget;
-  public final ImplicationWidget<G, M>   implicationWidget;
+  public final MatrixContextWidget<G, M>         contextWidget;
+  public final ConceptGraph<G, M>                conceptGraph;
+  public final ConceptWidget<G, M>               conceptWidget;
+  public final ImplicationWidget<G, M>           implicationWidget;
 
   public FCADataset(final Dataset parentDataset, final Request<G, M> request) {
     super(parentDataset);
@@ -150,17 +151,25 @@ public final class FCADataset<G, M> extends Dataset {
     defaultActiveViews.add("Lattice");
     actions.add(new DatasetAction("Polar Layout", () -> polarLayout()));
     actions.add(new DatasetAction("Circular Layout", () -> circularLayout()));
-    if (editable)
+    if (editable) {
       actions.add(new DatasetAction("Explore...", () -> {
+        implications.clear();
         try {
-          AttributeExploration.withHumanExpert((MatrixContext<String, String>) context).start();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
+          AttributeExploration.withHumanExpert(((MatrixContext<String, String>) context).getSelection()).start();
+        } catch (InterruptedException __) {}
       }));
+      actions.add(new DatasetAction("Explore (parallel)...", () -> {
+        implications.clear();
+        ConExpFX.execute(NextClosures2.createExplorationTask((FCADataset<String, String>) this));
+      }));
+    }
     actions.add(new DatasetAction("Refresh", () -> reinitializeWithNextClosures()));
     Platform2.runOnFXThread(() -> initializeWithNextClosures());
-
+    context.addEventHandler(
+        __ -> Platform.runLater(() -> unsavedChanges.set(true)),
+        RelationEvent.ROWS,
+        RelationEvent.COLUMNS,
+        RelationEvent.ENTRIES);
   }
 
   private final void polarLayout() {

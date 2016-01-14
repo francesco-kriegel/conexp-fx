@@ -7,7 +7,7 @@ package conexp.fx.gui;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -264,7 +264,7 @@ public class ConExpFX extends Application {
       this.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TreeItem<Control>>() {
 
         @Override
-        public void onChanged(ListChangeListener.Change<? extends TreeItem<Control>> c) {
+        public synchronized void onChanged(ListChangeListener.Change<? extends TreeItem<Control>> c) {
           while (c.next()) {
             if (c.wasAdded())
               c
@@ -281,7 +281,7 @@ public class ConExpFX extends Application {
                   .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
                   .forEach(item -> contentPane.getItems().remove(item.getDatasetView().getContentNode()));
           }
-          Platform2.runOnFXThread(() -> {
+          Platform2.runOnFXThreadAndWaitTryCatch(() -> {
             final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();
             for (int i = 0; i < contentPane.getItems().size(); i++)
               contentPane.setDividerPosition(i, pos * (double) (i + 1));

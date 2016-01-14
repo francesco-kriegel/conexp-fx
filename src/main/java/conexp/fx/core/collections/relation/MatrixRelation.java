@@ -7,7 +7,7 @@ package conexp.fx.core.collections.relation;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -18,8 +18,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.ujmp.core.booleanmatrix.BooleanMatrix;
@@ -29,11 +33,8 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
@@ -177,8 +178,8 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       return new ListIterator<R>() {
 
         private final ListIterator<R> it = RowHeads.super.listIterator(i);
-        private R pointer;
-        private int j;
+        private R                     pointer;
+        private int                   j;
 
         public final boolean hasNext() {
           return it.hasNext();
@@ -399,8 +400,8 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       return new ListIterator<C>() {
 
         private final ListIterator<C> it = ColHeads.super.listIterator(i);
-        private C pointer;
-        private int j;
+        private C                     pointer;
+        private int                   j;
 
         public final boolean hasNext() {
           return it.hasNext();
@@ -632,8 +633,8 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       return new ListIterator<R>() {
 
         private final ListIterator<R> it = Heads.super.listIterator(i);
-        private R pointer;
-        private int j;
+        private R                     pointer;
+        private int                   j;
 
         public final boolean hasNext() {
           return it.hasNext();
@@ -733,9 +734,8 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
     }
   }
 
-  protected BooleanMatrix                                              matrix;
-  private ListMultimap<RelationEvent.Type, RelationEventHandler<R, C>> eventHandlers =
-      Multimaps.synchronizedListMultimap(ArrayListMultimap.<RelationEvent.Type, RelationEventHandler<R, C>> create());
+  protected BooleanMatrix                                                 matrix;
+  private final Map<RelationEvent.Type, List<RelationEventHandler<R, C>>> eventHandlers = new ConcurrentHashMap<>();
 
   public MatrixRelation(final boolean homogen) {
     this(SetLists.<R> empty(), SetLists.<C> empty(), BooleanMatrix2D.factory.zeros(0, 0), homogen);
@@ -1385,7 +1385,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   }
 
   public final Collection<Integer> _row(final int i, final Collection<Integer> j) {
-    return Collections3.newBitSetSet(Collections2.filter(j, new Predicate<Integer>() {
+    return Collections3.newBitSetSet2(Collections2.filter(j, new Predicate<Integer>() {
 
       public final boolean apply(final Integer j) {
         return matrix.getBoolean(i, j);
@@ -1394,7 +1394,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   }
 
   public final Collection<Integer> _col(final int j, final Collection<Integer> i) {
-    return Collections3.newBitSetSet(Collections2.filter(i, new Predicate<Integer>() {
+    return Collections3.newBitSetSet2(Collections2.filter(i, new Predicate<Integer>() {
 
       public final boolean apply(final Integer i) {
         return matrix.getBoolean(i, j);
@@ -1425,7 +1425,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   public final Collection<Integer> _rowAnd(final Iterable<Integer> i, final Collection<Integer> j) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return SetLists.integers(colHeads.size());
-    return Collections3.newBitSetSet(Collections2.filter(j, new Predicate<Integer>() {
+    return Collections3.newBitSetSet2(Collections2.filter(j, new Predicate<Integer>() {
 
       private final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
 
@@ -1438,7 +1438,7 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   public final Collection<Integer> _colAnd(final Iterable<Integer> j, final Collection<Integer> i) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return SetLists.integers(rowHeads.size());
-    return Collections3.newBitSetSet(Collections2.filter(i, new Predicate<Integer>() {
+    return Collections3.newBitSetSet2(Collections2.filter(i, new Predicate<Integer>() {
 
       private final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
 
@@ -1512,8 +1512,9 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   }
 
   public final void pushAllChangedEvent() {
-//    System.out.println("pushAllChangedEvent");
-    push(RelationEvent.ALL_CHANGED, new RelationEvent<R, C>(RelationEvent.ALL_CHANGED));
+    synchronized (eventHandlers) {
+      push(RelationEvent.ALL_CHANGED, new RelationEvent<R, C>(RelationEvent.ALL_CHANGED));
+    }
   }
 
   protected final void push(final RelationEvent<R, C> event) {
@@ -1527,16 +1528,18 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
 
   private final void push(final RelationEvent.Type type, final RelationEvent<R, C> event) {
     synchronized (eventHandlers) {
-      for (RelationEventHandler<R, C> eventHandler : eventHandlers.get(type))
-        eventHandler.handle(event);
+      if (eventHandlers.containsKey(type))
+        for (RelationEventHandler<R, C> eventHandler : eventHandlers.get(type))
+          eventHandler.handle(event);
     }
   }
 
   public final void addEventHandler(final RelationEventHandler<R, C> eventHandler, final RelationEvent.Type... types) {
     synchronized (eventHandlers) {
       for (RelationEvent.Type type : types) {
-//        System.out.println("adding event handler " + eventHandler + " (" + type + ")");
-        eventHandlers.put(type, eventHandler);
+        if (!eventHandlers.containsKey(type))
+          eventHandlers.put(type, new CopyOnWriteArrayList<>());
+        eventHandlers.get(type).add(eventHandler);
       }
     }
   }
@@ -1548,13 +1551,15 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   }
 
   protected final boolean hasEventHandlers(final RelationEvent.Type type) {
-    RelationEvent.Type type_ = type;
-    if (!eventHandlers.get(type_).isEmpty())
-      return true;
-    while ((type_ = type_.getSuperType()) != null)
+    synchronized (eventHandlers) {
+      RelationEvent.Type type_ = type;
       if (!eventHandlers.get(type_).isEmpty())
         return true;
-    return false;
+      while ((type_ = type_.getSuperType()) != null)
+        if (!eventHandlers.get(type_).isEmpty())
+          return true;
+      return false;
+    }
   }
 
   public final BooleanMatrix matrix() {

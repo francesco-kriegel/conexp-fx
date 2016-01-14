@@ -1,10 +1,13 @@
 package conexp.fx.gui.exploration;
 
+import java.util.Collections;
+import java.util.Set;
+
 /*
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -27,14 +30,14 @@ public final class HumanExpert implements Expert<String, String> {
 
   @SuppressWarnings("incomplete-switch")
   @Override
-  public final CounterExample<String, String> askForCounterexample(final Implication<String, String> implication)
+  public final Set<CounterExample<String, String>> askForCounterExample(final Implication<String, String> implication)
       throws InterruptedException {
     final Return<CounterExample<String, String>> result = new CounterExampleDialog(context, implication).showAndWait();
     switch (result.result()) {
     case YES:
-      return null;
+      return Collections.emptySet();
     case NO:
-      return result.value();
+      return Collections.singleton(result.value());
     case CANCEL:
       throw new InterruptedException("Attribute Exploration has been interrupted by user.");
     }

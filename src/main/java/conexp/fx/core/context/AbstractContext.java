@@ -4,7 +4,7 @@ package conexp.fx.core.context;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -13,11 +13,14 @@ package conexp.fx.core.context;
 import java.util.Collection;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 import conexp.fx.core.collections.relation.AbstractRelation;
 import conexp.fx.core.collections.relation.Relation;
 import conexp.fx.core.collections.setlist.SetList;
+import conexp.fx.core.implication.Implication;
 
-public abstract class AbstractContext<G, M> extends AbstractRelation<G, M>implements Context<G, M> {
+public abstract class AbstractContext<G, M> extends AbstractRelation<G, M> implements Context<G, M> {
 
   protected AbstractContext(final SetList<G> objects, final SetList<M> attributes, final boolean homogen) {
     super(objects, attributes, homogen);
@@ -74,4 +77,5 @@ public abstract class AbstractContext<G, M> extends AbstractRelation<G, M>implem
   public final AbstractContext<G, M> getSelection() {
     return this;
   }
+
 }

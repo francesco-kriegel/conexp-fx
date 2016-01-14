@@ -4,15 +4,17 @@ package conexp.fx.gui.context;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 import java.util.Collection;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.semanticweb.owlapi.model.OWLClassExpression;
 
@@ -60,6 +62,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.ContextMenu;
@@ -89,8 +92,8 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
   public final class RowHeaderPane extends CellPane<RowHeaderPane, RowHeaderCell> {
 
-    private RowHeaderPane() {
-      super("DomainPane", InteractionMode.ROWS);
+    private RowHeaderPane(final boolean interactive) {
+      super("DomainPane", InteractionMode.ROWS, interactive);
       this.rowHeightDefault.bind(MatrixContextWidget.this.cellSizeDefault);
       this.columnWidthDefault.bind(MatrixContextWidget.this.rowHeaderSizeDefault);
       this.zoomFactor.bind(MatrixContextWidget.this.zoomFactor);
@@ -100,22 +103,25 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       this.autoSizeColumns.set(true);
       this.maxColumns.set(1);
       this.maxRows.set(context.rowHeads().size());
-      final RelationEventHandler<G, M> eventHandler = new RelationEventHandler<G, M>() {
-
-        public final void handle(final RelationEvent<G, M> event) {
-          Platform2.runOnFXThread(new Runnable() {
-
-            public void run() {
-//              System.out.println("updating rows");
-              maxRows.set(context.rowHeads().size());
-//              updateContent();
-            }
-          });
-        }
-      };
-      context.addEventHandler(eventHandler, RelationEvent.ROWS);
+//      final RelationEventHandler<G, M> eventHandler = new RelationEventHandler<G, M>() {
+//
+//        public final void handle(final RelationEvent<G, M> event) {
+//          Platform2.runOnFXThread(new Runnable() {
+//
+//            public void run() {
+////              System.out.println("updating rows");
+//              maxRows.set(context.rowHeads().size());
+////              updateContent();
+//            }
+//          });
+//        }
+//      };
+//      context.addEventHandler(eventHandler, RelationEvent.ROWS);
 //      context.addEventHandler(eventHandler, RelationEvent.ROWS_ADDED);
 //      context.addEventHandler(eventHandler, RelationEvent.ROWS_REMOVED);
+      context.addEventHandler(
+          __ -> Platform2.runOnFXThread(() -> maxRows.set(context.rowHeads().size())),
+          RelationEvent.ROWS);
       if (dataset != null)
         this.interactionPane.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
 
@@ -133,12 +139,18 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     public final void highlightConcept(final Collection<Integer> domainIndices) {
       highlight(domainIndices, null);
     }
+
+    protected final Map<G, Node> decorations = new ConcurrentHashMap<>();
+
+    public final void addDecoration(final G row, final Node decoration) {
+      decorations.put(row, decoration);
+    }
   }
 
   public final class ColHeaderPane extends CellPane<ColHeaderPane, ColHeaderCell> {
 
-    private ColHeaderPane() {
-      super("CodomainPane", InteractionMode.COLUMNS);
+    private ColHeaderPane(final boolean interactive) {
+      super("CodomainPane", InteractionMode.COLUMNS, interactive);
       this.rowHeightDefault.bind(MatrixContextWidget.this.colHeaderSizeDefault);
       this.columnWidthDefault.bind(MatrixContextWidget.this.cellSizeDefault);
       this.zoomFactor.bind(MatrixContextWidget.this.zoomFactor);
@@ -183,10 +195,10 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
   }
 
-  private final class ContextPane extends CellPane<ContextPane, ContextCell> {
+  public final class ContextPane extends CellPane<ContextPane, ContextCell> {
 
-    private ContextPane() {
-      super("FormalContextPane", InteractionMode.ROWS_AND_COLUMNS);
+    private ContextPane(final boolean interactive) {
+      super("FormalContextPane", InteractionMode.ROWS_AND_COLUMNS, interactive);
       this.textSizeDefault.bind(MatrixContextWidget.this.incidenceSizeDefault);
       this.zoomFactor.bind(MatrixContextWidget.this.zoomFactor);
       this.bind(rowHeaderPane, InteractionMode.ROWS);
@@ -230,63 +242,64 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       super(rowHeaderPane, row, 0, Pos.CENTER_RIGHT, TextAlignment.RIGHT, false, null, false);
       this.contentPane.get().getChildren().add(view);
       this.contentPane.get().text.setOpacity(0);
-      final ContextMenu contextMenu = new ContextMenu();
-      final MenuItem editItem = new MenuItem("Edit");
-      final MenuItem removeItem = new MenuItem("Remove");
-      final MenuItem selectItem = new MenuItem("Select");
-      final MenuItem insertItem = new MenuItem("Insert");
-      if (dataset.editable)
-        contextMenu.getItems().addAll(editItem, removeItem, selectItem, insertItem);
-      else
-        contextMenu.getItems().addAll(removeItem, selectItem);
-      insertItem.setOnAction(__ -> {
-        ((FCADataset<String, String>) dataset).addObject(
-            (dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(),
-            contentCoordinates.get().x());
-        rowHeaderPane.rowOpacityMap.keySet().stream().sorted().filter(i -> i >= contentCoordinates.get().x()).forEach(
-            i -> rowHeaderPane.rowOpacityMap.put(i + 1, rowHeaderPane.rowOpacityMap.remove(i)));
-      });
-      editItem.setOnAction(__ -> {
-        if (MatrixContextWidget.this.dataset.editable) {
-          final G object = context.rowHeads().get(contentCoordinates.get().x());
-          final TextField textField = TextFieldBuilder.create().text((String) object).build();
-          textField.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
-            switch (event.getCode()) {
-            case ENTER:
-              dataset.renameObject(object, (G) textField.getText().trim());
-            case ESCAPE:
-              interactionPane.get().getChildren().remove(textField);
-            }
-          });
-          interactionPane.get().getChildren().add(textField);
-          textField
-              .focusedProperty()
-              .addListener((observable, oldValue, newValue) -> new Timer().schedule(new TimerTask() {
+      if (cellPane.interactive) {
+        final ContextMenu contextMenu = new ContextMenu();
+        final MenuItem editItem = new MenuItem("Edit");
+        final MenuItem removeItem = new MenuItem("Remove");
+        final MenuItem selectItem = new MenuItem("Select");
+        final MenuItem insertItem = new MenuItem("Insert");
+        if (dataset != null && dataset.editable)
+          contextMenu.getItems().addAll(editItem, removeItem, selectItem, insertItem);
+        else
+          contextMenu.getItems().addAll(removeItem, selectItem);
+        insertItem.setOnAction(__ -> {
+          ((FCADataset<String, String>) dataset).addObject(
+              (dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(),
+              contentCoordinates.get().x());
+          rowHeaderPane.rowOpacityMap.keySet().stream().sorted().filter(i -> i >= contentCoordinates.get().x()).forEach(
+              i -> rowHeaderPane.rowOpacityMap.put(i + 1, rowHeaderPane.rowOpacityMap.remove(i)));
+        });
+        editItem.setOnAction(__ -> {
+          if (MatrixContextWidget.this.dataset.editable) {
+            final G object = context.rowHeads().get(contentCoordinates.get().x());
+            final TextField textField = TextFieldBuilder.create().text((String) object).build();
+            textField.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+              switch (event.getCode()) {
+              case ENTER:
+                dataset.renameObject(object, (G) textField.getText().trim());
+              case ESCAPE:
+                interactionPane.get().getChildren().remove(textField);
+              }
+            });
+            interactionPane.get().getChildren().add(textField);
+            textField.focusedProperty().addListener(
+                (observable, oldValue, newValue) -> new Timer().schedule(new TimerTask() {
 
-            public final void run() {
-              Platform.runLater(() -> textField.selectAll());
-            }
-          }, 20));
-          textField.requestFocus();
-        } else {
-          System.out.println("no instance of MatrixContextWidget");
-        }
-      });
-      removeItem.setOnAction(__ -> {
-        dataset.removeObject(context.rowHeads().get(contentCoordinates.get().x()));
-        rowHeaderPane.rowOpacityMap.keySet().stream().sorted().filter(i -> i > contentCoordinates.get().x()).forEach(
-            i -> rowHeaderPane.rowOpacityMap.put(i - 1, rowHeaderPane.rowOpacityMap.remove(i)));
-      });
-      selectItem.setOnAction(__ -> select());
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-        switch (event.getButton()) {
-        case PRIMARY:
-          select();
-          break;
-        case SECONDARY:
-          contextMenu.show(interactionPane.getValue(), event.getScreenX(), event.getScreenY());
-        }
-      });
+              public final void run() {
+                Platform.runLater(() -> textField.selectAll());
+              }
+            }, 20));
+            textField.requestFocus();
+          } else {
+            System.out.println("no instance of MatrixContextWidget");
+          }
+        });
+        removeItem.setOnAction(__ -> {
+          dataset.removeObject(context.rowHeads().get(contentCoordinates.get().x()));
+          rowHeaderPane.rowOpacityMap.keySet().stream().sorted().filter(i -> i > contentCoordinates.get().x()).forEach(
+              i -> rowHeaderPane.rowOpacityMap.put(i - 1, rowHeaderPane.rowOpacityMap.remove(i)));
+        });
+        selectItem.setOnAction(__ -> select());
+        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+          switch (event.getButton()) {
+          case PRIMARY:
+            select();
+            break;
+          case SECONDARY:
+            contextMenu.show(interactionPane.getValue(), event.getScreenX(), event.getScreenY());
+          }
+        });
+      }
       if (dataset != null)
         this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, event -> {
           if (contextPane.highlight.get())
@@ -299,7 +312,15 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
           @Override
           public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
-            final double width = newValue.getWidth();
+            final double decorationWidth =
+                cellPane.decorations.containsKey(context.rowHeads().get(contentCoordinates.get().x()))
+                    ? cellPane.decorations
+                        .get(context.rowHeads().get(contentCoordinates.get().x()))
+                        .layoutBoundsProperty()
+                        .get()
+                        .getWidth()
+                    : 0d;
+            final double width = newValue.getWidth() + decorationWidth;
             if (width > cellPane.maximalTextWidth.get())
               cellPane.maximalTextWidth.set(width);
           }
@@ -340,7 +361,13 @@ public class MatrixContextWidget<G, M> extends BorderPane {
         final String string = context.rowHeads().get(contentCoordinates.get().x()).toString();
         textContent.set(string);
         view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
-      } catch (IndexOutOfBoundsException _) {}
+        if (cellPane.decorations.containsKey(context.rowHeads().get(contentCoordinates.get().x()))) {
+          interactionPane.get().getChildren().removeAll(cellPane.decorations.values());
+          interactionPane
+              .get()
+              .setRight(cellPane.decorations.get(context.rowHeads().get(contentCoordinates.get().x())));
+        }
+      } catch (IndexOutOfBoundsException __) {}
     }
   }
 
@@ -352,71 +379,76 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       super(colHeaderPane, 0, column, Pos.CENTER_LEFT, TextAlignment.LEFT, true, null, false);
       this.contentPane.get().getChildren().add(view);
       this.contentPane.get().text.setOpacity(0);
-      final ContextMenu contextMenu = new ContextMenu();
-      final MenuItem editItem = new MenuItem("Edit");
-      final MenuItem removeItem = new MenuItem("Remove");
-      final MenuItem selectItem = new MenuItem("Select");
-      final MenuItem insertItem = new MenuItem("Insert");
-      if (dataset.editable)
-        contextMenu.getItems().addAll(editItem, removeItem, selectItem, insertItem);
-      else
-        contextMenu.getItems().addAll(removeItem, selectItem);
-      insertItem.setOnAction(__ -> {
-        ((FCADataset<String, String>) dataset).addAttribute(
-            (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(),
-            contentCoordinates.get().y());
-        colHeaderPane.columnOpacityMap
-            .keySet()
-            .stream()
-            .sorted()
-            .filter(i -> i >= contentCoordinates.get().y())
-            .forEach(i -> colHeaderPane.columnOpacityMap.put(i + 1, colHeaderPane.columnOpacityMap.remove(i)));
-      });
-      editItem.setOnAction(event -> {
-        if (MatrixContextWidget.this.dataset.editable) {
-          final M attribute = context.colHeads().get(contentCoordinates.get().y());
-          final TextField textField = TextFieldBuilder.create().text((String) attribute).build();
-          textField.addEventHandler(KeyEvent.KEY_RELEASED, keyEvent -> {
-            switch (keyEvent.getCode()) {
-            case ENTER:
-              dataset.renameAttribute(attribute, (M) textField.getText().trim());
-            case ESCAPE:
-              interactionPane.get().getChildren().remove(textField);
-            }
-          });
-          textField.rotateProperty().set(-90);
-          textField.setMinSize(colHeaderPane.rowHeight.get(), cellSize.get());
-          textField.setMaxSize(colHeaderPane.rowHeight.get(), cellSize.get());
-          interactionPane.get().getChildren().add(textField);
-          textField
-              .focusedProperty()
-              .addListener((observable, oldValue, newValue) -> new Timer().schedule(new TimerTask() {
+      if (cellPane.interactive) {
+        final ContextMenu contextMenu = new ContextMenu();
+        final MenuItem editItem = new MenuItem("Edit");
+        final MenuItem removeItem = new MenuItem("Remove");
+        final MenuItem selectItem = new MenuItem("Select");
+        final MenuItem insertItem = new MenuItem("Insert");
+        if (dataset != null && dataset.editable)
+          contextMenu.getItems().addAll(editItem, removeItem, selectItem, insertItem);
+        else
+          contextMenu.getItems().addAll(removeItem, selectItem);
+        insertItem.setOnAction(__ -> {
+          ((FCADataset<String, String>) dataset).addAttribute(
+              (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(),
+              contentCoordinates.get().y());
+          colHeaderPane.columnOpacityMap
+              .keySet()
+              .stream()
+              .sorted()
+              .filter(i -> i >= contentCoordinates.get().y())
+              .forEach(i -> colHeaderPane.columnOpacityMap.put(i + 1, colHeaderPane.columnOpacityMap.remove(i)));
+        });
+        editItem.setOnAction(event -> {
+          if (MatrixContextWidget.this.dataset.editable) {
+            final M attribute = context.colHeads().get(contentCoordinates.get().y());
+            final TextField textField = TextFieldBuilder.create().text((String) attribute).build();
+            textField.addEventHandler(KeyEvent.KEY_RELEASED, keyEvent -> {
+              switch (keyEvent.getCode()) {
+              case ENTER:
+                dataset.renameAttribute(attribute, (M) textField.getText().trim());
+              case ESCAPE:
+                interactionPane.get().getChildren().remove(textField);
+              }
+            });
+            textField.rotateProperty().set(-90);
+            textField.setMinSize(colHeaderPane.rowHeight.get(), cellSize.get());
+            textField.setMaxSize(colHeaderPane.rowHeight.get(), cellSize.get());
+            interactionPane.get().getChildren().add(textField);
+            textField.focusedProperty().addListener(
+                (observable, oldValue, newValue) -> new Timer().schedule(new TimerTask() {
 
-            public final void run() {
-              Platform.runLater(() -> textField.selectAll());
-            }
-          }, 20));
-          textField.requestFocus();
-        }
-      });
-      removeItem.setOnAction(event -> {
-        dataset.removeAttribute(context.colHeads().get(contentCoordinates.get().y()));
-        colHeaderPane.columnOpacityMap.remove(contentCoordinates.get().y());
-        colHeaderPane.columnOpacityMap.keySet().stream().sorted().filter(i -> i > contentCoordinates.get().y()).forEach(
-            i -> colHeaderPane.columnOpacityMap.put(i - 1, colHeaderPane.columnOpacityMap.remove(i)));
-      });
-      selectItem.setOnAction(event -> select());
+              public final void run() {
+                Platform.runLater(() -> textField.selectAll());
+              }
+            }, 20));
+            textField.requestFocus();
+          }
+        });
+        removeItem.setOnAction(event -> {
+          dataset.removeAttribute(context.colHeads().get(contentCoordinates.get().y()));
+          colHeaderPane.columnOpacityMap.remove(contentCoordinates.get().y());
+          colHeaderPane.columnOpacityMap
+              .keySet()
+              .stream()
+              .sorted()
+              .filter(i -> i > contentCoordinates.get().y())
+              .forEach(i -> colHeaderPane.columnOpacityMap.put(i - 1, colHeaderPane.columnOpacityMap.remove(i)));
+        });
+        selectItem.setOnAction(event -> select());
 //      if (!tab.fca.context.selectedAttributes().contains(tab.fca.context.colHeads().get(contentCoordinates.get().y())))
 //        colHeaderPane.columnOpacityMap.put(contentCoordinates.get().y(), Constants.HIDE_OPACITY);
-      this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-        switch (event.getButton()) {
-        case PRIMARY:
-          select();
-          break;
-        case SECONDARY:
-          contextMenu.show(interactionPane.getValue(), event.getScreenX(), event.getScreenY());
-        }
-      });
+        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+          switch (event.getButton()) {
+          case PRIMARY:
+            select();
+            break;
+          case SECONDARY:
+            contextMenu.show(interactionPane.getValue(), event.getScreenX(), event.getScreenY());
+          }
+        });
+      }
       if (dataset != null)
         this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, event -> {
           if (contextPane.highlight.get()) {
@@ -465,7 +497,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
             m instanceof OWLClassExpression ? OWLtoString.toString((OWLClassExpression) m) : m.toString();
         textContent.set(string);
         view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
-      } catch (IndexOutOfBoundsException _) {}
+      } catch (IndexOutOfBoundsException __) {}
     }
   }
 
@@ -514,12 +546,11 @@ public class MatrixContextWidget<G, M> extends BorderPane {
             }
           }
         });
-      context.addEventHandler(
-          event -> updateContent(),
-          RelationEvent.ENTRIES_ADDED,
-          RelationEvent.ENTRIES_REMOVED,
-          RelationEvent.ALL_CHANGED,
-          RelationEvent.SELECTION_CHANGED);
+      context.addEventHandler(event -> updateContent(), RelationEvent.ANY);
+//          RelationEvent.ENTRIES_ADDED,
+//          RelationEvent.ENTRIES_REMOVED,
+//          RelationEvent.ALL_CHANGED,
+//          RelationEvent.SELECTION_CHANGED);
       updateContent();
     }
 
@@ -563,7 +594,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
           ContextCell.this.textContent.set(context.getValue(g, m, false).first().toString());
           ContextCell.this.contentPane.get().text.setRotate(0d);
         }
-      } catch (IndexOutOfBoundsException _) {}
+      } catch (IndexOutOfBoundsException __) {}
     }
   }
 
@@ -577,16 +608,16 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   protected final ScrollBar           colScrollBar;
 //  public final ListSpinner<Integer> zoomSpinner =new ListSpinner<Integer>(-4, 4, 1);
   public final Slider                 zoomSlider            = SliderBuilder
-      .create()
-      .min(-4d)
-      .max(4d)
-      .value(0d)
-      // .showTickMarks(true)
-      // .minorTickCount(17)
-      // .majorTickUnit(1d)
-      // .snapToTicks(true)
-      .blockIncrement(0.25d)
-      .build();
+                                                                .create()
+                                                                .min(-4d)
+                                                                .max(4d)
+                                                                .value(0d)
+                                                                // .showTickMarks(true)
+                                                                // .minorTickCount(17)
+                                                                // .majorTickUnit(1d)
+                                                                // .snapToTicks(true)
+                                                                .blockIncrement(0.25d)
+                                                                .build();
   public final DoubleProperty         zoomFactor            = new SimpleDoubleProperty(0.01d);
   public final IntegerProperty        rowHeaderSizeDefault  = new SimpleIntegerProperty(40);
   public final IntegerProperty        colHeaderSizeDefault  = new SimpleIntegerProperty(40);
@@ -595,34 +626,37 @@ public class MatrixContextWidget<G, M> extends BorderPane {
   public final IntegerProperty        incidenceSizeDefault  = new SimpleIntegerProperty(20);
   public final IntegerBinding         cellSize              = new IntegerBinding() {
 
-    {
-      super.bind(zoomFactor, cellSizeDefault);
-    }
+                                                              {
+                                                                super.bind(zoomFactor, cellSizeDefault);
+                                                              }
 
-    protected int computeValue() {
-      return (int) (zoomFactor.get() * cellSizeDefault.doubleValue());
-    };
-  };
+                                                              protected int computeValue() {
+                                                                return (int) (zoomFactor.get()
+                                                                    * cellSizeDefault.doubleValue());
+                                                              };
+                                                            };
   public final IntegerBinding         textSize              = new IntegerBinding() {
 
-    {
-      super.bind(zoomFactor, textSizeDefault);
-    }
+                                                              {
+                                                                super.bind(zoomFactor, textSizeDefault);
+                                                              }
 
-    protected int computeValue() {
-      return (int) (zoomFactor.get() * textSizeDefault.doubleValue());
-    };
-  };
+                                                              protected int computeValue() {
+                                                                return (int) (zoomFactor.get()
+                                                                    * textSizeDefault.doubleValue());
+                                                              };
+                                                            };
   public final IntegerBinding         incidenceSize         = new IntegerBinding() {
 
-    {
-      super.bind(zoomFactor, textSizeDefault);
-    }
+                                                              {
+                                                                super.bind(zoomFactor, textSizeDefault);
+                                                              }
 
-    protected int computeValue() {
-      return (int) (zoomFactor.get() * incidenceSizeDefault.doubleValue());
-    };
-  };
+                                                              protected int computeValue() {
+                                                                return (int) (zoomFactor.get()
+                                                                    * incidenceSizeDefault.doubleValue());
+                                                              };
+                                                            };
   public final BooleanProperty        animate               = new SimpleBooleanProperty(false);
   public final BooleanProperty        showArrows            = new SimpleBooleanProperty();
   public final BooleanProperty        showPaths             = new SimpleBooleanProperty();
@@ -639,9 +673,19 @@ public class MatrixContextWidget<G, M> extends BorderPane {
    * @param orContext
    *          may only be set if fcaInstance is null, otherwise unexpected behaviour may occur.
    */
+  @SafeVarargs
   public MatrixContextWidget(
       final FCADataset<G, M> dataset,
       final boolean withToolbar,
+      final MatrixContext<G, M>... orContext) {
+    this(dataset, withToolbar, true, orContext);
+  }
+
+  @SafeVarargs
+  public MatrixContextWidget(
+      final FCADataset<G, M> dataset,
+      final boolean withToolbar,
+      final boolean interactive,
       final MatrixContext<G, M>... orContext) {
     super();
     this.dataset = dataset;
@@ -649,9 +693,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       this.context = orContext[0];
     else
       this.context = dataset.context;
-    this.rowHeaderPane = new RowHeaderPane();
-    this.colHeaderPane = new ColHeaderPane();
-    this.contextPane = new ContextPane();
+    this.rowHeaderPane = new RowHeaderPane(interactive);
+    this.colHeaderPane = new ColHeaderPane(interactive);
+    this.contextPane = new ContextPane(interactive);
     this.rowScrollBar = contextPane.getRowScrollBar();
     this.colScrollBar = contextPane.getColumnScrollBar();
     centerPane.setHgap(4);
@@ -767,7 +811,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
         t.play();
       }
     });
-    if (dataset.editable) {
+    if (dataset != null && dataset.editable) {
 
       final Button domainButton = ButtonBuilder
           .create()
@@ -941,5 +985,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
   public final void highlightImplication(final Implication<M> implication) {
 
+  }
+
+  public final void addRowDecoration(final G row, final Node decoration) {
+    rowHeaderPane.addDecoration(row, decoration);
   }
 }

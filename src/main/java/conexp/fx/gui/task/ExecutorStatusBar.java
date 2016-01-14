@@ -1,12 +1,13 @@
 package conexp.fx.gui.task;
 
+import conexp.fx.core.math.Math3;
 import conexp.fx.gui.util.Platform2;
 
 /*
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -73,7 +74,7 @@ public final class ExecutorStatusBar {
       currentStatusLabel.textProperty().bind(task.titleProperty());
       timeLabel.textProperty().bind(
           Bindings.createStringBinding(
-              () -> task.isCancelled() ? "cancelled" : formatTime(task.runTimeMillisProperty().get()),
+              () -> task.isCancelled() ? "cancelled" : Math3.formatTime(task.runTimeMillisProperty().get()),
               task.runTimeMillisProperty(),
               task.stateProperty()));
       timeLabel.alignmentProperty().bind(
@@ -84,22 +85,6 @@ public final class ExecutorStatusBar {
       stopButton.setOnAction(e -> task.cancel(true));
       stopButton.visibleProperty().bind(Bindings.createObjectBinding(() -> !task.isDone(), task.stateProperty()));
     }
-  }
-
-  public final String formatTime(final long time) {
-    if (time == 0)
-      return "";
-    final long ms = time % 1000;
-    final long s = (time / 1000) % 60;
-    final long m = (time / 60000) % 60;
-    final long h = (time / 3600000);
-    if (h > 0)
-      return String.format("%02dh %02dmin", h, m);
-    if (m > 0)
-      return String.format("%02dmin %02ds", m, s);
-    if (s > 0)
-      return String.format("%02ds %03dms", s, ms);
-    return String.format("%03dms", ms);
   }
 
   private BlockingExecutor        executor;

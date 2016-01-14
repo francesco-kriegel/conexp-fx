@@ -13,7 +13,7 @@ import conexp.fx.gui.dataset.FCADataset;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -53,7 +53,7 @@ public class ImplicationWidget<G, M> extends BorderPane {
             .createStringBinding(() -> ((int) confidenceSlider.getValue()) + "%", confidenceSlider.valueProperty()));
     final HBox confidenceBox = new HBox(confidenceLabel, confidenceSlider, confidenceValue);
     final Label supportLabel = new Label("Support");
-    final Slider supportSlider = new Slider(0, 100, 1);
+    final Slider supportSlider = new Slider(0, 100, 0);
     supportSlider.setBlockIncrement(5);
     supportSlider.setSnapToTicks(true);
     supportSlider.setMajorTickUnit(1);

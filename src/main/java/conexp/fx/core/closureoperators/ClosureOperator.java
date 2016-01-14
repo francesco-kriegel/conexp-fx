@@ -1,10 +1,12 @@
 package conexp.fx.core.closureoperators;
 
+import java.util.Arrays;
+
 /*
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2015 Francesco Kriegel
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -38,46 +40,46 @@ public interface ClosureOperator<M> {
 
       @Override
       public final Set<T> closure(final Set<T> set) {
-        return closure.apply(
-            set);
+        return closure.apply(set);
       }
 
     };
   }
 
+  @SafeVarargs
+  public static <T> ClosureOperator<T> infimum(final ClosureOperator<T>... closureOperators) {
+    return infimum(Arrays.asList(closureOperators));
+  }
+
   public static <T> ClosureOperator<T> infimum(final Iterable<ClosureOperator<T>> closureOperators) {
-    return definedBy(
-        set -> {
-          final Set<T> closure = new HashSet<T>();
-          final Iterator<ClosureOperator<T>> iterator = closureOperators.iterator();
-          if (iterator.hasNext())
-            set.addAll(
-                iterator.next().closure(
-                    set));
-          while (iterator.hasNext())
-            set.retainAll(
-                iterator.next().closure(
-                    set));
-          return closure;
-        });
+    return definedBy(set -> {
+      final Set<T> closure = new HashSet<T>();
+      final Iterator<ClosureOperator<T>> iterator = closureOperators.iterator();
+      if (iterator.hasNext())
+        set.addAll(iterator.next().closure(set));
+      while (iterator.hasNext())
+        set.retainAll(iterator.next().closure(set));
+      return closure;
+    });
+  }
+
+  @SafeVarargs
+  public static <T> ClosureOperator<T> supremum(final ClosureOperator<T>... closureOperators) {
+    return supremum(Arrays.asList(closureOperators));
   }
 
   public static <T> ClosureOperator<T> supremum(final Iterable<ClosureOperator<T>> closureOperators) {
-    return definedBy(
-        set -> {
-          final Set<T> closure = new HashSet<T>();
-          closure.addAll(
-              set);
-          boolean changed = true;
-          while (changed) {
-            changed = false;
-            for (ClosureOperator<T> clop : closureOperators)
-              changed |= closure.addAll(
-                  clop.closure(
-                      closure));
-          }
-          return closure;
-        });
+    return definedBy(set -> {
+      final Set<T> closure = new HashSet<T>();
+      closure.addAll(set);
+      boolean changed = true;
+      while (changed) {
+        changed = false;
+        for (ClosureOperator<T> clop : closureOperators)
+          changed |= closure.addAll(clop.closure(closure));
+      }
+      return closure;
+    });
 //    @Override
 //    public final boolean isClosed(final Set<M> set) {
 //      return closureOperators.parallelStream().allMatch(
@@ -141,119 +143,83 @@ public interface ClosureOperator<M> {
 //  }
 
   public static <G, M> ClosureOperator<M> fromContext(final MatrixContext<G, M> cxt) {
-    return definedBy(
-        set -> cxt.rowAnd(
-            cxt.colAnd(
-                set)));
+    return definedBy(set -> cxt.rowAnd(cxt.colAnd(set)));
   }
 
   public static <G, M> ClosureOperator<M> fromImplications(
       final Collection<Implication<G, M>> implications,
       final boolean includePseudoClosures,
       final boolean parallel) {
-    return definedBy(
-        set -> {
-          final Set<M> closure = new HashSet<M>(set);
-          final AtomicBoolean changed = new AtomicBoolean(true);
-          while (changed.get()) {
-            changed.set(
-                false);
-            (parallel ? implications.parallelStream() : implications.stream()).filter(
+    return definedBy(set -> {
+      final Set<M> closure = new HashSet<M>(set);
+      final AtomicBoolean changed = new AtomicBoolean(true);
+      while (changed.get()) {
+        changed.set(false);
+        (parallel ? implications.parallelStream() : implications.stream())
+            .filter(
                 i -> (includePseudoClosures ? closure.size() > i.getPremise().size()
-                    : closure.size() >= i.getPremise().size())
-                    && closure.containsAll(
-                        i.getPremise())
-                    && (closure.size() < i.getConclusion().size() || !closure.containsAll(
-                        i.getConclusion())))
-                .sequential().forEach(
-                    i -> changed.set(
-                        closure.addAll(
-                            i.getConclusion())));
-          }
-          return closure;
-        });
+                    : closure.size() >= i.getPremise().size()) && closure.containsAll(i.getPremise())
+                    && (closure.size() < i.getConclusion().size() || !closure.containsAll(i.getConclusion())))
+            .sequential()
+            .forEach(i -> changed.set(closure.addAll(i.getConclusion())));
+      }
+      return closure;
+    });
   }
 
   public static <G, M> ClosureOperator<M>
       fromImplicationSetLinClosure(final Collection<Implication<G, M>> implications) {
-    return definedBy(
-        set -> {
+    return definedBy(set -> {
 
-          // Initialization
-          final Map<Implication<G, M>, Integer> count = new HashMap<Implication<G, M>, Integer>();
-          final Map<M, Set<Implication<G, M>>> list = new HashMap<M, Set<Implication<G, M>>>();
-          for (M attribute : set)
-            list.put(
-                attribute,
-                new HashSet<Implication<G, M>>());
-          for (Implication<G, M> implication : implications) {
-            for (M attribute : implication.getPremise())
-              list.put(
-                  attribute,
-                  new HashSet<Implication<G, M>>());
-            for (M attribute : implication.getConclusion())
-              list.put(
-                  attribute,
-                  new HashSet<Implication<G, M>>());
-          }
-          // final Multimap<M, Implication<G, M>> list = HashMultimap.create();
-          final Set<M> newdep = new HashSet<M>();
-          final Set<M> update = new HashSet<M>();
-          for (Implication<G, M> implication : implications) {
-            count.put(
-                implication,
-                implication.getPremise().size());
-            if (implication.getPremise().isEmpty())
-              newdep.addAll(
-                  implication.getConclusion());
-            for (M attribute : implication.getPremise()) {
-              if (!list.containsKey(
-                  attribute))
-                list.put(
-                    attribute,
-                    new HashSet<Implication<G, M>>());
-              list.get(
-                  attribute).add(
-                      implication);
-              // list.put(
-              // attribute,
-              // implication);
-            }
-          }
-          newdep.addAll(
-              set);
-          update.addAll(
-              set);
+      // Initialization
+      final Map<Implication<G, M>, Integer> count = new HashMap<Implication<G, M>, Integer>();
+      final Map<M, Set<Implication<G, M>>> list = new HashMap<M, Set<Implication<G, M>>>();
+      for (M attribute : set)
+        list.put(attribute, new HashSet<Implication<G, M>>());
+      for (Implication<G, M> implication : implications) {
+        for (M attribute : implication.getPremise())
+          list.put(attribute, new HashSet<Implication<G, M>>());
+        for (M attribute : implication.getConclusion())
+          list.put(attribute, new HashSet<Implication<G, M>>());
+      }
+      // final Multimap<M, Implication<G, M>> list = HashMultimap.create();
+      final Set<M> newdep = new HashSet<M>();
+      final Set<M> update = new HashSet<M>();
+      for (Implication<G, M> implication : implications) {
+        count.put(implication, implication.getPremise().size());
+        if (implication.getPremise().isEmpty())
+          newdep.addAll(implication.getConclusion());
+        for (M attribute : implication.getPremise()) {
+          if (!list.containsKey(attribute))
+            list.put(attribute, new HashSet<Implication<G, M>>());
+          list.get(attribute).add(implication);
+          // list.put(
+          // attribute,
+          // implication);
+        }
+      }
+      newdep.addAll(set);
+      update.addAll(set);
 
-          // Computation
-          while (!update.isEmpty()) {
-            final M attribute = update.iterator().next();
-            update.remove(
-                attribute);
-            for (Implication<G, M> implication : list.get(
-                attribute)) {
-              final Integer previous = count.get(
-                  implication);
-              count.put(
-                  implication,
-                  previous - 1);
-              if (count.get(
-                  implication) == 0) {
-                final Set<M> add = new HashSet<M>();
-                add.addAll(
-                    implication.getConclusion());
-                add.removeAll(
-                    newdep);
-                newdep.addAll(
-                    add);
-                update.addAll(
-                    add);
-              }
-            }
+      // Computation
+      while (!update.isEmpty()) {
+        final M attribute = update.iterator().next();
+        update.remove(attribute);
+        for (Implication<G, M> implication : list.get(attribute)) {
+          final Integer previous = count.get(implication);
+          count.put(implication, previous - 1);
+          if (count.get(implication) == 0) {
+            final Set<M> add = new HashSet<M>();
+            add.addAll(implication.getConclusion());
+            add.removeAll(newdep);
+            newdep.addAll(add);
+            update.addAll(add);
           }
+        }
+      }
 
-          return newdep;
-        });
+      return newdep;
+    });
   }
 
   public static <G, M> ClosureOperator<M>
@@ -301,24 +267,20 @@ public interface ClosureOperator<M> {
 
       @Override
       public boolean isClosed(final Set<M> set) {
-        return set.size() <= maxCard || set.containsAll(
-            baseSet);
+        return set.size() <= maxCard || set.containsAll(baseSet);
       }
 
       @Override
       public boolean close(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return true;
-        set.addAll(
-            baseSet);
+        set.addAll(baseSet);
         return false;
       }
 
       @Override
       public Set<M> closure(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return new HashSet<M>(set);
         return new HashSet<M>(baseSet);
       }
@@ -337,26 +299,20 @@ public interface ClosureOperator<M> {
 
       @Override
       public boolean isClosed(final Set<M> set) {
-        return cxt.colAnd(
-            set).size() >= minSupp
-            || set.containsAll(
-                cxt.colHeads());
+        return cxt.colAnd(set).size() >= minSupp || set.containsAll(cxt.colHeads());
       }
 
       @Override
       public boolean close(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return true;
-        set.addAll(
-            cxt.colHeads());
+        set.addAll(cxt.colHeads());
         return false;
       }
 
       @Override
       public Set<M> closure(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return new HashSet<M>(set);
         return new HashSet<M>(cxt.colHeads());
       }
@@ -374,28 +330,23 @@ public interface ClosureOperator<M> {
 
       @Override
       public boolean isClosed(final Set<M> set) {
-        return set.containsAll(
-            elements);
+        return set.containsAll(elements);
       }
 
       @Override
       public boolean close(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return true;
-        set.addAll(
-            elements);
+        set.addAll(elements);
         return false;
       }
 
       @Override
       public Set<M> closure(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return new HashSet<M>(set);
         Set<M> result = new HashSet<M>(set);
-        result.addAll(
-            elements);
+        result.addAll(elements);
         return result;
       }
 
@@ -413,24 +364,20 @@ public interface ClosureOperator<M> {
 
       @Override
       public boolean isClosed(final Set<M> set) {
-        return elements.containsAll(
-            set);
+        return elements.containsAll(set);
       }
 
       @Override
       public boolean close(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return true;
-        set.addAll(
-            baseSet);
+        set.addAll(baseSet);
         return false;
       }
 
       @Override
       public Set<M> closure(final Set<M> set) {
-        if (isClosed(
-            set))
+        if (isClosed(set))
           return new HashSet<M>(set);
         return new HashSet<M>(baseSet);
       }
