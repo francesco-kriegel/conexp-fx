@@ -28,18 +28,18 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import conexp.fx.core.algorithm.nextclosures.NextClosures2;
-import conexp.fx.core.closureoperators.ClosureOperator;
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.Context;
+import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.SparseContext;
-import conexp.fx.core.implication.Implication;
+import conexp.fx.core.math.ClosureOperator;
 
 public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C, G, T> {
 
-  protected final Set<IRI>  domain;
-  protected final Signature signature;
+  protected final Set<IRI>                      domain;
+  protected final Signature                     signature;
 
   protected final Multimap<IRI, IRI>            conceptNameExtensions;
   protected final Multimap<IRI, Pair<IRI, IRI>> roleNameExtensions;
@@ -187,8 +187,7 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
   @Override
   public final ClosureOperator<IRI>
       getClosureOperator(final int roleDepth, final int maxCardinality, final Constructor... constructors) {
-    return ClosureOperator.definedBy(
-        set -> getConceptExpressionExtension(getMostSpecificConcept(set, roleDepth, maxCardinality, constructors)));
+    return set -> getConceptExpressionExtension(getMostSpecificConcept(set, roleDepth, maxCardinality, constructors));
   }
 
   protected final Multimap<IRI, IRI>            conceptNamesPerIndividual = HashMultimap.create();

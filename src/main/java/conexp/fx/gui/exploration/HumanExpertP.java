@@ -18,14 +18,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import conexp.fx.core.algorithm.nextclosure.exploration.CounterExample;
-import conexp.fx.core.algorithm.nextclosure.exploration.Expert;
+import conexp.fx.core.algorithm.exploration.CounterExample;
+import conexp.fx.core.algorithm.exploration.Expert;
 import conexp.fx.core.collections.relation.RelationEvent;
 import conexp.fx.core.collections.relation.RelationEventHandler;
 import conexp.fx.core.context.Context;
+import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.context.MatrixContext.AutomaticMode;
-import conexp.fx.core.implication.Implication;
 import conexp.fx.core.util.IdGenerator;
 import conexp.fx.gui.context.MatrixContextWidget;
 import conexp.fx.gui.dialog.ErrorDialog;
@@ -53,7 +53,7 @@ public final class HumanExpertP<M> implements Expert<String, M> {
 
     private Question(final Implication<String, M> implication) {
       super();
-      this.object = "Counter-Example " + IdGenerator.getNextId();
+      this.object = "Counter-Example " + IdGenerator.getNextId(cxt);
       this.implication = implication;
       final Button acceptButton = new Button("accept");
       final Button declineButton = new Button("decline");
@@ -168,7 +168,7 @@ public final class HumanExpertP<M> implements Expert<String, M> {
   }
 
   @Override
-  public Set<CounterExample<String, M>> askForCounterExample(final Implication<String, M> implication)
+  public Set<CounterExample<String, M>> getCounterExamples(final Implication<String, M> implication)
       throws InterruptedException {
     Platform2.runOnFXThreadAndWaitTryCatch(() -> pendingQuestions.put(implication, new Question(implication)));
 //    return new Future<Set<CounterExample<String, M>>>() {

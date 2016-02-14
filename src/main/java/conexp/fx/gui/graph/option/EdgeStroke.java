@@ -1,17 +1,6 @@
 package conexp.fx.gui.graph.option;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-
-
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.context.Context;

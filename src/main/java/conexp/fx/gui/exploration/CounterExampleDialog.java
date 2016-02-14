@@ -21,9 +21,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import conexp.fx.core.algorithm.nextclosure.exploration.CounterExample;
+import conexp.fx.core.algorithm.exploration.CounterExample;
+import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.implication.Implication;
 import conexp.fx.core.util.IdGenerator;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dialog.ErrorDialog;
@@ -63,7 +63,7 @@ public class CounterExampleDialog extends FXDialog<CounterExample<String, String
 //    pane.setTop(implicationText);
 
     final Label objectLabel = new Label("Counterexample-Name: ");
-    final TextField objectTextField = new TextField("Counterexample" + IdGenerator.getNextId());
+    final TextField objectTextField = new TextField("Counterexample" + IdGenerator.getNextId(context));
     final HBox objectBox = new HBox(objectLabel, objectTextField);
     final ObservableList<String> selectedAttributes = FXCollections.observableArrayList();
     final ObservableValue<CounterExample<String, String>> counterExample = Bindings.createObjectBinding(

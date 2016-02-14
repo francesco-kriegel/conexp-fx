@@ -31,7 +31,7 @@ import com.google.common.collect.Sets;
 import com.sun.javafx.geom.BaseBounds;
 import com.sun.javafx.geom.transform.BaseTransform;
 
-import conexp.fx.core.collections.pair.IntPair;
+import conexp.fx.core.collections.IntPair;
 import conexp.fx.gui.properties.BoundedIntPairProperty;
 import conexp.fx.gui.properties.SimpleIntPairProperty;
 import conexp.fx.gui.util.ColorScheme;
@@ -159,12 +159,12 @@ public abstract class CellPane<TCellPane extends CellPane<TCellPane, TCell>, TCe
 
                                                                                     protected int computeValue() {
                                                                                       if (autoSizeRows.get())
-                                                                                        return (int) maximalTextWidth.get()
-                                                                                            + 10;
-//                                                                                        return Math.min(
-//                                                                                            250,
-//                                                                                            (int) maximalTextWidth.get()
-//                                                                                                + 10);
+                                                                                        return (int) maximalTextWidth
+                                                                                            .get() + 10;
+                                                                                //                                                                                        return Math.min(
+                                                                                //                                                                                            250,
+                                                                                //                                                                                            (int) maximalTextWidth.get()
+                                                                                //                                                                                                + 10);
                                                                                       return (int) (zoomFactor.get()
                                                                                           * (double) rowHeightDefault
                                                                                               .get());
@@ -181,12 +181,12 @@ public abstract class CellPane<TCellPane extends CellPane<TCellPane, TCell>, TCe
 
                                                                                     protected int computeValue() {
                                                                                       if (autoSizeColumns.get())
-                                                                                        return (int) maximalTextWidth.get()
-                                                                                            + 10;
-//                                                                                        return Math.min(
-//                                                                                            250,
-//                                                                                            (int) maximalTextWidth.get()
-//                                                                                                + 10);
+                                                                                        return (int) maximalTextWidth
+                                                                                            .get() + 10;
+                                                                                //                                                                                        return Math.min(
+                                                                                //                                                                                            250,
+                                                                                //                                                                                            (int) maximalTextWidth.get()
+                                                                                //                                                                                                + 10);
                                                                                       return (int) (zoomFactor.get()
                                                                                           * columnWidthDefault.get());
                                                                                     };

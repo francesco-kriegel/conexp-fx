@@ -17,7 +17,7 @@ import java.util.Map;
 
 import org.jsoup.nodes.Element;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 
 public final class Metadata extends Data<Element> {
 

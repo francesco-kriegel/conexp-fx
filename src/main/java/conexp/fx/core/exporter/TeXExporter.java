@@ -21,7 +21,7 @@ import java.util.Map;
 
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.layout.ConceptLayout;
+import conexp.fx.core.layout.AdditiveConceptLayout;
 
 public class TeXExporter<G, M> {
 
@@ -177,18 +177,18 @@ public class TeXExporter<G, M> {
     ConExpFX
   }
 
-  private final MatrixContext<G, M>   formalContext;
-  private final Map<Integer, Integer> objectPermutation;
-  private final Map<Integer, Integer> attributePermutation;
-  private final ConceptLayout<G, M>   conceptLayout;
-  private final TeXOptions            teXOptions;
-  private final StringBuffer          buffer = new StringBuffer();
+  private final MatrixContext<G, M>         formalContext;
+  private final Map<Integer, Integer>       objectPermutation;
+  private final Map<Integer, Integer>       attributePermutation;
+  private final AdditiveConceptLayout<G, M> conceptLayout;
+  private final TeXOptions                  teXOptions;
+  private final StringBuffer                buffer = new StringBuffer();
 
   public TeXExporter(
       final MatrixContext<G, M> formalContext,
       final Map<Integer, Integer> objectPermutation,
       final Map<Integer, Integer> attributePermutation,
-      final ConceptLayout<G, M> conceptLayout,
+      final AdditiveConceptLayout<G, M> conceptLayout,
       final TeXOptions teXOptions) {
     this.formalContext = formalContext;
     this.objectPermutation = objectPermutation;
@@ -379,9 +379,8 @@ public class TeXExporter<G, M> {
     final double height = conceptLayout.getCurrentBoundingBox(false, false).getHeight();
     final double w = teXOptions.scale.widthFactor(width, height);
     final double h = teXOptions.scale.heightFactor(width, height);
-    final double unit =
-        (teXOptions.scale.scale == ScaleEnum.FitHeight ? h : (teXOptions.scale.scale == ScaleEnum.FitWidth ? w : Math
-            .min(w, h)));
+    final double unit = (teXOptions.scale.scale == ScaleEnum.FitHeight ? h
+        : (teXOptions.scale.scale == ScaleEnum.FitWidth ? w : Math.min(w, h)));
     append("\\begin{diagram}{" + width + "}{" + height + "}\r\n");
     append("\\unitlength " + unit + "mm\r\n");
     append("\\CircleSize{1}\r\n");
@@ -389,8 +388,8 @@ public class TeXExporter<G, M> {
     append("\\EdgeThickness{1pt}\r\n");
     for (int i = 0; i < conceptLayout.lattice.rowHeads().size(); i++) {
       final Concept<G, M> concept = conceptLayout.lattice.rowHeads().get(i);
-      final double x = conceptLayout.positions.get(concept).getX();
-      final double y = conceptLayout.positions.get(concept).getY();
+      final double x = conceptLayout.getPosition(concept).getValue().getX();
+      final double y = conceptLayout.getPosition(concept).getValue().getY();
       append("\\Node{" + i + "}{" + (x - minX) + "}{" + (height - y) + "}\r\n");
     }
     for (int i = 0; i < conceptLayout.lattice.rowHeads().size(); i++) {
@@ -402,18 +401,16 @@ public class TeXExporter<G, M> {
     if (teXOptions.labels)
       for (int i = 0; i < conceptLayout.lattice.rowHeads().size(); i++) {
         final Concept<G, M> concept = conceptLayout.lattice.rowHeads().get(i);
-        final String objLabels =
-            conceptLayout.lattice
-                .objectLabels(concept)
-                .toString()
-                .substring(1, conceptLayout.lattice.objectLabels(concept).toString().length() - 1)
-                .trim();
-        final String attLabels =
-            conceptLayout.lattice
-                .attributeLabels(concept)
-                .toString()
-                .substring(1, conceptLayout.lattice.attributeLabels(concept).toString().length() - 1)
-                .trim();
+        final String objLabels = conceptLayout.lattice
+            .objectLabels(concept)
+            .toString()
+            .substring(1, conceptLayout.lattice.objectLabels(concept).toString().length() - 1)
+            .trim();
+        final String attLabels = conceptLayout.lattice
+            .attributeLabels(concept)
+            .toString()
+            .substring(1, conceptLayout.lattice.attributeLabels(concept).toString().length() - 1)
+            .trim();
         if (!objLabels.isEmpty())
           append("\\centerObjbox{" + i + "}{0}{1}{" + objLabels + "}\r\n");
         if (!attLabels.isEmpty())
@@ -434,8 +431,8 @@ public class TeXExporter<G, M> {
     append("\\setlength{\\labeldistance}{1pt}\r\n");
     for (int i = 0; i < conceptLayout.lattice.rowHeads().size(); i++) {
       final Concept<G, M> concept = conceptLayout.lattice.rowHeads().get(i);
-      final double x = conceptLayout.positions.get(concept).getX();
-      final double y = conceptLayout.positions.get(concept).getY();
+      final double x = conceptLayout.getPosition(concept).getValue().getX();
+      final double y = conceptLayout.getPosition(concept).getValue().getY();
       append("\\conceptnode{" + i + "}{" + (x - minX) + "}{" + (height - y) + "}\r\n");
     }
     for (int i = 0; i < conceptLayout.lattice.rowHeads().size(); i++) {
@@ -447,18 +444,16 @@ public class TeXExporter<G, M> {
     if (teXOptions.labels)
       for (int i = 0; i < conceptLayout.lattice.rowHeads().size(); i++) {
         final Concept<G, M> concept = conceptLayout.lattice.rowHeads().get(i);
-        final String objLabels =
-            conceptLayout.lattice
-                .objectLabels(concept)
-                .toString()
-                .substring(1, conceptLayout.lattice.objectLabels(concept).toString().length() - 1)
-                .trim();
-        final String attLabels =
-            conceptLayout.lattice
-                .attributeLabels(concept)
-                .toString()
-                .substring(1, conceptLayout.lattice.attributeLabels(concept).toString().length() - 1)
-                .trim();
+        final String objLabels = conceptLayout.lattice
+            .objectLabels(concept)
+            .toString()
+            .substring(1, conceptLayout.lattice.objectLabels(concept).toString().length() - 1)
+            .trim();
+        final String attLabels = conceptLayout.lattice
+            .attributeLabels(concept)
+            .toString()
+            .substring(1, conceptLayout.lattice.attributeLabels(concept).toString().length() - 1)
+            .trim();
         if (!attLabels.isEmpty())
           append("\\attributelabel{" + i + "}{" + attLabels + "}\r\n");
         if (!objLabels.isEmpty())

@@ -19,7 +19,7 @@ import java.io.OutputStreamWriter;
 import java.util.Map;
 
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.layout.ConceptLayout;
+import conexp.fx.core.layout.AdditiveConceptLayout;
 
 public class HTMLExporter<G, M> {
 
@@ -27,7 +27,7 @@ public class HTMLExporter<G, M> {
       MatrixContext<G, M> context,
       Map<Integer, Integer> domainPermutation,
       Map<Integer, Integer> codomainPermutation,
-      ConceptLayout<G, M> layout,
+      AdditiveConceptLayout<G, M> layout,
       boolean exportArrows,
       boolean exportLabels,
       File file) {
@@ -59,7 +59,7 @@ public class HTMLExporter<G, M> {
       MatrixContext<G, M> formalContext,
       Map<Integer, Integer> domainPermutation,
       Map<Integer, Integer> codomainPermutation,
-      ConceptLayout<G, M> layout,
+      AdditiveConceptLayout<G, M> layout,
       boolean exportArrows,
       boolean exportLabels) {
     StringBuffer buffer = new StringBuffer();

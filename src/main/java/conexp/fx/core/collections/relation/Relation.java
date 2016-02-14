@@ -13,18 +13,16 @@ package conexp.fx.core.collections.relation;
  * #L%
  */
 
-
 import java.util.Collection;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.math.PartialComparable;
 
-public interface Relation<R, C> extends Iterable<Pair<R, C>>, PartialComparable<Relation<R, C>>, Cloneable
-{
+public interface Relation<R, C> extends Iterable<Pair<R, C>>, PartialComparable<Relation<R, C>>, Cloneable {
 
   public SetList<R> rowHeads();
 
@@ -69,6 +67,10 @@ public interface Relation<R, C> extends Iterable<Pair<R, C>>, PartialComparable<
 
   public int size();
 
+  default public double density() {
+    return ((double) size()) / ((double) (rowHeads().size() * colHeads().size()));
+  }
+
   public boolean isEmpty();
 
   public boolean isFull();
@@ -83,13 +85,11 @@ public interface Relation<R, C> extends Iterable<Pair<R, C>>, PartialComparable<
 
   public boolean[][] toArray();
 
-  public static final class NoHomogenRelationException extends RuntimeException
-  {
+  public static final class NoHomogenRelationException extends RuntimeException {
 
     private static final long serialVersionUID = -3920949710978936537L;
 
-    public NoHomogenRelationException()
-    {
+    public NoHomogenRelationException() {
       super();
     }
   }

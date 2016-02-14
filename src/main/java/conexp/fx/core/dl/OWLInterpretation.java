@@ -51,19 +51,17 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures;
-import conexp.fx.core.algorithm.nextclosures.NextClosures.Result;
+import conexp.fx.core.algorithm.nextclosures.NextClosures1;
+import conexp.fx.core.algorithm.nextclosures.NextClosures1.Result;
 import conexp.fx.core.algorithm.nextclosures.NextClosuresC;
 import conexp.fx.core.algorithm.nextclosures.NextClosuresC.ResultC;
-import conexp.fx.core.closureoperators.AClosureOperator;
-import conexp.fx.core.closureoperators.ClosureOperator;
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.Context;
+import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.SparseContext;
-import conexp.fx.core.implication.Implication;
-import conexp.fx.core.util.OWLMinimizer;
+import conexp.fx.core.math.ClosureOperator;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectComplementOfImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
@@ -218,10 +216,9 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     for (IRI conceptName : conceptNameExtensions.keySet())
       if (getConceptNameExtension(conceptName).containsAll(individuals))
         conjuncts.add(new OWLClassImpl(conceptName));
-      else
-        if (Arrays.asList(constructors).contains(Constructor.PRIMITIVE_NEGATION) && Collections2
-            .filter(getDomain(), d -> !getConceptNameExtension(conceptName).contains(d))
-            .containsAll(individuals))
+      else if (Arrays.asList(constructors).contains(Constructor.PRIMITIVE_NEGATION) && Collections2
+          .filter(getDomain(), d -> !getConceptNameExtension(conceptName).contains(d))
+          .containsAll(individuals))
         conjuncts.add(new OWLObjectComplementOfImpl(new OWLClassImpl(conceptName)));
     if (roleDepth > 0) {
       for (IRI roleName : signature.getRoleNames()) {
@@ -404,7 +401,7 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     return getMostSpecificConcept(Collections.singleton(individual), roleDepth, maxCardinality, constructors);
   }
 
-  private final Map<Set<IRI>, OWLClassExpression> cache      = new ConcurrentHashMap<>();
+  private final Map<Set<IRI>, OWLClassExpression> cache = new ConcurrentHashMap<>();
 
   @Override
   public OWLClassExpression getMostSpecificConcept(
@@ -689,7 +686,7 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     final Set<OWLSubPropertyChainOfAxiom> base = new HashSet<OWLSubPropertyChainOfAxiom>();
 
     final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> cxt = getInducedRoleContext(roleDepth);
-    final ClosureOperator<Triple<Integer, IRI, Integer>> clop = new AClosureOperator<Triple<Integer, IRI, Integer>>() {
+    final ClosureOperator<Triple<Integer, IRI, Integer>> clop = new ClosureOperator<Triple<Integer, IRI, Integer>>() {
 
       @Override
       public Set<Triple<Integer, IRI, Integer>> closure(Set<Triple<Integer, IRI, Integer>> set) {
@@ -703,7 +700,7 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
       }
 
     };
-    final Result<ArrayList<IRI>, Triple<Integer, IRI, Integer>> result = NextClosures.compute(
+    final Result<ArrayList<IRI>, Triple<Integer, IRI, Integer>> result = NextClosures1.compute(
         cxt,
         // clop,
         true);

@@ -15,7 +15,7 @@ import java.io.File;
 import java.util.Map;
 
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.layout.ConceptLayout;
+import conexp.fx.core.layout.AdditiveConceptLayout;
 
 
 public class PDFExporter<G, M> {
@@ -24,7 +24,7 @@ public class PDFExporter<G, M> {
       MatrixContext<G, M> context,
       Map<Integer, Integer> domainPermutation,
       Map<Integer, Integer> codomainPermutation,
-      ConceptLayout<G, M> layout,
+      AdditiveConceptLayout<G, M> layout,
       boolean exportArrows,
       boolean exportLabels,
       File file) {

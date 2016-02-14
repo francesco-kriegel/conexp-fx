@@ -11,10 +11,10 @@ package conexp.fx.gui.graph.transformation;
  */
 
 
-import conexp.fx.core.math.Isomorphism;
+import conexp.fx.core.math.GuavaIsomorphism;
 import javafx.geometry.Point3D;
 
-public final class PolarTransformation extends Isomorphism<Point3D, Point3D> {
+public final class PolarTransformation extends GuavaIsomorphism<Point3D, Point3D> {
 
 //  private final double minX;
   private final double width;

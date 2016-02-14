@@ -11,10 +11,10 @@ package conexp.fx.gui.graph.transformation;
  */
 
 
-import conexp.fx.core.math.Isomorphism;
+import conexp.fx.core.math.GuavaIsomorphism;
 import javafx.geometry.Point3D;
 
-public class RotationXY extends Isomorphism<Point3D, Point3D> {
+public class RotationXY extends GuavaIsomorphism<Point3D, Point3D> {
 
   private final double  angle;
   private final Point3D center;

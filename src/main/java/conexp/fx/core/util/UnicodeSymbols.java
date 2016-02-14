@@ -32,7 +32,8 @@ public class UnicodeSymbols {
   public static final String TO         = "\u27F6";
   public static final String WEDGE      = "\u22C0";
   public static final String VEE        = "\u22C1";
-  public static final String UNTIL      = "UNTIL";
+  public static final String UNTIL      = new String(new int[] { 0x1D4B0 }, 0, 1);
+  // "\u1D4B0" // "\u1D518" // "\u25C1" // "\u25C3" // "\u22B2"
   public static final String NEXT       = "\u25CB";
   public static final String SOMETIMES  = "\u25C7";
   public static final String ALWAYS     = "\u25A1";

@@ -25,7 +25,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 
-import conexp.fx.core.math.Isomorphism;
+import conexp.fx.core.collections.GuavaFunctions;
 
 public abstract class AbstractSetList<E> implements SetList<E> {
 
@@ -162,22 +162,6 @@ public abstract class AbstractSetList<E> implements SetList<E> {
       }), Predicates.notNull());
   }
 
-  @Override
-  public Isomorphism<E, Integer> index() {
-    return new Isomorphism<E, Integer>() {
-
-      @Override
-      public final Integer apply(final E e) {
-        return indexOf(e);
-      }
-
-      @Override
-      public final E invert(final Integer i) {
-        return get(i);
-      }
-    };
-  }
-
   public int indexOf(final Object o) {
     int i = 0;
     for (E e : this) {
@@ -190,19 +174,11 @@ public abstract class AbstractSetList<E> implements SetList<E> {
 
   public final Collection<Integer> indicesOf(final Collection<?> c, final boolean includeMinusOne) {
     if (includeMinusOne)
-      return Collections2.transform(c, new Function<Object, Integer>() {
-
-        public final Integer apply(final Object o) {
-          return indexOf(o);
-        }
-      });
+      return Collections2.transform(c, GuavaFunctions.toGuavaFunction(this::indexOf));
     else
-      return Collections2.filter(Collections2.transform(c, new Function<Object, Integer>() {
-
-        public final Integer apply(final Object o) {
-          return indexOf(o);
-        }
-      }), Predicates.not(Predicates.equalTo(-1)));
+      return Collections2.filter(
+          Collections2.transform(c, GuavaFunctions.toGuavaFunction(this::indexOf)),
+          Predicates.not(Predicates.equalTo(-1)));
   }
 
   @Deprecated

@@ -14,35 +14,30 @@ package conexp.fx.core.context;
  */
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import conexp.fx.core.math.PartialComparable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
-import conexp.fx.core.math.PartialComparable;
 
 public final class Concept<G, M>
     implements de.tudresden.inf.tcs.fcaapi.Concept<M, G>, PartialComparable<Concept<G, M>>, Cloneable {
 
-  private final Set<G>           extent;
+  private final ObservableSet<G> extent;
   private final ObservableSet<M> intent;
 
-  public Concept(final Set<G> extent, final ObservableSet<M> intent) {
-    super();
-    this.extent = extent;
-    this.intent = intent;
-  }
-
   public Concept(final Set<G> extent, final Set<M> intent) {
-    this(extent, FXCollections.observableSet(Collections.synchronizedSet(intent)));
+    super();
+    this.extent = (extent instanceof ObservableSet) ? (ObservableSet<G>) extent : FXCollections.observableSet(extent);
+    this.intent = (intent instanceof ObservableSet) ? (ObservableSet<M>) intent : FXCollections.observableSet(intent);
   }
 
   public Concept(final Collection<G> extent, final Collection<M> intent) {
     this(new HashSet<G>(extent), new HashSet<M>(intent));
   }
 
-  public final Set<G> extent() {
+  public final ObservableSet<G> extent() {
     return extent;
   }
 
@@ -96,11 +91,12 @@ public final class Concept<G, M>
 
   public final boolean equals(final Object object) {
     return (object != null) && (object instanceof Concept) && extent.equals(((Concept<?, ?>) object).extent)
-        && intent.equals(((Concept<?, ?>) object).intent);
+//        && intent.equals(((Concept<?, ?>) object).intent)
+        ;
   }
 
   public final int hashCode() {
-    return extent.hashCode();
+    return extent.hashCode() ;//+ intent.hashCode();
   }
 
   public final String toString() {

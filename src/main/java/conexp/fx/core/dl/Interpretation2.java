@@ -46,7 +46,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
 
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.MatrixContext;
 
 public class Interpretation2 {

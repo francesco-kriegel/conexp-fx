@@ -23,7 +23,7 @@ import org.ujmp.core.enums.ValueType;
 import org.ujmp.core.matrix.factory.Matrix2DFactory;
 import org.ujmp.core.matrix.factory.MatrixMultiDFactory;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 
 public class Matrix3D<G, M, W> {
 

@@ -13,7 +13,7 @@ package conexp.fx.core.context;
 import java.util.HashSet;
 import java.util.Set;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 

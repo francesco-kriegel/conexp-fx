@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import conexp.fx.core.collections.pair.IntPair;
+import conexp.fx.core.collections.IntPair;
 import conexp.fx.core.util.IdGenerator;
 import conexp.fx.gui.util.Platform2;
 import javafx.animation.FadeTransition;

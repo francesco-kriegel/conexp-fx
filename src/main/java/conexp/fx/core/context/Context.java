@@ -19,7 +19,6 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.relation.Relation;
-import conexp.fx.core.implication.Implication;
 
 public interface Context<G, M> extends Relation<G, M> {
 
@@ -54,5 +53,9 @@ public interface Context<G, M> extends Relation<G, M> {
 
   public default boolean has(Concept<G, M> concept) {
     return concept.extent().equals(colAnd(concept.intent())) && concept.intent().equals(rowAnd(concept.extent()));
+  }
+
+  public default MatrixContext<G, M> toMatrixContext() {
+    return this instanceof MatrixContext ? (MatrixContext<G, M>) this : clone();
   }
 }

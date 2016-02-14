@@ -1,21 +1,9 @@
 package conexp.fx.gui.graph.option;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-
-
 import conexp.fx.core.util.Constants;
 import javafx.util.Duration;
 
-public enum AnimationSpeed
-{
+public enum AnimationSpeed {
   OFF(0, "Off"),
   FASTESTEST(1, "Fastestest"),
   FASTESTER(2, "Fastester"),
@@ -28,12 +16,12 @@ public enum AnimationSpeed
   SLOWEST(25, "Slowest"),
   SLOWESTER(32, "Slowester"),
   SLOWESTEST(40, "Slowestest");
+
   public final int      n;
   public final String   title;
   public final Duration frameSize;
 
-  private AnimationSpeed(final int n, final String title) throws IllegalArgumentException
-  {
+  private AnimationSpeed(final int n, final String title) throws IllegalArgumentException {
     this.n = n;
     this.title = title;
     if (n < 0)
@@ -44,8 +32,7 @@ public enum AnimationSpeed
       this.frameSize = Duration.millis(Constants.FRAME_SIZE_MILLIS * n);
   }
 
-  public String toString()
-  {
+  public String toString() {
     return title;
   }
 }

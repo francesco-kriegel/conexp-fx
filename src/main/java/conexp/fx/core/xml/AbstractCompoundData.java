@@ -24,7 +24,7 @@ import org.jsoup.nodes.Element;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 
 public abstract class AbstractCompoundData extends Data<Map<String, Data<?>>> implements Map<String, Data<?>> {
 

@@ -1,5 +1,7 @@
 package conexp.fx.core.importer;
 
+import java.io.BufferedReader;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -11,12 +13,14 @@ package conexp.fx.core.importer;
  */
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.util.IterableFile;
 
 public final class CSVImporter {
 
@@ -57,11 +61,17 @@ public final class CSVImporter {
   }
 
   public final void readFile() {
-    final Iterator<String> it = new IterableFile(file).iterator();
-    while (it.hasNext()) {
-      final String[] tuple = it.next().split(delimiter);
-      if (tuple.length > 0)
-        tuples.add(tuple);
+    try {
+      final BufferedReader reader = new BufferedReader(new FileReader(file));
+      final Iterator<String> it = reader.lines().iterator();
+      while (it.hasNext()) {
+        final String[] tuple = it.next().split(delimiter);
+        if (tuple.length > 0)
+          tuples.add(tuple);
+      }
+      reader.close();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
   }
 

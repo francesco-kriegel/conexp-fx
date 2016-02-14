@@ -10,108 +10,32 @@ package conexp.fx.core.math;
  * #L%
  */
 
+import java.util.function.Function;
 
-import com.google.common.base.Function;
+public final class Isomorphism<T, R> implements Function<T, R> {
 
-public abstract class Isomorphism<A, B> implements Function<A, B> {
+  private final Function<T, R> function;
+  private final Function<R, T> inverse;
 
-  public static final <A> Isomorphism<A, A> identity() {
-    return new Isomorphism<A, A>() {
-
-      @Override
-      public A apply(A a) {
-        return a;
-      }
-
-      @Override
-      public A invert(A a) {
-        return a;
-      }
-    };
+  public Isomorphism(final Function<T, R> function, final Function<R, T> inverse) {
+    super();
+    if (function == null || inverse == null)
+      throw new IllegalArgumentException(new NullPointerException());
+    this.function = function;
+    this.inverse = inverse;
   }
 
-  public static final <A, B> Isomorphism<A, B> create(final Function<A, B> function, final Function<B, A> inverse) {
-    return new Isomorphism<A, B>() {
-
-      @Override
-      public final B apply(final A a) {
-        return function.apply(a);
-      }
-
-      @Override
-      public final A invert(final B b) {
-        return inverse.apply(b);
-      }
-
-      @Override
-      public Function<A, B> function() {
-        return function;
-      }
-
-      @Override
-      public Function<B, A> inverse() {
-        return inverse;
-      }
-    };
+  @Override
+  public final R apply(T t) {
+    return function.apply(t);
   }
 
-  public static final <A, B> Isomorphism<B, A> invert(final Isomorphism<A, B> isomorphism) {
-    return new Isomorphism<B, A>() {
-
-      @Override
-      public final A apply(final B b) {
-        return isomorphism.invert(b);
-      }
-
-      @Override
-      public final B invert(final A a) {
-        return isomorphism.apply(a);
-      }
-
-      @Override
-      public Function<B, A> function() {
-        return isomorphism.inverse();
-      }
-
-      @Override
-      public Function<A, B> inverse() {
-        return isomorphism.function();
-      }
-    };
+  public final T invert(R r) {
+    return inverse.apply(r);
   }
 
-  public static final <A, B, C> Isomorphism<A, C> compose(
-      final Isomorphism<A, B> isomorphism1,
-      final Isomorphism<B, C> isomorphism2) {
-    return new Isomorphism<A, C>() {
-
-      @Override
-      public final C apply(final A a) {
-        return isomorphism2.apply(isomorphism1.apply(a));
-      }
-
-      @Override
-      public final A invert(final C c) {
-        return isomorphism1.invert(isomorphism2.invert(c));
-      }
-    };
+  public final Function<R, T> inverse() {
+    return inverse;
   }
 
-  public A invert(B b) {
-    throw new RuntimeException();
-  }
-
-  public Function<A, B> function() {
-    return this;
-  }
-
-  public Function<B, A> inverse() {
-    return new Function<B, A>() {
-
-      @Override
-      public final A apply(final B b) {
-        return Isomorphism.this.invert(b);
-      }
-    };
-  }
 }

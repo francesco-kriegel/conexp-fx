@@ -24,8 +24,6 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.collect.UnmodifiableListIterator;
 
-import conexp.fx.core.collections.pair.Pair;
-
 public final class ListIterators {
 
   public static final <E> ListIterator<E> empty() {

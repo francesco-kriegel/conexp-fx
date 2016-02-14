@@ -1,0 +1,29 @@
+module conexp.fx.frege.Bar where
+
+import Data.List
+import Data.Maybe
+
+add :: (Num a) => a->a->a
+add x y = x+y
+
+sub :: (Num a) => a->a->a
+sub x y = x-y
+
+mul :: Num a => a -> a -> a
+mul x y =x*y
+
+f :: Maybe a->Maybe b
+f Nothing  = undefined    -- TODO: complete code
+f (Just _)  = undefined    -- TODO: complete code
+
+foo :: (a,b) -> (b,a)
+foo (a,b) = (b,a)
+
+bar :: (b,a) -> b
+bar (a,b)=a
+
+g ∷ Num 𝖆 ⇒ (𝖆,𝖆) → 𝖆
+g (a,b)=a*a+b
+
+h ∷ Num α ⇒ (α,α,α) → α
+h (a,b,c)=a*b*c

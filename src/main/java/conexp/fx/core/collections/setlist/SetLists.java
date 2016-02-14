@@ -13,7 +13,6 @@ package conexp.fx.core.collections.setlist;
  * #L%
  */
 
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ListIterator;
@@ -23,7 +22,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
 import conexp.fx.core.collections.ListIterators;
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 
 public final class SetLists {
 
@@ -79,6 +78,11 @@ public final class SetLists {
       public final ListIterator<Integer> listIterator(final int i) {
         return ListIterators.integers(i, size);
       }
+
+      @Override
+      public final int size() {
+        return size;
+      }
     };
   }
 
@@ -104,10 +108,8 @@ public final class SetLists {
     return new UnmodifiableSetList<E>() {
 
       public final ListIterator<E> listIterator(final int i) {
-        return ListIterators.concat(
-            s1.listIterator(),
-            ListIterators.filter(s2.listIterator(), Predicates.not(Predicates.in(s1))),
-            i);
+        return ListIterators
+            .concat(s1.listIterator(), ListIterators.filter(s2.listIterator(), Predicates.not(Predicates.in(s1))), i);
       }
     };
   }

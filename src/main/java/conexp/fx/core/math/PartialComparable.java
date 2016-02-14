@@ -13,7 +13,6 @@ package conexp.fx.core.math;
  * #L%
  */
 
-
 public interface PartialComparable<E> extends Comparable<E> {
 
   public boolean smaller(E e);

@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 
 public class ELLeastCommonSubsumer {
 

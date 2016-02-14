@@ -10,9 +10,7 @@ package conexp.fx.core.layout;
  * #L%
  */
 
-
-public enum ConceptMovement
-{
+public enum ConceptMovement {
   INTENT_SEEDS,
   LABEL_SEED,
   INTENT_CHAIN_SEEDS,

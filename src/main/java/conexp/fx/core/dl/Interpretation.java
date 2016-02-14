@@ -13,9 +13,9 @@ package conexp.fx.core.dl;
 import java.util.Collection;
 import java.util.Set;
 
-import conexp.fx.core.closureoperators.ClosureOperator;
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Context;
+import conexp.fx.core.math.ClosureOperator;
 
 public interface Interpretation<I, C, G, T> {
 

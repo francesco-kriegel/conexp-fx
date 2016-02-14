@@ -14,11 +14,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.Dataset;
@@ -36,14 +34,14 @@ import javafx.event.EventHandler;
 
 public class BlockingExecutor {
 
-  public final AbstractExecutorService      tpe                     =
-      // new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() - 1,
-          Runtime.getRuntime().availableProcessors() - 1,
-          1,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<Runnable>());
+  public final ExecutorService              tpe                     = Executors.newWorkStealingPool();
+  // new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1);
+//      new ThreadPoolExecutor(
+//          Runtime.getRuntime().availableProcessors() - 1,
+//          Runtime.getRuntime().availableProcessors() - 1,
+//          1,
+//          TimeUnit.SECONDS,
+//          new LinkedBlockingQueue<Runnable>());
   public final BooleanBinding               isIdleBinding;
   public final DoubleBinding                overallProgressBinding;
   public final ObservableList<TimeTask<?>>  scheduledTasks          =
@@ -75,14 +73,14 @@ public class BlockingExecutor {
           task.exceptionProperty().addListener(
               (____, _____, exception) -> new ErrorDialog(ConExpFX.instance.primaryStage, exception).showAndWait());
           final EventHandler<WorkerStateEvent> x = ____ -> {
-            System.out.println("finished task " + task.n + " " + task.getTitle());
-            System.out.println("");
+//            System.out.println("finished task " + task.n + " " + task.getTitle());
+//            System.out.println("");
             next();
           };
           task.setOnCancelled(x);
           task.setOnFailed(x);
           task.setOnSucceeded(x);
-          System.out.println("starting task " + task.n + " " + task.getTitle());
+//          System.out.println("starting task " + task.n + " " + task.getTitle());
           if (task.onFXThread())
             tpe.submit(TimeTask.encapsulateTaskOnFXThread(task));
           else

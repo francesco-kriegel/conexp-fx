@@ -1,63 +1,120 @@
 package conexp.fx.cli;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
-import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang3.NotImplementedException;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures;
-import conexp.fx.core.algorithm.nextclosures.NextClosures.Result;
+import conexp.fx.core.algorithm.nextclosures.NextClosures2Bit;
+import conexp.fx.core.collections.Collections3;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Concept;
+import conexp.fx.core.context.ConceptLattice;
+import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.exporter.CXTExporter;
 import conexp.fx.core.importer.CXTImporter;
 import conexp.fx.gui.ConExpFX;
 
-public class CLI {
+public final class CLI {
 
-  public static void main(final String[] args) throws Exception {
+  public void main(final String[] args) throws Exception {
+    new CLI(args);
+  }
+
+  private final CommandLine                commandLine;
+  private MatrixContext<String, String>    cxt;
+  private Set<Concept<String, String>>     concepts;
+  private Set<Implication<String, String>> implications;
+  private ConceptLattice<String, String>   lattice;
+
+  private CLI(final String[] args) throws Exception {
+    super();
     try {
-      final CommandLine commandLine = parseArgs(args);
-      printUnrecognizedOptions(commandLine);
-      if (commandLine.getOptions().length == 0 || commandLine.hasOption(GUI.getLongOpt()))
-        ConExpFX.main(new String[] {});
-      else if (commandLine.hasOption(HELP.getLongOpt()))
-        printHelp();
-//      else if (commandLine.hasOption(TEST.getLongOpt()))
-//        test(commandLine);
-//      else if (commandLine.hasOption(BENCHMARK.getLongOpt()))
-//        NextClosures6Benchmark.main(new String[] {});
-      else if (commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt()))
-        computeImplications(commandLine);
-      else
-        throw new NotImplementedException("");
+      commandLine = new DefaultParser().parse(OPTIONS, args);
     } catch (ParseException e) {
+      printHelp();
       throw new RuntimeException("Unable to parse command line arguments. Please check supplied arguments!", e);
+    }
+    if (!commandLine.getArgList().isEmpty()) {
+      printHelp();
+      throw new RuntimeException("Unrecognized Arguments: " + commandLine.getArgList());
+    }
+    execute();
+  }
+
+  private final void printHelp() {
+    new HelpFormatter().printHelp(
+        120,
+        "java -jar conexp-fx-VERSION-jar-with_dependencies.jar [OPTIONS]",
+        "Available command line options for Concept Explorer FX",
+        OPTIONS,
+        "");
+  }
+
+  private final void execute() throws Exception {
+    if (commandLine.getOptions().length == 0 || commandLine.hasOption(GUI.getLongOpt()))
+      ConExpFX.main(new String[] {});
+    else if (commandLine.hasOption(HELP.getLongOpt()))
+      printHelp();
+    else {
+      final Consumer<Concept<String, String>> c1;
+      final Consumer<Implication<String, String>> c2;
+      final Consumer<String> c3;
+      final Consumer<Double> c4;
+      if (commandLine.hasOption(PRINT_TO_CONSOLE.getLongOpt())) {
+        c1 = System.out::println;
+        c2 = System.out::println;
+        c3 = System.out::println;
+        c4 = System.out::println;
+      } else {
+        c1 = __ -> {};
+        c2 = __ -> {};
+        c3 = __ -> {};
+        c4 = __ -> {};
+      }
+      if (!commandLine.hasOption(IMPORT_CXT.getLongOpt()))
+        throw new IllegalArgumentException(
+            "Unable to instanciate FCA service without formal context. Please specify a file in Burmeister formatting by adding a command line prefix\r\n\t--importContextFromCXT <path_to_file>");
+      final File input = new File(commandLine.getOptionValue(IMPORT_CXT.getLongOpt()));
+      cxt = CXTImporter.read(input);
+      if (commandLine.hasOption(CALC_CONCEPTS.getLongOpt()) || commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt())
+          || commandLine.hasOption(CALC_NEIGHBORHOOD.getLongOpt())) {
+        final Pair<Set<Concept<String, String>>, Set<Implication<String, String>>> result =
+            NextClosures2Bit.bitBitCompute(cxt, Executors.newWorkStealingPool(), c1, c2, c3, c4, () -> false);
+        concepts = result.first();
+        implications = result.second();
+      }
+      if (commandLine.hasOption(CALC_NEIGHBORHOOD.getLongOpt())) {
+//        IPred.
+      }
+      if (commandLine.hasOption(WRITE_TO_FILE.getLongOpt())) {
+        final String filename = input.getName().substring(0, input.getName().lastIndexOf("."));
+        if (concepts != null)
+          Collections3.writeToFile(
+              new File(input.getParentFile(), filename + ".concepts"),
+              concepts,
+              "Formal Concepts of " + input.getAbsolutePath());
+        if (implications != null)
+          Collections3.writeToFile(
+              new File(input.getParentFile(), filename + ".implications"),
+              implications,
+              "Implications of " + input.getAbsolutePath());
+        if (lattice != null)
+          CXTExporter.export(lattice, new File(input.getParentFile(), filename + ".lattice"));
+      }
     }
   }
 
-//  private static final void test(final CommandLine commandLine) {
+//  private final void test(final CommandLine commandLine) {
 //    final String path = commandLine.getOptionValue(CLI.TEST.getLongOpt());
 //    NextClosuresTest.run(path);
 //    TestSuite.main(new String[] {});
@@ -69,157 +126,88 @@ public class CLI {
 ////    -Djub.xml.file=benchmarks/latest.xml    
 //  }
 
-  private static final void computeImplications(final CommandLine commandLine) throws Exception {
-    if (!commandLine.hasOption(IMPORT_CXT.getLongOpt()))
-      throw new IllegalArgumentException(
-          "Unable to instanciate FCA service without formal context. Please specify a file in Burmeister formatting by adding a command line prefix\r\n\t--importContextFromCXT <path_to_file>");
-    final File input = new File(commandLine.getOptionValue(CLI.IMPORT_CXT.getLongOpt()));
-    final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
-    CXTImporter.read(cxt, input);
-    final long start = System.currentTimeMillis();
-    final Result<String, String> implicationalBase = NextClosures.compute(cxt, true);
-    final long duration = System.currentTimeMillis() - start;
-    final File output =
-        new File(input.getParentFile(), input.getName().substring(0, input.getName().lastIndexOf(".")) + ".nxc");
-    exportImplications(
-        "Result from NextClosures for " + input.getName() + "\n" + "computation time: " + duration + "ms",
-        implicationalBase,
-        output);
-  }
-
-  private static final void
-      exportImplications(final String description, final Result<String, String> result, final File file) {
-    System.out.println("writing to " + file.getAbsolutePath());
-    FileWriter fw = null;
-    BufferedWriter bw = null;
-    try {
-      fw = new FileWriter(file);
-      bw = new BufferedWriter(fw);
-      bw.append(description + "\n\n");
-      bw.append(result.implications.size() + " implications:\n");
-      for (Entry<Set<String>, Set<String>> imp : result.implications.entrySet())
-        bw.append(imp.getKey() + " --> " + imp.getValue() + "\n");
-      bw.append("\n");
-      bw.append(result.concepts.size() + " concepts:\n");
-      for (Concept<String, String> con : result.concepts)
-        bw.append(con.intent() + " <x> " + con.extent() + "\n");
-      bw.append("\n");
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        bw.close();
-        fw.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  private static final CommandLine parseArgs(final String[] args) throws ParseException {
-    final CommandLineParser parser = new BasicParser();
-    final CommandLine commandLine = parser.parse(OPTIONS, args);
-    return commandLine;
-  }
-
-  private static final void printUnrecognizedOptions(final CommandLine commandLine) {
-    @SuppressWarnings("rawtypes")
-    final List unrecognizedArgs = commandLine.getArgList();
-    if (!unrecognizedArgs.isEmpty()) {
-      System.err.println("Unrecognized Arguments: " + unrecognizedArgs);
-      System.err.println();
-    }
-  }
-
-  private static final void printHelp() {
-    HelpFormatter helpFormatter = new HelpFormatter();
-    helpFormatter.printHelp(
-        120,
-        "java -jar conexp-fx-VERSION-jar-with_dependencies.jar [OPTIONS]",
-        "Available command line options for Concept Explorer FX",
-        OPTIONS,
-        "");
-  }
-
-  protected static final Options OPTIONS           = new Options();
+  private final Options OPTIONS           = new Options();
   @SuppressWarnings("static-access")
-  protected static final Option  HELP              = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("showHelp")
-      .hasArg(false)
-      .withDescription("shows available command line options and their arguments.")
-      .create("help");
+  private final Option  HELP              = OptionBuilder
+                                              .isRequired(false)
+                                              .withLongOpt("showHelp")
+                                              .hasArg(false)
+                                              .withDescription(
+                                                  "shows available command line options and their arguments.")
+                                              .create("help");
   @SuppressWarnings("static-access")
-  protected static final Option  IMPORT_CXT        = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("importContextFromCXT")
-      .hasArg(true)
-      .withArgName("file")
-      .withDescription("imports formal context file in Burmeister formatting (*.cxt)")
-      .create("fromCXT");
+  private final Option  IMPORT_CXT        = OptionBuilder
+                                              .isRequired(false)
+                                              .withLongOpt("importContextFromCXT")
+                                              .hasArg(true)
+                                              .withArgName("file")
+                                              .withDescription(
+                                                  "imports formal context file in Burmeister formatting (*.cxt)")
+                                              .create("import");
   @SuppressWarnings("static-access")
-  protected static final Option  CALC_CONCEPTS     = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("calculateConcepts")
-      .hasArg(false)
-      .withDescription("computes all formal concepts")
-      .create("bk");
+  private final Option  CALC_CONCEPTS     = OptionBuilder
+                                              .isRequired(false)
+                                              .withLongOpt("calculateConcepts")
+                                              .hasArg(false)
+                                              .withDescription("computes all formal concepts")
+                                              .create("concepts");
   @SuppressWarnings("static-access")
-  protected static final Option  CALC_NEIGHBORHOOD = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("calculateNeighborhood")
-      .hasArg(false)
-      .withDescription("computes the neighborhood relation")
-      .create("bvk");
-  @SuppressWarnings("static-access")
-  protected static final Option  CALC_LAYOUT       = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("calculateLayout")
-      .hasArg(false)
-      .withDescription("computes a concept layout")
-      .create("blk");
-  @SuppressWarnings("static-access")
-  protected static final Option  CALC_IMPLICATIONS = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("calculateImplications")
-      .hasArg(false)
-      .withDescription("computes implicational base")
-      .create("imp");
-  @SuppressWarnings("static-access")
-  protected static final Option  CALC_ASSOCIATIONS = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("calculateAssociations")
-      .hasArg(true)
-      .withArgName("supp")
-      .withArgName("conf")
-      .withDescription("computes all association rules")
-      .create("ass");
-  @SuppressWarnings("static-access")
-  protected static final Option  PRINT_TO_CONSOLE  = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("printToConsole")
-      .hasArg(false)
-      .withDescription("prints all results to console")
-      .create("print");
-  @SuppressWarnings("static-access")
-  protected static final Option  EXPORT            = OptionBuilder
-      .isRequired(false)
-      .withLongOpt("export")
-      .hasArgs(2)
-      .withValueSeparator(' ')
-      .withArgName("format")
-      .withArgName("file")
-      .withDescription("exports labeled and layouted concept lattice to SVG document (*.svg)")
-      .create("out");
-  @SuppressWarnings("static-access")
-  protected static final Option  GUI               = OptionBuilder
-      .isRequired(false)
-      .hasArg(false)
-      .withDescription("starts the JavaFX gui")
-      .withLongOpt("startGUI")
-      .create("gui");
+  private final Option  CALC_NEIGHBORHOOD = OptionBuilder
+                                              .isRequired(false)
+                                              .withLongOpt("calculateNeighborhood")
+                                              .hasArg(false)
+                                              .withDescription("computes the neighborhood relation")
+                                              .create("lattice");
 //  @SuppressWarnings("static-access")
-//  protected static final Option  TEST              = OptionBuilder
+//  private final Option  CALC_LAYOUT       = OptionBuilder
+//                                              .isRequired(false)
+//                                              .withLongOpt("calculateLayout")
+//                                              .hasArg(false)
+//                                              .withDescription("computes a concept layout")
+//                                              .create("layout");
+  @SuppressWarnings("static-access")
+  private final Option  CALC_IMPLICATIONS = OptionBuilder
+                                              .isRequired(false)
+                                              .withLongOpt("calculateImplications")
+                                              .hasArg(false)
+                                              .withDescription("computes implicational base")
+                                              .create("implications");
+//  @SuppressWarnings("static-access")
+//  private final Option  CALC_ASSOCIATIONS = OptionBuilder
+//                                              .isRequired(false)
+//                                              .withLongOpt("calculateAssociations")
+//                                              .hasArg(true)
+//                                              .withArgName("supp")
+//                                              .withArgName("conf")
+//                                              .withDescription("computes all association rules")
+//                                              .create("associationrules");
+  @SuppressWarnings("static-access")
+  private final Option  PRINT_TO_CONSOLE  = OptionBuilder
+                                              .isRequired(false)
+                                              .withLongOpt("printToConsole")
+                                              .hasArg(false)
+                                              .withDescription("prints all results to console")
+                                              .create("print");
+  @SuppressWarnings("static-access")
+  private final Option  WRITE_TO_FILE     = OptionBuilder
+                                              .isRequired(false)
+                                              .withLongOpt("writeToFile")
+                                              .hasArg(false)
+                                              // .hasArgs(2)
+                                              // .withValueSeparator(' ')
+                                              // .withArgName("format")
+                                              // .withArgName("file")
+                                              .withDescription("writes all results to files")
+                                              .create("write");
+  @SuppressWarnings("static-access")
+  private final Option  GUI               = OptionBuilder
+                                              .isRequired(false)
+                                              .hasArg(false)
+                                              .withDescription("starts the JavaFX gui")
+                                              .withLongOpt("startGUI")
+                                              .create("gui");
+//  @SuppressWarnings("static-access")
+//  private final Option  TEST              = OptionBuilder
 //                                                       .isRequired(false)
 //                                                       .hasArg(true)
 //                                                       .withArgName("path")
@@ -227,7 +215,7 @@ public class CLI {
 //                                                       .withLongOpt("runTestSuite")
 //                                                       .create("test");
 //  @SuppressWarnings("static-access")
-//  protected static final Option  BENCHMARK         = OptionBuilder
+//  private final Option  BENCHMARK         = OptionBuilder
 //                                                       .isRequired(false)
 //                                                       .hasArg(true)
 //                                                       .withArgName("path")
@@ -235,17 +223,17 @@ public class CLI {
 //                                                       .withLongOpt("runBenchmarkSuite")
 //                                                       .create("bench");
 
-  static {
+  {
     OPTIONS.addOption(GUI);
     OPTIONS.addOption(HELP);
     OPTIONS.addOption(IMPORT_CXT);
     OPTIONS.addOption(CALC_CONCEPTS);
     OPTIONS.addOption(CALC_NEIGHBORHOOD);
-    OPTIONS.addOption(CALC_LAYOUT);
+//    OPTIONS.addOption(CALC_LAYOUT);
     OPTIONS.addOption(CALC_IMPLICATIONS);
-    OPTIONS.addOption(CALC_ASSOCIATIONS);
+//    OPTIONS.addOption(CALC_ASSOCIATIONS);
     OPTIONS.addOption(PRINT_TO_CONSOLE);
-    OPTIONS.addOption(EXPORT);
+    OPTIONS.addOption(WRITE_TO_FILE);
 //    OPTIONS.addOption(TEST);
 //    OPTIONS.addOption(BENCHMARK);
   }

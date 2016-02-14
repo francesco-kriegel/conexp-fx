@@ -31,7 +31,6 @@ import com.google.common.collect.Sets;
 import conexp.fx.core.collections.relation.MatrixRelation;
 import conexp.fx.core.collections.relation.RelationEvent;
 import conexp.fx.core.collections.relation.RelationEventHandler;
-import conexp.fx.core.implication.Implication;
 
 public final class ConceptLattice<G, M> extends MatrixRelation<Concept<G, M>, Concept<G, M>> {
 

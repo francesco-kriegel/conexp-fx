@@ -21,7 +21,7 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.relation.RelationEvent;
 import conexp.fx.core.collections.relation.RelationEventHandler;
 import conexp.fx.core.context.Concept;
@@ -29,7 +29,7 @@ import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.context.MatrixContext.Incidence;
 import conexp.fx.core.util.Constants;
 import conexp.fx.core.util.IdGenerator;
-import conexp.fx.core.util.OWLtoString;
+import conexp.fx.core.util.OWLUtil;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.cellpane.Cell;
 import conexp.fx.gui.cellpane.CellPane;
@@ -254,7 +254,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
           contextMenu.getItems().addAll(removeItem, selectItem);
         insertItem.setOnAction(__ -> {
           ((FCADataset<String, String>) dataset).addObject(
-              (dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(),
+              (dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(dataset),
               contentCoordinates.get().x());
           rowHeaderPane.rowOpacityMap.keySet().stream().sorted().filter(i -> i >= contentCoordinates.get().x()).forEach(
               i -> rowHeaderPane.rowOpacityMap.put(i + 1, rowHeaderPane.rowOpacityMap.remove(i)));
@@ -391,7 +391,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
           contextMenu.getItems().addAll(removeItem, selectItem);
         insertItem.setOnAction(__ -> {
           ((FCADataset<String, String>) dataset).addAttribute(
-              (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(),
+              (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(dataset),
               contentCoordinates.get().y());
           colHeaderPane.columnOpacityMap
               .keySet()
@@ -494,7 +494,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       try {
         final M m = context.colHeads().get(contentCoordinates.get().y());
         final String string =
-            m instanceof OWLClassExpression ? OWLtoString.toString((OWLClassExpression) m) : m.toString();
+            m instanceof OWLClassExpression ? OWLUtil.toString((OWLClassExpression) m) : m.toString();
         textContent.set(string);
         view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
       } catch (IndexOutOfBoundsException __) {}
@@ -819,8 +819,9 @@ public class MatrixContextWidget<G, M> extends BorderPane {
           .onAction(new EventHandler<ActionEvent>() {
 
             public void handle(ActionEvent event) {
-              ((FCADataset<String, String>) dataset)
-                  .addObject((dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(), -1);
+              ((FCADataset<String, String>) dataset).addObject(
+                  (dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(dataset),
+                  -1);
             }
           })
           .build();
@@ -852,7 +853,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
 
             public void handle(ActionEvent event) {
               ((FCADataset<String, String>) dataset).addAttribute(
-                  (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(),
+                  (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(dataset),
                   -1);
             }
           })

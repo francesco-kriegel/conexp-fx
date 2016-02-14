@@ -39,14 +39,14 @@ public abstract class TimeTask<T> extends Task<T> {
   }
 
   public static final TimeTask<Void>
-      create(final Dataset dataset, final String title, final RunnableWithException runnable) {
+      create(final Dataset dataset, final String title, final RunnableWithException<?> runnable) {
     return create(dataset, title, runnable.toCallable());
   }
 
   public static final TimeTask<Void> create(
       final Dataset dataset,
       final String title,
-      final RunnableWithException runnable,
+      final RunnableWithException<?> runnable,
       final boolean onFXThread) {
     return create(dataset, title, runnable.toCallable(), onFXThread);
   }
@@ -78,6 +78,7 @@ public abstract class TimeTask<T> extends Task<T> {
       @Override
       protected Void call() throws Exception {
         for (TimeTask<Void> task : Arrays.asList(tasks)) {
+          updateTitle(title + " - " + task.getTitle());
           task.progressProperty().addListener((__, ___, p) -> updateProgress(p.doubleValue(), 1d));
           task.messageProperty().addListener((__, ___, m) -> updateMessage(m));
 //          task.exceptionProperty().addListener((__, ___, e) -> setException(e));
@@ -106,9 +107,8 @@ public abstract class TimeTask<T> extends Task<T> {
     };
   }
 
-  private final ReadOnlyLongWrapper runTimeMillis = new ReadOnlyLongWrapper(0l);
-  private final Dataset             dataset;
-  private final boolean             onFXThread;
+  private final Dataset dataset;
+  private final boolean onFXThread;
 
   public TimeTask(final String title) {
     this(null, title);
@@ -118,12 +118,8 @@ public abstract class TimeTask<T> extends Task<T> {
     this(dataset, title, false);
   }
 
-  private static int _n = 0;
-  public int         n;
-
   public TimeTask(final Dataset dataset, final String title, final boolean onFXThread) {
     super();
-    n = _n++;
     this.dataset = dataset;
     if (dataset != null)
       updateTitle(dataset.id.get() + " - " + title);
@@ -140,45 +136,77 @@ public abstract class TimeTask<T> extends Task<T> {
     return onFXThread;
   }
 
-  public ReadOnlyLongProperty runTimeMillisProperty() {
-    return runTimeMillis.getReadOnlyProperty();
+  private final ObservableTimer timer = new ObservableTimer();
+
+  public final ReadOnlyLongProperty runTimeNanosProperty() {
+    return timer.runTimeNanosProperty();
   }
 
-  private long   startTimeMillis;
-  private Thread timer;
+  private static final class ObservableTimer {
 
-  private final void startTimer() {
-    startTimeMillis = System.currentTimeMillis();
-    timer = new Thread(() -> {
-      try {
-        while (true) {
-          final long currentTimeMillis = System.currentTimeMillis();
-          Platform.runLater(() -> runTimeMillis.set(currentTimeMillis - startTimeMillis));
-          Thread.sleep(250);
-        }
-      } catch (InterruptedException e) {}
-    });
-    timer.start();
-  }
+    private final ReadOnlyLongWrapper runTimeNanos = new ReadOnlyLongWrapper(0l);
+    private long                      startTimeNanos;
+    private Thread                    thread;
+    private final long                updateDelayMillis;
 
-  private final void stopTimer() {
-    if (timer == null)
-      return;
-    timer.interrupt();
-    final long currentTimeMillis = System.currentTimeMillis();
-    Platform.runLater(() -> runTimeMillis.set(currentTimeMillis - startTimeMillis));
+    public ObservableTimer(final long updateDelayMillis) {
+      super();
+      this.updateDelayMillis = updateDelayMillis;
+    }
+
+    public ObservableTimer() {
+      this(250l);
+    }
+
+    public final ReadOnlyLongProperty runTimeNanosProperty() {
+      return runTimeNanos.getReadOnlyProperty();
+    }
+
+    public final void start() {
+      synchronized (this) {
+        if (thread != null)
+          return;
+        startTimeNanos = System.nanoTime();
+        thread = new Thread(() -> {
+          try {
+            while (true) {
+              update();
+              Thread.sleep(updateDelayMillis);
+            }
+          } catch (InterruptedException e) {}
+        });
+        thread.start();
+      }
+    }
+
+    public final void stop() {
+      synchronized (this) {
+        if (thread == null)
+          return;
+        thread.interrupt();
+        update();
+        thread = null;
+      }
+    }
+
+    public final void update() {
+      if (thread == null)
+        return;
+      final long currentTimeNanos = System.nanoTime();
+      Platform.runLater(() -> runTimeNanos.set(currentTimeNanos - startTimeNanos));
+    }
   }
 
   @Override
   protected void running() {
     super.running();
-    startTimer();
+    timer.start();
   }
 
   @Override
   protected void succeeded() {
     super.succeeded();
-    stopTimer();
+    timer.stop();
   }
 
   @Override
@@ -186,7 +214,7 @@ public abstract class TimeTask<T> extends Task<T> {
     super.cancelled();
     if (getProgress() < 0)
       updateProgress(0d, 1d);
-    stopTimer();
+    timer.stop();
   };
 
   @Override
@@ -194,7 +222,7 @@ public abstract class TimeTask<T> extends Task<T> {
     super.failed();
     if (getProgress() < 0)
       updateProgress(0d, 1d);
-    stopTimer();
+    timer.stop();
   }
 
 }

@@ -10,11 +10,10 @@ package conexp.fx.core.util;
  * #L%
  */
 
-
 import javafx.util.Duration;
 
-public class Constants
-{
+public class Constants {
+
   public static final double   FRAMES_PER_SECOND                = 100d;
   public static final double   FRAME_SIZE_MILLIS                = 1000d / FRAMES_PER_SECOND;
   public static final int      MAX_CONCEPTS                     = 2048;

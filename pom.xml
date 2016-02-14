@@ -1,5 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>conexp-fx</groupId>
@@ -26,7 +29,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<application.javaVersion>1.8</application.javaVersion>
-		<javafx.version>8u66</javafx.version>
+		<javafx.version>8u74</javafx.version>
 		<javafx.jar>${java.home}/lib/ext/jfxrt.jar</javafx.jar>
 		<javafx.javadoc>lib/javafx-${javafx.version}-apidocs.zip</javafx.javadoc>
 		<javafx.sources>${java.home}/../javafx-src.zip</javafx.sources>
@@ -89,11 +92,11 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.5.1</version>
 		</dependency>
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>javafx</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.oracle</groupId> -->
+<!-- 			<artifactId>javafx</artifactId> -->
+<!-- 			<version>${javafx.version}</version> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
@@ -168,6 +171,11 @@
 			<version>1.4.190</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>2.12.0-M3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -202,6 +210,49 @@
 										<goals>
 											<goal>update-file-header</goal>
 											<goal>update-project-license</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>net.alchim31.maven</groupId>
+										<artifactId>scala-maven-plugin</artifactId>
+										<versionRange>[3.2.2,)</versionRange>
+										<goals>
+											<goal>add-source</goal>
+											<goal>compile</goal>
+											<goal>testCompile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>build-helper-maven-plugin</artifactId>
+										<versionRange>[1.10,)</versionRange>
+										<goals>
+											<goal>add-source</goal>
+											<goal>add-test-source</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.theoryinpractise.frege</groupId>
+										<artifactId>frege-maven-plugin</artifactId>
+										<versionRange>[1.0.7,)</versionRange>
+										<goals>
+											<goal>compile</goal>
+											<goal>test-compile</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
@@ -271,7 +322,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.3</version>
+					<version>3.5</version>
 					<configuration>
 						<source>${application.javaVersion}</source>
 						<target>${application.javaVersion}</target>
@@ -280,6 +331,14 @@
 						<showWarnings>true</showWarnings>
 						<fork>true</fork>
 					</configuration>
+					<!-- <executions> -->
+					<!-- <execution> -->
+					<!-- <phase>compile</phase> -->
+					<!-- <goals> -->
+					<!-- <goal>compile</goal> -->
+					<!-- </goals> -->
+					<!-- </execution> -->
+					<!-- </executions> -->
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -358,27 +417,51 @@
 						</execution>
 					</executions>
 				</plugin>
-<!-- 				<plugin> -->
-<!-- 					<groupId>org.codehaus.mojo</groupId> -->
-<!-- 					<artifactId>build-helper-maven-plugin</artifactId> -->
-<!-- 					<version>1.9.1</version> -->
-<!-- 					<executions> -->
-<!-- 						<execution> -->
-<!-- 							<id>regex-property</id> -->
-<!-- 							<phase>initialize</phase> -->
-<!-- 							<goals> -->
-<!-- 								<goal>regex-property</goal> -->
-<!-- 							</goals> -->
-<!-- 							<configuration> -->
-<!-- 								<name>setup.version</name> -->
-<!-- 								<value>${project.version}</value> -->
-<!-- 								<regex>(.*)-(SNAPSHOT)</regex> -->
-<!-- 								<replacement>$1</replacement> -->
-<!-- 								<failIfNoMatch>false</failIfNoMatch> -->
-<!-- 							</configuration> -->
-<!-- 						</execution> -->
-<!-- 					</executions> -->
-<!-- 				</plugin> -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.10</version>
+					<executions>
+						<execution>
+							<id>add-source</id>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>add-source</goal>
+							</goals>
+							<configuration>
+								<sources>
+									<source>src/main/scala</source>
+								</sources>
+							</configuration>
+						</execution>
+						<execution>
+							<id>add-test-source</id>
+							<phase>generate-test-sources</phase>
+							<goals>
+								<goal>add-test-source</goal>
+							</goals>
+							<configuration>
+								<sources>
+									<source>src/test/scala</source>
+								</sources>
+							</configuration>
+						</execution>
+						<!-- <execution> -->
+						<!-- <id>regex-property</id> -->
+						<!-- <phase>initialize</phase> -->
+						<!-- <goals> -->
+						<!-- <goal>regex-property</goal> -->
+						<!-- </goals> -->
+						<!-- <configuration> -->
+						<!-- <name>setup.version</name> -->
+						<!-- <value>${project.version}</value> -->
+						<!-- <regex>(.*)-(SNAPSHOT)</regex> -->
+						<!-- <replacement>$1</replacement> -->
+						<!-- <failIfNoMatch>false</failIfNoMatch> -->
+						<!-- </configuration> -->
+						<!-- </execution> -->
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>com.zenjava</groupId>
 					<artifactId>javafx-maven-plugin</artifactId>
@@ -403,7 +486,7 @@
 						<!-- <certOrgUnit>Francesco Kriegel</certOrgUnit> -->
 						<!-- <certState>Germany</certState> -->
 						<!-- <overwriteKeyStore>true</overwriteKeyStore> -->
-<!-- 						<nativeReleaseVersion>${setup.version}</nativeReleaseVersion> -->
+						<!-- <nativeReleaseVersion>${setup.version}</nativeReleaseVersion> -->
 						<embeddedHeight>100%</embeddedHeight>
 						<embeddedWidth>100%</embeddedWidth>
 						<templates>
@@ -455,21 +538,45 @@
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.3</version>
 				</plugin>
+				<plugin>
+					<groupId>net.alchim31.maven</groupId>
+					<artifactId>scala-maven-plugin</artifactId>
+					<version>3.2.2</version>
+					<executions>
+						<execution>
+							<id>scala-compile-first</id>
+							<phase>process-resources</phase>
+							<!-- <phase>compile</phase> -->
+							<goals>
+								<goal>add-source</goal>
+								<goal>compile</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>scala-test-compile</id>
+							<phase>process-test-resources</phase>
+							<!-- <phase>test-compile</phase> -->
+							<goals>
+								<goal>testCompile</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<!-- <plugin> -->
 				<!-- <groupId>com.theoryinpractise.frege</groupId> -->
 				<!-- <artifactId>frege-maven-plugin</artifactId> -->
-				<!-- <version>1.0.5</version> -->
+				<!-- <version>1.0.7</version> -->
 				<!-- <executions> -->
 				<!-- <execution> -->
 				<!-- <id>compile</id> -->
-				<!-- <phase>generate-sources</phase> -->
+				<!-- <phase>process-resources</phase> -->
 				<!-- <goals> -->
 				<!-- <goal>compile</goal> -->
 				<!-- </goals> -->
 				<!-- </execution> -->
 				<!-- <execution> -->
 				<!-- <id>test-compile</id> -->
-				<!-- <phase>generate-test-sources</phase> -->
+				<!-- <phase>process-test-resources</phase> -->
 				<!-- <goals> -->
 				<!-- <goal>test-compile</goal> -->
 				<!-- </goals> -->
@@ -478,8 +585,8 @@
 				<!-- <configuration> -->
 				<!-- <inline>true</inline> -->
 				<!-- <hints>true</hints> -->
-				<!-- <sourceDirectory>src/main/frege</sourceDirectory> -->
-				<!-- <testSourceDirectory>src/test/frege</testSourceDirectory> -->
+				<!-- <sourceDirectory>src/main/java</sourceDirectory> -->
+				<!-- <testSourceDirectory>src/test/java</testSourceDirectory> -->
 				<!-- <outputDirectory>target/generated-sources/frege</outputDirectory> -->
 				<!-- <testOutputDirectory>target/generated-test-sources/frege</testOutputDirectory> -->
 				<!-- </configuration> -->
@@ -487,6 +594,10 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+			</plugin>
 			<!-- <plugin> -->
 			<!-- <groupId>com.theoryinpractise.frege</groupId> -->
 			<!-- <artifactId>frege-maven-plugin</artifactId> -->
@@ -638,34 +749,34 @@
 									<packaging>jar</packaging>
 								</configuration>
 							</execution>
-<!-- 							<execution> -->
-<!-- 								<id>ujmp</id> -->
-<!-- 								<goals> -->
-<!-- 									<goal>install-file</goal> -->
-<!-- 								</goals> -->
-<!-- 								<phase>validate</phase> -->
-<!-- 								<configuration> -->
-<!-- 									<file>lib/ujmp-complete-0.2.5.jar</file> -->
-<!-- 									<groupId>org.ujmp</groupId> -->
-<!-- 									<artifactId>ujmp</artifactId> -->
-<!-- 									<version>0.2.5</version> -->
-<!-- 									<packaging>jar</packaging> -->
-<!-- 								</configuration> -->
-<!-- 							</execution> -->
-<!-- 							<execution> -->
-<!-- 								<id>fcalib</id> -->
-<!-- 								<goals> -->
-<!-- 									<goal>install-file</goal> -->
-<!-- 								</goals> -->
-<!-- 								<phase>validate</phase> -->
-<!-- 								<configuration> -->
-<!-- 									<file>lib/fcalib-0.11.0.jar</file> -->
-<!-- 									<groupId>de.tudresden.inf.tcs.fcalib</groupId> -->
-<!-- 									<artifactId>fcalib</artifactId> -->
-<!-- 									<version>0.11.0</version> -->
-<!-- 									<packaging>jar</packaging> -->
-<!-- 								</configuration> -->
-<!-- 							</execution> -->
+							<!-- <execution> -->
+							<!-- <id>ujmp</id> -->
+							<!-- <goals> -->
+							<!-- <goal>install-file</goal> -->
+							<!-- </goals> -->
+							<!-- <phase>validate</phase> -->
+							<!-- <configuration> -->
+							<!-- <file>lib/ujmp-complete-0.2.5.jar</file> -->
+							<!-- <groupId>org.ujmp</groupId> -->
+							<!-- <artifactId>ujmp</artifactId> -->
+							<!-- <version>0.2.5</version> -->
+							<!-- <packaging>jar</packaging> -->
+							<!-- </configuration> -->
+							<!-- </execution> -->
+							<!-- <execution> -->
+							<!-- <id>fcalib</id> -->
+							<!-- <goals> -->
+							<!-- <goal>install-file</goal> -->
+							<!-- </goals> -->
+							<!-- <phase>validate</phase> -->
+							<!-- <configuration> -->
+							<!-- <file>lib/fcalib-0.11.0.jar</file> -->
+							<!-- <groupId>de.tudresden.inf.tcs.fcalib</groupId> -->
+							<!-- <artifactId>fcalib</artifactId> -->
+							<!-- <version>0.11.0</version> -->
+							<!-- <packaging>jar</packaging> -->
+							<!-- </configuration> -->
+							<!-- </execution> -->
 						</executions>
 					</plugin>
 				</plugins>

@@ -24,8 +24,8 @@ import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.ListIterators;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.SimpleListIterator;
-import conexp.fx.core.collections.pair.Pair;
 import conexp.fx.core.collections.setlist.AbstractSetList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.collections.setlist.SetLists;

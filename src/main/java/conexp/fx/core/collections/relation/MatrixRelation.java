@@ -38,9 +38,10 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
+import conexp.fx.core.collections.BitSetSet2;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.ListIterators;
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.collections.setlist.SetLists;
@@ -1425,27 +1426,37 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   public final Collection<Integer> _rowAnd(final Iterable<Integer> i, final Collection<Integer> j) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return SetLists.integers(colHeads.size());
-    return Collections3.newBitSetSet2(Collections2.filter(j, new Predicate<Integer>() {
-
-      private final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
-
-      public final boolean apply(final Integer _j) {
-        return rowAnd.getBoolean(0, _j);
-      }
-    }));
+    final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
+    return j.parallelStream().filter(_j -> rowAnd.getBoolean(0, _j)).collect(
+        BitSetSet2::new,
+        BitSetSet2::add,
+        BitSetSet2::addAll);
+//    return Collections3.newBitSetSet2(Collections2.filter(j, new Predicate<Integer>() {
+//
+//      private final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
+//
+//      public final boolean apply(final Integer _j) {
+//        return rowAnd.getBoolean(0, _j);
+//      }
+//    }));
   }
 
   public final Collection<Integer> _colAnd(final Iterable<Integer> j, final Collection<Integer> i) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return SetLists.integers(rowHeads.size());
-    return Collections3.newBitSetSet2(Collections2.filter(i, new Predicate<Integer>() {
-
-      private final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
-
-      public final boolean apply(final Integer _i) {
-        return colAnd.getBoolean(_i, 0);
-      }
-    }));
+    final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
+    return i.parallelStream().filter(_i -> colAnd.getBoolean(_i, 0)).collect(
+        BitSetSet2::new,
+        BitSetSet2::add,
+        BitSetSet2::addAll);
+//    return Collections3.newBitSetSet2(Collections2.filter(i, new Predicate<Integer>() {
+//
+//      private final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
+//
+//      public final boolean apply(final Integer _i) {
+//        return colAnd.getBoolean(_i, 0);
+//      }
+//    }));
   }
 
   public final void empty() {

@@ -18,14 +18,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
-import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.ExecutorService;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 import conexp.fx.core.builder.Requests;
 import conexp.fx.core.collections.Collections3;
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.util.FileFormat;
 import conexp.fx.core.xml.StringData;
@@ -40,7 +40,7 @@ import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.dataset.RDFDataset;
 import conexp.fx.gui.dialog.ErrorDialog;
 import conexp.fx.gui.dialog.FXDialog;
-import conexp.fx.gui.dialog.FXDialog.Result;
+import conexp.fx.gui.dialog.FXDialog.Answer;
 import conexp.fx.gui.dialog.FXDialog.Style;
 import conexp.fx.gui.dialog.InfoDialog;
 import conexp.fx.gui.task.BlockingExecutor;
@@ -105,7 +105,7 @@ public class ConExpFX extends Application {
     instance.executor.execute(task);
   }
 
-  public static final AbstractExecutorService getThreadPool() {
+  public static final ExecutorService getThreadPool() {
     return instance.executor.tpe;
   }
 
@@ -265,27 +265,29 @@ public class ConExpFX extends Application {
 
         @Override
         public synchronized void onChanged(ListChangeListener.Change<? extends TreeItem<Control>> c) {
-          while (c.next()) {
-            if (c.wasAdded())
-              c
-                  .getAddedSubList()
-                  .stream()
-                  .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
-                  .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
-                  .forEach(item -> contentPane.getItems().add(item.getDatasetView().getContentNode()));
-            if (c.wasRemoved())
-              c
-                  .getRemoved()
-                  .stream()
-                  .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
-                  .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
-                  .forEach(item -> contentPane.getItems().remove(item.getDatasetView().getContentNode()));
+          synchronized (instance) {
+            while (c.next()) {
+              if (c.wasAdded())
+                c
+                    .getAddedSubList()
+                    .stream()
+                    .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
+                    .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
+                    .forEach(item -> contentPane.getItems().add(item.getDatasetView().getContentNode()));
+              if (c.wasRemoved())
+                c
+                    .getRemoved()
+                    .stream()
+                    .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
+                    .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
+                    .forEach(item -> contentPane.getItems().remove(item.getDatasetView().getContentNode()));
+            }
+            Platform2.runOnFXThreadAndWaitTryCatch(() -> {
+              final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();
+              for (int i = 0; i < contentPane.getItems().size(); i++)
+                contentPane.setDividerPosition(i, pos * (double) (i + 1));
+            });
           }
-          Platform2.runOnFXThreadAndWaitTryCatch(() -> {
-            final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();
-            for (int i = 0; i < contentPane.getItems().size(); i++)
-              contentPane.setDividerPosition(i, pos * (double) (i + 1));
-          });
         }
       });
       datasets.addListener(new ListChangeListener<Dataset>() {
@@ -349,25 +351,27 @@ public class ConExpFX extends Application {
     }
   }
 
-  public Stage                   primaryStage;
-  private final StackPane        stackPane         = new StackPane();
-  private final BorderPane       rootPane          = new BorderPane();
-  private final AnchorPane       overlayPane       = new AnchorPane();
-  private final SplitPane        contentPane       = new SplitPane();
-  private final SplitPane        splitPane         = new SplitPane();
-  public final DatasetTreeView   treeView          = new DatasetTreeView();
-  public final ExecutorStatusBar executorStatusBar = new ExecutorStatusBar(overlayPane);
+  public Stage                                     primaryStage;
+  private final StackPane                          stackPane         = new StackPane();
+  private final BorderPane                         rootPane          = new BorderPane();
+  private final AnchorPane                         overlayPane       = new AnchorPane();
+  private final SplitPane                          contentPane       = new SplitPane();
+  private final SplitPane                          splitPane         = new SplitPane();
+  public final DatasetTreeView                     treeView          = new DatasetTreeView();
+  public final ExecutorStatusBar                   executorStatusBar = new ExecutorStatusBar(overlayPane);
 
-  public final BlockingExecutor                    executor      = new BlockingExecutor();
-  public final XMLFile                             configuration = initConfiguration();
-  public final ListProperty<File>                  fileHistory   =
+  public final BlockingExecutor                    executor          = new BlockingExecutor();
+  public final XMLFile                             configuration     = initConfiguration();
+  public final ListProperty<File>                  fileHistory       =
       new SimpleListProperty<File>(FXCollections.observableArrayList());
   public File                                      lastDirectory;
-  public final ObservableList<MatrixContext<?, ?>> contexts      = FXCollections.observableList(
-      Lists.transform(
-          Collections3.filter(treeView.getDatasets(), dataset -> dataset instanceof FCADataset),
-          dataset -> ((FCADataset<?, ?>) dataset).context));
-  public final ObservableList<MatrixContext<?, ?>> orders        =
+  public final ObservableList<MatrixContext<?, ?>> contexts          = FXCollections.observableList(
+                                                                         Lists.transform(
+                                                                             Collections3.filter(
+                                                                                 treeView.getDatasets(),
+                                                                                 dataset -> dataset instanceof FCADataset),
+                                                                             dataset -> ((FCADataset<?, ?>) dataset).context));
+  public final ObservableList<MatrixContext<?, ?>> orders            =
       FXCollections.observableList(Collections3.filter(contexts, context -> context.isHomogen()));
 
   public final void start(final Stage primaryStage) {
@@ -520,7 +524,7 @@ public class ConExpFX extends Application {
         Style.QUESTION,
         "Unsaved Changes",
         dataset.id.get() + " has unsaved changes. Do you want to save?",
-        null).showAndWait().result().equals(Result.YES))
+        null).showAndWait().result().equals(Answer.YES))
       dataset.save();
   }
 

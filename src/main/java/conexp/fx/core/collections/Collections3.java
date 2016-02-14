@@ -1,5 +1,10 @@
 package conexp.fx.core.collections;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -24,6 +29,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import org.ujmp.core.collections.set.BitSetSet;
 
@@ -35,7 +41,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
-import conexp.fx.core.math.Isomorphism;
+import conexp.fx.core.math.GuavaIsomorphism;
 
 public final class Collections3 {
 
@@ -96,7 +102,7 @@ public final class Collections3 {
     return Collections2.<E> filter(c1, Predicates.not(Predicates.in(c2)));
   }
 
-  public static final <T, E> Set<E> transform(final Set<T> s, final Isomorphism<T, E> f) {
+  public static final <T, E> Set<E> transform(final Set<T> s, final GuavaIsomorphism<T, E> f) {
     return new AbstractSet<E>() {
 
       @Override
@@ -166,6 +172,21 @@ public final class Collections3 {
     };
   }
 
+  public static final <E> Set<E> fromIterator(final Supplier<Iterator<E>> its) {
+    return new AbstractSet<E>() {
+
+      @Override
+      public Iterator<E> iterator() {
+        return its.get();
+      }
+
+      @Override
+      public int size() {
+        return Iterators.size(iterator());
+      }
+    };
+  }
+
   public static final <E> Iterable<E> iterable(final Iterator<E> it) {
     return new Iterable<E>() {
 
@@ -221,5 +242,21 @@ public final class Collections3 {
         return Iterables.size(Iterables.filter(l, p));
       }
     };
+  }
+
+  public static final <T> void writeToFile(
+      final File file,
+      final Collection<T> collection,
+      final String prefix,
+      final String... suffix) throws IOException {
+    final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+    writer.append(prefix);
+    writer.append("size: " + collection.size());
+    // collection.stream().map(T::toString).forEach(bw::append);
+    for (T element : collection)
+      writer.append(element.toString());
+    if (suffix.length > 0)
+      writer.append(suffix[0]);
+    writer.close();
   }
 }

@@ -13,20 +13,18 @@ package conexp.fx.core.exporter;
  * #L%
  */
 
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 
-import conexp.fx.core.context.MatrixContext;
-
+import conexp.fx.core.collections.relation.MatrixRelation;
 
 public class CXTExporter<G, M> {
 
   public static <G, M> void export(
-      MatrixContext<G, M> context,
+      MatrixRelation<G, M> context,
       Map<Integer, Integer> domainPermutation,
       Map<Integer, Integer> codomainPermutation,
       File file) {
@@ -43,29 +41,21 @@ public class CXTExporter<G, M> {
       outputWriter.append(context.colHeads().size() + "\r\n");
       outputWriter.append("\r\n");
       for (int domainIndex = 0; domainIndex < context.rowHeads().size(); domainIndex++) {
-        G object =
-            context.rowHeads().get(
-                domainPermutation.containsKey(domainIndex) ? domainPermutation.get(domainIndex) : domainIndex);
+        G object = context.rowHeads().get(
+            domainPermutation.containsKey(domainIndex) ? domainPermutation.get(domainIndex) : domainIndex);
         outputWriter.append(object + "\r\n");
       }
       for (int codomainIndex = 0; codomainIndex < context.colHeads().size(); codomainIndex++) {
-        M attribute =
-            context
-                .colHeads()
-                .get(
-                    codomainPermutation.containsKey(codomainIndex) ? codomainPermutation.get(codomainIndex)
-                        : codomainIndex);
+        M attribute = context.colHeads().get(
+            codomainPermutation.containsKey(codomainIndex) ? codomainPermutation.get(codomainIndex) : codomainIndex);
         outputWriter.append(attribute + "\r\n");
       }
       for (int domainIndex = 0; domainIndex < context.rowHeads().size(); domainIndex++) {
-        G object =
-            context.rowHeads().get(
-                domainPermutation.containsKey(domainIndex) ? domainPermutation.get(domainIndex) : domainIndex);
+        G object = context.rowHeads().get(
+            domainPermutation.containsKey(domainIndex) ? domainPermutation.get(domainIndex) : domainIndex);
         for (int codomainIndex = 0; codomainIndex < context.colHeads().size(); codomainIndex++) {
-          M attribute =
-              context.colHeads().get(
-                  codomainPermutation.containsKey(codomainIndex) ? codomainPermutation.get(codomainIndex)
-                      : codomainIndex);
+          M attribute = context.colHeads().get(
+              codomainPermutation.containsKey(codomainIndex) ? codomainPermutation.get(codomainIndex) : codomainIndex);
           outputWriter.append((context.contains(object, attribute) ? "X" : "."));
         }
         outputWriter.append("\r\n");
@@ -76,7 +66,7 @@ public class CXTExporter<G, M> {
     }
   }
 
-  public static <G, M> void export(MatrixContext<G, M> formalContext, File file) {
+  public static <G, M> void export(MatrixRelation<G, M> formalContext, File file) {
     try {
       if (!file.exists())
         file.createNewFile();

@@ -20,9 +20,10 @@ import javafx.scene.layout.HBox;
 
 import org.semanticweb.owlapi.model.IRI;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.dl.OWLInterpretation;
 import conexp.fx.core.util.IdGenerator;
+import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.assistent.InducedContextAssistent;
 
 public class DLDataset extends Dataset {
@@ -88,17 +89,22 @@ public class DLDataset extends Dataset {
   public DLDataset(final Dataset parent, final OWLInterpretation interpretation) {
     super(parent);
     this.interpretation = interpretation;
-    this.id.set("Model " + IdGenerator.getNextId());
+    this.id.set("Model " + IdGenerator.getNextId(ConExpFX.instance));
     this.views
         .add(new DatasetView<Set<IRI>>("Individuals", new DomainWidget().contentPane, interpretation.getDomain()));
-    this.views.add(new DatasetView<Set<IRI>>("Concept Names", new ConceptWidget().contentPane, interpretation
-        .getSignature()
-        .getConceptNames()));
-    this.views.add(new DatasetView<Set<IRI>>("Role Names", new RoleWidget().contentPane, interpretation
-        .getSignature()
-        .getRoleNames()));
+    this.views.add(
+        new DatasetView<Set<IRI>>(
+            "Concept Names",
+            new ConceptWidget().contentPane,
+            interpretation.getSignature().getConceptNames()));
+    this.views.add(
+        new DatasetView<Set<IRI>>(
+            "Role Names",
+            new RoleWidget().contentPane,
+            interpretation.getSignature().getRoleNames()));
     this.defaultActiveViews.add("Individuals");
-    this.actions.add(new DatasetAction("New Induced Context...", () -> new InducedContextAssistent(this).showAndWait()));
+    this.actions
+        .add(new DatasetAction("New Induced Context...", () -> new InducedContextAssistent(this).showAndWait()));
   }
 
   @Override

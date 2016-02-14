@@ -10,11 +10,10 @@ package conexp.fx.core.collections.relation;
  * #L%
  */
 
-
 import java.util.Collections;
 import java.util.Set;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 
 public final class RelationEvent<R, C> {
 
@@ -95,8 +94,10 @@ public final class RelationEvent<R, C> {
   }
 
   public RelationEvent(final Type type, final Pair<R, R> setRow, final Pair<C, C> setColumn) {
-    this(type, setRow == null ? null : Collections.singleton(setRow), setColumn == null ? null : Collections
-        .singleton(setColumn));
+    this(
+        type,
+        setRow == null ? null : Collections.singleton(setRow),
+        setColumn == null ? null : Collections.singleton(setColumn));
   }
 
   public RelationEvent(final Type type, final Set<Pair<R, R>> setRows, final Set<Pair<C, C>> setColumns) {

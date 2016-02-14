@@ -24,7 +24,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.layout.ConceptLayout;
+import conexp.fx.core.layout.AdditiveConceptLayout;
 
 public class CFXExporter<G, M> {
 
@@ -32,7 +32,7 @@ public class CFXExporter<G, M> {
       MatrixContext<G, M> context,
       Map<Integer, Integer> domainPermutation,
       Map<Integer, Integer> codomainPermutation,
-      ConceptLayout<G, M> layout,
+      AdditiveConceptLayout<G, M> layout,
       File file) {
     Document xml = new Document("");
     final Element domainEl = xml.appendElement("domain");
@@ -98,7 +98,7 @@ public class CFXExporter<G, M> {
       }
     }
     final Element latticeEl = xml.appendElement("lattice");
-    for (Entry<M, Point3D> attributeSeed : layout.seeds.entrySet()) {
+    for (Entry<M, Point3D> attributeSeed : layout.seedsM.entrySet()) {
       final Element seedEl = latticeEl.appendElement("attribute-seed");
       seedEl.attr("attribute", attributeSeed.getKey().toString());
       seedEl.attr("x", String.valueOf(attributeSeed.getValue().getX()));

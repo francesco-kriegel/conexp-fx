@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -26,8 +27,11 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 
 import conexp.fx.core.collections.Collections3;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Concept;
-import conexp.fx.core.quality.LayoutEvolution;
+import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.layout.AdditiveConceptLayout.Type;
+import conexp.fx.core.math.Points;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.task.TimeTask;
@@ -46,15 +50,19 @@ public final class GeneticLayouter<G, M> {
           return null;
         final Random rng = new RandomSimple();
         updateMessage("Computing Infimum Irreducibles...");
+        final Set<G> supremumIrreducibles = dataset.layout.lattice.context.selection.supremumIrreducibles();
         final Set<M> infimumIrreducibles = dataset.layout.lattice.context.selection.infimumIrreducibles();
         updateProgress(0.2d, 1d);
         updateProgress(0.3d, 1d);
         updateMessage("Generating Layered Random Seeds...");
-        final Map<M, Point3D> randomSeeds = new HashMap<M, Point3D>();
+        final Map<G, Point3D> randomSeedsG = new HashMap<G, Point3D>();
+        final Map<M, Point3D> randomSeedsM = new HashMap<M, Point3D>();
+        for (G g : supremumIrreducibles)
+          randomSeedsG.put(g, new Point3D(2d * rng.nextDouble() - 1d, 1, 0));
         for (M m : infimumIrreducibles)
-          randomSeeds.put(m, new Point3D(2d * rng.nextDouble() - 1d, 1, 0));
+          randomSeedsM.put(m, new Point3D(2d * rng.nextDouble() - 1d, 1, 0));
         updateProgress(0.4d, 1d);
-        dataset.layout.updateSeeds(randomSeeds);
+        dataset.layout.updateSeeds(randomSeedsG, randomSeedsM);
         updateProgress(0.5d, 1d);
         updateMessage("Computing Attribute Labels...");
         for (Concept<G, M> c : dataset.layout.lattice.rowHeads()) {
@@ -81,6 +89,10 @@ public final class GeneticLayouter<G, M> {
     };
   }
 
+  public static final <G, M> void foo(final FCADataset<G, M> dataset) {
+
+  }
+
   public static final <G, M> TimeTask<Void> seeds(
       final FCADataset<G, M> dataset,
       final boolean includingLayout,
@@ -88,12 +100,14 @@ public final class GeneticLayouter<G, M> {
       final int populationSize) {
     return new TimeTask<Void>(dataset, "Genetic Layouter") {
 
-      private final DoubleProperty evolutionaryProgressProperty = new SimpleDoubleProperty(0d);
-      private final Set<ConceptLayout<G, M>> layouts = new HashSet<ConceptLayout<G, M>>(populationSize);
-      private double currentQuality = -1d;
-      private ConceptLayout<G, M> currentBest;
-      private ChainDecomposer<Set<Integer>> chainDecomposer;
-      private Random rng = new RandomSimple();
+      private final DoubleProperty                   evolutionaryProgressProperty = new SimpleDoubleProperty(0d);
+      private final Set<AdditiveConceptLayout<G, M>> layouts                      =
+          new HashSet<AdditiveConceptLayout<G, M>>(populationSize);
+      private double                                 currentQuality               = -1d;
+      private AdditiveConceptLayout<G, M>            currentBest;
+      private ChainDecomposer<Set<Integer>>          chainDecomposerG;
+      private ChainDecomposer<Set<Integer>>          chainDecomposerM;
+      private Random                                 rng                          = new RandomSimple();
 
       @Override
       protected final void updateProgress(double workDone, double max) {
@@ -108,8 +122,9 @@ public final class GeneticLayouter<G, M> {
           return null;
         updateProgress(0.1d, 1d);
         updateMessage("Decomposing Concept Lattice...");
-        chainDecomposer = new ChainDecomposer<Set<Integer>>(
-            dataset.layout.lattice.context.selection._reduced.clone().attributeQuasiOrder().neighborhood());
+        final MatrixContext<Set<Integer>, Set<Integer>> cxt = dataset.layout.lattice.context.selection._reduced.clone();
+        chainDecomposerG = new ChainDecomposer<Set<Integer>>(cxt.objectQuasiOrder().neighborhood());
+        chainDecomposerM = new ChainDecomposer<Set<Integer>>(cxt.attributeQuasiOrder().neighborhood());
         if (includingLayout) {
           layouts.add(dataset.layout.clone());
           currentBest = dataset.layout;
@@ -142,18 +157,44 @@ public final class GeneticLayouter<G, M> {
           @Override
           public void run() {
             if (dataset.conceptGraph.polar()) {} else {
-              final ConceptLayout<G, M> candidate = new ConceptLayout<G, M>(dataset.layout.lattice, null);
-              final Set<Set<Set<Integer>>> chains = chainDecomposer.randomChainDecomposition();
-              final int w = chains.size();
+              final AdditiveConceptLayout<G, M> candidate =
+                  new AdditiveConceptLayout<G, M>(dataset.layout.lattice, null, null, Type.HYBRID);
+              final Set<Set<Set<Integer>>> chainsG = chainDecomposerG.randomChainDecomposition();
+              final Set<Set<Set<Integer>>> chainsM = chainDecomposerM.randomChainDecomposition();
+              final int v = chainsG.size();
+              if (v == 1) {
+                final Point3D seed = new Point3D(0d, 1d, 0d);
+                for (G g : Collections2
+                    .transform(Iterables.getOnlyElement(chainsG), candidate.lattice.context.selection._firstObject))
+                  candidate.seedsG.put(g, seed);
+              } else {
+                final int vv = v * v;
+                final BitSetSet usedX = new BitSetSet();
+                for (Set<Set<Integer>> chain : chainsG) {
+                  int _x;
+                  for (_x = rng.nextInt(vv + 1); usedX.contains(_x) || usedX.contains(_x + 1)
+                      || (_x != 0 && usedX.contains(_x - 1)); _x = rng.nextInt(vv + 1));
+                  usedX.add(_x);
+                  final int __x = _x - vv / 2;
+                  final Point3D seed = new Point3D(
+                      (double) __x,
+                      (double) (rng.nextInt(Math.abs(__x + 1) + 1) + 1),
+                      dataset.conceptGraph.threeDimensions() ? (double) (rng.nextInt(Math.abs(__x + 1) + 1) - __x / 2)
+                          : 0d);
+                  for (G g : Collections2.transform(chain, candidate.lattice.context.selection._firstObject))
+                    candidate.seedsG.put(g, seed);
+                }
+              }
+              final int w = chainsM.size();
               if (w == 1) {
                 final Point3D seed = new Point3D(0d, 1d, 0d);
                 for (M m : Collections2
-                    .transform(Iterables.getOnlyElement(chains), candidate.lattice.context.selection._firstAttribute))
-                  candidate.seeds.put(m, seed);
+                    .transform(Iterables.getOnlyElement(chainsM), candidate.lattice.context.selection._firstAttribute))
+                  candidate.seedsM.put(m, seed);
               } else {
                 final int ww = w * w;
                 final BitSetSet usedX = new BitSetSet();
-                for (Set<Set<Integer>> chain : chains) {
+                for (Set<Set<Integer>> chain : chainsM) {
                   int _x;
                   for (_x = rng.nextInt(ww + 1); usedX.contains(_x) || usedX.contains(_x + 1)
                       || (_x != 0 && usedX.contains(_x - 1)); _x = rng.nextInt(ww + 1));
@@ -165,7 +206,7 @@ public final class GeneticLayouter<G, M> {
                       dataset.conceptGraph.threeDimensions() ? (double) (rng.nextInt(Math.abs(__x + 1) + 1) - __x / 2)
                           : 0d);
                   for (M m : Collections2.transform(chain, candidate.lattice.context.selection._firstAttribute))
-                    candidate.seeds.put(m, seed);
+                    candidate.seedsM.put(m, seed);
                 }
               }
               synchronized (layouts) {
@@ -181,18 +222,41 @@ public final class GeneticLayouter<G, M> {
         };
       }
 
+      private final AdditiveConceptLayout<G, M>
+          crossover(final AdditiveConceptLayout<G, M> l1, final AdditiveConceptLayout<G, M> l2) {
+        final AdditiveConceptLayout<G, M> l = l1.clone();
+        return null;
+      }
+
+      private final void evolveLayout(final AdditiveConceptLayout<G, M> layout) {
+        layout.getCurrentBoundingBox(false, false);
+        final Map<Concept<G, M>, Point3D> deltas = new ConcurrentHashMap<>();
+        for (Concept<G, M> concept : layout.lattice.rowHeads()) {
+          final Point3D p = layout.getOrAddPosition(concept).getValue();
+          final Point3D delta = new Point3D(0, 0, 0);
+          for (Pair<Concept<G, M>, Concept<G, M>> edge : layout.lattice) {
+            final Point3D q1 = layout.getOrAddPosition(edge.x()).getValue();
+            final Point3D q2 = layout.getOrAddPosition(edge.y()).getValue();
+            final double dist = Points.pointSegmentDistance(p, q1, q2);
+            Points.orthogonalXYVector(p, q1, q2);
+          }
+          deltas.put(concept, delta);
+        }
+        deltas.forEach((concept, delta) -> layout.move(concept, ConceptMovement.INTENT_CHAIN_SEEDS, delta));
+      }
+
       private final void evolvePopulation() {
         if (dataset.conceptGraph.polar()) {} else {
           for (int i = 0; i < generationCount; i++) {
-            if (currentBest != dataset.layout)
-              dataset.layout.updateSeeds(currentBest.seeds);
+//            if (currentBest != dataset.layout)
+            dataset.layout.updateSeeds(currentBest.seedsG, currentBest.seedsM);
             updateProgress(0.3d + 0.7d * ((double) i) / (double) generationCount, 1d);
             updateMessage("Evolving Seeds: " + i + " of " + generationCount + " Generations...");
             evolveGeneration();
           }
           try {
-            if (currentBest != dataset.layout)
-              dataset.layout.updateSeeds(currentBest.seeds);
+//            if (currentBest != dataset.layout)
+            dataset.layout.updateSeeds(currentBest.seedsG, currentBest.seedsM);
           } catch (Exception e) {
             System.err.println(currentBest);
             System.err.println(dataset.layout);
@@ -204,7 +268,7 @@ public final class GeneticLayouter<G, M> {
       private final void evolveGeneration() {
         if (dataset.conceptGraph.polar()) {} else {
           currentQuality = -1d;
-          for (ConceptLayout<G, M> candidate : layouts) {
+          for (AdditiveConceptLayout<G, M> candidate : layouts) {
             LayoutEvolution<G, M>.Value v = new LayoutEvolution<G, M>(
                 candidate,
                 dataset.conflictDistance.apply(candidate).first(),
@@ -216,28 +280,30 @@ public final class GeneticLayouter<G, M> {
                 1,
                 dataset.conflictDistance,
                 ConExpFX.instance.executor.tpe).calculate();
-            if (!candidate.updateSeeds(v.seeds)) {
-              if (rng.nextBoolean()) {
-                final Concept<G, M> c = candidate.seeds
-                    .keySet()
-                    .parallelStream()
-                    .map(candidate.lattice.attributeConcepts::get)
-                    .filter(cn -> cn != null)
-                    .findAny()
-                    .get();
-//                    candidate.lattice.attributeConcepts.get(Collections3.random(candidate.seeds.keySet(), rng));
-                v = new LayoutEvolution<G, M>(
-                    candidate,
-                    c,
-                    ConceptMovement.LABEL_CHAIN_SEEDS,
-                    4d,
-                    4d,
-                    2,
-                    2,
-                    1,
-                    dataset.conflictDistance,
-                    ConExpFX.instance.executor.tpe).calculate();
-              } else
+            if (!candidate.updateSeeds(v.seedsG, v.seedsM)) {
+//              if (rng.nextBoolean()) {
+//                final Concept<G, M> c = candidate.seedsM
+//                    .keySet()
+//                    .parallelStream()
+//                    .map(candidate.lattice.attributeConcepts::get)
+//                    .filter(cn -> cn != null)
+//                    .findAny()
+//                    .get();
+////                    candidate.lattice.attributeConcepts.get(Collections3.random(candidate.seeds.keySet(), rng));
+//                v = new LayoutEvolution<G, M>(
+//                    candidate,
+//                    c,
+//                    // TODO
+//                    //                    ConceptMovement.LABEL_CHAIN_SEEDS,
+//                    ConceptMovement.INTENT_CHAIN_SEEDS,
+//                    4d,
+//                    4d,
+//                    2,
+//                    2,
+//                    1,
+//                    dataset.conflictDistance,
+//                    ConExpFX.instance.executor.tpe).calculate();
+//              } else
                 v = new LayoutEvolution<G, M>(
                     candidate,
                     Collections3.random(candidate.lattice.rowHeads(), rng),
@@ -249,7 +315,7 @@ public final class GeneticLayouter<G, M> {
                     1,
                     dataset.conflictDistance,
                     ConExpFX.instance.executor.tpe).calculate();
-              candidate.updateSeeds(v.seeds);
+              candidate.updateSeeds(v.seedsG, v.seedsM);
             }
             if (v.result > currentQuality) {
               currentQuality = v.result;

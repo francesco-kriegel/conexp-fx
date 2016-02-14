@@ -27,11 +27,11 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.closureoperators.ClosureOperator;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Context;
-import conexp.fx.core.implication.Implication;
+import conexp.fx.core.context.Implication;
+import conexp.fx.core.math.ClosureOperator;
 
 public final class NextClosuresC {
 

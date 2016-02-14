@@ -1,5 +1,9 @@
 package conexp.fx.core.util;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -10,12 +14,20 @@ package conexp.fx.core.util;
  * #L%
  */
 
-
 public final class IdGenerator {
 
-  private static long nextId = 0;
+  private static final IdGenerator             defaultKey = new IdGenerator();
+  private static final Map<Object, AtomicLong> nextIds    = new ConcurrentHashMap<Object, AtomicLong>();
 
-  public static final synchronized long getNextId() {
-    return nextId++;
+  private IdGenerator() {}
+
+  public static final long getNextId() {
+    return getNextId(defaultKey);
+  }
+
+  public static final long getNextId(final Object key) {
+    synchronized (key) {
+      return nextIds.computeIfAbsent(key, __ -> new AtomicLong(0l)).getAndIncrement();
+    }
   }
 }

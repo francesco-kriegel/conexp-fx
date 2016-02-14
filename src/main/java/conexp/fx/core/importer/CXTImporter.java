@@ -1,5 +1,7 @@
 package conexp.fx.core.importer;
 
+import java.io.BufferedReader;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -11,6 +13,8 @@ package conexp.fx.core.importer;
  */
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Iterator;
 
 import org.ujmp.core.booleanmatrix.BooleanMatrix;
@@ -18,20 +22,20 @@ import org.ujmp.core.booleanmatrix.BooleanMatrix;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.util.IterableFile;
 
 public class CXTImporter {
 
-  public static final MatrixContext<String, String> read(final File file) throws Exception {
+  public static final MatrixContext<String, String> read(final File file) throws IOException {
     final MatrixContext<String, String> cxt = new MatrixContext<String, String>(false);
     read(cxt, file);
     return cxt;
   }
 
-  public static final void read(final MatrixContext<String, String> context, final File file) throws Exception {
+  public static final void read(final MatrixContext<String, String> context, final File file) throws IOException {
     if (!context.id.isBound())
       context.id.set(file.getName());
-    final Iterator<String> lineIterator = new IterableFile(file).iterator();
+    final BufferedReader reader = new BufferedReader(new FileReader(file));
+    final Iterator<String> lineIterator = reader.lines().iterator();
     final String[] firstLines = new String[5];
     int i = 0;
     while (lineIterator.hasNext() && i < 5) {
@@ -63,5 +67,6 @@ public class CXTImporter {
         mat.setBoolean(line[col] == 'X' || line[col] == 'x', row, col);
       i++;
     }
+    reader.close();
   }
 }

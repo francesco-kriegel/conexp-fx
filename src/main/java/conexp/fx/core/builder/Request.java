@@ -14,6 +14,7 @@ import conexp.fx.core.builder.Requests.Source;
 import conexp.fx.core.builder.Requests.Type;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.util.IdGenerator;
+import conexp.fx.gui.ConExpFX;
 
 public abstract class Request<G, M> {
 
@@ -42,6 +43,6 @@ public abstract class Request<G, M> {
   public abstract void setContent() throws Exception;
 
   public String getId() {
-    return type.title + " " + IdGenerator.getNextId();
+    return type.title + " " + IdGenerator.getNextId(ConExpFX.instance);
   }
 }

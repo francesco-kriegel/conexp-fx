@@ -62,7 +62,7 @@ import conexp.fx.core.builder.Requests.Scale.OrdinalScaleFromInt;
 import conexp.fx.core.builder.Requests.Scale.OrdinalScaleFromSetList;
 import conexp.fx.core.builder.Requests.Source;
 import conexp.fx.core.builder.Requests.Type;
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.util.FileFormat;

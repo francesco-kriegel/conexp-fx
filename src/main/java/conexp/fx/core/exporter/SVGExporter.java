@@ -31,7 +31,7 @@ import org.w3c.dom.Element;
 
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.layout.ConceptLayout;
+import conexp.fx.core.layout.AdditiveConceptLayout;
 
 public class SVGExporter<G, M> {
 
@@ -39,7 +39,7 @@ public class SVGExporter<G, M> {
       MatrixContext<G, M> context,
       Map<Integer, Integer> domainPermutation,
       Map<Integer, Integer> codomainPermutation,
-      ConceptLayout<G, M> layout,
+      AdditiveConceptLayout<G, M> layout,
       boolean exportArrows,
       boolean exportLabels,
       File file) {
@@ -49,15 +49,14 @@ public class SVGExporter<G, M> {
           file.mkdirs();
         file.createNewFile();
       }
-      Document doc =
-          toSVGDocument(
-              file.getName(),
-              context,
-              domainPermutation,
-              codomainPermutation,
-              layout,
-              exportArrows,
-              exportLabels);
+      Document doc = toSVGDocument(
+          file.getName(),
+          context,
+          domainPermutation,
+          codomainPermutation,
+          layout,
+          exportArrows,
+          exportLabels);
       Transformer transformer = TransformerFactory.newInstance().newTransformer();
       Result output = new StreamResult(new FileOutputStream(file));
       Source input = new DOMSource(doc);
@@ -73,7 +72,7 @@ public class SVGExporter<G, M> {
       MatrixContext<G, M> formalContext,
       Map<Integer, Integer> domainPermutation,
       Map<Integer, Integer> codomainPermutation,
-      ConceptLayout<G, M> layout,
+      AdditiveConceptLayout<G, M> layout,
       boolean exportArrows,
       boolean exportLabels) {
     final double width = 100d * layout.getCurrentBoundingBox(false, false).getWidth();
@@ -92,12 +91,14 @@ public class SVGExporter<G, M> {
     for (int i = 0; i < layout.lattice.rowHeads().size(); i++) {
       for (int j = 0; j < layout.lattice.rowHeads().size(); j++) {
         if (layout.lattice._contains(i, j)) {
-          final int x1 =
-              (int) (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getX() - minX + (border / 2));
-          final int y1 = (int) (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getY() + (border / 2));
-          final int x2 =
-              (int) (100d * layout.positions.get(layout.lattice.rowHeads().get(j)).getX() - minX + (border / 2));
-          final int y2 = (int) (100d * layout.positions.get(layout.lattice.rowHeads().get(j)).getY() + (border / 2));
+          final int x1 = (int) (100d * layout.getPosition(layout.lattice.rowHeads().get(i)).getValue().getX()
+              - minX + (border / 2));
+          final int y1 = (int) (100d * layout.getPosition(layout.lattice.rowHeads().get(i)).getValue().getY()
+              + (border / 2));
+          final int x2 = (int) (100d * layout.getPosition(layout.lattice.rowHeads().get(j)).getValue().getX()
+              - minX + (border / 2));
+          final int y2 = (int) (100d * layout.getPosition(layout.lattice.rowHeads().get(j)).getValue().getY()
+              + (border / 2));
           Element line = doc.createElementNS(svgNS, "line");
           line.setAttributeNS(null, "x1", String.valueOf(x1));
           line.setAttributeNS(null, "y1", String.valueOf(y1));
@@ -111,8 +112,8 @@ public class SVGExporter<G, M> {
     }
     for (int i = 0; i < layout.lattice.rowHeads().size(); i++) {
       Concept<G, M> conceptNode = layout.lattice.rowHeads().get(i);
-      final double x = 100d * layout.positions.get(conceptNode).getX();
-      final double y = 100d * layout.positions.get(conceptNode).getY();
+      final double x = 100d * layout.getPosition(conceptNode).getValue().getX();
+      final double y = 100d * layout.getPosition(conceptNode).getValue().getY();
       Element circle = doc.createElementNS(svgNS, "circle");
       circle.setAttributeNS(null, "cx", String.valueOf((int) (x - minX) + (border / 2)));
       circle.setAttributeNS(null, "cy", String.valueOf((int) y + (border / 2)));
@@ -122,18 +123,15 @@ public class SVGExporter<G, M> {
     if (exportLabels)
       for (int i = 0; i < layout.lattice.rowHeads().size(); i++) {
         Concept<G, M> conceptNode = layout.lattice.rowHeads().get(i);
-        String objLabels =
-            layout.lattice
-                .objectLabels(conceptNode)
-                .toString()
-                .substring(1, layout.lattice.objectLabels(conceptNode).toString().length() - 1);
-        String attLabels =
-            layout.lattice
-                .attributeLabels(conceptNode)
-                .toString()
-                .substring(1, layout.lattice.attributeLabels(conceptNode).toString().length() - 1);
-        final int x = (int) (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getX() - minX);
-        final int y = (int) (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getY());
+        String objLabels = layout.lattice.objectLabels(conceptNode).toString().substring(
+            1,
+            layout.lattice.objectLabels(conceptNode).toString().length() - 1);
+        String attLabels = layout.lattice.attributeLabels(conceptNode).toString().substring(
+            1,
+            layout.lattice.attributeLabels(conceptNode).toString().length() - 1);
+        final int x =
+            (int) (100d * layout.getPosition(layout.lattice.rowHeads().get(i)).getValue().getX() - minX);
+        final int y = (int) (100d * layout.getPosition(layout.lattice.rowHeads().get(i)).getValue().getY());
         final int ox = x + (border / 2);
         final int oy = y + (circleSize + textOffset) + (border / 2) + 10;
         final int ax = x + (border / 2);

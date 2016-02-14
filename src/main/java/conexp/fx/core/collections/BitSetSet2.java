@@ -57,8 +57,8 @@ public final class BitSetSet2 extends BitSetSet {
   public boolean equals(final Object o) {
     if (!(o instanceof BitSetSet2))
       return false;
-    final BitSetSet2 other = (BitSetSet2) o;
-    return this.containsAll(other) && other.containsAll(this);
+    final BitSetSet2 that = (BitSetSet2) o;
+    return this.size() == that.size() && this.containsAll(that);
   }
 
   @Override

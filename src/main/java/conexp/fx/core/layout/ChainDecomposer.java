@@ -10,7 +10,6 @@ package conexp.fx.core.layout;
  * #L%
  */
 
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
@@ -25,20 +24,18 @@ import conexp.fx.core.collections.BitSetSet2;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.relation.MatrixRelation;
 
-public final class ChainDecomposer<E>
-{
+public final class ChainDecomposer<E> {
+
   private final MatrixRelation<E, E> neighborhood;
   private final int                  num;
   private final Random               rng = new RandomSimple();
 
-  public ChainDecomposer(final MatrixRelation<E, E> neighborhood)
-  {
+  public ChainDecomposer(final MatrixRelation<E, E> neighborhood) {
     this.neighborhood = neighborhood;
     this.num = neighborhood.rowHeads().size();
   }
 
-  public final Set<Set<E>> randomChainDecomposition()
-  {
+  public final Set<Set<E>> randomChainDecomposition() {
     final BitSetSet2 available = new BitSetSet2();
     available.getBitSet().set(0, num);
     final Set<Set<E>> chains = new HashSet<Set<E>>();
@@ -47,20 +44,17 @@ public final class ChainDecomposer<E>
     return chains;
   }
 
-  private final Set<E> nextChain(final BitSetSet available)
-  {
+  private final Set<E> nextChain(final BitSetSet available) {
     final Set<E> chain = new HashSet<E>();
     for (int i = nextMinimalElement(available); i != -1; i = nextChainElement(i, available))
       chain.add(neighborhood.rowHeads().get(i));
     return chain;
   }
 
-  private final int nextMinimalElement(final BitSetSet available)
-  {
-    final int i = Collections3.random(available, new Predicate<Integer>()
-    {
-      public final boolean apply(final Integer i)
-      {
+  private final int nextMinimalElement(final BitSetSet available) {
+    final int i = Collections3.random(available, new Predicate<Integer>() {
+
+      public final boolean apply(final Integer i) {
         return neighborhood._col(i, available).isEmpty();
       }
     }, rng);
@@ -68,8 +62,7 @@ public final class ChainDecomposer<E>
     return i;
   }
 
-  private final int nextChainElement(final int i, final BitSetSet available)
-  {
+  private final int nextChainElement(final int i, final BitSetSet available) {
     final Collection<Integer> upper = neighborhood._row(i, available);
     if (upper.isEmpty())
       return -1;

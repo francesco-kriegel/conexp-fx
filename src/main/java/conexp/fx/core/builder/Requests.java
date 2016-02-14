@@ -18,7 +18,7 @@ import java.util.List;
 import org.openrdf.repository.Repository;
 import org.ujmp.core.booleanmatrix.BooleanMatrix;
 
-import conexp.fx.core.collections.pair.Pair;
+import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.collections.setlist.SetLists;
 import conexp.fx.core.context.MatrixContext;

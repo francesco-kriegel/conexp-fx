@@ -19,7 +19,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.base.Function;
@@ -30,16 +29,15 @@ import com.google.common.collect.Maps;
 
 import be.humphreys.simplevoronoi.GraphEdge;
 import conexp.fx.core.collections.Collections3;
-import conexp.fx.core.collections.pair.Pair;
-import conexp.fx.core.math.Isomorphism;
+import conexp.fx.core.collections.Pair;
+import conexp.fx.core.layout.LayoutEvolution;
+import conexp.fx.core.math.GuavaIsomorphism;
 import conexp.fx.core.math.VoronoiGenerator;
-import conexp.fx.core.quality.LayoutEvolution;
 import conexp.fx.gui.graph.option.AnimationSpeed;
 import conexp.fx.gui.graph.option.EdgeHighlight;
 import conexp.fx.gui.graph.option.GraphTransformation;
 import conexp.fx.gui.graph.transformation.PolarTransformation;
 import conexp.fx.gui.graph.transformation.RotationXY;
-import conexp.fx.gui.lock.ALock;
 import conexp.fx.gui.util.LaTeX;
 import conexp.fx.gui.util.Platform2;
 import conexp.fx.gui.util.SynchronizedPane;
@@ -467,12 +465,12 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 
   protected final class Config {
 
-    public final Isomorphism<Point3D, Point3D> iso;
-    public final BoundingBox                   box;
-    public final double                        f, x0, y0, w, h;
+    public final GuavaIsomorphism<Point3D, Point3D> iso;
+    public final BoundingBox                        box;
+    public final double                             f, x0, y0, w, h;
 
     protected Config(
-        final Isomorphism<Point3D, Point3D> iso,
+        final GuavaIsomorphism<Point3D, Point3D> iso,
         final BoundingBox box,
         final double f,
         final double x0,
@@ -554,8 +552,8 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     protected final Queue<Pair<T, T>>     removeVertices  = new ConcurrentLinkedQueue<Pair<T, T>>();
     protected final Queue<Pair<T, T>>     removeEdges     = new ConcurrentLinkedQueue<Pair<T, T>>();
     protected final Queue<Label>          removeLabels    = new ConcurrentLinkedQueue<Label>();
-    protected final Set<Vertex>           pendingVertices = new HashSet<Vertex>();
-    protected final Set<Edge>             pendingEdges    = new HashSet<Edge>();
+    protected final Set<Vertex>           pendingVertices = Collections3.newConcurrentHashSet();
+    protected final Set<Edge>             pendingEdges    = Collections3.newConcurrentHashSet();
     public Vertex                         polarBottom     = null;
 
     protected Controller(final Observable... observable) {
@@ -574,12 +572,12 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
             final BoundingBox box = getContentBoundingBox();
             final double w = front.widthProperty().get();
             final double h = front.heightProperty().get();
-            final Isomorphism<Point3D, Point3D> iso;
+            final GuavaIsomorphism<Point3D, Point3D> iso;
             final double f, x0, y0;
             switch (transformation.get()) {
             case GRAPH_3D:
             case GRAPH_2D:
-              iso = Isomorphism.<Point3D> identity();
+              iso = GuavaIsomorphism.<Point3D> identity();
               final double widthRatio = box.getWidth() < 0.001d ? Double.MAX_VALUE : w / box.getWidth();
               final double heightRatio = box.getHeight() < 0.001d ? Double.MAX_VALUE : h / box.getHeight();
               final double depthRatio = box.getDepth() < 0.001d ? Double.MAX_VALUE : w / box.getDepth();
@@ -607,7 +605,7 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
               y0 = h / 2d;
               break;
             default:
-              iso = Isomorphism.<Point3D> identity();
+              iso = GuavaIsomorphism.<Point3D> identity();
               f = 1d;
               x0 = 0d;
               y0 = 0d;
@@ -645,30 +643,7 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 //      }, 0, 2l * (long) speed.frameSize.toMillis());
     }
 
-    public final GraphLock graphLock = new GraphLock();
-
-    public final class GraphLock extends ALock {
-
-      public GraphLock() {
-        super("graph");
-      }
-
-      @Override
-      public void lock() {
-        isLocked = true;
-      }
-
-      @Override
-      public void unlock() {
-        isLocked = false;
-        refresh();
-      }
-
-      @Override
-      public boolean isLocked() {
-        return isLocked;
-      }
-    }
+    public boolean graphLock = false;
 
     public final void drag() {
       isDragging = true;
@@ -687,12 +662,16 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
     }
 
     protected final void disposeVertex(final T element, final T to) {
+//      if (element == null || to == null)
+//        throw new NullPointerException();
       synchronized (removeVertices) {
         removeVertices.offer(Pair.of(element, to));
       }
     }
 
     protected final void disposeEdge(final Pair<T, T> elements) {
+//      if (elements.first() == null || elements.second() == null)
+//        throw new NullPointerException();
       synchronized (removeEdges) {
         removeEdges.offer(elements);
       }
@@ -819,12 +798,15 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
             synchronized (edges) {
               edge = edges.remove(e);
             }
+            // TODO
 //            if (edge != null) {
             edge.isDisposing = true;
             edge.line.opacityProperty().unbind();
             synchronized (pendingEdges) {
               pendingEdges.add(edge);
             }
+//            } else {
+//              System.err.println(new NullPointerException());
 //            }
           }
         }
@@ -1176,23 +1158,31 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 
   protected final Collection<Edge> lowerEdges(final T element) {
     synchronized (edges) {
-      return new HashSet<Edge>(Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
+      return 
+//          new HashSet<Edge>(
+          Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
 
         public final boolean apply(final Pair<T, T> p) {
           return p.second().equals(element);
         }
-      }).values());
+      }).values()
+//          )
+          ;
     }
   }
 
   protected final Collection<Edge> upperEdges(final T element) {
     synchronized (edges) {
-      return new HashSet<Edge>(Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
+      return 
+//          new HashSet<Edge>(
+              Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
 
         public final boolean apply(final Pair<T, T> p) {
           return p.first().equals(element);
         }
-      }).values());
+      }).values()
+//              )
+          ;
     }
   }
 

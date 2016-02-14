@@ -63,10 +63,10 @@ public final class Math3 {
   public static final String formatTime(final long time) {
     if (time == 0)
       return "";
-    final long ms = time % 1000;
-    final long s = (time / 1000) % 60;
-    final long m = (time / 60000) % 60;
-    final long h = (time / 3600000);
+    final long ms = time % 1000l;
+    final long s = (time / 1000l) % 60l;
+    final long m = (time / 60000l) % 60l;
+    final long h = (time / 3600000l);
     if (h > 0)
       return String.format("%02dh %02dmin", h, m);
     if (m > 0)
@@ -74,5 +74,27 @@ public final class Math3 {
     if (s > 0)
       return String.format("%02ds %03dms", s, ms);
     return String.format("%03dms", ms);
+  }
+
+  public static final String formatNanos(final long nanos) {
+    if (nanos == 0)
+      return "";
+    final long ns = nanos % 1000l;
+    final long µs = (nanos / 1000l) % 1000l;
+    final long ms = (nanos / 1000000l) % 1000l;
+    final long s = (nanos / 1000000000l) % 60l;
+    final long m = (nanos / 60000000000l) % 60l;
+    final long h = (nanos / 3600000000000l);
+    if (h > 0)
+      return String.format("%02dh %02dmin", h, m);
+    if (m > 0)
+      return String.format("%02dmin %02ds", m, s);
+    if (s > 0)
+      return String.format("%02ds %03dms", s, ms);
+    if (ms > 0)
+      return String.format("%03dms %03dµs", ms, µs);
+    if (µs > 0)
+      return String.format("%03dµs %03dns", µs, ns);
+    return String.format("%03dns", ns);
   }
 }
