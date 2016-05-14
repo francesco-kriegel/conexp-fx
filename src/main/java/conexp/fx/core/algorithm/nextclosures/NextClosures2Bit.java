@@ -1,5 +1,17 @@
 package conexp.fx.core.algorithm.nextclosures;
 
+import java.io.File;
+
+/*
+ * #%L
+ * Concept Explorer FX
+ * %%
+ * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * %%
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
+ * #L%
+ */
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -12,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -27,7 +40,9 @@ import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.importer.CXTImporter;
 import conexp.fx.core.math.Math3;
+import conexp.fx.core.util.Meter;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.task.TimeTask;
@@ -129,6 +144,10 @@ public class NextClosures2Bit {
       };
       return x;
     };
+  }
+
+  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> bitBitCompute(final Context<G, M> cxt) {
+    return bitBitCompute(cxt, Executors.newWorkStealingPool(), __ -> {} , __ -> {} , __ -> {} , __ -> {} , () -> false);
   }
 
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> bitBitCompute(
@@ -283,6 +302,22 @@ public class NextClosures2Bit {
     return bitCompute(cxt, executor, __ -> {} , __ -> {} , System.out::println, System.out::println, () -> false);
   }
 
+  public static void main(String[] args) throws Exception {
+    System.out.println("starting context import...");
+    final Meter<Long> m = Meter.newNanoStopWatch();
+    final MatrixContext<String, String> cxt =
+        CXTImporter.read(new File("/Users/francesco/workspace/Data/Datasets/SNOMED/snomed.cxt"));
+    System.out.println("context import took " + Math3.formatNanos(m.measure()));
+    bitCleanedCompute(
+        cxt,
+        Executors.newWorkStealingPool(),
+        System.out::println,
+        System.out::println,
+        System.out::println,
+        System.out::println,
+        () -> false);
+  }
+
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> bitCleanedCompute(
       final Context<G, M> cxt,
       final ExecutorService executor,
@@ -292,14 +327,16 @@ public class NextClosures2Bit {
       final Consumer<Double> updateProgress,
       final Supplier<Boolean> isCancelled) {
     final MatrixContext<G, M> mcxt = cxt.toMatrixContext();
-    final long s = System.nanoTime();
-    System.out.print(".");
+    System.out.println("starting context cleaning...");
+    final Meter<Long> nsw = Meter.newNanoStopWatch();
     mcxt.clean();
-    System.out.print(".");
+    System.out.println("context cleaning took " + Math3.formatNanos(nsw.measure()));
+    System.out.println("cloning cleaned context...");
+    final Meter<Long> nsw2 = Meter.newNanoStopWatch();
     final MatrixContext<Set<G>, Set<M>> ccxt = mcxt.cleaned.clone();
-    System.out.println("cleaning took " + Math3.formatNanos(System.nanoTime() - s));
+    System.out.println("context cloning took " + Math3.formatNanos(nsw2.measure()));
     final Pair<Set<Concept<Set<G>, Set<M>>>, Set<Implication<Set<G>, Set<M>>>> r =
-        bitCompute(ccxt, executor, __ -> {} , __ -> {} , updateStatus, updateProgress, isCancelled);
+        bitBitCompute(ccxt, executor, __ -> {} , __ -> {} , updateStatus, updateProgress, isCancelled);
     final Result<G, M> x = new Result<G, M>();
     r
         .first()

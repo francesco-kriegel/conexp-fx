@@ -89,10 +89,6 @@ public final class GeneticLayouter<G, M> {
     };
   }
 
-  public static final <G, M> void foo(final FCADataset<G, M> dataset) {
-
-  }
-
   public static final <G, M> TimeTask<Void> seeds(
       final FCADataset<G, M> dataset,
       final boolean includingLayout,
@@ -228,23 +224,6 @@ public final class GeneticLayouter<G, M> {
         return null;
       }
 
-      private final void evolveLayout(final AdditiveConceptLayout<G, M> layout) {
-        layout.getCurrentBoundingBox(false, false);
-        final Map<Concept<G, M>, Point3D> deltas = new ConcurrentHashMap<>();
-        for (Concept<G, M> concept : layout.lattice.rowHeads()) {
-          final Point3D p = layout.getOrAddPosition(concept).getValue();
-          final Point3D delta = new Point3D(0, 0, 0);
-          for (Pair<Concept<G, M>, Concept<G, M>> edge : layout.lattice) {
-            final Point3D q1 = layout.getOrAddPosition(edge.x()).getValue();
-            final Point3D q2 = layout.getOrAddPosition(edge.y()).getValue();
-            final double dist = Points.pointSegmentDistance(p, q1, q2);
-            Points.orthogonalXYVector(p, q1, q2);
-          }
-          deltas.put(concept, delta);
-        }
-        deltas.forEach((concept, delta) -> layout.move(concept, ConceptMovement.INTENT_CHAIN_SEEDS, delta));
-      }
-
       private final void evolvePopulation() {
         if (dataset.conceptGraph.polar()) {} else {
           for (int i = 0; i < generationCount; i++) {
@@ -254,14 +233,14 @@ public final class GeneticLayouter<G, M> {
             updateMessage("Evolving Seeds: " + i + " of " + generationCount + " Generations...");
             evolveGeneration();
           }
-          try {
+//          try {
 //            if (currentBest != dataset.layout)
-            dataset.layout.updateSeeds(currentBest.seedsG, currentBest.seedsM);
-          } catch (Exception e) {
-            System.err.println(currentBest);
-            System.err.println(dataset.layout);
-            e.printStackTrace();
-          }
+          dataset.layout.updateSeeds(currentBest.seedsG, currentBest.seedsM);
+//          } catch (Exception e) {
+//            System.err.println(currentBest);
+//            System.err.println(dataset.layout);
+//            e.printStackTrace();
+//          }
         }
       }
 
@@ -304,17 +283,17 @@ public final class GeneticLayouter<G, M> {
 //                    dataset.conflictDistance,
 //                    ConExpFX.instance.executor.tpe).calculate();
 //              } else
-                v = new LayoutEvolution<G, M>(
-                    candidate,
-                    Collections3.random(candidate.lattice.rowHeads(), rng),
-                    ConceptMovement.INTENT_CHAIN_SEEDS,
-                    4d,
-                    4d,
-                    2,
-                    2,
-                    1,
-                    dataset.conflictDistance,
-                    ConExpFX.instance.executor.tpe).calculate();
+              v = new LayoutEvolution<G, M>(
+                  candidate,
+                  Collections3.random(candidate.lattice.rowHeads(), rng),
+                  ConceptMovement.INTENT_CHAIN_SEEDS,
+                  4d,
+                  4d,
+                  2,
+                  2,
+                  1,
+                  dataset.conflictDistance,
+                  ConExpFX.instance.executor.tpe).calculate();
               candidate.updateSeeds(v.seedsG, v.seedsM);
             }
             if (v.result > currentQuality) {

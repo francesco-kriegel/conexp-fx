@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.Spliterator;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class HashSetArrayList<E> extends AbstractSetList<E> {
 
@@ -62,26 +61,26 @@ public class HashSetArrayList<E> extends AbstractSetList<E> {
   }
 
   public boolean addAll(final Collection<? extends E> c) {
-    return c.stream().map(this::add).reduce(false, Boolean::logicalOr);
-//    boolean changed = false;
-//    for (E e : c)
-//      changed |= s.add(e) && l.add(e);
-//    return changed;
+//    return c.stream().map(this::add).reduce(false, Boolean::logicalOr);
+    boolean changed = false;
+    for (E e : c)
+      changed |= s.add(e) && l.add(e);
+    return changed;
   }
 
   public boolean addAll(final int i, final Collection<? extends E> c) {
     if (i < 0 || i > size())
       throw new IndexOutOfBoundsException();
-    final AtomicInteger j = new AtomicInteger(i);
-    return c.stream().map(e -> this._add(j.getAndIncrement(), e)).reduce(false, Boolean::logicalOr);
-//    boolean changed = false;
-//    int j = i;
-//    for (E e : c)
-//      if (s.add(e)) {
-//        l.add(j++, e);
-//        changed = true;
-//      }
-//    return changed;
+//    final AtomicInteger j = new AtomicInteger(i);
+//    return c.stream().map(e -> this._add(j.getAndIncrement(), e)).reduce(false, Boolean::logicalOr);
+    boolean changed = false;
+    int j = i;
+    for (E e : c)
+      if (s.add(e)) {
+        l.add(j++, e);
+        changed = true;
+      }
+    return changed;
   }
 
   public E set(final int i, final E e) {

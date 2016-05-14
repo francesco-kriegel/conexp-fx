@@ -17,24 +17,21 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import conexp.fx.core.collections.relation.RelationEvent;
-import conexp.fx.core.collections.relation.RelationEventHandler;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Binding;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 
-public abstract class ConceptLayout<G, M> implements Observable {
+public abstract class ConceptLayout<G, M, P extends ObservableValue<Point3D>> implements Observable {
 
-  protected boolean                                    observe          = false;
-  public final ConceptLattice<G, M>                    lattice;
-  protected final Map<Concept<G, M>, Binding<Point3D>> positionBindings =
-      new ConcurrentHashMap<Concept<G, M>, Binding<Point3D>>();
-//  public final Map<Concept<G, M>, Point3D>          positions        =
-//      Maps.transformValues(positionBindings, GuavaFunctions.<Point3D> observableValueToCurrentValueFunction());
-  public final Map<Concept<G, M>, Concept<G, M>>       generators       =
+  protected boolean                              observe          = false;
+  public final ConceptLattice<G, M>              lattice;
+  protected final Map<Concept<G, M>, P>          positionBindings = new ConcurrentHashMap<Concept<G, M>, P>();
+  public final Map<Concept<G, M>, Concept<G, M>> generators       =
       new ConcurrentHashMap<Concept<G, M>, Concept<G, M>>();
 
   protected ConceptLayout(final ConceptLattice<G, M> conceptLattice) {
@@ -43,65 +40,33 @@ public abstract class ConceptLayout<G, M> implements Observable {
   }
 
   public final void observe() {
-    if (true)
-      return;
     if (this.observe)
       return;
     this.observe = true;
-    lattice.addEventHandler(new RelationEventHandler<Concept<G, M>, Concept<G, M>>() {
-
-      public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
-        for (Concept<G, M> concept : event.getRows())
-//          synchronized (positionBindings) {
-          getOrAddPosition(concept);
-//          }
-      }
-    }, RelationEvent.ROWS_ADDED);
-    lattice.addEventHandler(new RelationEventHandler<Concept<G, M>, Concept<G, M>>() {
-
-      public final void handle(final RelationEvent<Concept<G, M>, Concept<G, M>> event) {
-        for (Concept<G, M> concept : event.getRows())
-          disposePosition(concept);
-//          synchronized (positionBindings) {
-//            final Binding<Point3D> posb = positionBindings.remove(concept);
-//            try {
-//              posb.dispose();
-//            } catch (NullPointerException e) {
-//              System.err.println("position binding not found: " + concept);
-//            }
-//          }
-      }
-    }, RelationEvent.ROWS_REMOVED);
-    // seeds.addListener(new MapChangeListener<M, Point3D>() {
-    //
-    // @Override
-    // public void onChanged(MapChangeListener.Change<? extends M, ? extends Point3D> change) {
-    // System.out.println(seeds.keySet());
-    // }
-    // });
+    // TODO synchronized(positionBindings)
+    lattice.addEventHandler(e -> e.getRows().forEach(this::getOrAddPosition), RelationEvent.ROWS_ADDED);
+    lattice.addEventHandler(e -> e.getRows().forEach(this::disposePosition), RelationEvent.ROWS_REMOVED);
   }
 
-  public final Binding<Point3D> getOrAddPosition(final Concept<G, M> concept) {
+  public final P getOrAddPosition(final Concept<G, M> concept) {
     synchronized (positionBindings) {
       return positionBindings.computeIfAbsent(concept, this::newPositionBinding);
     }
   }
 
-  protected abstract Binding<Point3D> newPositionBinding(Concept<G, M> concept);
+  protected abstract P newPositionBinding(Concept<G, M> concept);
 
-  public final Binding<Point3D> getPosition(final Concept<G, M> c) {
+  public final P getPosition(final Concept<G, M> c) {
     synchronized (positionBindings) {
-      // could possibly removed but then the position binding for bottom concept in interordinal scales could not be
-      // found.
-//      if (!positionBindings.containsKey(c))
-//        putNewPositionBinding(c);
       return positionBindings.get(c);
     }
   }
 
   public final void disposePosition(final Concept<G, M> concept) {
     synchronized (positionBindings) {
-      positionBindings.remove(concept).dispose();
+      final P p = positionBindings.remove(concept);
+      if (p instanceof Binding)
+        ((Binding<Point3D>) p).dispose();
     }
   }
 
@@ -149,7 +114,7 @@ public abstract class ConceptLayout<G, M> implements Observable {
 //                Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE }),
 //            (a, p) -> Pair.of(new double[] {}, new double[] {}),
 //            (a, b) -> Pair.of(null, null));
-      for (Entry<Concept<G, M>, Binding<Point3D>> e : positionBindings.entrySet())
+      for (Entry<Concept<G, M>, P> e : positionBindings.entrySet())
         if (!hideBottom || !e.getKey().getIntent().containsAll(lattice.context.colHeads()))
           if (!hideTop || !e.getKey().getExtent().containsAll(lattice.context.rowHeads())) {
             final Point3D p = e.getValue().getValue();

@@ -250,7 +250,7 @@ public final class IFox2<G, M> {
             layout.seedsM.put(m, layout.seedHistoryM.get(m));
           } else {
             updateMessage("Computing random seed: " + m);
-            layout.seedsM.put(m, new Point3D(2d * Math.random() - 1d, 0.5d + Math.random(), 0));
+            layout.seedsM.put(m, new Point3D(1d + Math.random(), 0.5d + Math.random(), 0));
           }
         }
         synchronized (layout.seedsG) {
@@ -264,7 +264,7 @@ public final class IFox2<G, M> {
                       .findAny()
                       .isPresent())
               .map(IuJ._firstObject::apply)
-              .forEach(g -> layout.seedsG.put(g, new Point3D(2d * Math.random() - 1d, 0.5d + Math.random(), 0)));
+              .forEach(g -> layout.seedsG.put(g, new Point3D(1d + Math.random(), 0.5d + Math.random(), 0)));
           layout.seedsG.keySet().removeIf(
               g -> !IuJ._irreducibleObjects
                   .contains(IuJ._objects.stream().filter(c -> c.contains(IuJ.rowHeads().indexOf(g))).findAny().get()));
@@ -461,7 +461,7 @@ public final class IFox2<G, M> {
                       .findAny()
                       .isPresent())
               .map(I._firstObject::apply)
-              .forEach(g -> layout.seedsG.put(g, new Point3D(2d * Math.random() - 1d, 0.5d + Math.random(), 0)));
+              .forEach(g -> layout.seedsG.put(g, new Point3D(1d + Math.random(), 0.5d + Math.random(), 0)));
           layout.seedsG.keySet().removeIf(
               g -> !I._irreducibleObjects
                   .contains(I._objects.stream().filter(c -> c.contains(I.rowHeads().indexOf(g))).findAny().get()));

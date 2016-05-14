@@ -47,8 +47,8 @@ public final class ExecutorStatusBar {
                                                      .build();
     private final Label       currentStatusLabel = LabelBuilder
                                                      .create()
-                                                     .minWidth(555)
-                                                     .maxWidth(555)
+                                                     .minWidth(554)
+                                                     .maxWidth(554)
                                                      .minHeight(height - 2 * padding)
                                                      .maxHeight(height - 2 * padding)
                                                      .build();

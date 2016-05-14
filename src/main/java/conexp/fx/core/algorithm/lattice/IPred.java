@@ -20,6 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Function;
@@ -29,6 +31,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
+import conexp.fx.core.context.MatrixContext;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.task.TimeTask;
 
@@ -101,65 +104,140 @@ public final class IPred<G, M> {
     };
   }
 
+  public static final <G, M> ConceptLattice<G, M>
+      getConceptLattice(final MatrixContext<G, M> cxt, final Set<Concept<G, M>> concepts) {
+    final ConceptLattice<G, M> lattice = new ConceptLattice<G, M>(cxt);
+    lattice.rowHeads().addAll(
+        concepts
+            .parallelStream()
+            .sorted((c1, c2) -> (int) Math.signum(c1.extent().size() - c2.extent().size()))
+            .collect(Collectors.toList()));
+    populateConceptLattice(lattice, __ -> {} , __ -> {} , () -> false);
+    return lattice;
+  }
+
+  public static final <G, M> void populateConceptLattice(
+      final ConceptLattice<G, M> lattice,
+      final Consumer<String> messageConsumer,
+      final Consumer<Double> statusConsumer,
+      final Supplier<Boolean> isCancelled) {
+    statusConsumer.accept(0d);
+    if (isCancelled.get())
+      return;
+    messageConsumer.accept("Computing Concept Neighborhood...");
+    lattice.empty();
+    final int bits = lattice.context.colHeads().size();
+    final List<BitSet> intents = lattice
+        .rowHeads()
+        .parallelStream()
+        .map(concept -> lattice.context.colHeads().subBitSet(concept.intent()))
+        .collect(Collectors.toList());
+    statusConsumer.accept(0.2d);
+    final Iterator<BitSet> intentIterator = intents.iterator();
+    final List<BitSet> borderIntents = new ArrayList<BitSet>(intents.size());
+    final Map<BitSet, BitSet> faceAccumulation =
+        intents.parallelStream().collect(Collectors.toMap(intent -> intent, intent -> new BitSet(bits)));
+    if (intentIterator.hasNext())
+      borderIntents.add(intentIterator.next());
+    final double total = intents.size();
+    final AtomicDouble actual = new AtomicDouble(0d);
+    while (intentIterator.hasNext()) {
+      if (isCancelled.get())
+        break;
+      actual.set(actual.get() + 1d);
+      statusConsumer.accept(0.3d + 0.7d * (actual.get() / total));
+      messageConsumer.accept("Computing Neighborhood: " + (int) actual.get() + " of " + (int) total + " Concepts...");
+      final BitSet intent = intentIterator.next();
+      Set<BitSet> toBeRemoved = Collections3.newConcurrentHashSet();
+      borderIntents.parallelStream().map(borderIntent -> {
+        final BitSet candidateIntent = ((BitSet) intent.clone());
+        candidateIntent.and(borderIntent);
+        return candidateIntent;
+      }).forEach(candidateIntent -> {
+        final BitSet candidateFace = faceAccumulation.get(candidateIntent);
+        final BitSet intentFace = ((BitSet) intent.clone());
+        intentFace.and(candidateFace);
+        if (intentFace.isEmpty()) {
+          final int index = intents.indexOf(candidateIntent);
+          synchronized (lattice) {
+            lattice._add((int) actual.get(), index);
+          }
+          final BitSet face = ((BitSet) intent.clone());
+          face.andNot(candidateIntent);
+          candidateFace.or(face);
+          toBeRemoved.add(candidateIntent);
+        }
+      });
+      borderIntents.removeAll(toBeRemoved);
+      borderIntents.add(intent);
+    }
+//    messageConsumer.accept(
+//        "Pushing Changes...");
+//    lattice.pushAllChangedEvent();
+    statusConsumer.accept(1d);
+  }
+
   public static final <G, M> TimeTask<Void> neighborhoodP(final FCADataset<G, M> dataset) {
     return new TimeTask<Void>(dataset, "iPred (parallel)") {
 
       protected final Void call() {
-        updateProgress(0d, 1d);
-        if (isCancelled())
-          return null;
-        updateMessage("Computing Concept Neighborhood...");
-        dataset.lattice.empty();
-        final int bits = dataset.lattice.context.colHeads().size();
-        final List<BitSet> intents = dataset.lattice
-            .rowHeads()
-            .parallelStream()
-            .map(concept -> dataset.lattice.context.colHeads().subBitSet(concept.intent()))
-            .collect(Collectors.toList());
-        updateProgress(0.2d, 1d);
-        final Iterator<BitSet> intentIterator = intents.iterator();
-        final List<BitSet> borderIntents = new ArrayList<BitSet>(intents.size());
-        final Map<BitSet, BitSet> faceAccumulation =
-            intents.parallelStream().collect(Collectors.toMap(intent -> intent, intent -> new BitSet(bits)));
-        if (intentIterator.hasNext())
-          borderIntents.add(intentIterator.next());
-        final double total = intents.size();
-        final AtomicDouble actual = new AtomicDouble(0d);
-        while (intentIterator.hasNext()) {
-          if (this.isCancelled())
-            break;
-          actual.set(actual.get() + 1d);
-          updateProgress(0.3d + 0.7d * (actual.get() / total), 1d);
-          updateMessage("Computing Neighborhood: " + (int) actual.get() + " of " + (int) total + " Concepts...");
-          final BitSet intent = intentIterator.next();
-          Set<BitSet> toBeRemoved = Collections3.newConcurrentHashSet();
-          borderIntents.parallelStream().map(borderIntent -> {
-            final BitSet candidateIntent = ((BitSet) intent.clone());
-            candidateIntent.and(borderIntent);
-            return candidateIntent;
-          }).forEach(candidateIntent -> {
-            final BitSet candidateFace = faceAccumulation.get(candidateIntent);
-            final BitSet intentFace = ((BitSet) intent.clone());
-            intentFace.and(candidateFace);
-            if (intentFace.isEmpty()) {
-              final int index = intents.indexOf(candidateIntent);
-              synchronized (dataset.lattice) {
-                dataset.lattice._add((int) actual.get(), index);
-              }
-              final BitSet face = ((BitSet) intent.clone());
-              face.andNot(candidateIntent);
-              candidateFace.or(face);
-              toBeRemoved.add(candidateIntent);
-            }
-          });
-          borderIntents.removeAll(toBeRemoved);
-          borderIntents.add(intent);
-        }
-//        updateMessage(
-//            "Pushing Changes...");
-//        lattice.pushAllChangedEvent();
-        updateProgress(1d, 1d);
+        populateConceptLattice(dataset.lattice, m -> updateMessage(m), p -> updateProgress(p, 1d), this::isCancelled);
         return null;
+//        updateProgress(0d, 1d);
+//        if (isCancelled())
+//          return null;
+//        updateMessage("Computing Concept Neighborhood...");
+//        dataset.lattice.empty();
+//        final int bits = dataset.lattice.context.colHeads().size();
+//        final List<BitSet> intents = dataset.lattice
+//            .rowHeads()
+//            .parallelStream()
+//            .map(concept -> dataset.lattice.context.colHeads().subBitSet(concept.intent()))
+//            .collect(Collectors.toList());
+//        updateProgress(0.2d, 1d);
+//        final Iterator<BitSet> intentIterator = intents.iterator();
+//        final List<BitSet> borderIntents = new ArrayList<BitSet>(intents.size());
+//        final Map<BitSet, BitSet> faceAccumulation =
+//            intents.parallelStream().collect(Collectors.toMap(intent -> intent, intent -> new BitSet(bits)));
+//        if (intentIterator.hasNext())
+//          borderIntents.add(intentIterator.next());
+//        final double total = intents.size();
+//        final AtomicDouble actual = new AtomicDouble(0d);
+//        while (intentIterator.hasNext()) {
+//          if (this.isCancelled())
+//            break;
+//          actual.set(actual.get() + 1d);
+//          updateProgress(0.3d + 0.7d * (actual.get() / total), 1d);
+//          updateMessage("Computing Neighborhood: " + (int) actual.get() + " of " + (int) total + " Concepts...");
+//          final BitSet intent = intentIterator.next();
+//          Set<BitSet> toBeRemoved = Collections3.newConcurrentHashSet();
+//          borderIntents.parallelStream().map(borderIntent -> {
+//            final BitSet candidateIntent = ((BitSet) intent.clone());
+//            candidateIntent.and(borderIntent);
+//            return candidateIntent;
+//          }).forEach(candidateIntent -> {
+//            final BitSet candidateFace = faceAccumulation.get(candidateIntent);
+//            final BitSet intentFace = ((BitSet) intent.clone());
+//            intentFace.and(candidateFace);
+//            if (intentFace.isEmpty()) {
+//              final int index = intents.indexOf(candidateIntent);
+//              synchronized (dataset.lattice) {
+//                dataset.lattice._add((int) actual.get(), index);
+//              }
+//              final BitSet face = ((BitSet) intent.clone());
+//              face.andNot(candidateIntent);
+//              candidateFace.or(face);
+//              toBeRemoved.add(candidateIntent);
+//            }
+//          });
+//          borderIntents.removeAll(toBeRemoved);
+//          borderIntents.add(intent);
+//        }
+////        updateMessage(
+////            "Pushing Changes...");
+////        lattice.pushAllChangedEvent();
+//        updateProgress(1d, 1d);
+//        return null;
       }
     };
   }

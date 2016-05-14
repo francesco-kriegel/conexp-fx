@@ -9,9 +9,8 @@ package conexp.fx.core.layout;
  * #L%
  */
 
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Maps;
@@ -23,14 +22,20 @@ import conexp.fx.core.math.Points;
 import javafx.beans.binding.Binding;
 import javafx.geometry.Point3D;
 
-public abstract class QualityMeasure<G, M, V>
-    implements com.google.common.base.Function<AdditiveConceptLayout<G, M>, V>,
-    java.util.function.Function<AdditiveConceptLayout<G, M>, V> {
+public abstract class QualityMeasure<G, M, V> implements Function<AdditiveConceptLayout<G, M>, V> {
 
-  private final Map<Pair<Map<G, Point3D>, Map<M, Point3D>>, V> cache = new ConcurrentHashMap<>();
-
-  public final V apply(final AdditiveConceptLayout<G, M> layout) {
-    return cache.computeIfAbsent(Pair.of(layout._seedsG, layout._seedsM), __ -> compute(layout));
+//    implements com.google.common.base.Function<AdditiveConceptLayout<G, M>, V>,
+//    java.util.function.Function<AdditiveConceptLayout<G, M>, V> {
+//
+//  private final Map<Pair<Map<G, Point3D>, Map<M, Point3D>>, V> cache = new ConcurrentHashMap<>();
+//
+//  public final V apply(final AdditiveConceptLayout<G, M> layout) {
+//    return cache.computeIfAbsent(Pair.of(layout._seedsG, layout._seedsM), __ -> compute(layout));
+//  }
+//
+  @Override
+  public V apply(AdditiveConceptLayout<G, M> t) {
+    return compute(t);
   }
 
   protected abstract V compute(AdditiveConceptLayout<G, M> layout);

@@ -15,7 +15,6 @@ import java.util.Set;
 
 import conexp.fx.core.collections.relation.AbstractRelation;
 import conexp.fx.core.collections.relation.Relation;
-import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 
 public abstract class AbstractContext<G, M> extends AbstractRelation<G, M> implements Context<G, M> {
@@ -64,10 +63,11 @@ public abstract class AbstractContext<G, M> extends AbstractRelation<G, M> imple
 
   public MatrixContext<G, M> clone() {
     final MatrixContext<G, M> clone = new MatrixContext<G, M>(rowHeads().clone(), colHeads().clone(), false);
-    for (G object : clone.rowHeads())
-      for (M attribute : clone.colHeads())
-        if (contains(object, attribute))
-          clone.addFast(object, attribute);
+    clone.rowHeads().parallelStream().forEach(object -> clone.row(object).addAll(row(object)));
+//    for (G object : clone.rowHeads())
+//      for (M attribute : clone.colHeads())
+//        if (contains(object, attribute))
+//          clone.addFast(object, attribute);
     return clone;
   }
 

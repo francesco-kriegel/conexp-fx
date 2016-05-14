@@ -328,6 +328,7 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C> {
         return new SimpleListIterator<Set<R>>(true) {
 
           private final HashSet<R> available = new HashSet<R>(rowHeads());
+
           {
             createFirst(i);
           }

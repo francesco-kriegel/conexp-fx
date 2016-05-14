@@ -15,12 +15,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.ujmp.core.booleanmatrix.BooleanMatrix;
 
-import conexp.fx.core.collections.setlist.HashSetArrayList;
-import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.MatrixContext;
 
 public class CXTImporter {
@@ -43,8 +45,8 @@ public class CXTImporter {
     }
     final int rows = Integer.valueOf(firstLines[2]);
     final int cols = Integer.valueOf(firstLines[3]);
-    final SetList<String> objs = new HashSetArrayList<String>();
-    final SetList<String> atts = new HashSetArrayList<String>();
+    final List<String> objs = new ArrayList<String>(rows);
+    final List<String> atts = new ArrayList<String>(cols);
 
     while (lineIterator.hasNext() && i < 5 + rows) {
       objs.add(lineIterator.next());

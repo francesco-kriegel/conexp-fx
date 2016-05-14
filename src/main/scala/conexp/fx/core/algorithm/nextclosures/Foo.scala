@@ -1,4 +1,4 @@
-package conexp.fx.scala
+package conexp.fx.core.algorithm.nextclosures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

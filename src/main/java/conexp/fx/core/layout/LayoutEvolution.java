@@ -154,8 +154,10 @@ public final class LayoutEvolution<G, M> {
         Point3D.ZERO,
         rectangle,
         conflictDistance.apply(layout),
-        layout.clone()._seedsG,
-        layout.clone()._seedsM);
+        //        layout.clone()._seedsG,
+        //        layout.clone()._seedsM);
+        layout.clone().seedsG,
+        layout.clone().seedsM);
     if (concept.equals(layout.lattice.context.selection.topConcept())) {
       best = firstValue;
       return;
@@ -163,9 +165,8 @@ public final class LayoutEvolution<G, M> {
     switch (movement) {
     case LABEL_SEED:
       try {
-        minY =
-            layout.getPosition(Iterators.getOnlyElement(layout.lattice.row(concept).iterator())).getValue().getY()
-                - origin.getY();
+        minY = layout.getPosition(Iterators.getOnlyElement(layout.lattice.row(concept).iterator())).getValue().getY()
+            - origin.getY();
       } catch (IllegalArgumentException | NoSuchElementException e) {
         best = firstValue;
         return;
@@ -244,8 +245,10 @@ public final class LayoutEvolution<G, M> {
                 tileWidth,
                 tileHeight),
             conflictDistance.apply(movedLayout),
-            movedLayout._seedsG,
-            movedLayout._seedsM);
+            //            movedLayout._seedsG,
+            //            movedLayout._seedsM);
+            movedLayout.seedsG,
+            movedLayout.seedsM);
         synchronized (values) {
           values.add(value);
         }

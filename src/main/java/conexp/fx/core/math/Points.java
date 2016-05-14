@@ -181,27 +181,32 @@ public final class Points {
    * @throws NoSuchElementException
    */
   public static final double solve(final Point3D p, final Point3D q) throws NoSuchElementException {
-    if (p.getX() == 0 && q.getX() != 0)
-      throw new NoSuchElementException();
-    if (p.getY() == 0 && q.getY() != 0)
-      throw new NoSuchElementException();
-    if (p.getZ() == 0 && q.getZ() != 0)
-      throw new NoSuchElementException();
-    if (q.getX() == 0 && q.getY() == 0 && q.getZ() == 0)
-      return 1d;
-    if (p.getX() != 0 && q.getX() != 0) {
-      final double t = q.getX() / p.getX();
-      if (t * p.getY() == q.getY() && t * p.getZ() == q.getZ())
-        return t;
-    } else if (p.getY() != 0 && q.getY() != 0) {
-      final double t = q.getY() / p.getY();
-      if (t * p.getX() == q.getX() && t * p.getZ() == q.getZ())
-        return t;
-    } else if (p.getZ() != 0 && q.getZ() != 0) {
-      final double t = q.getZ() / p.getZ();
-      if (t * p.getX() == q.getX() && t * p.getY() == q.getY())
-        return t;
+    if (p.normalize().equals(q.normalize())) {
+      if (p.equals(Point3D.ZERO))
+        return 1;
+      return q.magnitude() / p.magnitude();
     }
+//    if (p.getX() == 0 && q.getX() != 0)
+//      throw new NoSuchElementException();
+//    if (p.getY() == 0 && q.getY() != 0)
+//      throw new NoSuchElementException();
+//    if (p.getZ() == 0 && q.getZ() != 0)
+//      throw new NoSuchElementException();
+//    if (q.getX() == 0 && q.getY() == 0 && q.getZ() == 0)
+//      return 1d;
+//    if (p.getX() != 0 && q.getX() != 0) {
+//      final double t = q.getX() / p.getX();
+//      if (t * p.getY() == q.getY() && t * p.getZ() == q.getZ())
+//        return t;
+//    } else if (p.getY() != 0 && q.getY() != 0) {
+//      final double t = q.getY() / p.getY();
+//      if (t * p.getX() == q.getX() && t * p.getZ() == q.getZ())
+//        return t;
+//    } else if (p.getZ() != 0 && q.getZ() != 0) {
+//      final double t = q.getZ() / p.getZ();
+//      if (t * p.getX() == q.getX() && t * p.getY() == q.getY())
+//        return t;
+//    }
     throw new NoSuchElementException();
   }
 
@@ -255,8 +260,32 @@ public final class Points {
 //                                                                 }
 //                                                               };
 
-  public static final Point3D orthogonalXYVector(final Point3D p, final Point3D q1, final Point3D q2) {
-    // TODO Auto-generated method stub
-    return null;
+  /**
+   * Returns t such that p = q1 + t * (q2 - q1)
+   * 
+   * @param p
+   * @param q1
+   * @param q2
+   * @return
+   */
+  public static final double solve(final Point3D p, final Point3D q1, final Point3D q2) {
+    final Point3D q = q2.subtract(q1);
+    final Point3D x = p.subtract(q1);
+    return x.dotProduct(q) / q.dotProduct(q);
   }
+
+  public static final Point3D projectToLine(final Point3D p, final Point3D q1, final Point3D q2) {
+    final double t = solve(p, q1, q2);
+    return q1.add(q2.subtract(q1).multiply(t));
+  }
+
+  public static final Point3D projectToLineSegment(final Point3D p, final Point3D q1, final Point3D q2) {
+    final double t = Math.min(Math.max(solve(p, q1, q2), 0), 1);
+    return q1.add(q2.subtract(q1).multiply(t));
+  }
+
+  public static final Point3D shortestVectorFromLineSegment(final Point3D p, final Point3D q1, final Point3D q2) {
+    return p.subtract(projectToLineSegment(p, q1, q2));
+  }
+
 }

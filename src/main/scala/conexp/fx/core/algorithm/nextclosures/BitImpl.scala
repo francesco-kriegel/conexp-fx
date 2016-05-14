@@ -1,4 +1,4 @@
-package conexp.fx.scala
+package conexp.fx.core.algorithm.nextclosures
 
 import scala.collection.mutable.BitSet
 

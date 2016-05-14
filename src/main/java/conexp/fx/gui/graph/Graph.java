@@ -87,6 +87,7 @@ import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+@SuppressWarnings("deprecation")
 public abstract class Graph<T, N extends Node> extends BorderPane {
 
   public static final Color COLOR_DEFAULT       = Color.valueOf("#0576B0");
@@ -1158,31 +1159,31 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 
   protected final Collection<Edge> lowerEdges(final T element) {
     synchronized (edges) {
-      return 
+      return
 //          new HashSet<Edge>(
-          Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
+      Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
 
         public final boolean apply(final Pair<T, T> p) {
           return p.second().equals(element);
         }
       }).values()
 //          )
-          ;
+      ;
     }
   }
 
   protected final Collection<Edge> upperEdges(final T element) {
     synchronized (edges) {
-      return 
+      return
 //          new HashSet<Edge>(
-              Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
+      Maps.filterKeys(edges, new Predicate<Pair<T, T>>() {
 
         public final boolean apply(final Pair<T, T> p) {
           return p.first().equals(element);
         }
       }).values()
 //              )
-          ;
+      ;
     }
   }
 

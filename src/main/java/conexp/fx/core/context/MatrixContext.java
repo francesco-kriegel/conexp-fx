@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.ujmp.core.Matrix;
 import org.ujmp.core.booleanmatrix.BooleanMatrix;
@@ -469,9 +471,9 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
 
   public synchronized final void clean() {
     _objects.clear();
-    _objects.addAll(_objectEquivalence().clone().equivalenceClasses());
+    _objects.addAll(_objectEquivalence().equivalenceClasses());
     _attributes.clear();
-    _attributes.addAll(_attributeEquivalence().clone().equivalenceClasses());
+    _attributes.addAll(_attributeEquivalence().equivalenceClasses());
   }
 
   public synchronized final void reduce() {
@@ -618,14 +620,16 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
 
       public final Set<Integer> col(final Object i1) {
         final Matrix row = matrix.selectRows(Ret.LINK, (Integer) i1);
-        return Collections3.fromIterator(
-            () -> Iterators
-                .filter(ListIterators.integers(0, MatrixContext.this.rowHeads.size()), new Predicate<Integer>() {
-
-          public final boolean apply(final Integer i2) {
-            return row.equals(matrix.selectRows(Ret.LINK, i2));
-          }
-        }));
+        return Stream
+            .iterate(0, Math::incrementExact)
+            .limit(MatrixContext.this.rowHeads.size())
+            .parallel()
+            .filter(i2 -> row.equals(matrix.selectRows(Ret.LINK, i2)))
+            .collect(Collectors.toSet());
+//        return Collections3.fromIterator(
+//            () -> Iterators.filter(
+//                ListIterators.integers(0, MatrixContext.this.rowHeads.size()),
+//                i2 -> row.equals(matrix.selectRows(Ret.LINK, i2))));
       }
 
       public final Set<Integer> row(final Object i2) {
@@ -646,14 +650,16 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
 
       public final Set<Integer> col(final Object j1) {
         final Matrix col = matrix.selectColumns(Ret.LINK, (Integer) j1);
-        return Collections3.fromIterator(
-            () -> Iterators
-                .filter(ListIterators.integers(0, MatrixContext.this.colHeads.size()), new Predicate<Integer>() {
-
-          public final boolean apply(final Integer j2) {
-            return col.equals(matrix.selectColumns(Ret.LINK, j2));
-          }
-        }));
+        return Stream
+            .iterate(0, Math::incrementExact)
+            .limit(MatrixContext.this.colHeads.size())
+            .parallel()
+            .filter(j2 -> col.equals(matrix.selectColumns(Ret.LINK, j2)))
+            .collect(Collectors.toSet());
+//        return Collections3.fromIterator(
+//            () -> Iterators.filter(
+//                ListIterators.integers(0, MatrixContext.this.colHeads.size()),
+//                j2 -> col.equals(matrix.selectColumns(Ret.LINK, j2))));
       }
 
       public final Set<Integer> row(final Object i2) {

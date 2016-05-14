@@ -49,6 +49,7 @@ import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.layout.GeneticLayouter;
 import conexp.fx.core.layout.LayoutEvolution;
 import conexp.fx.core.layout.QualityMeasure;
+import conexp.fx.core.layout.SimpleConceptLayout;
 import conexp.fx.core.util.Constants;
 import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.ConExpFX;
@@ -75,6 +76,7 @@ public final class FCADataset<G, M> extends Dataset {
   public final MatrixContext<G, M>                               context;
   public final ConceptLattice<G, M>                              lattice;
   public final AdditiveConceptLayout<G, M>                       layout;
+  private final SimpleConceptLayout<G, M>                        l;
   public final ObservableList<Concept<G, M>>                     concepts            =
       FXCollections.<Concept<G, M>> observableArrayList();
   public final ObservableList<Implication<G, M>>                 implications        =
@@ -150,6 +152,8 @@ public final class FCADataset<G, M> extends Dataset {
     } , RelationEvent.ALL_CHANGED);
     views.add(new DatasetView<Context<G, M>>("Context", contextWidget, context));
     views.add(new DatasetView<AdditiveConceptLayout<G, M>>("Lattice", conceptGraph, layout));
+    this.l = new SimpleConceptLayout<G, M>(lattice);
+    views.add(new DatasetView<SimpleConceptLayout<G, M>>("Force Lattice", new ConceptGraph<G, M>(this, l), l));
     views.add(new DatasetView<List<Concept<G, M>>>("Concepts", conceptWidget, concepts));
     views.add(new DatasetView<List<Implication<G, M>>>("Implications", implicationWidget, implications));
     defaultActiveViews.add("Lattice");
@@ -332,6 +336,11 @@ public final class FCADataset<G, M> extends Dataset {
 //});
     relayout(0, Constants.POPULATION);
     ConExpFX.execute(TimeTask.create(this, "Initialize Concept Lattice Graph", layout::invalidate, true));
+//    ConExpFX.execute(TimeTask.create(this, "Force Layouter", () -> {
+//      for (Concept<G, M> c : lattice.rowHeads())
+//        l.getOrAddPosition(c).setValue(layout.getPosition(c).getValue());
+//      l.start();
+//    }));
   }
 
   public final void addObject(final G object, final int index) {
