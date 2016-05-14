@@ -1,5 +1,5 @@
 # Concept Explorer FX (conexp-fx) ![Continuous Integration Status](https://travis-ci.org/francesco-kriegel/conexp-fx.svg "Continuous Integration Status")
-Copyright ⓒ 2010-2015 Francesco Kriegel
+Copyright ⓒ 2010-2016 Francesco Kriegel
 
 ## Requirements
 * Java 8 (developed and tested with latest Oracle JDK)
@@ -79,6 +79,6 @@ The project lifecycle sticks to the default maven lifecycle.
 ## License
 Concept Explorer FX (conexp-fx)
 
-Copyright ⓒ 2010-2015 Francesco Kriegel
+Copyright ⓒ 2010-2016 Francesco Kriegel
 
 You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
