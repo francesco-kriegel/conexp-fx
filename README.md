@@ -79,6 +79,6 @@ The project lifecycle sticks to the default maven lifecycle.
 ## License
 Concept Explorer FX (conexp-fx)
 
-Copyright ⓒ 2010-2016 Francesco Kriegel
+Copyright ⓒ 2010-2017 Francesco Kriegel
 
 You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
