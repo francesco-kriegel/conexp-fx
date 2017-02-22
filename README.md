@@ -1,5 +1,5 @@
 # Concept Explorer FX (conexp-fx) ![Continuous Integration Status](https://travis-ci.org/francesco-kriegel/conexp-fx.svg "Continuous Integration Status")
-Copyright ⓒ 2010-2016 Francesco Kriegel
+Copyright ⓒ 2010-2017 Francesco Kriegel
 
 ## Requirements
 * Java 8 (developed and tested with latest Oracle JDK)
