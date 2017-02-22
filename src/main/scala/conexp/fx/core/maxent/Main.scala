@@ -9,7 +9,7 @@ object Main extends App {
   override def main(args: Array[String]): Unit = {
     val A: DoubleMatrix = "1,2,2;3,2,1"
     val b: DoubleMatrix = "1;5;4"
-    A
+//    A
     for (E <- A.eig()) println(E)
     val x = A.solve(b)
     println(x)

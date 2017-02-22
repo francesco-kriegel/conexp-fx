@@ -4,7 +4,7 @@ package conexp.fx.gui.assistent;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -57,10 +57,14 @@ public class ExportAssistent extends Assistent<String> {
       this.contentProperty.set(createContentNode());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({
+        "rawtypes",
+        "unchecked"
+    })
     @Override
     protected void onNext() {
       try {
+        this.resultProperty.get().file = ExportAssistent.this.showFileChooser();
         new TeXExporter(
             fcaInstance.context,
             fcaInstance.contextWidget.rowHeaderPane.rowMap,
@@ -76,24 +80,24 @@ public class ExportAssistent extends Assistent<String> {
       VBox box = new VBox();
       box.setPadding(new Insets(0, 10, 0, 10));
       box.setSpacing(4);
-      this.resultProperty.set(new TeXOptions(
-          null,
-          false,
-          true,
-          false,
-          ContextTeXPackage.None,
-          DiagramTeXPackage.ConExpFX,
-          new FitScale(80, 120)));
+      this.resultProperty.set(
+          new TeXOptions(
+              null,
+              false,
+              true,
+              false,
+              ContextTeXPackage.None,
+              DiagramTeXPackage.ConExpFX,
+              new FitScale(80, 120)));
       final CheckBox arrowsCheckBox = CheckBoxBuilder.create().text("Arrow Relations").build();
       final CheckBox labelsCheckBox = CheckBoxBuilder.create().text("Concept Labels").selected(true).build();
       final CheckBox standAloneCheckBox = CheckBoxBuilder.create().disable(true).text("Stand-Alone Document").build();
-      final RadioButton noneContextButton =
-          RadioButtonBuilder
-              .create()
-              .text("Context Package: None")
-              .selected(true)
-              .userData(ContextTeXPackage.None)
-              .build();
+      final RadioButton noneContextButton = RadioButtonBuilder
+          .create()
+          .text("Context Package: None")
+          .selected(true)
+          .userData(ContextTeXPackage.None)
+          .build();
       final RadioButton ganterContextButton =
           RadioButtonBuilder.create().text("Context Package: Ganter").userData(ContextTeXPackage.Ganter).build();
       final RadioButton tabularContextButton =
@@ -102,26 +106,24 @@ public class ExportAssistent extends Assistent<String> {
           RadioButtonBuilder.create().text("Diagram Package: None").userData(DiagramTeXPackage.None).build();
       final RadioButton ganterDiagramButton =
           RadioButtonBuilder.create().text("Diagram Package: Ganter").userData(DiagramTeXPackage.Ganter).build();
-      final RadioButton conExpFXDiagramButton =
-          RadioButtonBuilder
-              .create()
-              .text("Diagram Package: ConExpFX")
-              .selected(true)
-              .userData(DiagramTeXPackage.ConExpFX)
-              .build();
+      final RadioButton conExpFXDiagramButton = RadioButtonBuilder
+          .create()
+          .text("Diagram Package: ConExpFX")
+          .selected(true)
+          .userData(DiagramTeXPackage.ConExpFX)
+          .build();
       final RadioButton fitButton =
           RadioButtonBuilder.create().text("Diagram Scale: Fit").userData(ScaleEnum.Fit).build();
       final RadioButton fitWidthButton =
           RadioButtonBuilder.create().text("Diagram Scale: Fit Width").userData(ScaleEnum.FitWidth).build();
       final RadioButton fitHeightButton =
           RadioButtonBuilder.create().text("Diagram Scale: Fit Height").userData(ScaleEnum.FitHeight).build();
-      final RadioButton fitRatioButton =
-          RadioButtonBuilder
-              .create()
-              .text("Diagram Scale: Fit Ratio")
-              .selected(true)
-              .userData(ScaleEnum.FitRatio)
-              .build();
+      final RadioButton fitRatioButton = RadioButtonBuilder
+          .create()
+          .text("Diagram Scale: Fit Ratio")
+          .selected(true)
+          .userData(ScaleEnum.FitRatio)
+          .build();
       final ListSpinner<Integer> widthSpinner = new ListSpinner<Integer>(1, 1000);
       final ListSpinner<Integer> heightSpinner = new ListSpinner<Integer>(1, 1000);
       widthSpinner.valueProperty().set(80);
@@ -187,10 +189,8 @@ public class ExportAssistent extends Assistent<String> {
 
         @Override
         public void changed(ObservableValue<? extends Toggle> observable, Toggle oldToggle, Toggle newToggle) {
-          TeXExportPage.this.resultProperty.get().scale =
-              ((ScaleEnum) newToggle.getUserData()).toOption(widthSpinner.valueProperty().get(), heightSpinner
-                  .valueProperty()
-                  .get());
+          TeXExportPage.this.resultProperty.get().scale = ((ScaleEnum) newToggle.getUserData())
+              .toOption(widthSpinner.valueProperty().get(), heightSpinner.valueProperty().get());
           widthSpinner.disableProperty().set((ScaleEnum) newToggle.getUserData() == ScaleEnum.FitHeight);
           heightSpinner.disableProperty().set((ScaleEnum) newToggle.getUserData() == ScaleEnum.FitWidth);
         }
@@ -200,9 +200,8 @@ public class ExportAssistent extends Assistent<String> {
         @Override
         public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
           TeXExportPage.this.resultProperty.get().scale =
-              ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData()).toOption(newValue, heightSpinner
-                  .valueProperty()
-                  .get());
+              ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData())
+                  .toOption(newValue, heightSpinner.valueProperty().get());
         }
       });
       heightSpinner.valueProperty().addListener(new ChangeListener<Integer>() {
@@ -210,9 +209,8 @@ public class ExportAssistent extends Assistent<String> {
         @Override
         public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
           TeXExportPage.this.resultProperty.get().scale =
-              ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData()).toOption(widthSpinner
-                  .valueProperty()
-                  .get(), newValue);
+              ((ScaleEnum) scaleGroup.selectedToggleProperty().get().getUserData())
+                  .toOption(widthSpinner.valueProperty().get(), newValue);
         }
       });
       box.getChildren().addAll(
@@ -243,15 +241,13 @@ public class ExportAssistent extends Assistent<String> {
               .spacing(4)
               .children(fitButton, fitWidthButton, fitHeightButton, fitRatioButton)
               .build());
-      box
-          .getChildren()
-          .addAll(
-              HBoxBuilder
-                  .create()
-                  .padding(new Insets(0, 0, 2, 0))
-                  .spacing(4)
-                  .children(widthSpinner, heightSpinner)
-                  .build());
+      box.getChildren().addAll(
+          HBoxBuilder
+              .create()
+              .padding(new Insets(0, 0, 2, 0))
+              .spacing(4)
+              .children(widthSpinner, heightSpinner)
+              .build());
       return box;
     }
 
@@ -260,8 +256,13 @@ public class ExportAssistent extends Assistent<String> {
   private final FCADataset fcaInstance;
 
   public ExportAssistent(final Stage owner, final FCADataset<?, ?> fcaInstance) {
-    super(owner, "Export Wizard", "Export Wizard", "Exports a Formal Context", null, r -> r.equals("TEX") ? "TEX"
-        : null);
+    super(
+        owner,
+        "Export Wizard",
+        "Export Wizard",
+        "Exports a Formal Context",
+        null,
+        r -> r.equals("TEX") ? "TEX" : null);
     this.fcaInstance = fcaInstance;
     initialize();
   }
@@ -314,12 +315,16 @@ public class ExportAssistent extends Assistent<String> {
   @Override
   protected void onNext() {
     if (!this.resultProperty.get().equals("TEX")) {
-      final FileChooser fc = new FileChooser();
-      fc.setInitialDirectory(ConExpFX.instance.lastDirectory);
-      final File result = fc.showSaveDialog(owner);
+      final File result = showFileChooser();
       if (result != null)
         fcaInstance.export(FileFormat.valueOf(this.resultProperty.get()), result);
     }
+  }
+
+  private final File showFileChooser() {
+    final FileChooser fc = new FileChooser();
+    fc.setInitialDirectory(ConExpFX.instance.lastDirectory);
+    return fc.showSaveDialog(owner);
   }
 
 }

@@ -7,7 +7,7 @@ import java.util.Collections;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -68,6 +68,14 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
 
   public Implication(final Collection<M> premise, final Collection<M> conclusion) {
     this(new HashSet<M>(premise), new HashSet<M>(conclusion));
+  }
+
+  public Implication(final Collection<M> premise, final Collection<M> conclusion, final Collection<G> support) {
+    this(
+        (Set<M>) (premise instanceof Set ? premise : new HashSet<M>(premise)),
+        (Set<M>) (conclusion instanceof Set ? conclusion : new HashSet<M>(conclusion)),
+        (Set<G>) (support instanceof Set ? support : new HashSet<G>(support)),
+        1d);
   }
 
   public Implication(final M premise, final Set<M> conclusion) {

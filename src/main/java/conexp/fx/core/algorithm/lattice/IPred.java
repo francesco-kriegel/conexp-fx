@@ -7,14 +7,13 @@ package conexp.fx.core.algorithm.lattice;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +27,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AtomicDouble;
 
+import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
@@ -47,19 +47,19 @@ public final class IPred<G, M> {
         updateMessage("Computing Concept Neighborhood...");
         lattice.empty();
         final int bits = lattice.context.colHeads().size();
-        final List<BitSet> intents =
-            new ArrayList<BitSet>(Lists.transform(lattice.rowHeads(), new Function<Concept<G, M>, BitSet>() {
+        final List<BitSetFX> intents =
+            new ArrayList<BitSetFX>(Lists.transform(lattice.rowHeads(), new Function<Concept<G, M>, BitSetFX>() {
 
-          public final BitSet apply(final Concept<G, M> concept) {
+          public final BitSetFX apply(final Concept<G, M> concept) {
             return lattice.context.colHeads().subBitSet(concept.intent());
           }
         }));
         updateProgress(0.2d, 1d);
-        final Iterator<BitSet> intentIterator = intents.iterator();
-        final List<BitSet> borderIntents = new ArrayList<BitSet>(intents.size());
-        final Map<BitSet, BitSet> faceAccumulation = new HashMap<BitSet, BitSet>(intents.size(), 1f);
-        for (BitSet intent : intents)
-          faceAccumulation.put(intent, new BitSet(bits));
+        final Iterator<BitSetFX> intentIterator = intents.iterator();
+        final List<BitSetFX> borderIntents = new ArrayList<BitSetFX>(intents.size());
+        final Map<BitSetFX, BitSetFX> faceAccumulation = new HashMap<BitSetFX, BitSetFX>(intents.size(), 1f);
+        for (BitSetFX intent : intents)
+          faceAccumulation.put(intent, new BitSetFX(bits));
         if (intentIterator.hasNext())
           borderIntents.add(intentIterator.next());
         final double total = intents.size();
@@ -68,16 +68,16 @@ public final class IPred<G, M> {
           actual++;
           updateProgress(0.3d + 0.7d * (actual / total), 1d);
           updateMessage("Computing Neighborhood: " + (int) actual + " of " + (int) total + " Concepts...");
-          final BitSet intent = intentIterator.next();
-          final List<BitSet> candidateIntents = new ArrayList<BitSet>(borderIntents.size());
-          for (BitSet borderIntent : borderIntents) {
-            final BitSet candidateIntent = ((BitSet) intent.clone());
+          final BitSetFX intent = intentIterator.next();
+          final List<BitSetFX> candidateIntents = new ArrayList<BitSetFX>(borderIntents.size());
+          for (BitSetFX borderIntent : borderIntents) {
+            final BitSetFX candidateIntent = ((BitSetFX) intent.clone());
             candidateIntent.and(borderIntent);
             candidateIntents.add(candidateIntent);
           }
-          for (BitSet candidateIntent : candidateIntents) {
-            final BitSet candidateFace = faceAccumulation.get(candidateIntent);
-            final BitSet intentFace = ((BitSet) intent.clone());
+          for (BitSetFX candidateIntent : candidateIntents) {
+            final BitSetFX candidateFace = faceAccumulation.get(candidateIntent);
+            final BitSetFX intentFace = ((BitSetFX) intent.clone());
             try {
               intentFace.and(candidateFace);
             } catch (Exception e) {
@@ -87,7 +87,7 @@ public final class IPred<G, M> {
             }
             if (intentFace.isEmpty()) {
               lattice._add((int) actual, intents.indexOf(candidateIntent));
-              final BitSet face = ((BitSet) intent.clone());
+              final BitSetFX face = ((BitSetFX) intent.clone());
               face.andNot(candidateIntent);
               candidateFace.or(face);
               borderIntents.remove(candidateIntent);
@@ -127,16 +127,16 @@ public final class IPred<G, M> {
     messageConsumer.accept("Computing Concept Neighborhood...");
     lattice.empty();
     final int bits = lattice.context.colHeads().size();
-    final List<BitSet> intents = lattice
+    final List<BitSetFX> intents = lattice
         .rowHeads()
         .parallelStream()
         .map(concept -> lattice.context.colHeads().subBitSet(concept.intent()))
         .collect(Collectors.toList());
     statusConsumer.accept(0.2d);
-    final Iterator<BitSet> intentIterator = intents.iterator();
-    final List<BitSet> borderIntents = new ArrayList<BitSet>(intents.size());
-    final Map<BitSet, BitSet> faceAccumulation =
-        intents.parallelStream().collect(Collectors.toMap(intent -> intent, intent -> new BitSet(bits)));
+    final Iterator<BitSetFX> intentIterator = intents.iterator();
+    final List<BitSetFX> borderIntents = new ArrayList<BitSetFX>(intents.size());
+    final Map<BitSetFX, BitSetFX> faceAccumulation =
+        intents.parallelStream().collect(Collectors.toMap(intent -> intent, intent -> new BitSetFX(bits)));
     if (intentIterator.hasNext())
       borderIntents.add(intentIterator.next());
     final double total = intents.size();
@@ -147,22 +147,22 @@ public final class IPred<G, M> {
       actual.set(actual.get() + 1d);
       statusConsumer.accept(0.3d + 0.7d * (actual.get() / total));
       messageConsumer.accept("Computing Neighborhood: " + (int) actual.get() + " of " + (int) total + " Concepts...");
-      final BitSet intent = intentIterator.next();
-      Set<BitSet> toBeRemoved = Collections3.newConcurrentHashSet();
+      final BitSetFX intent = intentIterator.next();
+      Set<BitSetFX> toBeRemoved = Collections3.newConcurrentHashSet();
       borderIntents.parallelStream().map(borderIntent -> {
-        final BitSet candidateIntent = ((BitSet) intent.clone());
+        final BitSetFX candidateIntent = ((BitSetFX) intent.clone());
         candidateIntent.and(borderIntent);
         return candidateIntent;
       }).forEach(candidateIntent -> {
-        final BitSet candidateFace = faceAccumulation.get(candidateIntent);
-        final BitSet intentFace = ((BitSet) intent.clone());
+        final BitSetFX candidateFace = faceAccumulation.get(candidateIntent);
+        final BitSetFX intentFace = ((BitSetFX) intent.clone());
         intentFace.and(candidateFace);
         if (intentFace.isEmpty()) {
           final int index = intents.indexOf(candidateIntent);
           synchronized (lattice) {
             lattice._add((int) actual.get(), index);
           }
-          final BitSet face = ((BitSet) intent.clone());
+          final BitSetFX face = ((BitSetFX) intent.clone());
           face.andNot(candidateIntent);
           candidateFace.or(face);
           toBeRemoved.add(candidateIntent);

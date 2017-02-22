@@ -3,17 +3,6 @@
  */
 package conexp.fx.core.collections.setlist;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -28,6 +17,7 @@ import java.util.function.BiPredicate;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.math.GuavaIsomorphism;
 import conexp.fx.core.math.Isomorphism;
 
@@ -46,7 +36,7 @@ public interface SetList<E> extends Set<E>, List<E>, Collection<E>, Iterable<E>,
 
   public SetList<E> subList(int from, int to);
 
-  public BitSet subBitSet(Collection<?> c);
+  public BitSetFX subBitSet(Collection<?> c);
 
   public default HashSetArrayList<E> clone() {
     return new HashSetArrayList<E>(this);

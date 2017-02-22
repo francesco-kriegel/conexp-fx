@@ -6,7 +6,7 @@ import java.util.Arrays;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -17,15 +17,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.NotImplementedException;
 
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
-import conexp.fx.core.context.MatrixContext;
 
 @FunctionalInterface
 public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
@@ -87,63 +88,80 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
 //    }
   }
 
-//  /**
-//   * @param implications
-//   * @return a closure operator, that computes the closure w.r.t. the given implication set.
-//   */
-//  public static <G, M> ClosureOperator<M>
-//      fromImplicationSet(final Collection<Implication<G, M>> implications, final boolean includePseudoClosures) {
-//    return definedBy(
-//        set -> {
-//          final Set<M> closure = new HashSet<M>(set);
-//          boolean changed = true;
-//          while (changed) {
-//            changed = false;
-//            for (Implication<G, M> i : implications)
-//              if ((includePseudoClosures ? closure.size() > i.getPremise().size()
-//                  : closure.size() >= i.getPremise().size())
-//                  && closure.containsAll(
-//                      i.getPremise())
-//                  && (closure.size() < i.getConclusion().size() || !closure.containsAll(
-//                      i.getConclusion())))
-//                changed |= closure.addAll(
-//                    i.getConclusion());
-//          }
-//          return closure;
-//        });
-//  }
-//
-//  public static <G, M> ClosureOperator<M> fromImplicationSetOptimized(
-//      final Collection<Implication<G, M>> implications,
-//      final boolean includePseudoClosures) {
-//    return definedBy(
-//        set -> {
-//          final List<Implication<G, M>> is = new ArrayList<Implication<G, M>>();
-//          final Set<M> closure = new HashSet<M>(set);
-//          boolean changed = true;
-//          while (changed) {
-//            changed = false;
-//            for (Implication<G, M> i : implications)
-//              if (!is.contains(
-//                  i)
-//                  && (includePseudoClosures ? closure.size() > i.getPremise().size()
-//                      : closure.size() >= i.getPremise().size())
-//                  && closure.containsAll(
-//                      i.getPremise())
-//                  && (closure.size() < i.getConclusion().size() || !closure.containsAll(
-//                      i.getConclusion()))) {
-//                changed |= closure.addAll(
-//                    i.getConclusion());
-//                is.add(
-//                    i);
-//              }
-//          }
-//          return closure;
-//        });
-//  }
-
-  public static <G, M> ClosureOperator<M> fromContext(final MatrixContext<G, M> cxt) {
+  public static <G, M> ClosureOperator<M> fromContext(final Context<G, M> cxt) {
     return set -> cxt.rowAnd(cxt.colAnd(set));
+  }
+
+  public static <G, M, C extends Set<M>> C implicativeClosure(
+      final Collection<Implication<G, M>> implications,
+      final int firstPremiseSize,
+      final boolean includePseudoClosures,
+      final boolean parallel,
+      final boolean bySize,
+      final Function<Set<M>, C> supplier,
+      final Set<M> set) {
+    final C closure = supplier.apply(set);// new HashSet<M>(set);
+    final AtomicBoolean changed = new AtomicBoolean(true);
+    final Predicate<Implication<G, M>> p;
+    if (includePseudoClosures)
+      p = i -> closure.size() > i.getPremise().size() && closure.containsAll(i.getPremise());
+    else
+      p = i -> closure.size() >= i.getPremise().size() && closure.containsAll(i.getPremise());
+    // && (closure.size() < i.getConclusion().size() || !closure.containsAll(i.getConclusion())))
+    if (bySize) {
+      int size;
+      if (firstPremiseSize > 0) {
+        size = closure.size();
+        (parallel ? implications.parallelStream() : implications.stream())
+            .filter(i -> firstPremiseSize <= i.getPremise().size())
+            .filter(p)
+            .sequential()
+            .forEach(i -> closure.addAll(i.getConclusion()));
+        changed.set(closure.size() != size);
+      }
+      while (changed.get()) {
+        size = closure.size();
+        changed.set(false);
+        (parallel ? implications.parallelStream() : implications.stream())
+            .filter(p)
+            .sequential()
+            .forEach(i -> closure.addAll(i.getConclusion()));
+        changed.set(closure.size() != size);
+      }
+    } else {
+      if (firstPremiseSize > 0) {
+        (parallel ? implications.parallelStream() : implications.stream())
+            .filter(i -> firstPremiseSize <= i.getPremise().size())
+            .filter(p)
+            .sequential()
+            .forEach(i -> changed.set(closure.addAll(i.getConclusion()) || changed.get()));
+      }
+      while (changed.get()) {
+        changed.set(false);
+        (parallel ? implications.parallelStream() : implications.stream())
+            .filter(p)
+            .sequential()
+            .forEach(i -> changed.set(closure.addAll(i.getConclusion()) || changed.get()));
+      }
+    }
+    return closure;
+  }
+
+  public static <G, M, C extends Set<M>> ClosureOperator<M> fromImplications(
+      final Collection<Implication<G, M>> implications,
+      final int firstPremiseSize,
+      final boolean includePseudoClosures,
+      final boolean parallel,
+      final boolean bySize,
+      final Function<Set<M>, C> supplier) {
+    return set -> implicativeClosure(
+        implications,
+        firstPremiseSize,
+        includePseudoClosures,
+        parallel,
+        bySize,
+        supplier,
+        set);
   }
 
   public static <G, M> ClosureOperator<M> fromImplications(
@@ -151,50 +169,18 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
       final int firstPremiseSize,
       final boolean includePseudoClosures,
       final boolean parallel) {
-    return set -> {
-      final Set<M> closure = new HashSet<M>(set);
-      final AtomicBoolean changed = new AtomicBoolean(false);
-      (parallel ? implications.parallelStream() : implications.stream())
-          .filter(
-              i -> (includePseudoClosures ? closure.size() > i.getPremise().size()
-                  : closure.size() >= i.getPremise().size()) && firstPremiseSize <= i.getPremise().size()
-                  && closure.containsAll(i.getPremise()))
-          // && (closure.size() < i.getConclusion().size() || !closure.containsAll(i.getConclusion())))
-          .sequential()
-          .forEach(i -> changed.set(closure.addAll(i.getConclusion()) || changed.get()));
-      while (changed.get()) {
-        changed.set(false);
-        (parallel ? implications.parallelStream() : implications.stream())
-            .filter(
-                i -> (includePseudoClosures ? closure.size() > i.getPremise().size()
-                    : closure.size() >= i.getPremise().size()) && closure.containsAll(i.getPremise()))
-            // && (closure.size() < i.getConclusion().size() || !closure.containsAll(i.getConclusion())))
-            .sequential()
-            .forEach(i -> changed.set(closure.addAll(i.getConclusion()) || changed.get()));
-      }
-      return closure;
-    };
+    return fromImplications(implications, firstPremiseSize, includePseudoClosures, parallel, false, HashSet<M>::new);
   }
 
   public static <G, M> ClosureOperator<M> fromImplications(
       final Collection<Implication<G, M>> implications,
       final boolean includePseudoClosures,
       final boolean parallel) {
-    return set -> {
-      final Set<M> closure = new HashSet<M>(set);
-      final AtomicBoolean changed = new AtomicBoolean(true);
-      while (changed.get()) {
-        changed.set(false);
-        (parallel ? implications.parallelStream() : implications.stream())
-            .filter(
-                i -> (includePseudoClosures ? closure.size() > i.getPremise().size()
-                    : closure.size() >= i.getPremise().size()) && closure.containsAll(i.getPremise()))
-            // && (closure.size() < i.getConclusion().size() || !closure.containsAll(i.getConclusion())))
-            .sequential()
-            .forEach(i -> changed.set(closure.addAll(i.getConclusion()) || changed.get()));
-      }
-      return closure;
-    };
+    return fromImplications(implications, 0, includePseudoClosures, parallel);
+  }
+
+  public static <G, M> ClosureOperator<M> fromImplications(final Collection<Implication<G, M>> implications) {
+    return fromImplications(implications, false, true);
   }
 
   public static <G, M> ClosureOperator<M>
@@ -412,6 +398,47 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
         return new HashSet<M>(baseSet);
       }
 
+    };
+  }
+
+  public static <M> ClosureOperator<M> bottom() {
+    return new ClosureOperator<M>() {
+
+      @Override
+      public final boolean isClosed(final Set<M> set) {
+        return true;
+      }
+
+      @Override
+      public final boolean close(final Set<M> set) {
+        return true;
+      }
+
+      @Override
+      public final Set<M> closure(final Set<M> set) {
+        return new HashSet<M>(set);
+      }
+    };
+  }
+
+  public static <M> ClosureOperator<M> top(final Set<M> baseSet) {
+    return new ClosureOperator<M>() {
+
+      @Override
+      public final boolean isClosed(final Set<M> set) {
+        return set.containsAll(baseSet) && baseSet.containsAll(set);
+      }
+
+      @Override
+      public final boolean close(final Set<M> set) {
+        set.retainAll(baseSet);
+        return !set.addAll(baseSet);
+      }
+
+      @Override
+      public final Set<M> closure(final Set<M> set) {
+        return new HashSet<M>(baseSet);
+      }
     };
   }
 

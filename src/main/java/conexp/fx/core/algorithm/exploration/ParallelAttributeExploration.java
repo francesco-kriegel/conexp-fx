@@ -4,7 +4,7 @@ package conexp.fx.core.algorithm.exploration;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -19,7 +19,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosures2.Result;
+import conexp.fx.core.algorithm.nextclosures.NextClosuresState;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
@@ -43,7 +43,7 @@ public class ParallelAttributeExploration {
       final Supplier<Boolean> isCancelled) {
     if (!cxt.models(backgroundKnowledge))
       throw new IllegalArgumentException("Background knowledge does not hold in formal context");
-    final Result<String, M> result = new Result<String, M>();
+    final NextClosuresState<String, M, Set<M>> result = NextClosuresState.withHashSets(cxt.colHeads());
     final int maxCardinality = cxt.colHeads().size();
     // expert.onCancelRunnable.set(() -> result.cardinality = maxCardinality);
     final ClosureOperator<M> clop = backgroundKnowledge == null || backgroundKnowledge.isEmpty()
@@ -88,9 +88,9 @@ public class ParallelAttributeExploration {
               final Set<M> intent = new HashSet<M>();
               intent.addAll(implication.getPremise());
               intent.addAll(implication.getConclusion());
-              result.addNewCandidates(cxt, intent);
+              result.addNewCandidates(intent);
             } else
-              result.addNewCandidates(cxt, candidate);
+              result.addNewCandidates(candidate);
           } else
             result.candidates.put(closure, result.cardinality);
           result.candidates.remove(candidate);

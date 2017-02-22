@@ -7,7 +7,7 @@ package conexp.fx.core.context;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -40,14 +40,14 @@ public interface Context<G, M> extends Relation<G, M> {
 
   public default boolean models(Implication<G, M> implication, boolean... checkSupport) {
     final Set<G> support = colAnd(implication.getPremise());
-    final double confidence =
-        ((double) colAnd(Sets.union(implication.getPremise(), implication.getConclusion())).size())
+    final double confidence = support.isEmpty() ? 1d
+        : ((double) colAnd(Sets.union(implication.getPremise(), implication.getConclusion())).size())
             / ((double) support.size());
     return implication.getConfidence() == confidence
         && (checkSupport.length == 0 || checkSupport[0] == false || implication.getSupport().equals(support));
   }
 
-  public default boolean models(Set<Implication<G, M>> implications, boolean... checkSupport) {
+  public default boolean models(Collection<Implication<G, M>> implications, boolean... checkSupport) {
     return implications.parallelStream().allMatch(implication -> this.models(implication, checkSupport));
   }
 

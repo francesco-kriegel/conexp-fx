@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -159,6 +159,7 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
     System.out.println(extents.size() + " mmscs");
     return extents
         .parallelStream()
+        .filter(ex -> !ex.isEmpty())
         .map(extent -> getMostSpecificConcept(extent, roleDepth, maxCardinality, constructors))
         .collect(Collectors.toSet());
   }
@@ -169,8 +170,11 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
       final Constructor... constructors);
 
   @Override
-  public Context<IRI, C>
-      getInducedContext(final int roleDepth, final int maxCardinality, final Constructor... constructors) {
+  public Context<IRI, C> getInducedContext(
+      final Collection<IRI> individuals,
+      final int roleDepth,
+      final int maxCardinality,
+      final Constructor... constructors) {
     checkRoleDepth(roleDepth);
     final SetList<IRI> _domain = new HashSetArrayList<IRI>(domain);
     final SetList<C> _codomain = getAttributeSetForInducedContext(roleDepth, maxCardinality, constructors);

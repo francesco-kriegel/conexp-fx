@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -42,12 +42,11 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 
-import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
-
 import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.MatrixContext;
+import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
 
 public class Interpretation2 {
 
@@ -100,7 +99,8 @@ public class Interpretation2 {
     this.addConceptAssertion(df.getOWLNamedIndividual(IRI.create(d)), df.getOWLClass(IRI.create(c)));
   }
 
-  public final void addRoleAssertion(final OWLNamedIndividual d, final OWLObjectProperty r, final OWLNamedIndividual e) {
+  public final void
+      addRoleAssertion(final OWLNamedIndividual d, final OWLObjectProperty r, final OWLNamedIndividual e) {
     roles.add(d, r, e);
   }
 
@@ -154,10 +154,8 @@ public class Interpretation2 {
     return this.isInstanceOf(df.getOWLNamedIndividual(IRI.create(i)), df.getOWLClass(IRI.create(c)));
   }
 
-  public final OWLClassExpression getMMSC(
-      final Set<OWLNamedIndividual> individuals,
-      final int roleDepth,
-      final DescriptionLogic dl) {
+  public final OWLClassExpression
+      getMMSC(final Set<OWLNamedIndividual> individuals, final int roleDepth, final DescriptionLogic dl) {
     final Set<OWLClassExpression> conjuncts = new HashSet<OWLClassExpression>();
     concepts.cut(individuals.stream(), type).forEach(new Consumer<OWLClass>() {
 
@@ -201,10 +199,8 @@ public class Interpretation2 {
         dl);
   }
 
-  private final Set<Set<OWLNamedIndividual>> minimalSuccessorSets(
-      Set<OWLNamedIndividual> individuals,
-      OWLObjectProperty role,
-      Constructor constructor) {
+  private final Set<Set<OWLNamedIndividual>>
+      minimalSuccessorSets(Set<OWLNamedIndividual> individuals, OWLObjectProperty role, Constructor constructor) {
     switch (constructor) {
     case EXISTENTIAL_RESTRICTION:
       final Set<OWLNamedIndividual> successors0 = new HashSet<OWLNamedIndividual>();
@@ -254,9 +250,8 @@ public class Interpretation2 {
     }
   }
 
-  public final MatrixContext<OWLNamedIndividual, OWLClassExpression> toLogicalContext(
-      final int roleDepth,
-      final DescriptionLogic dl) {
+  public final MatrixContext<OWLNamedIndividual, OWLClassExpression>
+      toLogicalContext(final int roleDepth, final DescriptionLogic dl) {
     MatrixContext<OWLNamedIndividual, OWLClassExpression> cxt =
         new MatrixContext<OWLNamedIndividual, OWLClassExpression>(false);
     cxt.rowHeads().addAll(concepts.getGs());
@@ -353,9 +348,10 @@ public class Interpretation2 {
       final Statement stmt = statements5.next();
       if (!stmt.getPredicate().equals(RDF.TYPE) && !stmt.getObject().equals(RDF.PROPERTY)
           && !stmt.getObject().equals(RDFS.CLASS))
-        i.addRoleAssertion(stmt.getSubject().stringValue(), stmt.getPredicate().stringValue(), stmt
-            .getObject()
-            .stringValue());
+        i.addRoleAssertion(
+            stmt.getSubject().stringValue(),
+            stmt.getPredicate().stringValue(),
+            stmt.getObject().stringValue());
     }
     statements5.close();
 

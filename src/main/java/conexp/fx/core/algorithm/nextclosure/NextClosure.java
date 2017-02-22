@@ -4,7 +4,7 @@ package conexp.fx.core.algorithm.nextclosure;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -58,7 +58,7 @@ public class NextClosure {
         cxt.colHeads(),
         clop2.apply(new HashSet<M>()),
         clop2,
-        e -> e.getLeft().isPresent() ? e.getLeft().get().getIntent() : e.getRight().get().getPremise());
+        e -> e.x().isPresent() ? e.x().get().getIntent() : e.y().get().getPremise());
   }
 
   public static <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>

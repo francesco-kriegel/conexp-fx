@@ -4,7 +4,7 @@ package conexp.fx.cli;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -36,7 +36,7 @@ import conexp.fx.gui.ConExpFX;
 
 public final class CLI {
 
-  public void main(final String[] args) throws Exception {
+  public static void main(final String[] args) throws Exception {
     new CLI(args);
   }
 
@@ -99,7 +99,7 @@ public final class CLI {
       if (commandLine.hasOption(CALC_CONCEPTS.getLongOpt()) || commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt())
           || commandLine.hasOption(CALC_NEIGHBORHOOD.getLongOpt())) {
         final Pair<Set<Concept<String, String>>, Set<Implication<String, String>>> result =
-            NextClosures2Bit.bitBitCompute(cxt, Executors.newWorkStealingPool(), c1, c2, c3, c4, () -> false);
+            NextClosures2Bit.bitCompute(cxt, Executors.newWorkStealingPool(), c1, c2, c3, c4, () -> false);
         concepts = result.first();
         implications = result.second();
       }
@@ -139,35 +139,33 @@ public final class CLI {
   private final Options OPTIONS           = new Options();
   @SuppressWarnings("static-access")
   private final Option  HELP              = OptionBuilder
-                                              .isRequired(false)
-                                              .withLongOpt("showHelp")
-                                              .hasArg(false)
-                                              .withDescription(
-                                                  "shows available command line options and their arguments.")
-                                              .create("help");
+      .isRequired(false)
+      .withLongOpt("showHelp")
+      .hasArg(false)
+      .withDescription("shows available command line options and their arguments.")
+      .create("help");
   @SuppressWarnings("static-access")
   private final Option  IMPORT_CXT        = OptionBuilder
-                                              .isRequired(false)
-                                              .withLongOpt("importContextFromCXT")
-                                              .hasArg(true)
-                                              .withArgName("file")
-                                              .withDescription(
-                                                  "imports formal context file in Burmeister formatting (*.cxt)")
-                                              .create("import");
+      .isRequired(false)
+      .withLongOpt("importContextFromCXT")
+      .hasArg(true)
+      .withArgName("file")
+      .withDescription("imports formal context file in Burmeister formatting (*.cxt)")
+      .create("import");
   @SuppressWarnings("static-access")
   private final Option  CALC_CONCEPTS     = OptionBuilder
-                                              .isRequired(false)
-                                              .withLongOpt("calculateConcepts")
-                                              .hasArg(false)
-                                              .withDescription("computes all formal concepts")
-                                              .create("concepts");
+      .isRequired(false)
+      .withLongOpt("calculateConcepts")
+      .hasArg(false)
+      .withDescription("computes all formal concepts")
+      .create("concepts");
   @SuppressWarnings("static-access")
   private final Option  CALC_NEIGHBORHOOD = OptionBuilder
-                                              .isRequired(false)
-                                              .withLongOpt("calculateNeighborhood")
-                                              .hasArg(false)
-                                              .withDescription("computes the neighborhood relation")
-                                              .create("lattice");
+      .isRequired(false)
+      .withLongOpt("calculateNeighborhood")
+      .hasArg(false)
+      .withDescription("computes the neighborhood relation")
+      .create("lattice");
 //  @SuppressWarnings("static-access")
 //  private final Option  CALC_LAYOUT       = OptionBuilder
 //                                              .isRequired(false)
@@ -177,11 +175,11 @@ public final class CLI {
 //                                              .create("layout");
   @SuppressWarnings("static-access")
   private final Option  CALC_IMPLICATIONS = OptionBuilder
-                                              .isRequired(false)
-                                              .withLongOpt("calculateImplications")
-                                              .hasArg(false)
-                                              .withDescription("computes implicational base")
-                                              .create("implications");
+      .isRequired(false)
+      .withLongOpt("calculateImplications")
+      .hasArg(false)
+      .withDescription("computes implicational base")
+      .create("implications");
 //  @SuppressWarnings("static-access")
 //  private final Option  CALC_ASSOCIATIONS = OptionBuilder
 //                                              .isRequired(false)
@@ -193,29 +191,29 @@ public final class CLI {
 //                                              .create("associationrules");
   @SuppressWarnings("static-access")
   private final Option  PRINT_TO_CONSOLE  = OptionBuilder
-                                              .isRequired(false)
-                                              .withLongOpt("printToConsole")
-                                              .hasArg(false)
-                                              .withDescription("prints all results to console")
-                                              .create("print");
+      .isRequired(false)
+      .withLongOpt("printToConsole")
+      .hasArg(false)
+      .withDescription("prints all results to console")
+      .create("print");
   @SuppressWarnings("static-access")
   private final Option  WRITE_TO_FILE     = OptionBuilder
-                                              .isRequired(false)
-                                              .withLongOpt("writeToFile")
-                                              .hasArg(false)
-                                              // .hasArgs(2)
-                                              // .withValueSeparator(' ')
-                                              // .withArgName("format")
-                                              // .withArgName("file")
-                                              .withDescription("writes all results to files")
-                                              .create("write");
+      .isRequired(false)
+      .withLongOpt("writeToFile")
+      .hasArg(false)
+      // .hasArgs(2)
+      // .withValueSeparator(' ')
+      // .withArgName("format")
+      // .withArgName("file")
+      .withDescription("writes all results to files")
+      .create("write");
   @SuppressWarnings("static-access")
   private final Option  GUI               = OptionBuilder
-                                              .isRequired(false)
-                                              .hasArg(false)
-                                              .withDescription("starts the JavaFX gui")
-                                              .withLongOpt("startGUI")
-                                              .create("gui");
+      .isRequired(false)
+      .hasArg(false)
+      .withDescription("starts the JavaFX gui")
+      .withLongOpt("startGUI")
+      .create("gui");
 //  @SuppressWarnings("static-access")
 //  private final Option  TEST              = OptionBuilder
 //                                                       .isRequired(false)

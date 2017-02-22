@@ -7,14 +7,13 @@ package conexp.fx.core.collections.setlist;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
 import java.lang.reflect.Array;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -25,6 +24,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 
+import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.collections.GuavaFunctions;
 
 public abstract class AbstractSetList<E> implements SetList<E> {
@@ -196,8 +196,8 @@ public abstract class AbstractSetList<E> implements SetList<E> {
     });
   }
 
-  public final BitSet subBitSet(final Collection<?> c) {
-    final BitSet b = new BitSet(size());
+  public final BitSetFX subBitSet(final Collection<?> c) {
+    final BitSetFX b = new BitSetFX(size());
     for (int i : indicesOf(c, true))
       b.flip(i);
     return b;

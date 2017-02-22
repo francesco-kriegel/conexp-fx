@@ -6,7 +6,7 @@ import java.util.HashMap;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -16,22 +16,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.ujmp.core.collections.set.BitSetSet;
 import org.ujmp.core.util.RandomSimple;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 
+import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.collections.Collections3;
-import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.layout.AdditiveConceptLayout.Type;
-import conexp.fx.core.math.Points;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.task.TimeTask;
@@ -165,7 +162,7 @@ public final class GeneticLayouter<G, M> {
                   candidate.seedsG.put(g, seed);
               } else {
                 final int vv = v * v;
-                final BitSetSet usedX = new BitSetSet();
+                final BitSetFX usedX = new BitSetFX();
                 for (Set<Set<Integer>> chain : chainsG) {
                   int _x;
                   for (_x = rng.nextInt(vv + 1); usedX.contains(_x) || usedX.contains(_x + 1)
@@ -189,7 +186,7 @@ public final class GeneticLayouter<G, M> {
                   candidate.seedsM.put(m, seed);
               } else {
                 final int ww = w * w;
-                final BitSetSet usedX = new BitSetSet();
+                final BitSetFX usedX = new BitSetFX();
                 for (Set<Set<Integer>> chain : chainsM) {
                   int _x;
                   for (_x = rng.nextInt(ww + 1); usedX.contains(_x) || usedX.contains(_x + 1)

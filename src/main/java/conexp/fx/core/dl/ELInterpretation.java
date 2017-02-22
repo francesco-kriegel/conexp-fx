@@ -6,7 +6,7 @@ import java.io.BufferedReader;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -31,8 +31,8 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import conexp.fx.core.algorithm.nextclosures.NextClosuresC;
-import conexp.fx.core.algorithm.nextclosures.NextClosuresC.ResultC;
+import conexp.fx.core.algorithm.nextclosures.NextClosures1C;
+import conexp.fx.core.algorithm.nextclosures.NextClosures1C.ResultC;
 import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
@@ -244,11 +244,11 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       final Constructor... constructors) {
     checkRoleDepth(roleDepth);
     final ELTBox tbox = new ELTBox();
-    final Context<IRI, ELConceptDescription> inducedContext = getInducedContext(roleDepth, maxCardinality);
+    final Context<IRI, ELConceptDescription> inducedContext = getInducedContext(domain, roleDepth, maxCardinality);
     final Set<Implication<IRI, ELConceptDescription>> backgroundImplications =
         getBackgroundImplications(inducedContext, backgroundTBox);
     final ResultC<IRI, ELConceptDescription> result =
-        NextClosuresC.computeWithBackgroundImplications(inducedContext, backgroundImplications, false);
+        NextClosures1C.computeWithBackgroundImplications(inducedContext, backgroundImplications, false);
     for (Entry<Set<ELConceptDescription>, Set<ELConceptDescription>> entry : result.implications.entrySet())
       tbox.getGCIs().add(
           new ELConceptInclusion(

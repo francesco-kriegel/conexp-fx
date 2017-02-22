@@ -4,7 +4,7 @@ package conexp.fx.core.algorithm.nextclosures;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -33,7 +34,7 @@ import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.math.ClosureOperator;
 
-public final class NextClosuresC {
+public final class NextClosures1C {
 
   public static final class ResultC<G, M> {
 
@@ -50,8 +51,8 @@ public final class NextClosuresC {
     }
 
     private final boolean isClosed(final Set<M> candidate) {
-      if (!clop.isClosed(candidate))
-        return false;
+//      if (!clop.isClosed(candidate))
+//        return false;
       for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
         if (candidate.size() > implication.getKey().size() && candidate.containsAll(implication.getKey())
             && !candidate.containsAll(implication.getValue()))
@@ -68,7 +69,7 @@ public final class NextClosuresC {
           closure.addAll(implication.getValue());
           changed = true;
         }
-      changed |= !clop.close(closure);
+//      changed |= !clop.close(closure);
       while (changed) {
         changed = false;
         for (Entry<Set<M>, Set<M>> implication : implications.entrySet())
@@ -77,7 +78,7 @@ public final class NextClosuresC {
             closure.addAll(implication.getValue());
             changed = true;
           }
-        changed |= !clop.close(closure);
+//        changed |= !clop.close(closure);
       }
       return closure;
     }
@@ -93,7 +94,7 @@ public final class NextClosuresC {
             closure.addAll(implication.getValue());
             changed = true;
           }
-        changed |= !clop.close(closure);
+//        changed |= !clop.close(closure);
       }
       return closure;
     }
@@ -117,57 +118,67 @@ public final class NextClosuresC {
       System.out
           .println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize() + " cores...");
     final ResultC<G, M> result = new ResultC<G, M>(clop);
+    final ClosureOperator<M> sup = ClosureOperator.supremum(ClosureOperator.fromContext(cxt), clop);
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
       if (verbose) {
         final int p = (int) ((100f * (float) result.cardinality) / ((float) maxCardinality));
-        System.out.print("current cardinality: " + result.cardinality + "/" + maxCardinality + " (" + p + "%)");
+        System.out.println("current cardinality: " + result.cardinality + "/" + maxCardinality + " (" + p + "%)");
       }
-      final Collection<Set<M>> candidatesN =
-          new HashSet<Set<M>>(Collections2.filter(result.candidates.keySet(), new Predicate<Set<M>>() {
-
-            @Override
-            public final boolean apply(final Set<M> candidate) {
-              return candidate.size() == result.cardinality;
-            }
-          }));
-      if (verbose)
-        System.out.println("     " + candidatesN.size() + " candidates will be processed...");
-      final Set<Future<?>> futures = new HashSet<Future<?>>();
-      for (final Set<M> candidate : candidatesN) {
-        futures.add(tpe.submit(new Runnable() {
-
-          @Override
-          public final void run() {
-            final Set<M> closure = result.fastClosure(candidate, result.candidates.get(candidate));
-            if (closure.equals(candidate)) {
-              final Set<M> candidateII = clop.closure(cxt.intent(candidate));
-              if (result.addToProcessed(candidateII)) {
-                for (M m : Sets.difference(cxt.colHeads(), candidateII)) {
-                  final Set<M> candidateM = new HashSet<M>(candidateII);
-                  candidateM.add(m);
-                  result.candidates.put(candidateM, 0);
-                }
+//      final Collection<Set<M>> candidatesN =
+//          new HashSet<Set<M>>(Collections2.filter(result.candidates.keySet(), new Predicate<Set<M>>() {
+//
+//            @Override
+//            public final boolean apply(final Set<M> candidate) {
+//              return candidate.size() == result.cardinality;
+//            }
+//          }));
+//      if (verbose)
+//        System.out.println("     " + candidatesN.size() + " candidates will be processed...");
+      final Set<Future<?>> futures = Collections3.newConcurrentHashSet();
+//      for (final Set<M> candidate : candidatesN) {
+      result.candidates.keySet().parallelStream().filter(c -> c.size() == result.cardinality).forEach(candidate -> {
+        futures.add(tpe.submit(() -> {
+          final Set<M> closure = ClosureOperator
+              .fromImplications(
+                  result.implications
+                      .entrySet()
+                      .stream()
+                      .map(e -> new Implication<G, M>(e.getKey(), e.getValue()))
+                      .collect(Collectors.toSet()),
+                  true,
+                  true)
+              .closure(candidate);
+//                result.fastClosure(candidate, result.candidates.get(candidate));
+          if (closure.size() == candidate.size()) {
+            final Set<M> candidateII = sup.closure(candidate);
+            if (result.addToProcessed(candidateII)) {
+              for (M m : Sets.difference(cxt.colHeads(), candidateII)) {
+                final Set<M> candidateM = new HashSet<M>(candidateII);
+                candidateM.add(m);
+                result.candidates.put(candidateM, 0);
               }
-              if (candidateII.size() == candidate.size()) {
-                result.concepts.add(new Concept<G, M>(cxt.colAnd(candidate), candidate));
-              } else {
-                candidateII.removeAll(candidate);
-                result.implications.put(candidate, candidateII);
-              }
-            } else {
-              result.candidates.put(closure, result.cardinality);
             }
+            result.concepts.add(new Concept<G, M>(cxt.colAnd(candidateII), Sets.newHashSet(candidateII)));
+            if (candidateII.size() != candidate.size()) {
+//                result.concepts.add(new Concept<G, M>(cxt.colAnd(candidate), candidate));
+//              } else {
+              candidateII.removeAll(candidate);
+              result.implications.put(candidate, candidateII);
+            }
+          } else {
+            result.candidates.put(closure, result.cardinality);
           }
+          result.candidates.remove(candidate);
         }));
-      }
+      });
       for (Future<?> future : futures)
         try {
           future.get();
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
-      result.candidates.keySet().removeAll(candidatesN);
+//      result.candidates.keySet().removeAll(candidatesN);
     }
     if (verbose) {
       System.out.println(result.concepts.size() + " concepts found");

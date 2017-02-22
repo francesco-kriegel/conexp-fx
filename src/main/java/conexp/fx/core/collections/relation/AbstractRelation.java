@@ -4,7 +4,7 @@ package conexp.fx.core.collections.relation;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
@@ -31,6 +32,37 @@ import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.collections.setlist.SetLists;
 
 public abstract class AbstractRelation<R, C> implements Relation<R, C> {
+
+  public static <R, C> AbstractRelation<R, C>
+      fromPredicate(final SetList<R> rowHeads, final SetList<C> colHeads, final BiPredicate<R, C> predicate) {
+    return new AbstractRelation<R, C>(rowHeads, colHeads, false) {
+
+      @Override
+      public final boolean contains(final Object o1, final Object o2) {
+        try {
+          return predicate.test((R) o1, (C) o2);
+        } catch (ClassCastException e) {
+          return false;
+        }
+      }
+
+    };
+  }
+
+  public static <R> AbstractRelation<R, R> fromPredicate(final SetList<R> heads, final BiPredicate<R, R> predicate) {
+    return new AbstractRelation<R, R>(heads, heads, true) {
+
+      @Override
+      public final boolean contains(final Object o1, final Object o2) {
+        try {
+          return predicate.test((R) o1, (R) o2);
+        } catch (ClassCastException e) {
+          return false;
+        }
+      }
+
+    };
+  }
 
   protected final boolean homogen;
   protected SetList<R>    rowHeads;

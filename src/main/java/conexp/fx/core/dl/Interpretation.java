@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -53,11 +53,13 @@ public interface Interpretation<I, C, G, T> {
 
   public Set<C> getAllMostSpecificConcepts(int roleDepth, int maxCardinality, Constructor... constructors);
 
-  public Context<I, C> getInducedContext(int roleDepth, int maxCardinality, Constructor... constructors);
+  public Context<I, C>
+      getInducedContext(Collection<I> individuals, int roleDepth, int maxCardinality, Constructor... constructors);
 
 //  public T computeTBoxBase(int roleDepth) throws Exception;
 
-  public T computeTBoxBase(int roleDepth, int maxCardinality, T backgroundOntology, Constructor... constructors) throws Exception;
+  public T computeTBoxBase(int roleDepth, int maxCardinality, T backgroundOntology, Constructor... constructors)
+      throws Exception;
 
   public ClosureOperator<I> getClosureOperator(int roleDepth, int maxCardinality, Constructor... constructors);
 

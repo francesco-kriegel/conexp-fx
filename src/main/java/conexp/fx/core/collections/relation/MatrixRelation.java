@@ -7,7 +7,7 @@ package conexp.fx.core.collections.relation;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -38,7 +38,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
-import conexp.fx.core.collections.BitSetSet2;
+import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.ListIterators;
 import conexp.fx.core.collections.Pair;
@@ -1027,11 +1027,11 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
                     null,
                     new HashSet<Pair<R, C>>(Collections2.transform(changes, new Function<C, Pair<R, C>>() {
 
-              @SuppressWarnings("unchecked")
-              public final Pair<R, C> apply(final C col) {
-                return new Pair<R, C>((R) o, col);
-              }
-            }))));
+                      @SuppressWarnings("unchecked")
+                      public final Pair<R, C> apply(final C col) {
+                        return new Pair<R, C>((R) o, col);
+                      }
+                    }))));
           }
         }
         return changed;
@@ -1074,11 +1074,11 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
                     null,
                     new HashSet<Pair<R, C>>(Collections2.transform(changes, new Function<C, Pair<R, C>>() {
 
-              @SuppressWarnings("unchecked")
-              public final Pair<R, C> apply(final C col) {
-                return new Pair<R, C>((R) o, col);
-              }
-            }))));
+                      @SuppressWarnings("unchecked")
+                      public final Pair<R, C> apply(final C col) {
+                        return new Pair<R, C>((R) o, col);
+                      }
+                    }))));
           }
         }
         return changed;
@@ -1102,11 +1102,11 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
                     null,
                     new HashSet<Pair<R, C>>(Collections2.transform(changes, new Function<C, Pair<R, C>>() {
 
-              @SuppressWarnings("unchecked")
-              public final Pair<R, C> apply(final C col) {
-                return new Pair<R, C>((R) o, col);
-              }
-            }))));
+                      @SuppressWarnings("unchecked")
+                      public final Pair<R, C> apply(final C col) {
+                        return new Pair<R, C>((R) o, col);
+                      }
+                    }))));
           }
         }
         return changed;
@@ -1121,15 +1121,15 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         return Iterators
             .transform(Iterators.filter(ListIterators.integers(0, colHeads.size()), new Predicate<Integer>() {
 
-          public final boolean apply(final Integer j) {
-            return matrix.getBoolean(i, j);
-          }
-        }), new Function<Integer, C>() {
+              public final boolean apply(final Integer j) {
+                return matrix.getBoolean(i, j);
+              }
+            }), new Function<Integer, C>() {
 
-          public final C apply(final Integer j) {
-            return colHeads.get(j);
-          }
-        });
+              public final C apply(final Integer j) {
+                return colHeads.get(j);
+              }
+            });
       }
 
       public final int size() {
@@ -1183,11 +1183,11 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
                     null,
                     new HashSet<Pair<R, C>>(Collections2.transform(changes, new Function<R, Pair<R, C>>() {
 
-              @SuppressWarnings("unchecked")
-              public final Pair<R, C> apply(final R row) {
-                return new Pair<R, C>(row, (C) o);
-              }
-            }))));
+                      @SuppressWarnings("unchecked")
+                      public final Pair<R, C> apply(final R row) {
+                        return new Pair<R, C>(row, (C) o);
+                      }
+                    }))));
           }
         }
         return changed;
@@ -1230,11 +1230,11 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
                     null,
                     new HashSet<Pair<R, C>>(Collections2.transform(changes, new Function<R, Pair<R, C>>() {
 
-              @SuppressWarnings("unchecked")
-              public final Pair<R, C> apply(final R row) {
-                return new Pair<R, C>(row, (C) o);
-              }
-            }))));
+                      @SuppressWarnings("unchecked")
+                      public final Pair<R, C> apply(final R row) {
+                        return new Pair<R, C>(row, (C) o);
+                      }
+                    }))));
           }
         }
         return changed;
@@ -1258,11 +1258,11 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
                     null,
                     new HashSet<Pair<R, C>>(Collections2.transform(changes, new Function<R, Pair<R, C>>() {
 
-              @SuppressWarnings("unchecked")
-              public final Pair<R, C> apply(final R row) {
-                return new Pair<R, C>(row, (C) o);
-              }
-            }))));
+                      @SuppressWarnings("unchecked")
+                      public final Pair<R, C> apply(final R row) {
+                        return new Pair<R, C>(row, (C) o);
+                      }
+                    }))));
           }
         }
         return changed;
@@ -1277,15 +1277,15 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
         return Iterators
             .transform(Iterators.filter(ListIterators.integers(0, rowHeads.size()), new Predicate<Integer>() {
 
-          public final boolean apply(final Integer i) {
-            return matrix.getBoolean(i, j);
-          }
-        }), new Function<Integer, R>() {
+              public final boolean apply(final Integer i) {
+                return matrix.getBoolean(i, j);
+              }
+            }), new Function<Integer, R>() {
 
-          public final R apply(final Integer i) {
-            return rowHeads.get(i);
-          }
-        });
+              public final R apply(final Integer i) {
+                return rowHeads.get(i);
+              }
+            });
       }
 
       public final int size() {
@@ -1306,53 +1306,31 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   public final Set<C> rowAnd(final Collection<?> c) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return new HashSet<C>(colHeads());
-    return colHeads()
-        .parallelStream()
-        .filter(col -> c.parallelStream().allMatch(row -> contains(row, col)))
-        .collect(Collectors.toSet());
-//    return Sets.filter(
-//        colHeads(),
-//        new Predicate<C>() {
+    return colHeads().parallelStream().filter(col -> c.parallelStream().allMatch(row -> contains(row, col))).collect(
+        Collectors.toSet());
+//    return Sets.filter(colHeads(), new Predicate<C>() {
 //
-//          private final BooleanMatrix rowAnd = BooleanMatrices.andRow(
-//              matrix,
-//              rowHeads.indicesOf(
-//                  c,
-//                  true));
+//      private final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, rowHeads.indicesOf(c, true));
 //
-//          public final boolean apply(final C col) {
-//            return rowAnd.getBoolean(
-//                0,
-//                colHeads.indexOf(
-//                    col));
-//          }
-//        });
+//      public final boolean apply(final C col) {
+//        return rowAnd.getBoolean(0, colHeads.indexOf(col));
+//      }
+//    });
   }
 
   public final Set<R> colAnd(final Collection<?> c) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return new HashSet<R>(rowHeads());
-    return rowHeads()
-        .parallelStream()
-        .filter(row -> c.parallelStream().allMatch(col -> contains(row, col)))
-        .collect(Collectors.toSet());
-//    return Sets.filter(
-//        rowHeads(),
-//        new Predicate<R>() {
+    return rowHeads().parallelStream().filter(row -> c.parallelStream().allMatch(col -> contains(row, col))).collect(
+        Collectors.toSet());
+//    return Sets.filter(rowHeads(), new Predicate<R>() {
 //
-//          private final BooleanMatrix colAnd = BooleanMatrices.andCol(
-//              matrix,
-//              colHeads.indicesOf(
-//                  c,
-//                  true));
+//      private final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, colHeads.indicesOf(c, true));
 //
-//          public final boolean apply(final R row) {
-//            return colAnd.getBoolean(
-//                rowHeads.indexOf(
-//                    row),
-//                0);
-//          }
-//        });
+//      public final boolean apply(final R row) {
+//        return colAnd.getBoolean(rowHeads.indexOf(row), 0);
+//      }
+//    });
   }
 
   public final void _add(final int i, final int j) {
@@ -1385,22 +1363,32 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
     return _col(j, SetLists.integers(rowHeads.size()));
   }
 
-  public final Collection<Integer> _row(final int i, final Collection<Integer> j) {
-    return Collections3.newBitSetSet2(Collections2.filter(j, new Predicate<Integer>() {
-
-      public final boolean apply(final Integer j) {
-        return matrix.getBoolean(i, j);
-      }
-    }));
+  public final Collection<Integer> _row(final int i, final Collection<Integer> js) {
+    final BitSetFX _row = new BitSetFX();
+    for (int j : js)
+      if (matrix.getBoolean(i, j))
+        _row.set(j);
+    return _row;
+//    return Collections3.newBitSetFX(Collections2.filter(j, new Predicate<Integer>() {
+//
+//      public final boolean apply(final Integer j) {
+//        return matrix.getBoolean(i, j);
+//      }
+//    }));
   }
 
-  public final Collection<Integer> _col(final int j, final Collection<Integer> i) {
-    return Collections3.newBitSetSet2(Collections2.filter(i, new Predicate<Integer>() {
-
-      public final boolean apply(final Integer i) {
-        return matrix.getBoolean(i, j);
-      }
-    }));
+  public final Collection<Integer> _col(final int j, final Collection<Integer> is) {
+    final BitSetFX _col = new BitSetFX();
+    for (int i : is)
+      if (matrix.getBoolean(i, j))
+        _col.set(i);
+    return _col;
+//    return Collections3.newBitSetFX(Collections2.filter(i, new Predicate<Integer>() {
+//
+//      public final boolean apply(final Integer i) {
+//        return matrix.getBoolean(i, j);
+//      }
+//    }));
   }
 
   public final Collection<Integer> _rowAnd(final int... i) {
@@ -1415,23 +1403,42 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
     return _colAnd(Ints.asList(j));
   }
 
-  public final Collection<Integer> _rowAnd(final Iterable<Integer> i) {
-    return _rowAnd(i, SetLists.integers(colHeads.size()));
-  }
-
-  public final Collection<Integer> _colAnd(final Iterable<Integer> j) {
-    return _colAnd(j, SetLists.integers(rowHeads.size()));
-  }
-
-  public final Collection<Integer> _rowAnd(final Iterable<Integer> i, final Collection<Integer> j) {
+  public synchronized final BitSetFX _rowAnd(final Iterable<Integer> i) {
+//    return _rowAnd(i, SetLists.integers(colHeads.size()));
     if (rowHeads().size() == 0 || colHeads().size() == 0)
-      return SetLists.integers(colHeads.size());
+      return Collections3.integers(colHeads.size());
+//      return SetLists.integers(colHeads.size());
+    final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
+    BitSetFX _rowAnd = new BitSetFX();
+    for (int j = 0; j < colHeads.size(); j++)
+      if (rowAnd.getBoolean(0, j))
+        _rowAnd.add(j);
+    return _rowAnd;
+  }
+
+  public synchronized final BitSetFX _colAnd(final Iterable<Integer> j) {
+//    return _colAnd(j, SetLists.integers(rowHeads.size()));
+    if (rowHeads().size() == 0 || colHeads().size() == 0)
+      return Collections3.integers(rowHeads().size());
+//      return SetLists.integers(rowHeads.size());
+    final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
+    BitSetFX _colAnd = new BitSetFX();
+    for (int i = 0; i < rowHeads.size(); i++)
+      if (colAnd.getBoolean(i, 0))
+        _colAnd.add(i);
+    return _colAnd;
+  }
+
+  public final BitSetFX _rowAnd(final Iterable<Integer> i, final Collection<Integer> j) {
+    if (rowHeads().size() == 0 || colHeads().size() == 0)
+      return Collections3.integers(colHeads.size());
+//      return SetLists.integers(colHeads.size());
     final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
     return j.parallelStream().filter(_j -> rowAnd.getBoolean(0, _j)).collect(
-        BitSetSet2::new,
-        BitSetSet2::add,
-        BitSetSet2::addAll);
-//    return Collections3.newBitSetSet2(Collections2.filter(j, new Predicate<Integer>() {
+        BitSetFX::new,
+        BitSetFX::add,
+        BitSetFX::addAll);
+//    return Collections3.newBitSetFX(Collections2.filter(j, new Predicate<Integer>() {
 //
 //      private final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
 //
@@ -1441,15 +1448,16 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
 //    }));
   }
 
-  public final Collection<Integer> _colAnd(final Iterable<Integer> j, final Collection<Integer> i) {
+  public final BitSetFX _colAnd(final Iterable<Integer> j, final Collection<Integer> i) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
-      return SetLists.integers(rowHeads.size());
+      return Collections3.integers(rowHeads().size());
+//      return SetLists.integers(rowHeads.size());
     final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
     return i.parallelStream().filter(_i -> colAnd.getBoolean(_i, 0)).collect(
-        BitSetSet2::new,
-        BitSetSet2::add,
-        BitSetSet2::addAll);
-//    return Collections3.newBitSetSet2(Collections2.filter(i, new Predicate<Integer>() {
+        BitSetFX::new,
+        BitSetFX::add,
+        BitSetFX::addAll);
+//    return Collections3.newBitSetFX(Collections2.filter(i, new Predicate<Integer>() {
 //
 //      private final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
 //

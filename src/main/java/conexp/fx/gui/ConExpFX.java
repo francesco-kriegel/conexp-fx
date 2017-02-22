@@ -7,7 +7,7 @@ package conexp.fx.gui;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -185,9 +185,9 @@ public class ConExpFX extends Application {
               Collections2.transform(
                   fileHistory,
                   file -> MenuItemBuilder.create().text(file.toString()).onAction(e -> Platform.runLater(() -> {
-            if (file.exists() && file.isFile())
-              openFile(FileFormat.of(file));
-          })).build()));
+                    if (file.exists() && file.isFile())
+                      openFile(FileFormat.of(file));
+                  })).build()));
         }
       });
       contextMenu.getItems().addAll(
@@ -238,34 +238,37 @@ public class ConExpFX extends Application {
       this.setShowRoot(false);
       this.selectionModelProperty().get().setSelectionMode(SelectionMode.MULTIPLE);
       activeDataset.bind(Bindings.createObjectBinding(() -> {
-        Dataset active = null;
-        final Iterator<TreeItem<Control>> it = getSelectionModel().getSelectedItems().iterator();
-        if (it.hasNext()) {
-          TreeItem<?> selectedItem = it.next();
-          if (selectedItem.isLeaf())
-            selectedItem = selectedItem.getParent();
-          if (selectedItem instanceof DatasetTreeItem) {
-            active = ((DatasetTreeItem) selectedItem).getDataset();
-            while (it.hasNext()) {
-              selectedItem = it.next();
-              if (selectedItem.isLeaf())
-                selectedItem = selectedItem.getParent();
-              if (selectedItem instanceof Dataset.DatasetTreeItem) {
-                if (!active.equals(((Dataset.DatasetTreeItem) selectedItem).getDataset())) {
-                  active = null;
-                  break;
+//        final Object foo = instance == null ? 0 : instance;
+//        synchronized (foo) {
+          Dataset active = null;
+          final Iterator<TreeItem<Control>> it = getSelectionModel().getSelectedItems().iterator();
+          if (it.hasNext()) {
+            TreeItem<?> selectedItem = it.next();
+            if (selectedItem.isLeaf())
+              selectedItem = selectedItem.getParent();
+            if (selectedItem instanceof DatasetTreeItem) {
+              active = ((DatasetTreeItem) selectedItem).getDataset();
+              while (it.hasNext()) {
+                selectedItem = it.next();
+                if (selectedItem.isLeaf())
+                  selectedItem = selectedItem.getParent();
+                if (selectedItem instanceof Dataset.DatasetTreeItem) {
+                  if (!active.equals(((Dataset.DatasetTreeItem) selectedItem).getDataset())) {
+                    active = null;
+                    break;
+                  }
                 }
               }
             }
           }
-        }
-        return active;
-      } , this.getSelectionModel().getSelectedItems()));
+          return active;
+//        }
+      }, this.getSelectionModel().getSelectedItems()));
       this.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TreeItem<Control>>() {
 
         @Override
         public synchronized void onChanged(ListChangeListener.Change<? extends TreeItem<Control>> c) {
-          synchronized (instance) {
+//          synchronized (instance) {
             while (c.next()) {
               if (c.wasAdded())
                 c
@@ -283,34 +286,38 @@ public class ConExpFX extends Application {
                     .forEach(item -> contentPane.getItems().remove(item.getDatasetView().getContentNode()));
             }
             Platform2.runOnFXThreadAndWaitTryCatch(() -> {
-              final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();
-              for (int i = 0; i < contentPane.getItems().size(); i++)
-                contentPane.setDividerPosition(i, pos * (double) (i + 1));
+//              synchronized (instance) {
+                final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();
+                for (int i = 0; i < contentPane.getItems().size(); i++)
+                  contentPane.setDividerPosition(i, pos * (double) (i + 1));
+//              }
             });
-          }
+//          }
         }
       });
       datasets.addListener(new ListChangeListener<Dataset>() {
 
         @Override
         public void onChanged(ListChangeListener.Change<? extends Dataset> c) {
-          while (c.next()) {
-            if (c.wasAdded())
-              c.getAddedSubList().forEach(dataset -> dataset.addToTree(DatasetTreeView.this));
-            if (c.wasRemoved())
-              c.getRemoved().forEach(dataset -> {
-                dataset.views.forEach(view -> contentPane.getItems().remove(view.getContentNode()));
-                final TreeItem<Control> parentItem = getParentItem(dataset);
-                parentItem
-                    .getChildren()
-                    .parallelStream()
-                    .filter(treeItem -> treeItem instanceof Dataset.DatasetTreeItem)
-                    .map(treeItem -> (Dataset.DatasetTreeItem) treeItem)
-                    .filter(treeItem -> treeItem.getDataset().equals(dataset))
-                    .findAny()
-                    .ifPresent(treeItem -> parentItem.getChildren().remove(treeItem));
-              });
-          }
+//          synchronized (instance) {
+            while (c.next()) {
+              if (c.wasAdded())
+                c.getAddedSubList().forEach(dataset -> dataset.addToTree(DatasetTreeView.this));
+              if (c.wasRemoved())
+                c.getRemoved().forEach(dataset -> {
+                  dataset.views.forEach(view -> contentPane.getItems().remove(view.getContentNode()));
+                  final TreeItem<Control> parentItem = getParentItem(dataset);
+                  parentItem
+                      .getChildren()
+                      .parallelStream()
+                      .filter(treeItem -> treeItem instanceof Dataset.DatasetTreeItem)
+                      .map(treeItem -> (Dataset.DatasetTreeItem) treeItem)
+                      .filter(treeItem -> treeItem.getDataset().equals(dataset))
+                      .findAny()
+                      .ifPresent(treeItem -> parentItem.getChildren().remove(treeItem));
+                });
+            }
+//          }
         }
       });
       ConExpFX.this.splitPane.getItems().add(new BorderPane(this, toolBar, null, null, null));
@@ -325,7 +332,11 @@ public class ConExpFX extends Application {
     }
 
     public final void addDataset(final Dataset dataset) {
-      Platform2.runOnFXThread(() -> datasets.add(dataset));
+      Platform2.runOnFXThread(() -> {
+//        synchronized (instance) {
+          datasets.add(dataset);
+//        }
+      });
     }
 
     public final void close(final Dataset dataset) {
@@ -366,11 +377,9 @@ public class ConExpFX extends Application {
       new SimpleListProperty<File>(FXCollections.observableArrayList());
   public File                                      lastDirectory;
   public final ObservableList<MatrixContext<?, ?>> contexts          = FXCollections.observableList(
-                                                                         Lists.transform(
-                                                                             Collections3.filter(
-                                                                                 treeView.getDatasets(),
-                                                                                 dataset -> dataset instanceof FCADataset),
-                                                                             dataset -> ((FCADataset<?, ?>) dataset).context));
+      Lists.transform(
+          Collections3.filter(treeView.getDatasets(), dataset -> dataset instanceof FCADataset),
+          dataset -> ((FCADataset<?, ?>) dataset).context));
   public final ObservableList<MatrixContext<?, ?>> orders            =
       FXCollections.observableList(Collections3.filter(contexts, context -> context.isHomogen()));
 
@@ -405,7 +414,9 @@ public class ConExpFX extends Application {
     this.executorStatusBar.bindTo(executor);
     this.primaryStage.show();
     Platform.runLater(() -> {
-      ConExpFX.this.splitPane.setDividerPositions(new double[] { 0.1618d });
+      ConExpFX.this.splitPane.setDividerPositions(new double[] {
+          0.1618d
+      });
       readConfiguration();
     });
   }

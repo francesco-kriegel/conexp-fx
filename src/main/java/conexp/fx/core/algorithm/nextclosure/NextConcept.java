@@ -7,7 +7,7 @@ package conexp.fx.core.algorithm.nextclosure;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -21,12 +21,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.ujmp.core.collections.set.BitSetSet;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 
+import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.setlist.SetLists;
 import conexp.fx.core.context.Concept;
@@ -117,23 +116,23 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
         return reduced._extent(set);
       }
     };
-    return Iterators.transform(new UnmodifiableIterator<BitSetSet>() {
+    return Iterators.transform(new UnmodifiableIterator<BitSetFX>() {
 
       private final int rows = reduced.rowHeads().size();
-      private BitSetSet _A = Collections3.newBitSetSet(reduced._colAnd(SetLists.integers(reduced.colHeads().size())));
+      private BitSetFX _A = new BitSetFX(reduced._colAnd(SetLists.integers(reduced.colHeads().size())));
 
       public final boolean hasNext() {
         return _A != null;
       }
 
-      public final BitSetSet next() {
-        final BitSetSet _nextExtent = _A;
+      public final BitSetFX next() {
+        final BitSetFX _nextExtent = _A;
         _APlus();
         return _nextExtent;
       }
 
       private final void _APlus() {
-        BitSetSet _APlus;
+        BitSetFX _APlus;
         for (int _g = rows - 1; _g > -1; --_g)
           if (!_A.contains(_g)) {
             _APlus = _APlusG(_g);
@@ -145,8 +144,8 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
         _A = null;
       }
 
-      private final BitSetSet _APlusG(final int _g) {
-        return Collections3.newBitSetSet(
+      private final BitSetFX _APlusG(final int _g) {
+        return new BitSetFX(
             hullOp.closure(
                 Collections3.iterable(
                     Iterators.concat(
@@ -154,7 +153,7 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
                         Iterators.singletonIterator(_g)))));
       }
 
-      private final boolean _AisLexicSmallerG(final BitSetSet _B, final int _g) {
+      private final boolean _AisLexicSmallerG(final BitSetFX _B, final int _g) {
         for (int _h : _B)
           if (_h == _g)
             break;
@@ -162,9 +161,9 @@ public final class NextConcept<G, M> implements Iterable<Concept<G, M>> {
             return false;
         return true;
       }
-    }, new Function<BitSetSet, Concept<G, M>>() {
+    }, new Function<BitSetFX, Concept<G, M>>() {
 
-      public final Concept<G, M> apply(final BitSetSet _extent) {
+      public final Concept<G, M> apply(final BitSetFX _extent) {
         return new Concept<G, M>(
             selection.rowHeads().getAll(
                 selection._colAnd(

@@ -114,7 +114,7 @@ object LTLClosures {
 
   def toLTLformula[M](trace: Trace[M], t0: Int, t1: Int, depth: Int): LTLformula[M] = {
     if (t0 > t1)
-      error("start timepoint must not be greater than end timepoint")
+      sys.error("start timepoint must not be greater than end timepoint")
     else if (t0 == t1)
       new LTLconjunction[M](
         trace.filter(_._2 == t0).map(_._1).map(new LTLliteral[M](_))

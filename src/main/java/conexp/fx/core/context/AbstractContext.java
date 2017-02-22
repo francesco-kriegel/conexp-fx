@@ -4,7 +4,7 @@ package conexp.fx.core.context;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -12,12 +12,44 @@ package conexp.fx.core.context;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import conexp.fx.core.collections.relation.AbstractRelation;
 import conexp.fx.core.collections.relation.Relation;
 import conexp.fx.core.collections.setlist.SetList;
 
 public abstract class AbstractContext<G, M> extends AbstractRelation<G, M> implements Context<G, M> {
+
+  public static <G, M> AbstractContext<G, M>
+      fromPredicate(final SetList<G> objects, final SetList<M> attributes, final BiPredicate<G, M> predicate) {
+    return new AbstractContext<G, M>(objects, attributes, false) {
+
+      @Override
+      public final boolean contains(final Object o1, final Object o2) {
+        try {
+          return predicate.test((G) o1, (M) o2);
+        } catch (ClassCastException e) {
+          return false;
+        }
+      }
+
+    };
+  }
+
+  public static <G> AbstractContext<G, G> fromPredicate(final SetList<G> objects, final BiPredicate<G, G> predicate) {
+    return new AbstractContext<G, G>(objects, objects, true) {
+
+      @Override
+      public final boolean contains(final Object o1, final Object o2) {
+        try {
+          return predicate.test((G) o1, (G) o2);
+        } catch (ClassCastException e) {
+          return false;
+        }
+      }
+
+    };
+  }
 
   protected AbstractContext(final SetList<G> objects, final SetList<M> attributes, final boolean homogen) {
     super(objects, attributes, homogen);

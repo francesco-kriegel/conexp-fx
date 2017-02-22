@@ -9,7 +9,7 @@ import java.io.IOException;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import org.ujmp.core.collections.set.BitSetSet;
-
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -49,8 +47,15 @@ public final class Collections3 {
     return Collections.newSetFromMap(new ConcurrentHashMap<E, Boolean>());
   }
 
+  public static final BitSetFX integers(final int n) {
+//    return Stream.iterate(0, k -> k + 1).limit(n).collect(Collectors.toSet());
+    final BitSetFX s = new BitSetFX();
+    s.addRange(0, n);
+    return s;
+  }
+
   public static final <E extends Number & Comparable<? super E>> double sum(final Collection<? extends E> c) {
-    double s = 0;
+    double s = 0d;
     for (E e : c)
       s += e.doubleValue();
     return s;
@@ -219,17 +224,17 @@ public final class Collections3 {
     };
   }
 
-  public static final BitSetSet newBitSetSet(final Collection<Integer> c) {
-    final BitSetSet b = new BitSetSet();
-    b.addAll(c);
-    return b;
-  }
+//  public static final BitSetSetFX newBitSetSet(final Collection<Integer> c) {
+//    final BitSetSetFX b = new BitSetSetFX();
+//    b.addAll(c);
+//    return b;
+//  }
 
-  public static final BitSetSet2 newBitSetSet2(final Collection<Integer> c) {
-    final BitSetSet2 b = new BitSetSet2();
-    b.addAll(c);
-    return b;
-  }
+//  public static final BitSetSet2 newBitSetSet2(final Collection<Integer> c) {
+//    final BitSetSet2 b = new BitSetSet2();
+//    b.addAll(c);
+//    return b;
+//  }
 
   public static final <E> List<E> filter(final List<E> l, final Predicate<E> p) {
     return new AbstractList<E>() {

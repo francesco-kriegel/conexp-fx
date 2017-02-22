@@ -4,7 +4,7 @@ package conexp.fx.core.algorithm.nextclosures;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -42,9 +42,7 @@ public final class NextClosures1 {
     protected int                        cardinality  = 0;
 
     public Result() {
-      candidates.put(
-          new HashSet<M>(),
-          0);
+      candidates.put(new HashSet<M>(), 0);
     }
 
     private final boolean isClosed(final Set<M> candidate) {
@@ -101,13 +99,11 @@ public final class NextClosures1 {
 
   }
 
-  public static final <G, M> Result<G, M> compute(
-      final Context<G, M> cxt,
-      final boolean verbose,
-      final ThreadPoolExecutor tpe) {
+  public static final <G, M> Result<G, M>
+      compute(final Context<G, M> cxt, final boolean verbose, final ThreadPoolExecutor tpe) {
     if (verbose)
-      System.out.println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize()
-          + " cores...");
+      System.out
+          .println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize() + " cores...");
     final Result<G, M> result = new Result<G, M>();
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
@@ -115,9 +111,8 @@ public final class NextClosures1 {
         final int p = (int) ((100f * (float) result.cardinality) / ((float) maxCardinality));
         System.out.print("current cardinality: " + result.cardinality + "/" + maxCardinality + " (" + p + "%)");
       }
-      final Collection<Set<M>> candidatesN = new HashSet<Set<M>>(Collections2.filter(
-          result.candidates.keySet(),
-          candidate -> candidate.size() == result.cardinality));
+      final Collection<Set<M>> candidatesN = new HashSet<Set<M>>(
+          Collections2.filter(result.candidates.keySet(), candidate -> candidate.size() == result.cardinality));
       if (verbose)
         System.out.println("     " + candidatesN.size() + " candidates will be processed...");
       final Set<Future<?>> futures = new HashSet<Future<?>>();
@@ -126,21 +121,15 @@ public final class NextClosures1 {
 
           @Override
           public final void run() {
-            final Set<M> closure = result.fastClosure(
-                candidate,
-                result.candidates.get(candidate));
+            final Set<M> closure = result.fastClosure(candidate, result.candidates.get(candidate));
             if (closure.equals(candidate)) {
-              final Set<G> candidateI = new HashSet<G>(cxt.colAnd(candidate));
-              final Set<M> candidateII = new HashSet<M>(cxt.rowAnd(candidateI));
+              final Set<G> candidateI = cxt.colAnd(candidate);
+              final Set<M> candidateII = cxt.rowAnd(candidateI);
               if (result.addToProcessed(candidateII)) {
-                for (M m : Sets.difference(
-                    cxt.colHeads(),
-                    candidateII)) {
+                for (M m : Sets.difference(cxt.colHeads(), candidateII)) {
                   final Set<M> candidateM = new HashSet<M>(candidateII);
                   candidateM.add(m);
-                  result.candidates.put(
-                      candidateM,
-                      0);
+                  result.candidates.put(candidateM, 0);
                 }
               }
               if (candidateII.size() == candidate.size()) {
@@ -148,17 +137,11 @@ public final class NextClosures1 {
               } else {
                 result.concepts.add(new Concept<G, M>(candidateI, candidateII));
                 candidateII.removeAll(candidate);
-                result.implications.put(
-                    candidate,
-                    candidateII);
-                result.supports.put(
-                    candidate,
-                    candidateI);
+                result.implications.put(candidate, candidateII);
+                result.supports.put(candidate, candidateI);
               }
             } else {
-              result.candidates.put(
-                  closure,
-                  result.cardinality);
+              result.candidates.put(closure, result.cardinality);
             }
           }
         }));
@@ -169,8 +152,7 @@ public final class NextClosures1 {
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
-      result.candidates.keySet().removeAll(
-          candidatesN);
+      result.candidates.keySet().removeAll(candidatesN);
     }
     if (verbose) {
       System.out.println(result.concepts.size() + " concepts found");
@@ -181,16 +163,13 @@ public final class NextClosures1 {
 
   public static final <G, M> Result<G, M> compute(final Context<G, M> cxt, final boolean verbose, final int cores) {
     if (cores > Runtime.getRuntime().availableProcessors())
-      throw new IllegalArgumentException("Requested pool size is too large. VM has only "
-          + Runtime.getRuntime().availableProcessors() + " available cpus, thus a thread pool with " + cores
-          + " cores cannot be used here.");
+      throw new IllegalArgumentException(
+          "Requested pool size is too large. VM has only " + Runtime.getRuntime().availableProcessors()
+              + " available cpus, thus a thread pool with " + cores + " cores cannot be used here.");
     final ThreadPoolExecutor tpe =
         new ThreadPoolExecutor(cores, cores, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     tpe.prestartAllCoreThreads();
-    final Result<G, M> result = compute(
-        cxt,
-        verbose,
-        tpe);
+    final Result<G, M> result = compute(cxt, verbose, tpe);
     tpe.purge();
     tpe.shutdown();
     return result;
@@ -199,10 +178,7 @@ public final class NextClosures1 {
   public static final <G, M> Result<G, M> compute(final Context<G, M> cxt, final boolean verbose) {
     final int maxc = Runtime.getRuntime().availableProcessors();
     final int cores = maxc < 9 ? maxc : (maxc * 3) / 4;
-    return compute(
-        cxt,
-        verbose,
-        cores);
+    return compute(cxt, verbose, cores);
   }
 
 }

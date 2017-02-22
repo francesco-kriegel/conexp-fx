@@ -4,7 +4,7 @@ package conexp.fx.gui.assistent;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -129,6 +129,7 @@ public class InducedContextAssistent extends Assistent<Result> {
         if (isCancelled())
           return null;
         final Context<IRI, OWLClassExpression> inducedContext = dataset.interpretation.getInducedContext(
+            dataset.interpretation.getDomain(),
             resultProperty.get().selectedRoleDepth,
             resultProperty.get().selectedMaxCardinality,
             resultProperty.get().selectedConstructors);
@@ -137,19 +138,19 @@ public class InducedContextAssistent extends Assistent<Result> {
                 dataset,
                 new Request<IRI, OWLClassExpression>(Type.INDUCED_CONTEXT, Source.NULL) {
 
-          @Override
-          public MatrixContext<IRI, OWLClassExpression> createContext() {
-            MatrixContext<IRI, OWLClassExpression> cxt = new MatrixContext<IRI, OWLClassExpression>(false);
-            return cxt;
-          }
+                  @Override
+                  public MatrixContext<IRI, OWLClassExpression> createContext() {
+                    MatrixContext<IRI, OWLClassExpression> cxt = new MatrixContext<IRI, OWLClassExpression>(false);
+                    return cxt;
+                  }
 
-          @Override
-          public void setContent() {
-            this.context.rowHeads().addAll(inducedContext.rowHeads());
-            this.context.colHeads().addAll(inducedContext.colHeads());
-            context.addAll(inducedContext);
-          }
-        }));
+                  @Override
+                  public void setContent() {
+                    this.context.rowHeads().addAll(inducedContext.rowHeads());
+                    this.context.colHeads().addAll(inducedContext.colHeads());
+                    context.addAll(inducedContext);
+                  }
+                }));
         updateProgress(1d, 1d);
         return null;
       }

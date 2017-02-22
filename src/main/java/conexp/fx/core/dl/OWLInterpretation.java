@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -53,8 +53,8 @@ import com.google.common.collect.Sets;
 
 import conexp.fx.core.algorithm.nextclosures.NextClosures1;
 import conexp.fx.core.algorithm.nextclosures.NextClosures1.Result;
-import conexp.fx.core.algorithm.nextclosures.NextClosuresC;
-import conexp.fx.core.algorithm.nextclosures.NextClosuresC.ResultC;
+import conexp.fx.core.algorithm.nextclosures.NextClosures1C;
+import conexp.fx.core.algorithm.nextclosures.NextClosures1C.ResultC;
 import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
@@ -230,9 +230,10 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
         }
         if (Arrays.asList(constructors).contains(Constructor.EXISTENTIAL_RESTRICTION)) {
           for (Set<IRI> successors : getSuccessorSetsER(individuals, roleName))
-            conjuncts.add(df.getOWLObjectSomeValuesFrom(
-                property,
-                getMostSpecificConceptALQ(successors, roleDepth - 1, maxCardinality, constructors)));
+            conjuncts.add(
+                df.getOWLObjectSomeValuesFrom(
+                    property,
+                    getMostSpecificConceptALQ(successors, roleDepth - 1, maxCardinality, constructors)));
         }
         if (Arrays.asList(constructors).contains(Constructor.VALUE_RESTRICTION)) {
 //        for (Set<IRI> successors : getSuccessorSetsVR(individuals, roleName))
@@ -248,18 +249,20 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
         if (Arrays.asList(constructors).contains(Constructor.UNQUALIFIED_AT_MOST_RESTRICTION)) {
           for (int cardinality = 1; cardinality < maxCardinality; cardinality++)
             for (Set<IRI> successors : getSuccessorSetsQLR(individuals, roleName, cardinality))
-              conjuncts.add(df.getOWLObjectMaxCardinality(
-                  cardinality,
-                  property,
-                  getMostSpecificConceptALQ(successors, roleDepth - 1, maxCardinality, constructors)));
+              conjuncts.add(
+                  df.getOWLObjectMaxCardinality(
+                      cardinality,
+                      property,
+                      getMostSpecificConceptALQ(successors, roleDepth - 1, maxCardinality, constructors)));
         }
         if (Arrays.asList(constructors).contains(Constructor.QUALIFIED_AT_LEAST_RESTRICTION)) {
           for (int cardinality = 2; cardinality < maxCardinality; cardinality++)
             for (Set<IRI> successors : getSuccessorSetsQGR(individuals, roleName, cardinality))
-              conjuncts.add(df.getOWLObjectMinCardinality(
-                  cardinality,
-                  property,
-                  getMostSpecificConceptALQ(successors, roleDepth - 1, maxCardinality, constructors)));
+              conjuncts.add(
+                  df.getOWLObjectMinCardinality(
+                      cardinality,
+                      property,
+                      getMostSpecificConceptALQ(successors, roleDepth - 1, maxCardinality, constructors)));
         }
         // TODO
       }
@@ -286,14 +289,14 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
   }
 
   protected final Set<Set<IRI>> getSuccessorSetsER(final Set<IRI> individuals, final IRI roleName) {
-    return filterMinimal(
-        Sets
-            .powerSet(getAllSuccessors(individuals, roleName))
-            .parallelStream()
-            .filter(
-                successors -> individuals.parallelStream().allMatch(individual -> successors.parallelStream().anyMatch(
+    return filterMinimal(Sets
+        .powerSet(getAllSuccessors(individuals, roleName))
+        .parallelStream()
+        .filter(
+            successors -> individuals.parallelStream().allMatch(
+                individual -> successors.parallelStream().anyMatch(
                     successor -> getRoleNameExtension(roleName).contains(Pair.of(individual, successor)))))
-            .collect(Collectors.toSet()));
+        .collect(Collectors.toSet()));
   }
 
   protected final Set<Set<IRI>> getSuccessorSetsER2(final Set<IRI> individuals, final IRI roleName) {
@@ -354,42 +357,34 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
 
   private final Set<Set<IRI>>
       getSuccessorSetsQGR(final Set<IRI> individuals, final IRI roleName, final int cardinality) {
-    return filterMinimal(
-        Sets
-            .powerSet(getAllSuccessors(individuals, roleName))
-            .parallelStream()
-            .filter(
-                successors -> individuals
+    return filterMinimal(Sets
+        .powerSet(getAllSuccessors(individuals, roleName))
+        .parallelStream()
+        .filter(
+            successors -> individuals.parallelStream().allMatch(
+                individual -> successors
                     .parallelStream()
-                    .allMatch(
-                        individual -> successors
-                            .parallelStream()
-                            .filter(
-                                successor -> getRoleNameExtension(roleName).contains(Pair.of(individual, successor)))
-                            .skip(cardinality - 1)
-                            .findAny()
-                            .isPresent()))
-            .collect(Collectors.toSet()));
+                    .filter(successor -> getRoleNameExtension(roleName).contains(Pair.of(individual, successor)))
+                    .skip(cardinality - 1)
+                    .findAny()
+                    .isPresent()))
+        .collect(Collectors.toSet()));
   }
 
   private final Set<Set<IRI>>
       getSuccessorSetsQLR(final Set<IRI> individuals, final IRI roleName, final int cardinality) {
-    return filterMinimal(
-        Sets
-            .powerSet(getAllSuccessors(individuals, roleName))
-            .parallelStream()
-            .filter(
-                successors -> individuals
+    return filterMinimal(Sets
+        .powerSet(getAllSuccessors(individuals, roleName))
+        .parallelStream()
+        .filter(
+            successors -> individuals.parallelStream().allMatch(
+                individual -> !successors
                     .parallelStream()
-                    .allMatch(
-                        individual -> !successors
-                            .parallelStream()
-                            .filter(
-                                successor -> getRoleNameExtension(roleName).contains(Pair.of(individual, successor)))
-                            .skip(cardinality)
-                            .findAny()
-                            .isPresent()))
-            .collect(Collectors.toSet()));
+                    .filter(successor -> getRoleNameExtension(roleName).contains(Pair.of(individual, successor)))
+                    .skip(cardinality)
+                    .findAny()
+                    .isPresent()))
+        .collect(Collectors.toSet()));
   }
 
   @Override
@@ -588,11 +583,12 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     checkRoleDepth(roleDepth);
     final OWLOntologyManager om = OWLManager.createOWLOntologyManager();
     final OWLOntology ontology = om.createOntology();
-    final Context<IRI, OWLClassExpression> inducedContext = getInducedContext(roleDepth, maxCardinality, constructors);
+    final Context<IRI, OWLClassExpression> inducedContext =
+        getInducedContext(domain, roleDepth, maxCardinality, constructors);
     final Set<Implication<IRI, OWLClassExpression>> backgroundImplications =
         getBackgroundImplications(inducedContext, backgroundOntology);
     final ResultC<IRI, OWLClassExpression> result =
-        NextClosuresC.computeWithBackgroundImplications(inducedContext, backgroundImplications, true);
+        NextClosures1C.computeWithBackgroundImplications(inducedContext, backgroundImplications, true);
     for (Entry<Set<OWLClassExpression>, Set<OWLClassExpression>> entry : result.implications.entrySet())
       om.applyChange(
           new AddAxiom(

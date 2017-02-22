@@ -4,15 +4,19 @@ package conexp.fx.core.util;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import conexp.fx.core.collections.Pair;
@@ -42,8 +46,8 @@ public enum FileFormat {
   SVG("Scalable Vector Graphics (Only Lattice)", "svg"),
   TEX("Ganter's fca.sty TeX Format (Context & Lattice)", "tex");
 
-  public final String title;
-  public final String[] suffix;
+  public final String          title;
+  public final String[]        suffix;
   public final ExtensionFilter extensionFilter;
 
   private FileFormat(final String title, final String... suffix) {
@@ -70,6 +74,21 @@ public enum FileFormat {
 
   public static final Pair<File, FileFormat> of(final File file) {
     final String suffix = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+    if (suffix.toLowerCase().equals("csv")) {
+      try {
+        final Optional<String> firstNonEmptyLine = Files
+            .lines(file.toPath())
+            .map(String::trim)
+            .filter(((Predicate<String>) String::isEmpty).negate())
+            .findAny();
+        if (firstNonEmptyLine.isPresent() && Strings.countOccurences(firstNonEmptyLine.get(), ";") < 2)
+          return Pair.of(file, CSVB);
+        else
+          return Pair.of(file, CSVT);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
     for (FileFormat ff : FileFormat.values())
       if (ff != ANY)
         for (String suf : ff.suffix)

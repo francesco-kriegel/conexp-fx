@@ -4,7 +4,7 @@ package conexp.fx.core.math;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -60,13 +60,13 @@ public final class Math3 {
     return s;
   }
 
-  public static final String formatTime(final long time) {
-    if (time == 0)
+  public static final String formatMillis(final long millis) {
+    if (millis == 0)
       return "";
-    final long ms = time % 1000l;
-    final long s = (time / 1000l) % 60l;
-    final long m = (time / 60000l) % 60l;
-    final long h = (time / 3600000l);
+    final long ms = millis % 1000l;
+    final long s = (millis / 1000l) % 60l;
+    final long m = (millis / 60000l) % 60l;
+    final long h = (millis / 3600000l);
     if (h > 0)
       return String.format("%02dh %02dmin", h, m);
     if (m > 0)

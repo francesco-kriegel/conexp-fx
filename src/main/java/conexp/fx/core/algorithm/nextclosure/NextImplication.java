@@ -7,7 +7,7 @@ package conexp.fx.core.algorithm.nextclosure;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -19,14 +19,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.ujmp.core.collections.set.BitSetSet;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 
+import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.setlist.SetLists;
 import conexp.fx.core.context.MatrixContext;
@@ -109,10 +108,10 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
 
   private final static class BitImplication {
 
-    private final BitSetSet premise;
-    private final BitSetSet conclusion;
+    private final BitSetFX premise;
+    private final BitSetFX conclusion;
 
-    private BitImplication(BitSetSet premise, BitSetSet conclusion) {
+    private BitImplication(BitSetFX premise, BitSetFX conclusion) {
       super();
       this.premise = premise;
       this.conclusion = conclusion;
@@ -124,25 +123,26 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
     final MatrixContext<Set<Integer>, Set<Integer>> cleaned = context.selection._cleaned.clone();
     final UnmodifiableIterator<BitImplication> it = new UnmodifiableIterator<BitImplication>() {
 
-      private final int cols = cleaned.colHeads().size();
-      private BitSetSet _P = Collections3.newBitSetSet(cleaned._colAnd(SetLists.integers(cols)));
-      private final Set<BitImplication> impls = new HashSet<BitImplication>();
+      private final int                   cols   = cleaned.colHeads().size();
+      private BitSetFX                    _P     = new BitSetFX(cleaned._colAnd(SetLists.integers(cols)));
+      private final Set<BitImplication>   impls  = new HashSet<BitImplication>();
       private final HullOperator<Integer> hullOp = new HullOperator<Integer>() {
 
-        public final Collection<Integer> closure(final Collection<Integer> set) {
-          for (BitImplication impl : impls)
-            if (set.containsAll(impl.premise))
-              set.addAll(impl.conclusion);
-          return set;
-        }
-      };
+                                                   public final Collection<Integer>
+                                                       closure(final Collection<Integer> set) {
+                                                     for (BitImplication impl : impls)
+                                                       if (set.containsAll(impl.premise))
+                                                         set.addAll(impl.conclusion);
+                                                     return set;
+                                                   }
+                                                 };
 
       public final boolean hasNext() {
         return _P != null;
       }
 
       public final BitImplication next() {
-        BitSetSet _nextPseudoIntent;
+        BitSetFX _nextPseudoIntent;
         BitImplication bitImplication;
         do {
           _nextPseudoIntent = _P;
@@ -153,14 +153,14 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
         return bitImplication;
       }
 
-      private final BitImplication toBitImplication(final BitSetSet pseudoIntent) {
-        final BitSetSet conclusion = Collections3.newBitSetSet(cleaned._intent(pseudoIntent));
+      private final BitImplication toBitImplication(final BitSetFX pseudoIntent) {
+        final BitSetFX conclusion = new BitSetFX(cleaned._intent(pseudoIntent));
         conclusion.removeAll(pseudoIntent);
         return new BitImplication(pseudoIntent, conclusion);
       }
 
       private final void _PPlus() {
-        BitSetSet _PPlus;
+        BitSetFX _PPlus;
         for (int _m = cols - 1; _m > -1; --_m)
           if (!_P.contains(_m)) {
             _PPlus = _PPlusM(_m);
@@ -172,8 +172,8 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
         _P = null;
       }
 
-      private final BitSetSet _PPlusM(final int _m) {
-        return Collections3.newBitSetSet(
+      private final BitSetFX _PPlusM(final int _m) {
+        return new BitSetFX(
             hullOp.closure(
                 Sets.newHashSet(
                     Collections3.iterable(
@@ -182,7 +182,7 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
                             Iterators.singletonIterator(_m))))));
       }
 
-      private final boolean _PisLexicSmallerM(final BitSetSet _B, final int _m) {
+      private final boolean _PisLexicSmallerM(final BitSetFX _B, final int _m) {
         for (int _n : _B)
           if (_n == _m)
             break;
@@ -198,21 +198,21 @@ public final class NextImplication<G, M> implements Iterable<Implication<M>> {
             Collections3
                 .union(Collections2.transform(_implication.premise, new Function<Integer, Collection<Integer>>() {
 
-          @Override
-          public final Collection<Integer> apply(final Integer index) {
-            return cleaned.colHeads().get(index);
-          }
-        })),
+                  @Override
+                  public final Collection<Integer> apply(final Integer index) {
+                    return cleaned.colHeads().get(index);
+                  }
+                })),
             false);
         final Collection<M> c = context.selection.colHeads().getAll(
             Collections3
                 .union(Collections2.transform(_implication.conclusion, new Function<Integer, Collection<Integer>>() {
 
-          @Override
-          public final Collection<Integer> apply(final Integer index) {
-            return cleaned.colHeads().get(index);
-          }
-        })),
+                  @Override
+                  public final Collection<Integer> apply(final Integer index) {
+                    return cleaned.colHeads().get(index);
+                  }
+                })),
             false);
         return new Implication<M>(Sets.newHashSet(p), Sets.newHashSet(c));
       }

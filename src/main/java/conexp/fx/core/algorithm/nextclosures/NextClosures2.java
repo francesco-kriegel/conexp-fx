@@ -1,16 +1,6 @@
 package conexp.fx.core.algorithm.nextclosures;
 
-/*
- * #%L
- * Concept Explorer FX
- * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
- * %%
- * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
- * #L%
- */
-
-import java.util.ConcurrentModificationException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -41,37 +32,6 @@ import conexp.fx.gui.task.TimeTask;
 import conexp.fx.gui.util.Platform2;
 
 public final class NextClosures2 {
-
-  public static final class Result<G, M> {
-
-    public final Set<Concept<G, M>>     concepts     = Collections3.newConcurrentHashSet();
-    public final Set<Implication<G, M>> implications = Collections3.newConcurrentHashSet();
-    public final Map<Set<M>, Integer>   candidates   = new ConcurrentHashMap<>();
-    private final Set<Set<M>>           processed    = Collections3.newConcurrentHashSet();
-    public int                          cardinality  = 0;
-
-    public Result() {
-      candidates.put(new HashSet<M>(), 0);
-    }
-
-    private final boolean isNewIntent(final Set<M> s) {
-      try {
-        return processed.add(s);
-      } catch (ConcurrentModificationException e) {
-        return isNewIntent(s);
-      }
-    }
-
-    public final void addNewCandidates(final Context<G, M> cxt, final Set<M> intent) {
-      if (isNewIntent(intent))
-        for (M m : Sets.difference(cxt.colHeads(), intent)) {
-          final Set<M> candidateM = new HashSet<M>(intent);
-          candidateM.add(m);
-          candidates.put(candidateM, 0);
-        }
-    }
-
-  }
 
   public static final <T> Set<Set<T>>
       compute(final Set<T> baseSet, final ClosureOperator<T> clop, final boolean verbose, final ExecutorService tpe) {
@@ -123,6 +83,7 @@ public final class NextClosures2 {
     return closures.values().parallelStream().collect(Collectors.toSet());
   }
 
+  @SafeVarargs
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> compute(
       final Context<G, M> cxt,
       final ExecutorService executor,
@@ -130,8 +91,21 @@ public final class NextClosures2 {
       final Consumer<Implication<G, M>> implicationConsumer,
       final Consumer<String> updateStatus,
       final Consumer<Double> updateProgress,
-      final Supplier<Boolean> isCancelled) {
-    final Result<G, M> result = new Result<G, M>();
+      final Supplier<Boolean> isCancelled,
+      final Collection<Implication<G, M>>... backgroundKnowledge) {
+//    System.out.println("invalid background implications:");
+//    Collections3.union(backgroundKnowledge).stream().filter(i -> !cxt.models(i)).forEach(System.out::println);;
+//    System.out.println();
+    if (!cxt.models(Collections3.union(backgroundKnowledge)))
+      throw new RuntimeException("The background implications are not valid in the formal context.");
+    final NextClosuresState<G, M, Set<M>> result = NextClosuresState.withHashSets(cxt.colHeads());
+    final Function<Integer, ClosureOperator<M>> clop;
+    if (backgroundKnowledge.length == 0)
+      clop = i -> ClosureOperator.fromImplications(result.implications, i, true, true);
+    else
+      clop = i -> ClosureOperator.supremum(
+          ClosureOperator.fromImplications(result.implications, i, true, true),
+          ClosureOperator.fromImplications(Collections3.union(backgroundKnowledge), false, true));
 //    final ClosureOperator<M> clop = ClosureOperator.fromImplications(result.implications, true, true);
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
@@ -144,23 +118,19 @@ public final class NextClosures2 {
       updateStatus.accept("current cardinality: " + result.cardinality + "/" + maxCardinality + " (" + p + "%)");
       updateProgress.accept(q);
       final Set<Future<?>> futures = Collections3.newConcurrentHashSet();
-      result.candidates.keySet().parallelStream().filter(c -> c.size() == result.cardinality).forEach(candidate -> {
+      final Set<Set<M>> cc = result.getActualCandidates();
+      cc.forEach(candidate -> {
         futures.add(executor.submit(() -> {
-          final Set<M> closure = ClosureOperator
-              .fromImplications(result.implications, result.candidates.get(candidate), true, true)
-              .closure(candidate);
-          if (closure.size() == candidate.size()) {
+          final Set<M> closure = clop.apply(result.candidates.get(candidate)).closure(candidate);
+//          if (closure.size() == candidate.size()) {
+          if (closure.equals(candidate)) {
             final Set<G> candidateI = cxt.colAnd(candidate);
             final Set<M> candidateII = cxt.rowAnd(candidateI);
             if (result.isNewIntent(candidateII)) {
               final Concept<G, M> concept = new Concept<G, M>(candidateI, new HashSet<M>(candidateII));
               result.concepts.add(concept);
               conceptConsumer.accept(concept);
-              for (M m : Sets.difference(cxt.colHeads(), candidateII)) {
-                final Set<M> candidateM = new HashSet<M>(candidateII);
-                candidateM.add(m);
-                result.candidates.put(candidateM, 0);
-              }
+              result.addNewCandidates(candidateII);
             }
             if (candidateII.size() != candidate.size()) {
               candidateII.removeAll(candidate);
@@ -171,7 +141,7 @@ public final class NextClosures2 {
           } else {
             result.candidates.put(closure, result.cardinality);
           }
-          result.candidates.remove(candidate);
+//          result.candidates.remove(candidate);
         }));
       });
       for (Future<?> future : futures)
@@ -180,19 +150,24 @@ public final class NextClosures2 {
         } catch (InterruptedException | ExecutionException e) {
           e.printStackTrace();
         }
+      result.candidates.keySet().removeAll(cc);
     }
     updateStatus
         .accept(result.concepts.size() + " concepts, and " + result.implications.size() + " implications found");
-    return Pair.of(result.concepts, result.implications);
+    return result.getResultAndDispose();
   }
 
-  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
-      compute(final Context<G, M> cxt, final ExecutorService executor) {
-    return compute(cxt, executor, __ -> {} , __ -> {} , System.out::println, System.out::println, () -> false);
+  @SafeVarargs
+  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> compute(
+      final Context<G, M> cxt,
+      final ExecutorService executor,
+      final Collection<Implication<G, M>>... backgroundKnowledge) {
+    return compute(cxt, executor, __ -> {}, __ -> {}, __ -> {}, __ -> {}, () -> false, backgroundKnowledge);
   }
 
+  @SafeVarargs
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
-      compute(final Context<G, M> cxt, final int cores) {
+      compute(final Context<G, M> cxt, final int cores, final Collection<Implication<G, M>>... backgroundKnowledge) {
     if (cores > Runtime.getRuntime().availableProcessors())
       throw new IllegalArgumentException(
           "Requested pool size is too large. VM has only " + Runtime.getRuntime().availableProcessors()
@@ -201,14 +176,16 @@ public final class NextClosures2 {
 //        new ThreadPoolExecutor(cores, cores, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 //    tpe.prestartAllCoreThreads();
     final ExecutorService tpe = Executors.newWorkStealingPool(cores);
-    final Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> result = compute(cxt, tpe);
+    final Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> result = compute(cxt, tpe, backgroundKnowledge);
 //    tpe.purge();
     tpe.shutdown();
     return result;
   }
 
-  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> compute(final Context<G, M> cxt) {
-    return compute(cxt, Runtime.getRuntime().availableProcessors() - 1);
+  @SafeVarargs
+  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
+      compute(final Context<G, M> cxt, final Collection<Implication<G, M>>... backgroundKnowledge) {
+    return compute(cxt, Runtime.getRuntime().availableProcessors(), backgroundKnowledge);
   }
 
   public static final <G, M> TimeTask<?> createTask(FCADataset<G, M> dataset) {

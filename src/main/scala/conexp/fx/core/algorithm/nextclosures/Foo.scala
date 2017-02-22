@@ -33,7 +33,7 @@ object Foo extends App {
       }
     f.onComplete {
       case Success(x) => println(x)
-      case Failure(e) => println("error")
+      case Failure(e) => println("sys.error")
     }
     oncePerSecond(timeFlies)
     //    oncePerSecond(()=>print("."))
@@ -93,7 +93,7 @@ object Foo extends App {
     
     def <(that:Any):Boolean = {
       if (!that.isInstanceOf[Date])
-        error("foo")
+        sys.error("foo")
       val o = that.asInstanceOf[Date]
       this.year<o.year||(this.year==o.year&&this.month<o.month)||(this.year==o.year && this.month==o.month && this.day<o.day)
     }

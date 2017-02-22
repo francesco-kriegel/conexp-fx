@@ -4,7 +4,7 @@ package conexp.fx.core.importer;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2016 Francesco Kriegel
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -264,10 +264,9 @@ public class RDFImporter {
               IRI.create(triple.getObject().stringValue()),
               IRI.create(triple.getSubject().stringValue()));
         }
-      } else
-        if (signature.getRoleNames().contains(IRI.create(triple.getPredicate().stringValue()))
-            && signature.getIndividualNames().contains(IRI.create(triple.getSubject().stringValue()))
-            && signature.getIndividualNames().contains(IRI.create(triple.getObject().stringValue()))) {
+      } else if (signature.getRoleNames().contains(IRI.create(triple.getPredicate().stringValue()))
+          && signature.getIndividualNames().contains(IRI.create(triple.getSubject().stringValue()))
+          && signature.getIndividualNames().contains(IRI.create(triple.getObject().stringValue()))) {
         i.addRoleNameAssertion(
             IRI.create(triple.getPredicate().stringValue()),
             IRI.create(triple.getSubject().stringValue()),
