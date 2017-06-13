@@ -1,5 +1,15 @@
 package conexp.fx.core.algorithm.nextclosures;
 
+/*-
+ * #%L
+ * Concept Explorer FX
+ * %%
+ * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * %%
+ * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
+ * #L%
+ */
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +42,12 @@ public final class NextClosures2C {
       final Supplier<Boolean> isCancelled,
       final ClosureOperator<M> constraint) {
     final NextClosuresState<G, M, Set<M>> result = NextClosuresState.withHashSets(cxt.colHeads());
+    result.candidates.clear();
+    final HashSet<M> firstCandidate = new HashSet<M>();
+    constraint.close(firstCandidate);
+    final int firstCardinality = firstCandidate.size();
+    result.cardinality = firstCardinality;
+    result.candidates.put(firstCandidate, firstCardinality);
 //    final ClosureOperator<M> clop = ClosureOperator.fromImplications(result.implications, true, true);
     final ClosureOperator<M> sup = ClosureOperator.supremum(ClosureOperator.fromContext(cxt), constraint);
     final int maxCardinality = cxt.colHeads().size();

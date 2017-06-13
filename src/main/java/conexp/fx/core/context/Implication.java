@@ -98,7 +98,7 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
     return confidence;
   }
 
-  public final boolean isTrivial() {
+  public boolean isTrivial() {
     return getPremise().containsAll(getConclusion());
   }
 

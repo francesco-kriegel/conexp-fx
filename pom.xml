@@ -1,8 +1,5 @@
-<project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>conexp-fx</groupId>
@@ -29,7 +26,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<application.javaVersion>1.8</application.javaVersion>
-		<javafx.version>8u121</javafx.version>
+		<javafx.version>8u131</javafx.version>
 		<javafx.jar>${java.home}/lib/ext/jfxrt.jar</javafx.jar>
 		<javafx.javadoc>lib/javafx-${javafx.version}-apidocs.zip</javafx.javadoc>
 		<javafx.sources>${java.home}/../javafx-src.zip</javafx.sources>
@@ -108,6 +105,11 @@
 			<version>3.5</version>
 		</dependency>
 		<dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math4</artifactId>
+            <version>4.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
 			<version>4.3.0</version>
@@ -181,18 +183,18 @@
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
-			<version>2.12.1</version>
+			<version>2.11.8</version>
 		</dependency>
 		<!-- <dependency> -->
 		<!-- <groupId>org.scala-lang.modules</groupId> -->
 		<!-- <artifactId>scala-java8-compat_2.11</artifactId> -->
 		<!-- <version>0.7.0</version> -->
 		<!-- </dependency> -->
-		<dependency>
-			<groupId>me.enkode</groupId>
-			<artifactId>java8-converters_2.11</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>me.enkode</groupId> -->
+		<!-- <artifactId>java8-converters_2.11</artifactId> -->
+		<!-- <version>1.2.0-SNAPSHOT</version> -->
+		<!-- </dependency> -->
 	</dependencies>
 
 	<build>
@@ -439,30 +441,30 @@
 					<artifactId>build-helper-maven-plugin</artifactId>
 					<version>1.10</version>
 					<executions>
-						<execution>
-							<id>add-source</id>
-							<phase>generate-sources</phase>
-							<goals>
-								<goal>add-source</goal>
-							</goals>
-							<configuration>
-								<sources>
-									<source>src/main/scala</source>
-								</sources>
-							</configuration>
-						</execution>
-						<execution>
-							<id>add-test-source</id>
-							<phase>generate-test-sources</phase>
-							<goals>
-								<goal>add-test-source</goal>
-							</goals>
-							<configuration>
-								<sources>
-									<source>src/test/scala</source>
-								</sources>
-							</configuration>
-						</execution>
+						<!-- <execution> -->
+						<!-- <id>add-source</id> -->
+						<!-- <phase>generate-sources</phase> -->
+						<!-- <goals> -->
+						<!-- <goal>add-source</goal> -->
+						<!-- </goals> -->
+						<!-- <configuration> -->
+						<!-- <sources> -->
+						<!-- <source>src/main/scala</source> -->
+						<!-- </sources> -->
+						<!-- </configuration> -->
+						<!-- </execution> -->
+						<!-- <execution> -->
+						<!-- <id>add-test-source</id> -->
+						<!-- <phase>generate-test-sources</phase> -->
+						<!-- <goals> -->
+						<!-- <goal>add-test-source</goal> -->
+						<!-- </goals> -->
+						<!-- <configuration> -->
+						<!-- <sources> -->
+						<!-- <source>src/test/scala</source> -->
+						<!-- </sources> -->
+						<!-- </configuration> -->
+						<!-- </execution> -->
 						<!-- <execution> -->
 						<!-- <id>regex-property</id> -->
 						<!-- <phase>initialize</phase> -->
@@ -752,20 +754,20 @@
 									<sources>lib/simplevoronoi-1.0-sources.jar</sources>
 								</configuration>
 							</execution>
-							<execution>
-								<id>jlatexmath</id>
-								<goals>
-									<goal>install-file</goal>
-								</goals>
-								<phase>validate</phase>
-								<configuration>
-									<file>lib/jlatexmath-1.0.3.jar</file>
-									<groupId>org.scilab.forge</groupId>
-									<artifactId>jlatexmath</artifactId>
-									<version>1.0.3</version>
-									<packaging>jar</packaging>
-								</configuration>
-							</execution>
+							<!-- <execution> -->
+							<!-- <id>jlatexmath</id> -->
+							<!-- <goals> -->
+							<!-- <goal>install-file</goal> -->
+							<!-- </goals> -->
+							<!-- <phase>validate</phase> -->
+							<!-- <configuration> -->
+							<!-- <file>lib/jlatexmath-1.0.3.jar</file> -->
+							<!-- <groupId>org.scilab.forge</groupId> -->
+							<!-- <artifactId>jlatexmath</artifactId> -->
+							<!-- <version>1.0.3</version> -->
+							<!-- <packaging>jar</packaging> -->
+							<!-- </configuration> -->
+							<!-- </execution> -->
 							<!-- <execution> -->
 							<!-- <id>ujmp</id> -->
 							<!-- <goals> -->
