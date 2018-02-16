@@ -4,7 +4,7 @@ package conexp.fx.gui.dialog;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -52,46 +52,41 @@ public final class InfoDialog extends FXDialog<Void> {
         new ErrorDialog(cfx.primaryStage, e).showAndWait();
       }
     }).build();
-    final Label label =
-        LabelBuilder
-            .create()
-            .text("Concept Explorer FX\r\n" + "(c) 2010-2015, Francesco Kriegel, TU Dresden\r\n" + "Apache License 2.0")
-            .build();
+    final Label label = LabelBuilder
+        .create()
+        .text("Concept Explorer FX\r\n" + "(c) 2010-2018, Francesco Kriegel, TU Dresden\r\n" + "Apache License 2.0")
+        .build();
     final ImageView icon =
         imageView("image/conexp-fx.png", 64, "http://lat.inf.tu-dresden.de/~francesco/conexp-fx/conexp-fx.html");
-    final HBox title =
-        HBoxBuilder
-            .create()
-            .spacing(4)
-            .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
-            .children(icon, label)
-            .build();
-    final VBox contact =
-        VBoxBuilder
-            .create()
-            .spacing(0)
-            .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
-            .children(email, homepage)
-            .build();
-    final HBox icons1 =
-        HBoxBuilder
-            .create()
-            .spacing(5)
-            .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
-            .children(
-                imageView("image/logo_tu_black.png", 40, "http://tu-dresden.de/en"),
-                imageView("image/ganter.gif", 40, "http://tu-dresden.de/Members/bernhard.ganter"))
-            .build();
-    final HBox icons2 =
-        HBoxBuilder
-            .create()
-            .spacing(5)
-            .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
-            .children(
-                imageView("image/Javafx_logo_color.png", 40, "http://docs.oracle.com/javafx/"),
-                imageView("image/apache.png", 40, "http://www.apache.org/licenses/LICENSE-2.0.html"),
-                imageView("image/mavenlogo_builtby_w.gif", 40, "http://maven.apache.org/"))
-            .build();
+    final HBox title = HBoxBuilder
+        .create()
+        .spacing(4)
+        .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
+        .children(icon, label)
+        .build();
+    final VBox contact = VBoxBuilder
+        .create()
+        .spacing(0)
+        .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
+        .children(email, homepage)
+        .build();
+    final HBox icons1 = HBoxBuilder
+        .create()
+        .spacing(5)
+        .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
+        .children(
+            imageView("image/logo_tu_black.png", 40, "http://tu-dresden.de/en"),
+            imageView("image/ganter.gif", 40, "http://tu-dresden.de/Members/bernhard.ganter"))
+        .build();
+    final HBox icons2 = HBoxBuilder
+        .create()
+        .spacing(5)
+        .padding(InsetsBuilder.create().left(0).top(0).right(0).bottom(0).build())
+        .children(
+            imageView("image/Javafx_logo_color.png", 40, "http://docs.oracle.com/javafx/"),
+            imageView("image/apache.png", 40, "http://www.apache.org/licenses/LICENSE-2.0.html"),
+            imageView("image/mavenlogo_builtby_w.gif", 40, "http://maven.apache.org/"))
+        .build();
     return VBoxBuilder
         .create()
         .spacing(5)

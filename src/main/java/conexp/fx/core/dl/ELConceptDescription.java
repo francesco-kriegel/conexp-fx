@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -15,7 +15,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -26,9 +31,13 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.Pair;
+import conexp.fx.core.util.Meter;
 import conexp.fx.core.util.UnicodeSymbols;
 
 public class ELConceptDescription {
@@ -40,7 +49,7 @@ public class ELConceptDescription {
   }
 
   public static final ELConceptDescription bot() {
-    return new ELConceptDescription(Sets.newHashSet(df.getOWLNothing().getIRI()), Sets.newHashSet());
+    return new ELConceptDescription(Sets.newHashSet(df.getOWLNothing().getIRI()), HashMultimap.create());
   }
 
   public static final ELConceptDescription top() {
@@ -48,12 +57,14 @@ public class ELConceptDescription {
   }
 
   public static final ELConceptDescription conceptName(final IRI conceptName) {
-    return new ELConceptDescription(Sets.newHashSet(conceptName), Sets.newHashSet());
+    return new ELConceptDescription(Sets.newHashSet(conceptName), HashMultimap.create());
   }
 
-  public static final ELConceptDescription existentialRestriction(
-      final Pair<IRI, ELConceptDescription> existentialRestriction) {
-    return new ELConceptDescription(Sets.newHashSet(), Sets.newHashSet(existentialRestriction));
+  public static final ELConceptDescription
+      existentialRestriction(final IRI roleName, final ELConceptDescription filler) {
+    final ELConceptDescription C = new ELConceptDescription();
+    C.getExistentialRestrictions().put(roleName, filler);
+    return C;
   }
 
   public static final ELConceptDescription conjunction(final ELConceptDescription... conjuncts) {
@@ -64,18 +75,20 @@ public class ELConceptDescription {
     final ELConceptDescription conjunction = new ELConceptDescription();
     conjuncts.forEach(conjunct -> {
       conjunction.getConceptNames().addAll(conjunct.getConceptNames());
-      conjunction.getExistentialRestrictions().addAll(conjunct.getExistentialRestrictions());
+      conjunction.getExistentialRestrictions().putAll(conjunct.getExistentialRestrictions());
     });
     return conjunction;
   }
 
-  private final Set<IRI>                                            conceptNames;
-  private final Set<Pair<IRI, ELConceptDescription>>                existentialRestrictions;
-//  private final Set<Pair<IRI, ELConceptDescription>>                valueRestrictions;
-//  private final Set<Pair<Pair<Integer, IRI>, ELConceptDescription>> qualifiedGreaterThanRestrictions;
-//  private final Set<Pair<Pair<Integer, IRI>, ELConceptDescription>> qualifiedSmallerThanRestrictions;
-//  private final Set<IRI>                                            negatedConceptNames;
-//  private final Set<IRI>                                            extistentialSelfRestrictions;
+  private final Set<IRI>                            conceptNames;
+  private final Multimap<IRI, ELConceptDescription> existentialRestrictions;
+  // private final Set<Pair<IRI, ELConceptDescription>> valueRestrictions;
+  // private final Set<Pair<Pair<Integer, IRI>, ELConceptDescription>>
+  // qualifiedGreaterThanRestrictions;
+  // private final Set<Pair<Pair<Integer, IRI>, ELConceptDescription>>
+  // qualifiedSmallerThanRestrictions;
+  // private final Set<IRI> negatedConceptNames;
+  // private final Set<IRI> extistentialSelfRestrictions;
 
   /**
    * @param concept
@@ -85,7 +98,7 @@ public class ELConceptDescription {
   public ELConceptDescription(final OWLClassExpression concept) {
     super();
     this.conceptNames = new HashSet<IRI>();
-    this.existentialRestrictions = new HashSet<Pair<IRI, ELConceptDescription>>();
+    this.existentialRestrictions = HashMultimap.create();
     if (concept.isOWLThing())
       return;
     if (concept.isOWLNothing()) {
@@ -98,8 +111,9 @@ public class ELConceptDescription {
     }
     if (concept instanceof OWLObjectSomeValuesFrom) {
       final OWLObjectSomeValuesFrom existentialRestriction = (OWLObjectSomeValuesFrom) concept;
-      this.existentialRestrictions.add(new Pair<IRI, ELConceptDescription>(((OWLObjectProperty) existentialRestriction
-          .getProperty()).getIRI(), new ELConceptDescription(existentialRestriction.getFiller())));
+      this.existentialRestrictions.put(
+          ((OWLObjectProperty) existentialRestriction.getProperty()).getIRI(),
+          new ELConceptDescription(existentialRestriction.getFiller()));
       return;
     }
     if (concept instanceof OWLObjectIntersectionOf) {
@@ -108,9 +122,9 @@ public class ELConceptDescription {
         if (conjunct instanceof OWLClass)
           this.conceptNames.add(((OWLClass) conjunct).getIRI());
         else if (conjunct instanceof OWLObjectSomeValuesFrom)
-          this.existentialRestrictions.add(new Pair<IRI, ELConceptDescription>(
+          this.existentialRestrictions.put(
               ((OWLObjectProperty) ((OWLObjectSomeValuesFrom) conjunct).getProperty()).getIRI(),
-              new ELConceptDescription(((OWLObjectSomeValuesFrom) conjunct).getFiller())));
+              new ELConceptDescription(((OWLObjectSomeValuesFrom) conjunct).getFiller()));
         else
           throw new ELSyntaxException();
       return;
@@ -127,7 +141,7 @@ public class ELConceptDescription {
    */
   public ELConceptDescription(
       final Set<IRI> conceptNames,
-      final Set<Pair<IRI, ELConceptDescription>> existentialRestrictions) {
+      final Multimap<IRI, ELConceptDescription> existentialRestrictions) {
     super();
     this.conceptNames = conceptNames;
     this.existentialRestrictions = existentialRestrictions;
@@ -138,7 +152,7 @@ public class ELConceptDescription {
    */
   public ELConceptDescription() {
     this.conceptNames = Sets.newHashSet();
-    this.existentialRestrictions = Sets.newHashSet();
+    this.existentialRestrictions = HashMultimap.create();
   }
 
   public final boolean isBot() {
@@ -153,7 +167,7 @@ public class ELConceptDescription {
     return conceptNames;
   }
 
-  public final Set<Pair<IRI, ELConceptDescription>> getExistentialRestrictions() {
+  public final Multimap<IRI, ELConceptDescription> getExistentialRestrictions() {
     return existentialRestrictions;
   }
 
@@ -165,38 +179,40 @@ public class ELConceptDescription {
     if (conceptNames.size() == 1 && existentialRestrictions.isEmpty())
       return df.getOWLClass(conceptNames.iterator().next());
     if (conceptNames.isEmpty() && existentialRestrictions.size() == 1) {
-      final Pair<IRI, ELConceptDescription> existentialRestriction = existentialRestrictions.iterator().next();
-      return df.getOWLObjectSomeValuesFrom(df.getOWLObjectProperty(existentialRestriction.x()), existentialRestriction
-          .y()
-          .toOWLClassExpression());
+      final Entry<IRI, ELConceptDescription> existentialRestriction =
+          existentialRestrictions.entries().iterator().next();
+      return df.getOWLObjectSomeValuesFrom(
+          df.getOWLObjectProperty(existentialRestriction.getKey()),
+          existentialRestriction.getValue().toOWLClassExpression());
     }
     final Set<OWLClassExpression> conjuncts = new HashSet<OWLClassExpression>();
     for (IRI conceptName : conceptNames)
       conjuncts.add(df.getOWLClass(conceptName));
-    for (Pair<IRI, ELConceptDescription> existentialRestriction : existentialRestrictions)
-      conjuncts.add(df.getOWLObjectSomeValuesFrom(
-          df.getOWLObjectProperty(existentialRestriction.x()),
-          existentialRestriction.y().toOWLClassExpression()));
+    for (Entry<IRI, ELConceptDescription> existentialRestriction : existentialRestrictions.entries())
+      conjuncts.add(
+          df.getOWLObjectSomeValuesFrom(
+              df.getOWLObjectProperty(existentialRestriction.getKey()),
+              existentialRestriction.getValue().toOWLClassExpression()));
     return df.getOWLObjectIntersectionOf(conjuncts);
   }
 
-  public final ELConceptDescription minimize() {
-    if (conceptNames.contains(df.getOWLNothing().getIRI())) {
-      conceptNames.retainAll(Collections.singleton(df.getOWLNothing().getIRI()));
-      existentialRestrictions.clear();
-    }
-    for (Pair<IRI, ELConceptDescription> existentialRestriction : existentialRestrictions)
-      existentialRestriction.y().minimize();
-    final Set<Pair<IRI, ELConceptDescription>> toRemove = new HashSet<Pair<IRI, ELConceptDescription>>();
-    for (Pair<IRI, ELConceptDescription> existentialRestriction1 : existentialRestrictions)
-      for (Pair<IRI, ELConceptDescription> existentialRestriction2 : existentialRestrictions)
-        if (!existentialRestriction1.equals(existentialRestriction2)
-            && existentialRestriction1.x().equals(existentialRestriction2.x()))
-          if (existentialRestriction1.y().isSubsumedBy(existentialRestriction2.y()))
-            toRemove.add(existentialRestriction1);
-    existentialRestrictions.removeAll(toRemove);
-    return this;
-  }
+//  public final ELConceptDescription minimize() {
+//    if (conceptNames.contains(df.getOWLNothing().getIRI())) {
+//      conceptNames.retainAll(Collections.singleton(df.getOWLNothing().getIRI()));
+//      existentialRestrictions.clear();
+//    }
+//    for (Pair<IRI, ELConceptDescription> existentialRestriction : existentialRestrictions)
+//      existentialRestriction.y().minimize();
+//    final Set<Pair<IRI, ELConceptDescription>> toRemove = new HashSet<Pair<IRI, ELConceptDescription>>();
+//    for (Pair<IRI, ELConceptDescription> existentialRestriction1 : existentialRestrictions)
+//      for (Pair<IRI, ELConceptDescription> existentialRestriction2 : existentialRestrictions)
+//        if (!existentialRestriction1.equals(existentialRestriction2)
+//            && existentialRestriction1.x().equals(existentialRestriction2.x()))
+//          if (existentialRestriction1.y().isSubsumedBy(existentialRestriction2.y()))
+//            toRemove.add(existentialRestriction1);
+//    existentialRestrictions.removeAll(toRemove);
+//    return this;
+//  }
 
   public final boolean isSubsumedBy(final ELConceptDescription other) {
     return ELReasoner.isSubsumedBy(this, other);
@@ -206,8 +222,458 @@ public class ELConceptDescription {
     return ELReasoner.subsumes(this, other);
   }
 
+  public final boolean isEquivalentTo(final ELConceptDescription other) {
+    return Stream.<Supplier<Boolean>> of(() -> this.subsumes(other), () -> other.subsumes(this)).parallel().allMatch(
+        Supplier::get);
+    // return this.subsumes(other) && other.subsumes(this);
+  }
+
+  public final boolean isLowerNeighborOf(final ELConceptDescription other) {
+    return this.upperNeighborsReduced().parallelStream().anyMatch(other::isEquivalentTo);
+  }
+
+  public final boolean isUpperNeighborOf(final ELConceptDescription other) {
+    return other.isLowerNeighborOf(this);
+  }
+
+  public final ELConceptDescription reduce() {
+    for (Entry<IRI, ELConceptDescription> er : existentialRestrictions.entries())
+      er.getValue().reduce();
+    final Function<Entry<IRI, ELConceptDescription>, Stream<Pair<Entry<IRI, ELConceptDescription>, Entry<IRI, ELConceptDescription>>>> f =
+        er1 -> existentialRestrictions
+            .entries()
+            .parallelStream()
+            .filter(er2 -> er1.getKey().equals(er2.getKey()))
+            .filter(er2 -> !er1.equals(er2))
+            .map(er2 -> Pair.of(er1, er2));
+    final Set<Entry<IRI, ELConceptDescription>> superfluousERs = existentialRestrictions
+        .entries()
+        .parallelStream()
+        .map(f)
+        .reduce(Stream::concat)
+        .orElseGet(Stream::empty)
+        .filter(p -> p.first().getValue().isSubsumedBy(p.second().getValue()))
+        .map(Pair::second)
+        .collect(Collectors.toSet());
+    superfluousERs.forEach(x -> existentialRestrictions.remove(x.getKey(), x.getValue()));
+    return this;
+    // final Set<Pair<IRI, ELConceptDescription>> superfluousERs = new
+    // HashSet<>();
+    // for (int i = 0; i < 2; i++) {
+    // superfluousERs.clear();
+    // for (Pair<IRI, ELConceptDescription> er2 : existentialRestrictions)
+    // for (Pair<IRI, ELConceptDescription> er1 : existentialRestrictions)
+    // if (er1 != er2)
+    // // if (!superfluousERs.contains(er1))
+    // // if (!superfluousERs.contains(er2))
+    // if (er1.first().equals(er2.first()))
+    // if (er1.second().subsumes(er2.second()))
+    // superfluousERs.add(er1);
+    // existentialRestrictions.removeAll(superfluousERs);
+    // }
+  }
+
+  public final int roleDepth() {
+    if (existentialRestrictions.isEmpty())
+      return 0;
+    return 1 + existentialRestrictions
+        .entries()
+        .parallelStream()
+        .map(Entry::getValue)
+        .map(ELConceptDescription::roleDepth)
+        .max(Integer::compare)
+        .orElse(0);
+  }
+
+  public final int size() {
+    return Math.max(
+        1,
+        2 * conceptNames.size() + existentialRestrictions.size() - 1
+            + existentialRestrictions
+                .entries()
+                .parallelStream()
+                .map(Entry::getValue)
+                .map((ELConceptDescription c) -> 1 + c.size())
+                .reduce(0, Integer::sum));
+  }
+
+  public final int rank() {
+    return this.clone().reduce().unreducedRank();
+  }
+
+  private final int unreducedRank() {
+    if (this.isTop())
+      return 0;
+    else
+      return 1 + this.oneUpperNeighbor().unreducedRank();
+  }
+
+  private final ELConceptDescription oneUpperNeighbor() {
+    if (!this.conceptNames.isEmpty()) {
+      final ELConceptDescription upperNeighbor = this.clone();
+      final Iterator<IRI> it = upperNeighbor.conceptNames.iterator();
+      it.next();
+      it.remove();
+      return upperNeighbor;
+    } else if (!this.existentialRestrictions.isEmpty()) {
+      final ELConceptDescription upperNeighbor = this.clone();
+      final Iterator<Entry<IRI, ELConceptDescription>> it = upperNeighbor.existentialRestrictions.entries().iterator();
+      final Entry<IRI, ELConceptDescription> ER = it.next();
+      it.remove();
+      ER
+          .getValue()
+          .upperNeighborsReduced()
+          .parallelStream()
+          .filter(
+              uER -> upperNeighbor.existentialRestrictions
+                  .entries()
+                  .parallelStream()
+                  .filter(otherER -> !otherER.equals(ER))
+                  .filter(otherER -> ER.getKey().equals(otherER.getKey()))
+                  .map(Entry::getValue)
+                  .noneMatch(otherERfiller -> uER.subsumes(otherERfiller)))
+          .map(uER -> Pair.of(ER.getKey(), uER))
+          .sequential()
+          .forEach(p -> upperNeighbor.existentialRestrictions.put(p.first(), p.second()));
+      return upperNeighbor;
+    } else
+      return null;
+  }
+
+//  public final int rank2() {
+//    final ELConceptDescription C = this.clone().reduce();
+//    int r = C.conceptNames.size();
+//    C.conceptNames.clear();
+//    if (C.existentialRestrictions.isEmpty())
+//      return r;
+//    else if (C.existentialRestrictions.size() == 1)
+//      return r + rank2existentialRestriction(
+//          ELConceptDescription.existentialRestriction(C.existentialRestrictions.iterator().next()));
+//    else
+//      return r + rank2conjunction(C);
+//  }
+//
+//  private static final int rank2conjunction(final ELConceptDescription conjunction) {
+//    if (!conjunction.conceptNames.isEmpty())
+//      throw new IllegalArgumentException();
+//    final Set<Pair<IRI, ELConceptDescription>> conjuncts = conjunction.existentialRestrictions;
+//    if (conjuncts.isEmpty())
+//      return 0;
+//    else if (conjuncts.size() == 1)
+//      return rank2existentialRestriction(ELConceptDescription.existentialRestriction(conjuncts.iterator().next()));
+//    else {
+//      return IntStream.range(1, conjuncts.size() + 1).boxed().map(i -> {
+//        return (int) (Math.pow(-1, i + 1) * Sets
+//            .combinations(
+//                conjuncts
+//                    .parallelStream()
+//                    .map(ELConceptDescription::existentialRestriction)
+//                    // .map(ELConceptDescription::clone)
+//                    .collect(Collectors.toSet()),
+//                i)
+//            .parallelStream()
+//            .map(ELLeastCommonSubsumer::_of)
+//            .map(ELConceptDescription::clone)
+//            // .map(ELConceptDescription::getReducedForm)
+//            .collect(Collectors.summingInt(ELConceptDescription::rank2conjunction)));
+//      }).collect(Collectors.summingInt(Integer::intValue));
+//    }
+//  }
+//
+//  private static final int rank2existentialRestriction(final ELConceptDescription existentialRestriction) {
+//    if (!existentialRestriction.conceptNames.isEmpty())
+//      throw new IllegalArgumentException();
+//    else if (existentialRestriction.existentialRestrictions.size() != 1)
+//      throw new IllegalArgumentException();
+//    else {
+//      final Pair<IRI, ELConceptDescription> rC = existentialRestriction.existentialRestrictions.iterator().next();
+//      final IRI r = rC.first();
+//      final ELConceptDescription C = rC.second();
+//      C.reduce();
+//      return 1 + rank2conjunction(
+//          new ELConceptDescription(
+//              new HashSet<>(),
+//              C.upperNeighborsReduced().parallelStream().map(D -> Pair.of(r, D)).collect(Collectors.toSet())));
+//    }
+//  }
+
+  public final int rank3() {
+//    final Set<ELConceptDescription> Us = representatives(upperNeighborsReduced(), (X, Y) -> X.isEquivalentTo(Y));
+    final Set<ELConceptDescription> Us = upperNeighborsReduced();
+//    if (Us.parallelStream().anyMatch(X -> Us.parallelStream().filter(Y -> X != Y).anyMatch(X::isEquivalentTo)))
+//      throw new RuntimeException();
+    if (Us.isEmpty())
+      return 0;
+    else if (Us.size() == 1)
+      return 1 + Us.iterator().next().clone().reduce().rank3();
+    else
+      return Us.size() + ELLeastCommonSubsumer.lcs(Us).clone().reduce().rank3();
+  }
+
+  public final Set<ELConceptDescription> upperNeighbors() {
+    final ELConceptDescription reducedForm = this.clone().reduce();
+    return Stream.concat(reducedForm.conceptNames.parallelStream().map(A -> {
+      final ELConceptDescription upperNeighbor = reducedForm.clone();
+      upperNeighbor.conceptNames.remove(A);
+      return upperNeighbor;
+    }), reducedForm.existentialRestrictions.entries().parallelStream().map(ER -> {
+      final ELConceptDescription upperNeighbor = reducedForm.clone();
+      upperNeighbor.existentialRestrictions.remove(ER.getKey(), ER.getValue());
+      ER.getValue().upperNeighbors().parallelStream().sequential().forEach(
+          uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
+      return upperNeighbor;
+    })
+//        .filter(other -> !this.subsumes(other)))
+    ).collect(Collectors.toSet());
+  }
+
+  public final Set<ELConceptDescription> upperNeighborsReduced() {
+    final ELConceptDescription reducedForm = this.clone().reduce();
+    return Collections3.representatives(Stream.concat(reducedForm.conceptNames.parallelStream().map(A -> {
+      final ELConceptDescription upperNeighbor = reducedForm.clone();
+      upperNeighbor.conceptNames.remove(A);
+      return upperNeighbor;
+    }), reducedForm.existentialRestrictions.entries().parallelStream().map(ER -> {
+      final ELConceptDescription upperNeighbor = reducedForm.clone();
+      upperNeighbor.existentialRestrictions.remove(ER.getKey(), ER.getValue());
+      ER
+          .getValue()
+          .upperNeighborsReduced()
+          .parallelStream()
+          .filter(
+              uER -> reducedForm.existentialRestrictions
+                  .entries()
+                  .parallelStream()
+                  .filter(otherER -> !otherER.equals(ER))
+                  .filter(otherER -> ER.getKey().equals(otherER.getKey()))
+                  .map(Entry::getValue)
+                  .noneMatch(otherERfiller -> uER.subsumes(otherERfiller)))
+          .sequential()
+          .forEach(uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
+      return upperNeighbor;
+    })
+//        .filter(other -> !this.subsumes(other)))
+    ).collect(Collectors.toSet()), (X, Y) -> X.isEquivalentTo(Y));
+  }
+
+  public final Set<ELConceptDescription> lowerNeighbors(final Signature sigma) {
+    final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = C.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final Set<ELConceptDescription> filter = C.existentialRestrictions
+          .entries()
+          .parallelStream()
+          .filter(existentialRestriction -> existentialRestriction.getKey().equals(r))
+          .map(Entry::getValue)
+          .collect(Collectors.toSet());
+      if (filter.isEmpty()) {
+        final ELConceptDescription lowerNeighbor = C.clone();
+        lowerNeighbor.existentialRestrictions.put(r, ELConceptDescription.top());
+        lowerNeighbors.add(lowerNeighbor);
+      } else
+        recurseLowerNeighbors(sigma, r, C, Collections.singleton(ELConceptDescription.top()), filter, lowerNeighbors);
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription C,
+      final Set<ELConceptDescription> currentCandidates,
+      final Set<ELConceptDescription> filter,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
+    currentCandidates.parallelStream().forEach(D -> {
+      if (!D.upperNeighborsReduced().parallelStream().allMatch(
+          U -> C.isSubsumedBy(ELConceptDescription.existentialRestriction(r, U))))
+        return;
+      else if (filter.parallelStream().anyMatch(F -> F.isSubsumedBy(D)))
+        D.lowerNeighbors(sigma).parallelStream().forEach(nextCandidates::add);
+      else {
+        final ELConceptDescription X = C.clone();
+        X.existentialRestrictions.put(r, D);
+        lowerNeighbors.add(X);
+      }
+    });
+    if (!nextCandidates.isEmpty())
+      recurseLowerNeighbors(sigma, r, C, nextCandidates, filter, lowerNeighbors);
+  }
+
+  public final Set<ELConceptDescription> lowerNeighborsReduced(final Signature sigma) {
+    final Set<ELConceptDescription> lowerNeighbors = lowerNeighbors(sigma);
+    lowerNeighbors.parallelStream().forEach(ELConceptDescription::reduce);
+    return lowerNeighbors;
+  }
+
+  protected final Set<ELConceptDescription> lowerNeighbors2(final Signature sigma) {
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !ELConceptDescription.this.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = ELConceptDescription.this.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final ELConceptDescription rLCS = ELLeastCommonSubsumer.lcs(
+          ELConceptDescription.this.clone().reduce().existentialRestrictions
+              .entries()
+              .parallelStream()
+              .filter(sD -> sD.getKey().equals(r))
+              .map(Entry::getValue)
+              .collect(Collectors.toSet()));
+      rLCS.reduce();
+//      recurseLowerNeighbors(sigma, r, new ELConceptDescription(), lowerNeighbors);
+      recurseLowerNeighbors2a(sigma, r, rLCS, lowerNeighbors);
+      recurseLowerNeighbors2b(sigma, r, new ELConceptDescription(), rLCS, lowerNeighbors);
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors2a(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription D,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    if (ELConceptDescription.this.isSubsumedBy(ELConceptDescription.existentialRestriction(r, D)))
+      D.lowerNeighbors2(sigma).parallelStream().forEach(E -> recurseLowerNeighbors2a(sigma, r, E, lowerNeighbors));
+    else if (D.upperNeighborsReduced().parallelStream().allMatch(
+        E -> ELConceptDescription.this.isSubsumedBy(ELConceptDescription.existentialRestriction(r, E)))) {
+      final ELConceptDescription lowerNeighbor = ELConceptDescription.this.clone();
+      lowerNeighbor.existentialRestrictions.put(r, D);
+      lowerNeighbors.add(lowerNeighbor);
+    }
+  }
+
+  private final void recurseLowerNeighbors2b(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription D,
+      final ELConceptDescription rLCS,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    if (rLCS.subsumes(D))
+      return;
+    else if (ELConceptDescription.this.isSubsumedBy(ELConceptDescription.existentialRestriction(r, D)))
+      D.lowerNeighbors2(sigma).parallelStream().forEach(
+          E -> recurseLowerNeighbors2b(sigma, r, E, rLCS, lowerNeighbors));
+    else if (D.upperNeighborsReduced().parallelStream().allMatch(
+        E -> ELConceptDescription.this.isSubsumedBy(ELConceptDescription.existentialRestriction(r, E)))) {
+      final ELConceptDescription lowerNeighbor = ELConceptDescription.this.clone();
+      lowerNeighbor.existentialRestrictions.put(r, D);
+      lowerNeighbors.add(lowerNeighbor);
+    }
+  }
+
+  protected final Set<ELConceptDescription> lowerNeighbors3(final Signature sigma) {
+    final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !ELConceptDescription.this.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = C.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final Set<ELConceptDescription> Ds = C.existentialRestrictions
+          .entries()
+          .parallelStream()
+          .filter(sD -> sD.getKey().equals(r))
+          .map(Entry::getValue)
+          .collect(Collectors.toSet());
+      if (Ds.isEmpty()) {
+        final ELConceptDescription X = C.clone();
+        X.existentialRestrictions.put(r, ELConceptDescription.top());
+        lowerNeighbors.add(X);
+      } else
+//        Stream
+//            .concat(
+        // Collections.<Pair<Set<ELConceptDescription>, ELConceptDescription>> emptySet().parallelStream(),
+        Collections
+            .singleton(Pair.of(Ds, ELConceptDescription.top()))
+            .parallelStream()
+            // ,
+            // Sets.powerSet(Ds).parallelStream().filter(Es -> Es.size() > 0).map(Es -> {
+            // final ELConceptDescription lcsEs = ELLeastCommonSubsumer._of(Es);
+            // lcsEs.reduce();
+            // return Pair.of(Es, lcsEs);
+            // }))
+            .forEach(p -> {
+              recurseLowerNeighbors3(sigma, r, C, p.second(), p.first(), lowerNeighbors);
+              // p.second().lowerNeighbors3(sigma).parallelStream().forEach(
+              // E -> recurseLowerNeighbors3(sigma, r, C, E, p.first(), lowerNeighbors));
+            });
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors3(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription C,
+      final ELConceptDescription D,
+      final Set<ELConceptDescription> filter,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    if (!D.upperNeighborsReduced().parallelStream().allMatch(
+        U -> C.isSubsumedBy(ELConceptDescription.existentialRestriction(r, U))))
+      return;
+    else if (filter.parallelStream().anyMatch(F -> F.isSubsumedBy(D)))
+      D.lowerNeighbors3(sigma).parallelStream().forEach(
+          E -> recurseLowerNeighbors3(sigma, r, C, E, filter, lowerNeighbors));
+//      return;
+    else {
+      final ELConceptDescription X = C.clone();
+      X.existentialRestrictions.put(r, D);
+      lowerNeighbors.add(X);
+    }
+//    D
+//        .lowerNeighbors3(sigma)
+//        .parallelStream()
+//        .filter(L -> filter.parallelStream().allMatch(E -> !E.isSubsumedBy(L)))
+//        .filter(
+//            L -> L.upperNeighborsReduced().parallelStream().allMatch(
+//                U -> C.isSubsumedBy(ELConceptDescription.existentialRestriction(Pair.of(r, U)))))
+//        .map(L -> {
+//          final ELConceptDescription X = C.clone();
+//          X.existentialRestrictions.add(Pair.of(r, L));
+//          return X;
+//        })
+//        .forEach(lowerNeighbors::add);
+  }
+
+//  public final Set<ELConceptDescription> lowerNeighbors2(final Signature sigma) {
+//    this.reduce();
+//    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+//    sigma.getConceptNames().parallelStream().filter(A -> !ELConceptDescription.this.conceptNames.contains(A)).map(A -> {
+//      final ELConceptDescription lowerNeighbor = ELConceptDescription.this.clone();
+//      lowerNeighbor.conceptNames.add(A);
+//      return lowerNeighbor;
+//    }).forEach(lowerNeighbors::add);
+//    sigma.getRoleNames().parallelStream().forEach(
+//        r -> this.existentialRestrictions.parallelStream().filter(sD -> sD.first().equals(r)).map(Pair::second).forEach(
+//            D -> D.lowerNeighbors2(sigma).parallelStream().forEach(
+//                E -> recurseLowerNeighbors2(sigma, r, E, lowerNeighbors))));
+//    return lowerNeighbors;
+//  }
+//
+//  private final void recurseLowerNeighbors2(
+//      final Signature sigma,
+//      final IRI r,
+//      final ELConceptDescription D,
+//      final Set<ELConceptDescription> lowerNeighbors) {
+//    if (D.upperNeighborsReduced().parallelStream().allMatch(
+//        E -> ELConceptDescription.this.isSubsumedBy(ELConceptDescription.existentialRestriction(Pair.of(r, E))))) {
+//      final ELConceptDescription lowerNeighbor = ELConceptDescription.this.clone();
+//      lowerNeighbor.existentialRestrictions.add(Pair.of(r, D));
+//      lowerNeighbors.add(lowerNeighbor);
+//    } else
+//      D.lowerNeighbors(sigma).parallelStream().forEach(E -> recurseLowerNeighbors2(sigma, r, E, lowerNeighbors));
+//  }
+
   @Override
-  public String toString() {
+  public final String toString() {
     if (isBot())
       return UnicodeSymbols.BOT;
     if (isTop())
@@ -218,46 +684,56 @@ public class ELConceptDescription {
       sb.append(it1.next().toString());
     }
     while (it1.hasNext()) {
-      sb.append(" ");
+      // sb.append(" ");
       sb.append(UnicodeSymbols.SQCAP);
-      sb.append(" ");
+      // sb.append(" ");
       sb.append(it1.next().toString());
     }
     if (!conceptNames.isEmpty() && !existentialRestrictions.isEmpty()) {
-      sb.append(" ");
+      // sb.append(" ");
       sb.append(UnicodeSymbols.SQCAP);
-      sb.append(" ");
+      // sb.append(" ");
     }
-    final Iterator<Pair<IRI, ELConceptDescription>> it2 = existentialRestrictions.iterator();
+    final Iterator<Entry<IRI, ELConceptDescription>> it2 = existentialRestrictions.entries().iterator();
     if (it2.hasNext()) {
-      final Pair<IRI, ELConceptDescription> existentialRestriction = it2.next();
+      final Entry<IRI, ELConceptDescription> existentialRestriction = it2.next();
       sb.append(UnicodeSymbols.EXISTS);
-      sb.append(" ");
-      sb.append(existentialRestriction.x().toString());
-      sb.append(" ");
+      // sb.append(" ");
+      sb.append(existentialRestriction.getKey().toString());
+      // sb.append(" ");
       sb.append(".");
-      sb.append("(");
-      sb.append(existentialRestriction.y().toString());
-      sb.append(")");
+      if (existentialRestriction.getValue().conceptNames.size()
+          + existentialRestriction.getValue().existentialRestrictions.size() <= 1)
+        sb.append(existentialRestriction.getValue().toString());
+      else {
+        sb.append("(");
+        sb.append(existentialRestriction.getValue().toString());
+        sb.append(")");
+      }
     }
     while (it2.hasNext()) {
-      sb.append(" ");
+      // sb.append(" ");
       sb.append(UnicodeSymbols.SQCAP);
-      final Pair<IRI, ELConceptDescription> existentialRestriction = it2.next();
-      sb.append(" ");
+      final Entry<IRI, ELConceptDescription> existentialRestriction = it2.next();
+      // sb.append(" ");
       sb.append(UnicodeSymbols.EXISTS);
-      sb.append(" ");
-      sb.append(existentialRestriction.x().toString());
-      sb.append(" ");
+      // sb.append(" ");
+      sb.append(existentialRestriction.getKey().toString());
+      // sb.append(" ");
       sb.append(".");
-      sb.append("(");
-      sb.append(existentialRestriction.y().toString());
-      sb.append(")");
+      if (existentialRestriction.getValue().conceptNames.size()
+          + existentialRestriction.getValue().existentialRestrictions.size() <= 1)
+        sb.append(existentialRestriction.getValue().toString());
+      else {
+        sb.append("(");
+        sb.append(existentialRestriction.getValue().toString());
+        sb.append(")");
+      }
     }
     return sb.toString();
   }
 
-  public String toLaTeXString() {
+  public final String toLaTeXString() {
     if (this.isBot())
       return "\\bot";
     if (this.isTop())
@@ -271,34 +747,44 @@ public class ELConceptDescription {
       sb.append(" \\sqcap ");
       sb.append(it1.next().toString());
     }
-    final Iterator<Pair<IRI, ELConceptDescription>> it2 = existentialRestrictions.iterator();
+    final Iterator<Entry<IRI, ELConceptDescription>> it2 = existentialRestrictions.entries().iterator();
     if (conceptNames.isEmpty())
       sb.append(" \\sqcap ");
     if (it2.hasNext()) {
-      final Pair<IRI, ELConceptDescription> existentialRestriction = it2.next();
+      final Entry<IRI, ELConceptDescription> existentialRestriction = it2.next();
       sb.append(" \\exists ");
-      sb.append(existentialRestriction.x().toString());
+      sb.append(existentialRestriction.getKey().toString());
       sb.append(" . ");
-      sb.append(" \\left( ");
-      sb.append(existentialRestriction.y().toLaTeXString());
-      sb.append(" \\right) ");
+      if (existentialRestriction.getValue().conceptNames.size()
+          + existentialRestriction.getValue().existentialRestrictions.size() <= 1)
+        sb.append(existentialRestriction.getValue().toLaTeXString());
+      else {
+        sb.append(" \\left( ");
+        sb.append(existentialRestriction.getValue().toLaTeXString());
+        sb.append(" \\right) ");
+      }
     }
     while (it2.hasNext()) {
-      final Pair<IRI, ELConceptDescription> existentialRestriction = it2.next();
+      final Entry<IRI, ELConceptDescription> existentialRestriction = it2.next();
       sb.append(" \\sqcap ");
       sb.append(" \\exists ");
-      sb.append(existentialRestriction.x().toString());
+      sb.append(existentialRestriction.getKey().toString());
       sb.append(" . ");
-      sb.append(" \\left( ");
-      sb.append(existentialRestriction.y().toLaTeXString());
-      sb.append(" \\right) ");
+      if (existentialRestriction.getValue().conceptNames.size()
+          + existentialRestriction.getValue().existentialRestrictions.size() <= 1)
+        sb.append(existentialRestriction.getValue().toLaTeXString());
+      else {
+        sb.append(" \\left( ");
+        sb.append(existentialRestriction.getValue().toLaTeXString());
+        sb.append(" \\right) ");
+      }
 
     }
     return sb.toString();
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public final boolean equals(Object obj) {
     if (obj == null)
       return false;
     if (!(obj instanceof ELConceptDescription))
@@ -309,15 +795,21 @@ public class ELConceptDescription {
   }
 
   @Override
-  public int hashCode() {
+  public final int hashCode() {
     return 2 * conceptNames.hashCode() + 3 * existentialRestrictions.hashCode();
   }
 
   @Override
-  public ELConceptDescription clone() {
+  public final ELConceptDescription clone() {
     final ELConceptDescription clone = new ELConceptDescription();
     clone.getConceptNames().addAll(this.getConceptNames());
-    clone.getExistentialRestrictions().addAll(this.getExistentialRestrictions());
+    this
+        .getExistentialRestrictions()
+        .entries()
+        .parallelStream()
+        .map(ER -> Pair.of(ER.getKey(), ER.getValue().clone()))
+        .sequential()
+        .forEach(ER -> clone.getExistentialRestrictions().put(ER.x(), ER.y()));
     return clone;
   }
 

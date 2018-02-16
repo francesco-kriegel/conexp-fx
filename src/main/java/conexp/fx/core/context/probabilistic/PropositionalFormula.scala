@@ -88,11 +88,11 @@ case class Not[M](f: PropositionalFormula[M]) extends PropositionalFormula[M] {
   override def hasModel(v: M => Boolean): Boolean = !(f hasModel v)
 }
 case class And[M](fs: Set[PropositionalFormula[M]]) extends PropositionalFormula[M] {
-  
+
   def this(f:PropositionalFormula[M], g:PropositionalFormula[M]){
     this(Set(f,g))
   }
-  
+
   override def toString = fs.mkString("(", UnicodeSymbols.WEDGE, ")")
   override def mapVar[N](t: M => N) = And(fs map (_ mapVar t))
   override def visit(t: PropositionalFormula[M] => Unit) {
@@ -102,11 +102,11 @@ case class And[M](fs: Set[PropositionalFormula[M]]) extends PropositionalFormula
   override def hasModel(v: M => Boolean): Boolean = fs.forall(_ hasModel v)
 }
 case class Or[M](fs: Set[PropositionalFormula[M]]) extends PropositionalFormula[M] {
-  
+
   def this(f:PropositionalFormula[M], g:PropositionalFormula[M]){
     this(Set(f,g))
   }
-  
+
   override def toString = fs.mkString("(", UnicodeSymbols.VEE, ")")
   override def mapVar[N](t: M => N) = Or(fs map (_ mapVar t))
   override def visit(t: PropositionalFormula[M] => Unit) {
@@ -116,28 +116,54 @@ case class Or[M](fs: Set[PropositionalFormula[M]]) extends PropositionalFormula[
   override def hasModel(v: M => Boolean): Boolean = fs.exists(_ hasModel v)
 }
 
+//object PropositionalFormulaCompiler extends RegexParsers {
+//  
+//  override def skipWhitespace = true
+//  override val whiteSpace = "[ \t\r\f\n]+".r
+//
+//  sealed trait PropositionalToken
+//  case object AND extends PropositionalToken
+//  case object OR extends PropositionalToken
+//  case object NOT extends PropositionalToken
+//  case object IMPLIES extends PropositionalToken
+//  case object IF extends PropositionalToken
+//  case object IFF extends PropositionalToken
+//  case object TRUE extends PropositionalToken
+//  case object FALSE extends PropositionalToken
+//  case class VAR(name:String) extends PropositionalToken
+//
+//  val t_and: Parser[PropositionalToken] = ("and" | "AND" | UnicodeSymbols.WEDGE ) ^^ { _ => AND }
+//  val t_or = ("or" | "OR" | UnicodeSymbols.VEE) ^^ { _=>OR }
+//  val t_not = ("not" | "NOT" | UnicodeSymbols.NEG) ^^ {_=>NOT}
+//  val t_implies = ("implies" | "IMPLIES" | "only if" | "ONLY IF" | UnicodeSymbols.TO) ^^{_=>IMPLIES}
+//  val t_if = ("if" | "IF" | UnicodeSymbols.FROM) ^^{_=>IF}
+//  val t_iff = ("iff" | "IFF" | "if and only if" | "IF AND ONLY IF" |UnicodeSymbols.FROMTO)^^{_=>IFF}
+//  val t_true = ("true"|"TRUE"|"top"|"TOP"|"1"| UnicodeSymbols.TOP) ^^ { _=>TRUE }
+//
+//}
+
 object PropositionalFormulae {
-  
+
   def Implication[M](premise:PropositionalFormula[M],conclusion:PropositionalFormula[M]): PropositionalFormula[M] = {
     new Or(Not(premise),conclusion)
   }
-  
+
   def Biimplication[M](f: PropositionalFormula[M],g:PropositionalFormula[M]):PropositionalFormula[M] ={
     new And(Implication(f,g),Implication(g,f))
   }
-  
+
   def Xor[M](f:PropositionalFormula[M],g:PropositionalFormula[M]):PropositionalFormula[M] = {
     new Or(new And(f,Not(g)),new And(Not(f),g))
   }
-  
+
   def Nand[M](f:PropositionalFormula[M],g:PropositionalFormula[M]):PropositionalFormula[M] = {
     Not(new And(f,g))
   }
-  
+
   def Nor[M](f:PropositionalFormula[M],g:PropositionalFormula[M]):PropositionalFormula[M] = {
     Not(new Or(f,g))
   }
-  
+
   def Xnor[M](f:PropositionalFormula[M],g:PropositionalFormula[M]):PropositionalFormula[M] = {
     Not(Xor(f,g))
   }

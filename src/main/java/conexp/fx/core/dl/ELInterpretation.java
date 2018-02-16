@@ -6,7 +6,7 @@ import java.io.BufferedReader;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -61,9 +61,9 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       return true;
     return conceptExpression.getConceptNames().parallelStream().allMatch(
         conceptName -> conceptNameExtensions.get(conceptName).contains(individual))
-        && conceptExpression.getExistentialRestrictions().parallelStream().allMatch(
-            existentialRestriction -> getRoleSuccessorStream(existentialRestriction.first(), individual)
-                .anyMatch(successor -> isInstanceOf(successor, existentialRestriction.second())));
+        && conceptExpression.getExistentialRestrictions().entries().parallelStream().allMatch(
+            existentialRestriction -> getRoleSuccessorStream(existentialRestriction.getKey(), individual)
+                .anyMatch(successor -> isInstanceOf(successor, existentialRestriction.getValue())));
   }
 
 //  @Override
@@ -141,7 +141,12 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
 //                roleDepth - 1)));
     else
       existentialRestrictions = new HashSet<Pair<IRI, ELConceptDescription>>();
-    return new ELConceptDescription(conceptNames, existentialRestrictions).minimize();
+    final ELConceptDescription msc = new ELConceptDescription();
+    msc.getConceptNames().addAll(conceptNames);
+    for (Pair<IRI, ELConceptDescription> p : existentialRestrictions)
+      msc.getExistentialRestrictions().put(p.x(), p.y());
+    msc.reduce();
+    return msc;
   }
 
   @Override
@@ -151,9 +156,9 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       final int maxCardinality,
       final Constructor... constructors) {
     checkRoleDepth(roleDepth);
-    return ELLeastCommonSubsumer._of(Collections2.transform(individuals, individual -> {
-      return getMostSpecificConcept(individual, 0, roleDepth);
-    }));
+    return ELLeastCommonSubsumer.lcs(
+        new HashSet<>(
+            Collections2.transform(individuals, individual -> getMostSpecificConcept(individual, 0, roleDepth))));
   }
 
 //  private Set<ELNormalForm> getAllMostSpecificConcepts(final int roleDepth) {
@@ -209,7 +214,7 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
     _codomain.addAll(Collections2.transform(signature.getConceptNames(), ELConceptDescription::conceptName));
     for (IRI roleName : signature.getRoleNames())
       _codomain.addAll(Collections2.transform(mmscs, mmsc -> {
-        return ELConceptDescription.existentialRestriction(Pair.of(roleName, mmsc));
+        return ELConceptDescription.existentialRestriction(roleName, mmsc);
       }));
     return _codomain;
   };
@@ -252,8 +257,8 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
     for (Entry<Set<ELConceptDescription>, Set<ELConceptDescription>> entry : result.implications.entrySet())
       tbox.getGCIs().add(
           new ELConceptInclusion(
-              ELConceptDescription.conjunction(entry.getKey()).minimize(),
-              ELConceptDescription.conjunction(entry.getValue()).minimize()));
+              ELConceptDescription.conjunction(entry.getKey()).clone().reduce(),
+              ELConceptDescription.conjunction(entry.getValue()).clone().reduce()));
     return tbox;
   }
 

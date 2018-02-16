@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -50,23 +50,14 @@ public class ELReasoner {
       return true;
     if (!concept1.getConceptNames().containsAll(concept2.getConceptNames()))
       return false;
-    return concept2
-        .getExistentialRestrictions()
-        .parallelStream()
-        .allMatch(
-            existentialRestriction2 -> {
-              return concept1
-                  .getExistentialRestrictions()
-                  .parallelStream()
-                  .anyMatch(
-                      existentialRestriction1 -> {
-                        return existentialRestriction2.x().equals(existentialRestriction1.x())
-                            && isSubsumedBy(existentialRestriction2.y(), existentialRestriction1.y());
-                      });
-            });
+    return concept2.getExistentialRestrictions().entries().parallelStream().allMatch(
+        existentialRestriction2 -> concept1.getExistentialRestrictions().entries().parallelStream().anyMatch(
+            existentialRestriction1 -> existentialRestriction2.getKey().equals(existentialRestriction1.getKey())
+                && isSubsumedBy(existentialRestriction1.getValue(), existentialRestriction2.getValue())));
   }
 
-  public static final boolean isSubsumedBy(final ELConceptDescription concept1, final ELConceptDescription concept2, final ELTBox tBox) {
+  public static final boolean
+      isSubsumedBy(final ELConceptDescription concept1, final ELConceptDescription concept2, final ELTBox tBox) {
     return isSubsumedBy(concept1.toOWLClassExpression(), concept2.toOWLClassExpression(), tBox.toOWLOntology());
   }
 
@@ -76,10 +67,8 @@ public class ELReasoner {
     return dummy++;
   }
 
-  public static final boolean isSubsumedBy(
-      final OWLClassExpression concept1,
-      final OWLClassExpression concept2,
-      final OWLOntology ontology) {
+  public static final boolean
+      isSubsumedBy(final OWLClassExpression concept1, final OWLClassExpression concept2, final OWLOntology ontology) {
     final OWLOntologyManager om = OWLManager.createOWLOntologyManager();
     final OWLDataFactory df = OWLManager.getOWLDataFactory();
 

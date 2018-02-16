@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -49,10 +49,12 @@ public class ELTBox {
       final OWLDataFactory df = om.getOWLDataFactory();
       final OWLOntology ontology = om.createOntology();
       gcis.parallelStream().forEach(
-          gci -> om.applyChange(new AddAxiom(ontology, df.getOWLSubClassOfAxiom(gci
-              .getSubsumee()
-              .minimize()
-              .toOWLClassExpression(), gci.getSubsumer().minimize().toOWLClassExpression()))));
+          gci -> om.applyChange(
+              new AddAxiom(
+                  ontology,
+                  df.getOWLSubClassOfAxiom(
+                      gci.getSubsumee().clone().reduce().toOWLClassExpression(),
+                      gci.getSubsumer().clone().reduce().toOWLClassExpression()))));
       return ontology;
     } catch (OWLOntologyCreationException e) {
       throw new RuntimeException(e);

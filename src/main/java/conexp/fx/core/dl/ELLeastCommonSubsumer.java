@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -12,11 +12,10 @@ package conexp.fx.core.dl;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -25,82 +24,143 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.Pair;
 
 public class ELLeastCommonSubsumer {
 
-  private static final OWLDataFactory                       df       = OWLManager.getOWLDataFactory();
+  private static final OWLDataFactory df = OWLManager.getOWLDataFactory();
 
-  private static final Map<Set<ELConceptDescription>, ELConceptDescription> lcsCache = new HashMap<Set<ELConceptDescription>, ELConceptDescription>();
-
-  protected static final ELConceptDescription _of(final ELConceptDescription concept1, final ELConceptDescription concept2) {
-    final Set<ELConceptDescription> _concepts = Sets.newHashSet(concept1, concept2);
-    final ELConceptDescription _lcs = lcsCache.get(_concepts);
-    if (_lcs != null)
-      return _lcs;
-    if (concept1.isBot())
-      return concept2;
-    if (concept2.isBot())
-      return concept1;
-    if (concept1.isTop())
-      return concept1;
-    if (concept2.isTop())
-      return concept2;
-//    System.out.println("computing lcs of " + concept1 + " and " + concept2);
-    final Set<IRI> commonNames = new HashSet<IRI>();
-    commonNames.addAll(Sets.intersection(concept1.getConceptNames(), concept2.getConceptNames()));
-    final Set<Pair<IRI, ELConceptDescription>> commonRestrictions = new HashSet<Pair<IRI, ELConceptDescription>>();
-    for (Pair<IRI, ELConceptDescription> existentialRestriction1 : concept1.getExistentialRestrictions())
-      for (Pair<IRI, ELConceptDescription> existentialRestriction2 : concept2.getExistentialRestrictions())
-        if (existentialRestriction1.x().equals(existentialRestriction2.x())) {
-          commonRestrictions.add(new Pair<IRI, ELConceptDescription>(existentialRestriction1.x(), _of(
-              existentialRestriction1.y(),
-              existentialRestriction2.y())));
-        }
-    final ELConceptDescription lcs = new ELConceptDescription(commonNames, commonRestrictions);
-//    System.out.println("lcs( " + concept1 + " , " + concept2 + " ) = " + lcs);
-    lcsCache.put(_concepts, lcs);
-    return lcs;
-  }
-
-  protected static final ELConceptDescription _of(ELConceptDescription... concepts) {
-//    final Set<ELNormalForm> _concepts = Sets.newHashSet(concepts);
-//    final ELNormalForm _lcs = lcsCache.get(_concepts);
+//  private static final Map<Set<ELConceptDescription>, ELConceptDescription> lcsCache =
+//      new HashMap<Set<ELConceptDescription>, ELConceptDescription>();
+//
+//  protected static final ELConceptDescription
+//      _of(final ELConceptDescription concept1, final ELConceptDescription concept2) {
+//    final Set<ELConceptDescription> _concepts = Sets.newHashSet(concept1, concept2);
+//    final ELConceptDescription _lcs = lcsCache.get(_concepts);
 //    if (_lcs != null)
-//      return _lcs;
-//    if (concepts.length == 0)
-//      return new ELNormalForm();
-//    if (concepts.length == 1)
-//      return concepts[0];
-//    if (concepts.length == 2)
-//      return _of(concepts[0], concepts[1]);
-    return _of(Arrays.asList(concepts));
+//      return _lcs.clone();
+//    if (concept1.isBot())
+//      return concept2;
+//    if (concept2.isBot())
+//      return concept1;
+//    if (concept1.isTop())
+//      return concept1;
+//    if (concept2.isTop())
+//      return concept2;
+////    System.out.println("computing lcs of " + concept1 + " and " + concept2);
+//    final Set<IRI> commonNames = new HashSet<IRI>();
+//    commonNames.addAll(Sets.intersection(concept1.getConceptNames(), concept2.getConceptNames()));
+//    final Set<Pair<IRI, ELConceptDescription>> commonRestrictions = new HashSet<Pair<IRI, ELConceptDescription>>();
+//    for (Pair<IRI, ELConceptDescription> existentialRestriction1 : concept1.getExistentialRestrictions())
+//      for (Pair<IRI, ELConceptDescription> existentialRestriction2 : concept2.getExistentialRestrictions())
+//        if (existentialRestriction1.x().equals(existentialRestriction2.x())) {
+//          commonRestrictions.add(
+//              new Pair<IRI, ELConceptDescription>(
+//                  existentialRestriction1.x(),
+//                  _of(existentialRestriction1.y(), existentialRestriction2.y())));
+//        }
+//    final ELConceptDescription lcs = new ELConceptDescription(commonNames, commonRestrictions);
+////    System.out.println("lcs( " + concept1 + " , " + concept2 + " ) = " + lcs);
+//    lcsCache.put(_concepts, lcs);
+//    return lcs.clone();
+//  }
+//
+//  protected static final ELConceptDescription _of(ELConceptDescription... concepts) {
+////    final Set<ELNormalForm> _concepts = Sets.newHashSet(concepts);
+////    final ELNormalForm _lcs = lcsCache.get(_concepts);
+////    if (_lcs != null)
+////      return _lcs;
+////    if (concepts.length == 0)
+////      return new ELNormalForm();
+////    if (concepts.length == 1)
+////      return concepts[0];
+////    if (concepts.length == 2)
+////      return _of(concepts[0], concepts[1]);
+//    return _of(Arrays.asList(concepts));
+//  }
+//
+//  protected static final ELConceptDescription _of(Collection<ELConceptDescription> concepts) {
+//    final Set<ELConceptDescription> _concepts = Sets.newHashSet(concepts);
+//    final ELConceptDescription _lcs = lcsCache.get(_concepts);
+//    if (_lcs != null)
+//      return _lcs.clone();
+//    if (concepts.isEmpty())
+//      return new ELConceptDescription();
+//    final Iterator<ELConceptDescription> it = concepts.iterator();
+//    if (concepts.size() == 1)
+//      return it.next();
+//    if (concepts.size() == 2) {
+//      final ELConceptDescription lcs = _of(it.next(), it.next());
+//      lcsCache.put(_concepts, lcs);
+//      return lcs;
+//    }
+//    ELConceptDescription lcs = it.next();
+//    while (it.hasNext())
+//      lcs = _of(lcs, it.next());
+//    lcsCache.put(_concepts, lcs);
+//    return lcs.clone();
+//  }
+
+  public static final ELConceptDescription lcs(final ELConceptDescription C, final ELConceptDescription D) {
+    return lcs(Sets.newHashSet(C, D));
   }
 
-  protected static final ELConceptDescription _of(Collection<ELConceptDescription> concepts) {
-    final Set<ELConceptDescription> _concepts = Sets.newHashSet(concepts);
-    final ELConceptDescription _lcs = lcsCache.get(_concepts);
-    if (_lcs != null)
-      return _lcs;
-    if (concepts.isEmpty())
-      return new ELConceptDescription();
-    final Iterator<ELConceptDescription> it = concepts.iterator();
-    if (concepts.size() == 1)
-      return it.next();
-    if (concepts.size() == 2) {
-      final ELConceptDescription lcs = _of(it.next(), it.next());
-      lcsCache.put(_concepts, lcs);
-      return lcs;
+  public static final ELConceptDescription lcs(final Set<ELConceptDescription> Cs) {
+    Cs.parallelStream().forEach(ELConceptDescription::reduce);
+    final Set<ELConceptDescription> Ds = Collections3.representatives(Cs, (X, Y) -> X.isEquivalentTo(Y));
+    if (Ds.isEmpty())
+      return ELConceptDescription.bot();
+    else if (Ds.size() == 1)
+      return Ds.iterator().next().clone();
+    else {
+      final ELConceptDescription lcs = new ELConceptDescription();
+      final Iterator<ELConceptDescription> it = Ds.iterator();
+      final ELConceptDescription D = it.next();
+      it.remove();
+      final Set<IRI> commonConceptNames = D
+          .getConceptNames()
+          .parallelStream()
+          .filter(A -> Ds.parallelStream().map(ELConceptDescription::getConceptNames).allMatch(As -> As.contains(A)))
+          .collect(Collectors.toSet());
+      lcs.getConceptNames().addAll(commonConceptNames);
+      final Set<IRI> commonRoleNames = D
+          .getExistentialRestrictions()
+          .keySet()
+          .parallelStream()
+          .filter(
+              r -> Ds.parallelStream().map(ELConceptDescription::getExistentialRestrictions).allMatch(
+                  ERs -> ERs.keySet().parallelStream().anyMatch(r::equals)))
+          .collect(Collectors.toSet());
+      Ds.add(D);
+      commonRoleNames
+          .parallelStream()
+          .map(
+              r -> Pair.of(
+                  r,
+                  Sets
+                      .cartesianProduct(
+                          Ds
+                              .parallelStream()
+                              .map(ELConceptDescription::getExistentialRestrictions)
+                              .map(m -> m.get(r))
+                              .map(HashSet::new)
+                              .collect(Collectors.toList()))
+                      .parallelStream()
+                      .map(HashSet::new)
+                      .map(ELLeastCommonSubsumer::lcs)
+                      .map(ELConceptDescription::reduce)
+                      .collect(Collectors.toSet())))
+          .sequential()
+          .forEach(p -> lcs.getExistentialRestrictions().putAll(p.x(), p.y()));;
+      return lcs.clone().reduce();
     }
-    ELConceptDescription lcs = it.next();
-    while (it.hasNext())
-      lcs = _of(lcs, it.next());
-    lcsCache.put(_concepts, lcs);
-    return lcs;
   }
 
   public static final OWLClassExpression of(final OWLClassExpression concept1, final OWLClassExpression concept2) {
-    return ELLeastCommonSubsumer._of(ELConceptDescription.of(concept1), ELConceptDescription.of(concept2)).toOWLClassExpression();
+    return ELLeastCommonSubsumer
+        .lcs(ELConceptDescription.of(concept1), ELConceptDescription.of(concept2))
+        .toOWLClassExpression();
   }
 
   public static final OWLClassExpression of(final OWLClassExpression... concepts) {

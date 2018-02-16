@@ -4,7 +4,7 @@ package conexp.fx.gui.dataset;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -76,7 +76,7 @@ public final class FCADataset<G, M> extends Dataset {
   public final MatrixContext<G, M>                               context;
   public final ConceptLattice<G, M>                              lattice;
   public final AdditiveConceptLayout<G, M>                       layout;
-  private final SimpleConceptLayout<G, M>                        l;
+//  private final SimpleConceptLayout<G, M>                        l;
   public final ObservableList<Concept<G, M>>                     concepts            =
       FXCollections.<Concept<G, M>> observableArrayList();
   public final ObservableList<Implication<G, M>>                 implications        =
@@ -152,8 +152,8 @@ public final class FCADataset<G, M> extends Dataset {
     } , RelationEvent.ALL_CHANGED);
     views.add(new DatasetView<Context<G, M>>("Context", contextWidget, context));
     views.add(new DatasetView<AdditiveConceptLayout<G, M>>("Lattice", conceptGraph, layout));
-    this.l = new SimpleConceptLayout<G, M>(lattice);
-    views.add(new DatasetView<SimpleConceptLayout<G, M>>("Force Lattice", new ConceptGraph<G, M>(this, l), l));
+//    this.l = new SimpleConceptLayout<G, M>(lattice);
+//    views.add(new DatasetView<SimpleConceptLayout<G, M>>("Force Lattice", new ConceptGraph<G, M>(this, l), l));
     views.add(new DatasetView<List<Concept<G, M>>>("Concepts", conceptWidget, concepts));
     views.add(new DatasetView<List<Implication<G, M>>>("Implications", implicationWidget, implications));
     defaultActiveViews.add("Lattice");

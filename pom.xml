@@ -4,7 +4,7 @@
 
 	<groupId>conexp-fx</groupId>
 	<artifactId>conexp-fx</artifactId>
-	<version>5.3-SNAPSHOT</version>
+	<version>5.4-SNAPSHOT</version>
 	<name>Concept Explorer FX</name>
 	<description>Software for Formal Concept Analysis with Description Logics Extensions</description>
 	<packaging>jar</packaging>
@@ -26,10 +26,15 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<application.javaVersion>1.8</application.javaVersion>
-		<javafx.version>8u131</javafx.version>
+		<javafx.version>8u162</javafx.version>
 		<javafx.jar>${java.home}/lib/ext/jfxrt.jar</javafx.jar>
 		<javafx.javadoc>lib/javafx-${javafx.version}-apidocs.zip</javafx.javadoc>
 		<javafx.sources>${java.home}/../javafx-src.zip</javafx.sources>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<encoding>UTF-8</encoding>
+		<scala.version>2.12.4</scala.version>
+		<scala.compat.version>2.12</scala.compat.version>
 	</properties>
 
 	<scm>
@@ -67,7 +72,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>21.0</version>
+			<version>24.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -82,12 +87,12 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.10.2</version>
+			<version>1.11.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
+			<version>4.5.5</version>
 		</dependency>
 		<!-- <dependency> -->
 		<!-- <groupId>com.oracle</groupId> -->
@@ -97,27 +102,28 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.7</version>
+			<version>2.10.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.5</version>
+			<version>3.7</version>
 		</dependency>
 		<dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math4</artifactId>
-            <version>4.0-SNAPSHOT</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math4</artifactId>
+			<version>4.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
-			<version>4.3.0</version>
+			<version>4.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-svg-dom</artifactId>
 			<version>1.7</version>
+			<!-- <version>1.9.1</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jfxtras</groupId>
@@ -127,18 +133,24 @@
 		<dependency>
 			<groupId>org.scilab.forge</groupId>
 			<artifactId>jlatexmath</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
 			<!-- <version>4.0.1</version> -->
-			<version>3.5.4</version>
+			<version>3.5.7</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.semanticweb.elk</groupId>
 			<artifactId>elk-owlapi</artifactId>
-			<version>0.4.2</version>
+			<version>0.4.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.hermit-reasoner</groupId>
@@ -150,11 +162,17 @@
 			<artifactId>sesame-runtime</artifactId>
 			<!-- <version>4.1.2</version> -->
 			<version>2.9.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
-			<version>1.3.1</version>
+			<version>1.4</version>
 			<!-- <version>2.0-gt2-pre1</version> -->
 		</dependency>
 		<dependency>
@@ -172,18 +190,41 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.190</version>
+			<version>1.4.196</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.annotation</artifactId>
-			<version>2.1.0</version>
+			<version>2.1.100</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
-			<version>2.11.8</version>
+			<version>${scala.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scala-lang.modules</groupId>
+			<artifactId>scala-parser-combinators_${scala.compat.version}</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.specs2</groupId>
+			<artifactId>specs2-core_${scala.compat.version}</artifactId>
+			<version>4.0.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.specs2</groupId>
+			<artifactId>specs2-junit_${scala.compat.version}</artifactId>
+			<version>4.0.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.scalatest</groupId>
+			<artifactId>scalatest_${scala.compat.version}</artifactId>
+			<version>3.0.5</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- <dependency> -->
 		<!-- <groupId>org.scala-lang.modules</groupId> -->
@@ -235,21 +276,21 @@
 										<ignore />
 									</action>
 								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>net.alchim31.maven</groupId>
-										<artifactId>scala-maven-plugin</artifactId>
-										<versionRange>[3.2.2,)</versionRange>
-										<goals>
-											<goal>add-source</goal>
-											<goal>compile</goal>
-											<goal>testCompile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
+								<!-- <pluginExecution> -->
+								<!-- <pluginExecutionFilter> -->
+								<!-- <groupId>net.alchim31.maven</groupId> -->
+								<!-- <artifactId>scala-maven-plugin</artifactId> -->
+								<!-- <versionRange>[3.2.2,)</versionRange> -->
+								<!-- <goals> -->
+								<!-- <goal>add-source</goal> -->
+								<!-- <goal>compile</goal> -->
+								<!-- <goal>testCompile</goal> -->
+								<!-- </goals> -->
+								<!-- </pluginExecutionFilter> -->
+								<!-- <action> -->
+								<!-- <ignore /> -->
+								<!-- </action> -->
+								<!-- </pluginExecution> -->
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>org.codehaus.mojo</groupId>
@@ -264,20 +305,20 @@
 										<ignore />
 									</action>
 								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>com.theoryinpractise.frege</groupId>
-										<artifactId>frege-maven-plugin</artifactId>
-										<versionRange>[1.0.7,)</versionRange>
-										<goals>
-											<goal>compile</goal>
-											<goal>test-compile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
+								<!-- <pluginExecution> -->
+								<!-- <pluginExecutionFilter> -->
+								<!-- <groupId>com.theoryinpractise.frege</groupId> -->
+								<!-- <artifactId>frege-maven-plugin</artifactId> -->
+								<!-- <versionRange>[1.0.7,)</versionRange> -->
+								<!-- <goals> -->
+								<!-- <goal>compile</goal> -->
+								<!-- <goal>test-compile</goal> -->
+								<!-- </goals> -->
+								<!-- </pluginExecutionFilter> -->
+								<!-- <action> -->
+								<!-- <ignore /> -->
+								<!-- </action> -->
+								<!-- </pluginExecution> -->
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -285,7 +326,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.12</version>
+					<version>1.14</version>
 					<configuration>
 						<verbose>false</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
@@ -341,7 +382,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.7.0</version>
 					<configuration>
 						<source>${application.javaVersion}</source>
 						<target>${application.javaVersion}</target>
@@ -367,7 +408,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
+					<version>3.0.0</version>
 					<executions>
 						<execution>
 							<id>build-javadoc</id>
@@ -409,7 +450,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.1.0</version>
 					<executions>
 						<execution>
 							<id>build-assembly-jar</id>
@@ -439,7 +480,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>1.10</version>
+					<version>3.0.0</version>
 					<executions>
 						<!-- <execution> -->
 						<!-- <id>add-source</id> -->
@@ -538,7 +579,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.5.0</version>
+					<version>1.6.0</version>
 					<executions>
 						<execution>
 							<id>upload</id>
@@ -560,25 +601,52 @@
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.2.2</version>
+					<version>3.3.1</version>
 					<executions>
 						<execution>
-							<id>scala-compile-first</id>
-							<phase>process-resources</phase>
-							<!-- <phase>compile</phase> -->
 							<goals>
-								<goal>add-source</goal>
 								<goal>compile</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>scala-test-compile</id>
-							<phase>process-test-resources</phase>
-							<!-- <phase>test-compile</phase> -->
-							<goals>
 								<goal>testCompile</goal>
 							</goals>
+							<configuration>
+								<args>
+									<!-- <arg>-make:transitive</arg> -->
+									<arg>-dependencyfile</arg>
+									<arg>${project.build.directory}/.scala_dependencies</arg>
+								</args>
+							</configuration>
 						</execution>
+						<!-- <execution> -->
+						<!-- <id>scala-compile-first</id> -->
+						<!-- <phase>process-resources</phase> -->
+						<!-- <phase>compile</phase> -->
+						<!-- <goals> -->
+						<!-- <goal>add-source</goal> -->
+						<!-- <goal>compile</goal> -->
+						<!-- </goals> -->
+						<!-- <configuration> -->
+						<!-- <args> -->
+						<!-- <arg>-make:transitive</arg> -->
+						<!-- <arg>-dependencyfile</arg> -->
+						<!-- <arg>${project.build.directory}/.scala_dependencies</arg> -->
+						<!-- </args> -->
+						<!-- </configuration> -->
+						<!-- </execution> -->
+						<!-- <execution> -->
+						<!-- <id>scala-test-compile</id> -->
+						<!-- <phase>process-test-resources</phase> -->
+						<!-- <phase>test-compile</phase> -->
+						<!-- <goals> -->
+						<!-- <goal>testCompile</goal> -->
+						<!-- </goals> -->
+						<!-- <configuration> -->
+						<!-- <args> -->
+						<!-- <arg>-make:transitive</arg> -->
+						<!-- <arg>-dependencyfile</arg> -->
+						<!-- <arg>${project.build.directory}/.scala_dependencies</arg> -->
+						<!-- </args> -->
+						<!-- </configuration> -->
+						<!-- </execution> -->
 					</executions>
 				</plugin>
 				<!-- <plugin> -->

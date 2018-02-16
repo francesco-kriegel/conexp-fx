@@ -4,26 +4,27 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.semanticweb.owlapi.model.IRI;
 
 import com.google.common.collect.Collections2;
 
+import conexp.fx.core.collections.setlist.HashSetArrayList;
+import conexp.fx.core.collections.setlist.SetList;
+
 public final class Signature {
 
   private final IRI      baseIRI;
-  private final Set<IRI> conceptNames    = new HashSet<IRI>();
-  private final Set<IRI> roleNames       = new HashSet<IRI>();
-  private final Set<IRI> individualNames = new HashSet<IRI>();
+  private final SetList<IRI> conceptNames    = new HashSetArrayList<IRI>();
+  private final SetList<IRI> roleNames       = new HashSetArrayList<IRI>();
+  private final SetList<IRI> individualNames = new HashSetArrayList<IRI>();
 
   public Signature(final IRI baseIRI) {
     super();
@@ -34,15 +35,15 @@ public final class Signature {
     return baseIRI;
   }
 
-  public final Set<IRI> getConceptNames() {
+  public final SetList<IRI> getConceptNames() {
     return conceptNames;
   }
 
-  public final Set<IRI> getRoleNames() {
+  public final SetList<IRI> getRoleNames() {
     return roleNames;
   }
 
-  public final Set<IRI> getIndividualNames() {
+  public final SetList<IRI> getIndividualNames() {
     return individualNames;
   }
 

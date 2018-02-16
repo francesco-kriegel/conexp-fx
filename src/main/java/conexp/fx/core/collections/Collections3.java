@@ -9,7 +9,7 @@ import java.io.IOException;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -29,7 +29,9 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -42,6 +44,17 @@ import com.google.common.collect.Lists;
 import conexp.fx.core.math.GuavaIsomorphism;
 
 public final class Collections3 {
+
+  public static final <E> Set<Set<E>> quotient(final Set<E> set, BiPredicate<E, E> pred) {
+    return set
+        .parallelStream()
+        .map(x -> set.parallelStream().filter(y -> pred.test(x, y)).collect(Collectors.toSet()))
+        .collect(Collectors.toSet());
+  }
+
+  public static final <E> Set<E> representatives(final Set<E> set, BiPredicate<E, E> pred) {
+    return quotient(set, pred).parallelStream().map(eqclass -> eqclass.iterator().next()).collect(Collectors.toSet());
+  }
 
   public static final <E> Set<E> newConcurrentHashSet() {
     return Collections.newSetFromMap(new ConcurrentHashMap<E, Boolean>());
@@ -249,11 +262,9 @@ public final class Collections3 {
     };
   }
 
-  public static final <T> void writeToFile(
-      final File file,
-      final Collection<T> collection,
-      final String prefix,
-      final String... suffix) throws IOException {
+  public static final <T> void
+      writeToFile(final File file, final Collection<T> collection, final String prefix, final String... suffix)
+          throws IOException {
     final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
     writer.append(prefix);
     writer.append("size: " + collection.size());

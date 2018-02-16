@@ -7,12 +7,11 @@ package conexp.fx.core.collections;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
  */
-
 
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -125,9 +124,8 @@ public final class ListIterators {
     };
   }
 
-  public static final <T, E> ListIterator<E> transform(
-      final ListIterator<? extends T> it,
-      final Function<? super T, E> f) {
+  public static final <T, E> ListIterator<E>
+      transform(final ListIterator<? extends T> it, final Function<? super T, E> f) {
     return new UnmodifiableListIterator<E>() {
 
       public final boolean hasNext() {
@@ -160,10 +158,8 @@ public final class ListIterators {
     return filter(it, p, 0);
   }
 
-  public static final <E> ListIterator<E> filter(
-      final ListIterator<? extends E> it,
-      final Predicate<? super E> p,
-      final int i) {
+  public static final <E> ListIterator<E>
+      filter(final ListIterator<? extends E> it, final Predicate<? super E> p, final int i) {
     return new SimpleListIterator<E>(i) {
 
       protected final E createNext() {
@@ -186,10 +182,8 @@ public final class ListIterators {
     };
   }
 
-  public static final <E> ListIterator<E> concat(
-      final ListIterator<? extends E> it1,
-      final ListIterator<? extends E> it2,
-      final int i) {
+  public static final <E> ListIterator<E>
+      concat(final ListIterator<? extends E> it1, final ListIterator<? extends E> it2, final int i) {
     return new SimpleListIterator<E>(i) {
 
       protected final E createNext() {
@@ -210,10 +204,8 @@ public final class ListIterators {
     };
   }
 
-  public static final <T, E> ListIterator<Pair<T, E>> disjointUnion(
-      final ListIterator<T> it1,
-      final ListIterator<E> it2,
-      final int i) {
+  public static final <T, E> ListIterator<Pair<T, E>>
+      disjointUnion(final ListIterator<T> it1, final ListIterator<E> it2, final int i) {
     return new SimpleListIterator<Pair<T, E>>(i) {
 
       protected final Pair<T, E> createNext() {
@@ -234,10 +226,8 @@ public final class ListIterators {
     };
   }
 
-  public static final <T, E> ListIterator<Pair<T, E>> cartesianProduct(
-      final ListIterator<T> it1,
-      final ListIterator<E> it2,
-      final int i) {
+  public static final <T, E> ListIterator<Pair<T, E>>
+      cartesianProduct(final ListIterator<T> it1, final ListIterator<E> it2, final int i) {
     return new SimpleListIterator<Pair<T, E>>(true) {
 
       private T t = it1.hasNext() ? it1.next() : null;
@@ -279,7 +269,8 @@ public final class ListIterators {
       @Override
       public final Iterator<Pair<E, E>> iterator() {
         if (!it.iterator().hasNext())
-          return Iterators.emptyIterator();
+          return empty();
+//          return Iterators.emptyIterator();
         return new UnmodifiableIterator<Pair<E, E>>() {
 
           private final Iterator<E> it1   = it.iterator();
@@ -318,10 +309,12 @@ public final class ListIterators {
       public final Iterator<Pair<E, E>> iterator() {
         Iterator<E> _it = it.iterator();
         if (!_it.hasNext())
-          return Iterators.emptyIterator();
+          return empty();
+//          return Iterators.emptyIterator();
         _it.next();
         if (!_it.hasNext())
-          return Iterators.emptyIterator();
+          return empty();
+//          return Iterators.emptyIterator();
         return new UnmodifiableIterator<Pair<E, E>>() {
 
           private final Iterator<E> it1   = it.iterator();

@@ -4,7 +4,7 @@ package conexp.fx.gui.graph;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -52,11 +52,8 @@ public class PolarGraph<G, M> {
   }
 
   private void initialize(final ConceptLattice<G, M> lattice) {
-    final ChainDecomposer<Set<Integer>> chainDecomposer =
-        new ChainDecomposer<Set<Integer>>(lattice.context.selection._reduced
-            .clone()
-            .attributeQuasiOrder()
-            .neighborhood());
+    final ChainDecomposer<Set<Integer>> chainDecomposer = new ChainDecomposer<Set<Integer>>(
+        lattice.context.selection._reduced.clone().attributeQuasiOrder().neighborhood());
     final Random rng = new RandomSimple();
     final Map<M, Point2D> seeds = new HashMap<M, Point2D>();
     final Map<Concept<G, M>, Point2D> positions = new HashMap<Concept<G, M>, Point2D>();
@@ -79,12 +76,13 @@ public class PolarGraph<G, M> {
       if (!concept.equals(lattice.context.bottomConcept())) {
         positions.put(
             concept,
-            PolarPoints.polarSum(seeds
-                .entrySet()
-                .stream()
-                .filter(e -> concept.intent().contains(e.getKey()))
-                .map(e -> e.getValue())
-                .collect(Collectors.toList())));
+            PolarPoints.polarSum(
+                seeds
+                    .entrySet()
+                    .stream()
+                    .filter(e -> concept.intent().contains(e.getKey()))
+                    .map(e -> e.getValue())
+                    .collect(Collectors.toList())));
       }
     positions.values().forEach(this::addCircleAt);
     for (Concept<G, M> c1 : lattice.rowHeads())
@@ -97,13 +95,15 @@ public class PolarGraph<G, M> {
   private final void drawLine(final Point2D p, final Point2D q) {
     final Point2D _p = transform(p);
     final Point2D _q = transform(q);
-    final Arc e = new Arc(rootPane.getWidth() / 2d, rootPane.getHeight() / 2d, 100d*p.getX(), 100d*q.getX(), p.getY(), q.getY()
-        - p.getY());
-    
-    rootPane
-        .getChildren()
-        .add(
-            e);
+    final Arc e = new Arc(
+        rootPane.getWidth() / 2d,
+        rootPane.getHeight() / 2d,
+        100d * p.getX(),
+        100d * q.getX(),
+        p.getY(),
+        q.getY() - p.getY());
+
+    rootPane.getChildren().add(e);
 //    rootPane.getChildren().add(new Line(_p.getX(), _p.getY(), _q.getX(), _q.getY()));
   }
 

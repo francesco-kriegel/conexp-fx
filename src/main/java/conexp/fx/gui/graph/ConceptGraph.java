@@ -4,7 +4,7 @@ package conexp.fx.gui.graph;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import org.semanticweb.owlapi.model.OWLClassExpression;
 
@@ -50,6 +51,7 @@ import conexp.fx.gui.graph.option.VertexHighlight;
 import conexp.fx.gui.graph.option.VertexRadius;
 import conexp.fx.gui.util.FXControls;
 import conexp.fx.gui.util.NumberPropertyTransition;
+import conexp.fx.gui.util.Platform2;
 import conexp.fx.gui.util.SearchBox;
 import de.tudresden.inf.tcs.fcalib.Implication;
 import javafx.animation.FillTransition;
@@ -197,16 +199,118 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
 
       private HighlightHandler() {}
 
-      public final void handle(final MouseEvent event) {
-        System.out.println(layout.getPosition(element));
+      public final synchronized void handle(final MouseEvent event) {
+//        System.out.println(layout.getPosition(element));
         event.consume();
         if (!toolBar.highlight.isSelected() || controller.isDragging())
           return;
-        if (event.getEventType().equals(MouseEvent.MOUSE_ENTERED))
+        if (event.getEventType().equals(MouseEvent.MOUSE_ENTERED)) {
           highlight();
-        else {
+          if (controlBox.attributeLabelText.getSelectionModel().getSelectedItem().equals(AttributeLabelText.NONE)) {
+            final Consumer<Concept<G, M>> f = c -> {
+              synchronized (layout.lattice.attributeConcepts) {
+                for (Entry<M, Concept<G, M>> e : layout.lattice.attributeConcepts.entrySet())
+                  if (e.getValue().equals(c)) {
+                    new AttributeLabel(e.getKey(), c);
+                    break;
+                  }
+              }
+            };
+            final VertexHighlight vertexHighlightOption =
+                controlBox.vertexHighlight.getSelectionModel().selectedItemProperty().get();
+            switch (vertexHighlightOption) {
+            case CONCEPT:
+              f.accept(element);
+              break;
+            case UPPER_NEIGHBORS:
+              f.accept(element);
+              layout.lattice.upperNeighbors(element).forEach(f::accept);
+              break;
+            case LOWER_NEIGHBORS:
+              f.accept(element);
+              layout.lattice.lowerNeighbors(element).forEach(f::accept);
+              break;
+            case NEIGHBORS:
+              f.accept(element);
+              layout.lattice.upperNeighbors(element).forEach(f::accept);
+              layout.lattice.lowerNeighbors(element).forEach(f::accept);
+              break;
+            case FILTER:
+              f.accept(element);
+              layout.lattice.filter(element).forEach(f::accept);
+              break;
+            case IDEAL:
+              f.accept(element);
+              layout.lattice.ideal(element).forEach(f::accept);
+              break;
+            case FILTER_IDEAL:
+              f.accept(element);
+              layout.lattice.filter(element).forEach(f::accept);
+              layout.lattice.ideal(element).forEach(f::accept);
+              break;
+            }
+          }
+          if (controlBox.objectLabelText.getSelectionModel().getSelectedItem().equals(ObjectLabelText.NONE)) {
+            final Consumer<Concept<G, M>> f = c -> {
+              synchronized (layout.lattice.objectConcepts) {
+                for (Entry<G, Concept<G, M>> e : layout.lattice.objectConcepts.entrySet())
+                  if (e.getValue().equals(c)) {
+                    new ObjectLabel(e.getKey(), c);
+                    break;
+                  }
+              }
+            };
+            final VertexHighlight vertexHighlightOption =
+                controlBox.vertexHighlight.getSelectionModel().selectedItemProperty().get();
+            switch (vertexHighlightOption) {
+            case CONCEPT:
+              f.accept(element);
+              break;
+            case UPPER_NEIGHBORS:
+              f.accept(element);
+              layout.lattice.upperNeighbors(element).forEach(f::accept);
+              break;
+            case LOWER_NEIGHBORS:
+              f.accept(element);
+              layout.lattice.lowerNeighbors(element).forEach(f::accept);
+              break;
+            case NEIGHBORS:
+              f.accept(element);
+              layout.lattice.upperNeighbors(element).forEach(f::accept);
+              layout.lattice.lowerNeighbors(element).forEach(f::accept);
+              break;
+            case FILTER:
+              f.accept(element);
+              layout.lattice.filter(element).forEach(f::accept);
+              break;
+            case IDEAL:
+              f.accept(element);
+              layout.lattice.ideal(element).forEach(f::accept);
+              break;
+            case FILTER_IDEAL:
+              f.accept(element);
+              layout.lattice.filter(element).forEach(f::accept);
+              layout.lattice.ideal(element).forEach(f::accept);
+              break;
+            }
+          }
+          layout.invalidate();
+        } else if (event.getEventType().equals(MouseEvent.MOUSE_EXITED)) {
           fca.contextWidget.dehighlight();
           ConceptGraph.this.highlight(false, highlightRequests.dehighlight());
+          if (controlBox.attributeLabelText.getSelectionModel().getSelectedItem().equals(AttributeLabelText.NONE)) {
+            synchronized (attributeLabels) {
+              for (AttributeLabel u : attributeLabels.values())
+                u.dispose();
+            }
+          }
+          if (controlBox.objectLabelText.getSelectionModel().getSelectedItem().equals(ObjectLabelText.NONE)) {
+            synchronized (objectLabels) {
+              for (ObjectLabel l : objectLabels.values())
+                l.dispose();
+            }
+          }
+          layout.invalidate();
         }
       }
     }
@@ -318,11 +422,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         }
 
         public final double computeValue() {
-          return controlBox.vertexRadius
-              .getSelectionModel()
-              .selectedItemProperty()
-              .get()
-              .get(fca.context, fca.lattice, element);
+          return controlBox.vertexRadius.getSelectionModel().selectedItemProperty().get().get(
+              fca.context,
+              fca.lattice,
+              element);
         }
       });
     }
@@ -393,11 +496,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         }
 
         protected final double computeValue() {
-          return controlBox.edgeStroke
-              .getSelectionModel()
-              .selectedItemProperty()
-              .get()
-              .get(fca.context, fca.lattice, concepts);
+          return controlBox.edgeStroke.getSelectionModel().selectedItemProperty().get().get(
+              fca.context,
+              fca.lattice,
+              concepts);
         }
       });
     }
@@ -429,7 +531,9 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
       }, new SimpleStringProperty(object.toString()), true);
       text.styleProperty().bind(controlBox.textSizeBinding);
       synchronized (objectLabels) {
-        objectLabels.put(object, this);
+        final ObjectLabel old = objectLabels.put(object, this);
+        if (old != null)
+          old.dispose();
       }
     }
 
@@ -441,11 +545,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         }
 
         protected final String computeValue() {
-          return controlBox.objectLabelText
-              .getSelectionModel()
-              .selectedItemProperty()
-              .get()
-              .get(fca.context, fca.lattice, concept);
+          return controlBox.objectLabelText.getSelectionModel().selectedItemProperty().get().get(
+              fca.context,
+              fca.lattice,
+              concept);
         }
       }, true);
       text.styleProperty().bind(controlBox.textSizeBinding);
@@ -462,29 +565,27 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
   protected final class AttributeLabel extends Graph<Concept<G, M>, Circle>.UpperLabel {
 
     private AttributeLabel(final M attribute, final Concept<G, M> concept) {
-      super(
-          new ObjectBinding<Concept<G, M>>() {
+      super(new ObjectBinding<Concept<G, M>>() {
 
-            private final M   m = attribute;
-            private Concept<G, M>c = concept;
+        private final M       m = attribute;
+        private Concept<G, M> c = concept;
 
-            {
-              layout.lattice.attributeConcepts.addListener(new MapChangeListener<M, Concept<G, M>>() {
+        {
+          layout.lattice.attributeConcepts.addListener(new MapChangeListener<M, Concept<G, M>>() {
 
-                public final void
-                    onChanged(final MapChangeListener.Change<? extends M, ? extends Concept<G, M>> change) {
-                  if (change.wasRemoved() && change.wasAdded() && change.getKey().equals(m)) {
-                    c = change.getValueAdded();
-                    invalidate();
-                  }
-                }
-              });
+            public final void onChanged(final MapChangeListener.Change<? extends M, ? extends Concept<G, M>> change) {
+              if (change.wasRemoved() && change.wasAdded() && change.getKey().equals(m)) {
+                c = change.getValueAdded();
+                invalidate();
+              }
             }
+          });
+        }
 
-            protected final Concept<G, M> computeValue() {
-              return c;
-            }
-          },
+        protected final Concept<G, M> computeValue() {
+          return c;
+        }
+      },
           // TODO: the type check for OWLClassExpression is currently a workaround, and will be removed in the future.
           new SimpleStringProperty(
               attribute instanceof OWLClassExpression ? OWLUtil.toString((OWLClassExpression) attribute)
@@ -492,7 +593,9 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           true);
       text.styleProperty().bind(controlBox.textSizeBinding);
       synchronized (attributeLabels) {
-        attributeLabels.put(attribute, this);
+        final AttributeLabel old = attributeLabels.put(attribute, this);
+        if (old != null)
+          old.dispose();
       }
     }
 
@@ -504,11 +607,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
         }
 
         protected final String computeValue() {
-          return controlBox.attributeLabelText
-              .getSelectionModel()
-              .selectedItemProperty()
-              .get()
-              .get(fca.context, fca.lattice, concept);
+          return controlBox.attributeLabelText.getSelectionModel().selectedItemProperty().get().get(
+              fca.context,
+              fca.lattice,
+              concept);
         }
       }, true);
       text.styleProperty().bind(controlBox.textSizeBinding);
@@ -554,23 +656,23 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     private final ChoiceBox<VertexHighlight>            vertexHighlight    =
         FXControls.newChoiceBox(VertexHighlight.FILTER_IDEAL, VertexHighlight.values());
     private final Slider                                generations        = SliderBuilder
-                                                                               .create()
-                                                                               .min(0)
-                                                                               .max(16)
-                                                                               .value(Constants.GENERATIONS)
-                                                                               .majorTickUnit(1)
-                                                                               .minorTickCount(0)
-                                                                               .snapToTicks(true)
-                                                                               .build();
+        .create()
+        .min(0)
+        .max(16)
+        .value(Constants.GENERATIONS)
+        .majorTickUnit(1)
+        .minorTickCount(0)
+        .snapToTicks(true)
+        .build();
     private final Slider                                population         = SliderBuilder
-                                                                               .create()
-                                                                               .min(1)
-                                                                               .max(64)
-                                                                               .value(Constants.POPULATION)
-                                                                               .majorTickUnit(1)
-                                                                               .minorTickCount(0)
-                                                                               .snapToTicks(true)
-                                                                               .build();
+        .create()
+        .min(1)
+        .max(64)
+        .value(Constants.POPULATION)
+        .majorTickUnit(1)
+        .minorTickCount(0)
+        .snapToTicks(true)
+        .build();
     private final CheckBox                              conflictChart      = new CheckBox("Conflict Chart");
     private final CheckBox                              voronoiChart       = new CheckBox("Voronoi Chart");
     private final CheckBox                              hideBottom         = new CheckBox("Hide Bottom Concept");
@@ -721,10 +823,8 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           layout.invalidate();
         }
       });
-      attributeLabelText
-          .getSelectionModel()
-          .selectedItemProperty()
-          .addListener(new ChangeListener<AttributeLabelText>() {
+      attributeLabelText.getSelectionModel().selectedItemProperty().addListener(
+          new ChangeListener<AttributeLabelText>() {
 
             public final void changed(
                 final ObservableValue<? extends AttributeLabelText> observable,
@@ -871,10 +971,11 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
           // exportButton,
           createSpace(),
           createSearchBox());
-      relayout.setGraphic(ImageViewBuilder
-          .create()
-          .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/refresh.png")))
-          .build());
+      relayout.setGraphic(
+          ImageViewBuilder
+              .create()
+              .image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/refresh.png")))
+              .build());
       adjust.setGraphic(
           ImageViewBuilder
               .create()
@@ -1021,11 +1122,9 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
       transformationXYButton.setMinHeight(24);
       transformationPolarButton.setMinHeight(24);
 //      transformationCircularButton.setMinHeight(24);
-      transformationBox.getChildren().addAll(
-          transformation2DButton,
-          transformation3DButton,
-          transformationXYButton,
-          transformationPolarButton
+      transformationBox
+          .getChildren()
+          .addAll(transformation2DButton, transformation3DButton, transformationXYButton, transformationPolarButton
 //          ,transformationCircularButton
       );
       return transformationBox;
@@ -1117,10 +1216,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
                 Iterables
                     .concat(Iterables.transform(concepts, new Function<Concept<G, M>, Iterable<HighlightRequest>>() {
 
-              public final Iterable<HighlightRequest> apply(final Concept<G, M> concept) {
-                return highlightRequests.concept(concept);
-              }
-            })));
+                      public final Iterable<HighlightRequest> apply(final Concept<G, M> concept) {
+                        return highlightRequests.concept(concept);
+                      }
+                    })));
           }
         }
       });
@@ -1154,6 +1253,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     this.toolBar = new CFXToolBar();
     this.initLayoutListeners();
     this.initMouseListeners();
+    this.textSize.bind(this.controlBox.labelTextSize.valueProperty());
   }
 
   public ConceptGraph(final FCADataset<G, M> fcaInstance) {
@@ -1256,10 +1356,8 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     layout.lattice.attributeConcepts.addListener(new MapChangeListener<M, Concept<G, M>>() {
 
       public final void onChanged(final MapChangeListener.Change<? extends M, ? extends Concept<G, M>> change) {
-        if (!controlBox.attributeLabelText
-            .getSelectionModel()
-            .getSelectedItem()
-            .equals(AttributeLabelText.ATTRIBUTE_LABELS))
+        if (!controlBox.attributeLabelText.getSelectionModel().getSelectedItem().equals(
+            AttributeLabelText.ATTRIBUTE_LABELS))
           return;
         if (change.wasRemoved() && change.wasAdded())
           return;
@@ -1298,10 +1396,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
             final Set<Concept<G, M>> concepts =
                 new HashSet<Concept<G, M>>(Maps.filterValues(vertices, new Predicate<Vertex>() {
 
-              public final boolean apply(final Vertex v) {
-                return path.contains(v.node.translateXProperty().get(), v.node.translateYProperty().get());
-              }
-            }).keySet());
+                  public final boolean apply(final Vertex v) {
+                    return path.contains(v.node.translateXProperty().get(), v.node.translateYProperty().get());
+                  }
+                }).keySet());
             final Concept<G, M> supremum = layout.lattice.supremum(concepts);
             final Concept<G, M> infimum = layout.lattice.infimum(concepts);
             highlight(
@@ -1313,10 +1411,10 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
                 Iterables
                     .concat(Iterables.transform(concepts, new Function<Concept<G, M>, Iterable<HighlightRequest>>() {
 
-              public final Iterable<HighlightRequest> apply(final Concept<G, M> concept) {
-                return highlightRequests.concept(concept);
-              }
-            })));
+                      public final Iterable<HighlightRequest> apply(final Concept<G, M> concept) {
+                        return highlightRequests.concept(concept);
+                      }
+                    })));
           }
           front.getChildren().remove(path);
           path = null;
@@ -1397,9 +1495,8 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
             controller.translateX(controller.polarBottom.node, q),
             controller.translateY(controller.polarBottom.node, q)));
     for (final Edge e : upperEdges(controller.polarBottom.element)) {
-      t
-          .getKeyFrames()
-          .add(new KeyFrame(
+      t.getKeyFrames().add(
+          new KeyFrame(
               speed.frameSize,
               new KeyValue(e.line.startXProperty(), q.getX()),
               new KeyValue(e.line.startYProperty(), q.getY())));
@@ -1413,15 +1510,15 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
             5d,
             new EventHandler<ActionEvent>() {
 
-          public final void handle(final ActionEvent event) {
-            controller.polarBottom.init();
-            for (final Edge e : upperEdges(controller.polarBottom.element))
-              e.bindStart();
-            controller.polarBottom.node.fillProperty().set(COLOR_DEFAULT);
-            controller.polarBottom.node.toFront();
-            controller.polarBottom = null;
-          }
-        }).play();
+              public final void handle(final ActionEvent event) {
+                controller.polarBottom.init();
+                for (final Edge e : upperEdges(controller.polarBottom.element))
+                  e.bindStart();
+                controller.polarBottom.node.fillProperty().set(COLOR_DEFAULT);
+                controller.polarBottom.node.toFront();
+                controller.polarBottom = null;
+              }
+            }).play();
       }
     }));
   }

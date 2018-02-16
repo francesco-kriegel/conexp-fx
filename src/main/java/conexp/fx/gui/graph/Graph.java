@@ -4,7 +4,7 @@ package conexp.fx.gui.graph;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2017 Francesco Kriegel
+ * Copyright (C) 2010 - 2018 Francesco Kriegel
  * %%
  * You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
  * #L%
@@ -255,12 +255,12 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
         this.tex.imageProperty().bind(LaTeX.toFXImageBinding(string, new FloatBinding() {
 
           {
-            bind(zoom);
+            bind(zoom, textSize);
           }
 
           @Override
           protected final float computeValue() {
-            return (float) (zoom.get() * 14d);
+            return (float) (zoom.get() * textSize.get());
           }
         }));
       } else {
@@ -774,15 +774,21 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
       synchronized (addLabels) {
         while (!addLabels.isEmpty()) {
           final Label l = addLabels.poll();
-          final Transition fadeIn = fadeIn(l.content);
+          l.content.opacityProperty().set(0d);
+          final Transition fadeIn =
+              FadeTransitionBuilder.create().node(l.content).duration(speed.frameSize).toValue(0d).build();
+          final Transition fadeIn2 = fadeIn(l.content);
           fadeIn.setOnFinished(__ -> {
             l.content.toFront();
             l.content.layoutXProperty().set(l.shift.getValue().getX() - l.content.widthProperty().get() / 2d);
             l.content.layoutYProperty().set(
                 l.shift.getValue().getY() + l.index.doubleValue() * l.content.heightProperty().get());
+            l.content.setVisible(true);
             l.isInitialized = true;
+            fadeIn2.play();
           });
-          t.getKeyFrames().add(new KeyFrame(Duration.ONE, __ -> {
+          t.getKeyFrames().add(new KeyFrame(Duration.ZERO, __ -> {
+            l.content.setVisible(false);
             front.add(l.content);
             fadeIn.play();
           }));
@@ -895,42 +901,45 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
             synchronized (v.lowerLabels) {
               for (LowerLabel l : v.lowerLabels)
                 if (l.isInitialized)
-                  t.getKeyFrames().add(new KeyFrame(
-                      speed.frameSize,
-                      translateX(l.content, p),
-                      translateY(l.content, p),
-                      fadeZ(l.content, p),
-                      layoutX(l),
-                      layoutY(l)));
+                  t.getKeyFrames().add(
+                      new KeyFrame(
+                          speed.frameSize,
+                          translateX(l.content, p),
+                          translateY(l.content, p),
+                          fadeZ(l.content, p),
+                          layoutX(l),
+                          layoutY(l)));
                 else
-                  t.getKeyFrames().add(new KeyFrame(
-                      speed.frameSize,
-                      translateX(l.content, p),
-                      translateY(l.content, p),
-                      fadeZ(l.content, p)));
+                  t.getKeyFrames().add(
+                      new KeyFrame(
+                          speed.frameSize,
+                          translateX(l.content, p),
+                          translateY(l.content, p),
+                          fadeZ(l.content, p)));
             }
             synchronized (v.upperLabels) {
               for (UpperLabel u : v.upperLabels)
                 if (u.isInitialized)
-                  t.getKeyFrames().add(new KeyFrame(
-                      speed.frameSize,
-                      translateX(u.content, p),
-                      translateY(u.content, p),
-                      fadeZ(u.content, p),
-                      layoutX(u),
-                      layoutY(u)));
+                  t.getKeyFrames().add(
+                      new KeyFrame(
+                          speed.frameSize,
+                          translateX(u.content, p),
+                          translateY(u.content, p),
+                          fadeZ(u.content, p),
+                          layoutX(u),
+                          layoutY(u)));
                 else
-                  t.getKeyFrames().add(new KeyFrame(
-                      speed.frameSize,
-                      translateX(u.content, p),
-                      translateY(u.content, p),
-                      fadeZ(u.content, p)));
+                  t.getKeyFrames().add(
+                      new KeyFrame(
+                          speed.frameSize,
+                          translateX(u.content, p),
+                          translateY(u.content, p),
+                          fadeZ(u.content, p)));
             }
             synchronized (v.pendingVertices) {
               for (Pair<Vertex, Edge> pv : v.pendingVertices)
-                t
-                    .getKeyFrames()
-                    .add(new KeyFrame(
+                t.getKeyFrames().add(
+                    new KeyFrame(
                         speed.frameSize,
                         dispose(v, pv),
                         translateX(pv.first().node, p),
@@ -977,10 +986,10 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
                   Collections2.filter(vertices.values(), Predicates.not(Predicates.equalTo(polarBottom))),
                   new Function<Vertex, Point3D>() {
 
-            public final Point3D apply(final Vertex v) {
-              return new Point3D(v.node.translateXProperty().get(), v.node.translateYProperty().get(), 0);
-            }
-          }),
+                    public final Point3D apply(final Vertex v) {
+                      return new Point3D(v.node.translateXProperty().get(), v.node.translateYProperty().get(), 0);
+                    }
+                  }),
               0,
               c.w,
               0,
@@ -1113,6 +1122,7 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
   protected final ObjectProperty<GraphTransformation> transformation =
       new SimpleObjectProperty<GraphTransformation>(GraphTransformation.GRAPH_3D);
   protected final DoubleProperty                      zoom           = new SimpleDoubleProperty(1d);
+  protected final IntegerProperty                     textSize       = new SimpleIntegerProperty(12);
   protected final ObjectProperty<Point2D>             pan            =
       new SimpleObjectProperty<Point2D>(new Point2D(0d, 0d));
 
@@ -1208,4 +1218,5 @@ public abstract class Graph<T, N extends Node> extends BorderPane {
 //    edges.clear();
 //    vertices.clear();
   }
+
 }
