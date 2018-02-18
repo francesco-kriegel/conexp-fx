@@ -4,6 +4,7 @@ Copyright ⓒ 2010-2018 Francesco Kriegel
 
 ## Requirements
 * Java 8 (developed and tested with latest Oracle JDK)
+* Scala 2.12
 * Maven 3
 * Git
 
@@ -14,7 +15,7 @@ Copyright ⓒ 2010-2018 Francesco Kriegel
 
 ## Features
 Most time-consuming algorithms use parallel threads to shorten computation time.  
-Please note, that currently not all features are available from the graphical user interface and from the command line interface.
+Please note that currently not all features are available from the graphical user interface and from the command line interface.
 
 ### Formal Concept Analysis
 * Data model for handling formal contexts
@@ -39,7 +40,7 @@ Please note, that currently not all features are available from the graphical us
 * Basic support for exporting LaTeX
 
 ## Usage
-To run Concept Explorer FX with little effort, you can use the Java WebStart bundles, that are installed on my homepage at
+To run Concept Explorer FX with little effort, you can use the Java WebStart bundles which are installed on my homepage at
 (http://lat.inf.tu-dresden.de/~francesco/conexp-fx/conexp-fx.html). Please make sure that your browser has the latest Java WebStart plugin installed. The security warning can be deactivated by importing the certificate `conexp-fx.cer` to the Trusted CAs.
 
 ### Import Certificate to Trusted CAs
@@ -53,7 +54,7 @@ To run Concept Explorer FX with little effort, you can use the Java WebStart bun
 In case you do not want to run the software within your browser, there is also the option of downloading the latest release for your platform,
 either from this GitHub repository, or from the download site at (http://lat.inf.tu-dresden.de/~francesco/conexp-fx/download.html)
 
-The source code Concept Explorer FX can be used in at least three ways.  
+The source code of Concept Explorer FX can be used in at least three ways.
 1. Add it as a Maven dependency to your Java project.  
 2. Start the graphical user interface (class `conexp.fx.gui.ConExpFX`).  
 3. Use the command line interface (class `conexp.fx.cli.CLI`).  
@@ -80,6 +81,6 @@ The project lifecycle sticks to the default maven lifecycle.
 ## License
 Concept Explorer FX (conexp-fx)
 
-Copyright ⓒ 2010-2017 Francesco Kriegel
+Copyright ⓒ 2010-2018 Francesco Kriegel
 
 You may use this software for private or educational purposes at no charge. Please contact me for commercial use.
