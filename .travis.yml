@@ -3,4 +3,4 @@ jdk:
   - oraclejdk8
   
 install: mvn validate -Pinstall
-script: mvn clean compile test-compile
+script: mvn clean compile scala:compile

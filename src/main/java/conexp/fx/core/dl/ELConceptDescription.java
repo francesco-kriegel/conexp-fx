@@ -15,11 +15,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -37,10 +41,10 @@ import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.Pair;
-import conexp.fx.core.util.Meter;
+import conexp.fx.core.math.PartialComparable;
 import conexp.fx.core.util.UnicodeSymbols;
 
-public class ELConceptDescription {
+public final class ELConceptDescription implements PartialComparable<ELConceptDescription>, Cloneable {
 
   private static final OWLDataFactory df = OWLManager.getOWLDataFactory();
 
@@ -80,8 +84,21 @@ public class ELConceptDescription {
     return conjunction;
   }
 
-  private final Set<IRI>                            conceptNames;
-  private final Multimap<IRI, ELConceptDescription> existentialRestrictions;
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         quasiOrder       =
+      (X, Y) -> X.isSubsumedBy(Y);
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         dualQuasiOrder   =
+      (X, Y) -> X.subsumes(Y);
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         equivalence      =
+      (X, Y) -> X.isEquivalentTo(Y);
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         neighborhood     =
+      (X, Y) -> X.isLowerNeighborOf(Y);
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         dualNeighborhood =
+      (X, Y) -> X.isUpperNeighborOf(Y);
+  public static final BiFunction<ELConceptDescription, ELConceptDescription, Integer> distance         =
+      (X, Y) -> X.distanceTo(Y);
+
+  private final Set<IRI>                                                              conceptNames;
+  private final Multimap<IRI, ELConceptDescription>                                   existentialRestrictions;
   // private final Set<Pair<IRI, ELConceptDescription>> valueRestrictions;
   // private final Set<Pair<Pair<Integer, IRI>, ELConceptDescription>>
   // qualifiedGreaterThanRestrictions;
@@ -97,7 +114,7 @@ public class ELConceptDescription {
    */
   public ELConceptDescription(final OWLClassExpression concept) {
     super();
-    this.conceptNames = new HashSet<IRI>();
+    this.conceptNames = new HashSet<>();
     this.existentialRestrictions = HashMultimap.create();
     if (concept.isOWLThing())
       return;
@@ -147,9 +164,6 @@ public class ELConceptDescription {
     this.existentialRestrictions = existentialRestrictions;
   }
 
-  /**
-   * Creates a new EL normal form, that represents the bottom concept.
-   */
   public ELConceptDescription() {
     this.conceptNames = Sets.newHashSet();
     this.existentialRestrictions = HashMultimap.create();
@@ -185,7 +199,7 @@ public class ELConceptDescription {
           df.getOWLObjectProperty(existentialRestriction.getKey()),
           existentialRestriction.getValue().toOWLClassExpression());
     }
-    final Set<OWLClassExpression> conjuncts = new HashSet<OWLClassExpression>();
+    final Set<OWLClassExpression> conjuncts = new HashSet<>();
     for (IRI conceptName : conceptNames)
       conjuncts.add(df.getOWLClass(conceptName));
     for (Entry<IRI, ELConceptDescription> existentialRestriction : existentialRestrictions.entries())
@@ -195,24 +209,6 @@ public class ELConceptDescription {
               existentialRestriction.getValue().toOWLClassExpression()));
     return df.getOWLObjectIntersectionOf(conjuncts);
   }
-
-//  public final ELConceptDescription minimize() {
-//    if (conceptNames.contains(df.getOWLNothing().getIRI())) {
-//      conceptNames.retainAll(Collections.singleton(df.getOWLNothing().getIRI()));
-//      existentialRestrictions.clear();
-//    }
-//    for (Pair<IRI, ELConceptDescription> existentialRestriction : existentialRestrictions)
-//      existentialRestriction.y().minimize();
-//    final Set<Pair<IRI, ELConceptDescription>> toRemove = new HashSet<Pair<IRI, ELConceptDescription>>();
-//    for (Pair<IRI, ELConceptDescription> existentialRestriction1 : existentialRestrictions)
-//      for (Pair<IRI, ELConceptDescription> existentialRestriction2 : existentialRestrictions)
-//        if (!existentialRestriction1.equals(existentialRestriction2)
-//            && existentialRestriction1.x().equals(existentialRestriction2.x()))
-//          if (existentialRestriction1.y().isSubsumedBy(existentialRestriction2.y()))
-//            toRemove.add(existentialRestriction1);
-//    existentialRestrictions.removeAll(toRemove);
-//    return this;
-//  }
 
   public final boolean isSubsumedBy(final ELConceptDescription other) {
     return ELReasoner.isSubsumedBy(this, other);
@@ -225,7 +221,6 @@ public class ELConceptDescription {
   public final boolean isEquivalentTo(final ELConceptDescription other) {
     return Stream.<Supplier<Boolean>> of(() -> this.subsumes(other), () -> other.subsumes(this)).parallel().allMatch(
         Supplier::get);
-    // return this.subsumes(other) && other.subsumes(this);
   }
 
   public final boolean isLowerNeighborOf(final ELConceptDescription other) {
@@ -257,20 +252,6 @@ public class ELConceptDescription {
         .collect(Collectors.toSet());
     superfluousERs.forEach(x -> existentialRestrictions.remove(x.getKey(), x.getValue()));
     return this;
-    // final Set<Pair<IRI, ELConceptDescription>> superfluousERs = new
-    // HashSet<>();
-    // for (int i = 0; i < 2; i++) {
-    // superfluousERs.clear();
-    // for (Pair<IRI, ELConceptDescription> er2 : existentialRestrictions)
-    // for (Pair<IRI, ELConceptDescription> er1 : existentialRestrictions)
-    // if (er1 != er2)
-    // // if (!superfluousERs.contains(er1))
-    // // if (!superfluousERs.contains(er2))
-    // if (er1.first().equals(er2.first()))
-    // if (er1.second().subsumes(er2.second()))
-    // superfluousERs.add(er1);
-    // existentialRestrictions.removeAll(superfluousERs);
-    // }
   }
 
   public final int roleDepth() {
@@ -301,7 +282,7 @@ public class ELConceptDescription {
     return this.clone().reduce().unreducedRank();
   }
 
-  private final int unreducedRank() {
+  public final int unreducedRank() {
     if (this.isTop())
       return 0;
     else
@@ -331,7 +312,7 @@ public class ELConceptDescription {
                   .filter(otherER -> !otherER.equals(ER))
                   .filter(otherER -> ER.getKey().equals(otherER.getKey()))
                   .map(Entry::getValue)
-                  .noneMatch(otherERfiller -> uER.subsumes(otherERfiller)))
+                  .noneMatch(uER::subsumes))
           .map(uER -> Pair.of(ER.getKey(), uER))
           .sequential()
           .forEach(p -> upperNeighbor.existentialRestrictions.put(p.first(), p.second()));
@@ -397,6 +378,18 @@ public class ELConceptDescription {
 //    }
 //  }
 
+  public final int rank2() {
+    return this.clone().reduce().unreducedRank2();
+  }
+
+  public final int unreducedRank2() {
+    return this.getConceptNames().size() + this.getExistentialRestrictions().keySet().parallelStream().map(r -> {
+      final ELConceptDescription rDs = new ELConceptDescription();
+      rDs.getExistentialRestrictions().putAll(r, this.getExistentialRestrictions().get(r));
+      return rDs;
+    }).mapToInt(ELConceptDescription::unreducedRank).sum();
+  }
+
   public final int rank3() {
 //    final Set<ELConceptDescription> Us = representatives(upperNeighborsReduced(), (X, Y) -> X.isEquivalentTo(Y));
     final Set<ELConceptDescription> Us = upperNeighborsReduced();
@@ -408,6 +401,108 @@ public class ELConceptDescription {
       return 1 + Us.iterator().next().clone().reduce().rank3();
     else
       return Us.size() + ELLeastCommonSubsumer.lcs(Us).clone().reduce().rank3();
+  }
+
+  public final int rank4() {
+    return this.clone().reduce().unreducedRank4();
+  }
+
+  public final int unreducedRank4() {
+    return this.getConceptNames().size() + this
+        .getExistentialRestrictions()
+        .keySet()
+        .parallelStream()
+        .map(r -> this.getExistentialRestrictions().get(r))
+        .mapToInt(ELConceptDescription::recurseUnreducedRank4)
+        .sum();
+  }
+
+  private static final int recurseUnreducedRank4(final Collection<ELConceptDescription> Ds) {
+    if (Ds.isEmpty())
+      return 0;
+    else if (Ds.size() == 1)
+      return 1 + recurseUnreducedRank4(Ds.iterator().next().upperNeighborsReduced());
+    else
+      return IntStream
+          .range(1, Ds.size() + 1)
+          .boxed()
+          .map(
+              i -> (int) (Math.pow(-1, i + 1) * Sets
+                  .combinations(Sets.newHashSet(Ds), i)
+                  .parallelStream()
+                  .map(ELLeastCommonSubsumer::lcs)
+                  .map(ELConceptDescription::reduce)
+                  .collect(Collectors.toSet())
+                  .parallelStream()
+                  .map(Collections::singleton)
+                  .collect(Collectors.summingInt(ELConceptDescription::recurseUnreducedRank4))))
+          .collect(Collectors.summingInt(Integer::valueOf));
+  }
+
+  public final int distanceTo(final ELConceptDescription other) {
+    final List<Integer> x = Stream
+        .<Supplier<Integer>> of(
+            () -> ELConceptDescription.conjunction(this, other).rank(),
+            () -> ELLeastCommonSubsumer.lcs(this, other).rank())
+        .parallel()
+        .map(Supplier::get)
+        .collect(Collectors.toList());
+    return x.get(0) - x.get(1);
+  }
+
+  public final int distanceTo2(final ELConceptDescription other) {
+    final ELConceptDescription lcs = ELLeastCommonSubsumer.lcs(this, other);
+    int distance = -1;
+    for (ELConceptDescription C = ELConceptDescription.conjunction(this, other).reduce(); C != null; C =
+        C.oneUpperNeighborBelow(lcs))
+      distance++;
+    return distance;
+  }
+
+  private final ELConceptDescription oneUpperNeighborBelow(final ELConceptDescription other) {
+    return Stream.concat(this.conceptNames.parallelStream().map(A -> {
+      final ELConceptDescription upperNeighbor = this.clone();
+      upperNeighbor.conceptNames.remove(A);
+      return upperNeighbor;
+    }), this.existentialRestrictions.entries().parallelStream().map(ER -> {
+      final ELConceptDescription upperNeighbor = this.clone();
+      upperNeighbor.existentialRestrictions.remove(ER.getKey(), ER.getValue());
+      ER
+          .getValue()
+          .upperNeighborsReduced()
+          .parallelStream()
+          .filter(
+              uER -> upperNeighbor.existentialRestrictions
+                  .entries()
+                  .parallelStream()
+                  .filter(otherER -> !otherER.equals(ER))
+                  .filter(otherER -> ER.getKey().equals(otherER.getKey()))
+                  .map(Entry::getValue)
+                  .noneMatch(uER::subsumes))
+          .map(uER -> Pair.of(ER.getKey(), uER))
+          .sequential()
+          .forEach(p -> upperNeighbor.existentialRestrictions.put(p.first(), p.second()));
+      return upperNeighbor;
+    })).filter(other::subsumes).findAny().orElse(null);
+  }
+
+  public final Set<ELConceptDescription> neighborhood(final int radius, final Signature sigma) {
+    if (radius < 0)
+      throw new IllegalArgumentException();
+    final Set<ELConceptDescription> next = Sets.newHashSet(this);
+    final Set<ELConceptDescription> neighborhood = Sets.newHashSet(this);
+    for (int k = 0; k < radius; k++) {
+      final Set<ELConceptDescription> news = Stream
+          .concat(
+              next.parallelStream().flatMap(C -> C.upperNeighborsReduced().parallelStream()),
+              next.parallelStream().flatMap(C -> C.lowerNeighborsReduced(sigma).parallelStream()))
+          .collect(Collectors.toSet());
+      next.clear();
+      next.addAll(news);
+      next.removeAll(neighborhood);
+      neighborhood.addAll(news);
+    }
+    return neighborhood;
   }
 
   public final Set<ELConceptDescription> upperNeighbors() {
@@ -447,7 +542,7 @@ public class ELConceptDescription {
                   .filter(otherER -> !otherER.equals(ER))
                   .filter(otherER -> ER.getKey().equals(otherER.getKey()))
                   .map(Entry::getValue)
-                  .noneMatch(otherERfiller -> uER.subsumes(otherERfiller)))
+                  .noneMatch(uER::subsumes))
           .sequential()
           .forEach(uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
       return upperNeighbor;
@@ -811,6 +906,51 @@ public class ELConceptDescription {
         .sequential()
         .forEach(ER -> clone.getExistentialRestrictions().put(ER.x(), ER.y()));
     return clone;
+  }
+
+  @Override
+  public final int compareTo(final ELConceptDescription other) {
+    final List<Boolean> x = Stream
+        .<Supplier<Boolean>> of(() -> this.subsumes(other), () -> other.subsumes(this))
+        .parallel()
+        .map(Supplier::get)
+        .collect(Collectors.toList());
+    if (x.get(0) && x.get(1))
+      return 0;
+    else if (x.get(0))
+      return 1;
+    else if (x.get(1))
+      return -1;
+    else
+      return Integer.MAX_VALUE;
+  }
+
+  @Override
+  public final boolean smaller(final ELConceptDescription other) {
+    return Stream.<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> other.subsumes(this)).parallel().allMatch(
+        Supplier::get);
+  }
+
+  @Override
+  public final boolean greater(final ELConceptDescription other) {
+    return Stream.<Supplier<Boolean>> of(() -> this.subsumes(other), () -> !other.subsumes(this)).parallel().allMatch(
+        Supplier::get);
+  }
+
+  @Override
+  public final boolean smallerEq(final ELConceptDescription other) {
+    return this.isSubsumedBy(other);
+  }
+
+  @Override
+  public final boolean greaterEq(final ELConceptDescription other) {
+    return this.subsumes(other);
+  }
+
+  @Override
+  public final boolean uncomparable(final ELConceptDescription other) {
+    return Stream.<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> !other.subsumes(this)).parallel().allMatch(
+        Supplier::get);
   }
 
 }

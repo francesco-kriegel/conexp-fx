@@ -27,7 +27,7 @@ import conexp.fx.core.util.Meter;
 public final class ELNeighborhoodTest {
 
   public static void main(String[] args) {
-    test10();
+    test12();
   }
 
   public static final void test1() {
@@ -133,9 +133,12 @@ public final class ELNeighborhoodTest {
     sigma.addRoleNames("r", "s");
     final ELConceptDescription C = ELParser.read(
         // "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2");
-//        "A1 and A2 and A3 and exists r.(A1 and A2) and exists r.(A1 and A3) and exists r.(A2 and A3) and exists r.(A1 and A2 and A3 and exists r.(A1 and A2 and A3)) and exists s.(A1 and exists r.(A2 and exists s.Top) and exists s.A3 and exists r.A3) and exists s.A2 and exists s.(A3 and A4) and exists s.(exists r.Top and exists s.(A2 and exists r.A3) and exists s.exists r.A4) and exists r.exists r.exists r.exists r.exists r.Top and exists s.exists r.(A2 and exists s.A4 and exists r.exists s.A3 and exists r.exists r.Top)"
-        "exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))"
-        );
+        // "A1 and A2 and A3 and exists r.(A1 and A2) and exists r.(A1 and A3) and exists r.(A2 and A3) and exists r.(A1
+        // and A2 and A3 and exists r.(A1 and A2 and A3)) and exists s.(A1 and exists r.(A2 and exists s.Top) and exists
+        // s.A3 and exists r.A3) and exists s.A2 and exists s.(A3 and A4) and exists s.(exists r.Top and exists s.(A2
+        // and exists r.A3) and exists s.exists r.A4) and exists r.exists r.exists r.exists r.exists r.Top and exists
+        // s.exists r.(A2 and exists s.A4 and exists r.exists s.A3 and exists r.exists r.Top)"
+        "exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))");
     C.reduce();
     System.out.println(C);
     final Meter<Long> timer = Meter.newNanoStopWatch();
@@ -216,16 +219,28 @@ public final class ELNeighborhoodTest {
   }
 
   private static final void test9() {
-    final ELConceptDescription C = ELParser.read(
-        // "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))"
-        "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2 and exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)");
+    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))"
+//            "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2"
+//            "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃s.∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2"
+//        "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2 and exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)"
+    );
+    C.reduce();
     System.out.println(C);
     final Meter<Long> timer = Meter.newNanoStopWatch();
-    System.out.println("rank: " + C.rank());
-    System.out.println("computation time: " + timer.measureAndFormat());
-//    timer.reset();
-//    System.out.println("rank2: " + C.rank2());
-//    System.out.println("computation time: " + timer.measureAndFormat());
+    for (int i = 0; i < 3; i++) {
+      timer.reset();
+      System.out.println("rank: " + C.unreducedRank());
+      System.out.println("computation time: " + timer.measureAndFormat());
+      timer.reset();
+      System.out.println("rank2: " + C.unreducedRank2());
+      System.out.println("computation time: " + timer.measureAndFormat());
+      timer.reset();
+      System.out.println("rank3: " + C.rank3());
+      System.out.println("computation time: " + timer.measureAndFormat());
+      timer.reset();
+      System.out.println("rank4: " + C.unreducedRank4());
+      System.out.println("computation time: " + timer.measureAndFormat());
+    }
   }
 
   private static final void test10() {
@@ -241,9 +256,49 @@ public final class ELNeighborhoodTest {
 //      timer.reset();
 //      System.out.println("rank3: " + C.rank3());
 //      System.out.println("computation time: " + timer.measureAndFormat());
-//      timer.reset();
-//      System.out.println("rank2: " + C.rank2());
-//      System.out.println("computation time: " + timer.measureAndFormat());
+      timer.reset();
+      System.out.println("rank2: " + C.rank2());
+      System.out.println("computation time: " + timer.measureAndFormat());
+      System.out.println();
+    }
+  }
+
+  private static final void test11() {
+    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2))");
+    final ELConceptDescription D = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓∃r.(A1⊓A2⊓A3)⊓∃r.∃s.(A1 and A2 AND A3))");
+    C.reduce();
+    D.reduce();
+    System.out.println(C);
+    System.out.println(D);
+    final Meter<Long> timer = Meter.newNanoStopWatch();
+    for (int i = 0; i < 3; i++) {
+      timer.reset();
+      System.out.println("distance: " + C.distanceTo(D));
+      System.out.println("computation time: " + timer.measureAndFormat());
+      timer.reset();
+      System.out.println("distance2: " + C.distanceTo2(D));
+      System.out.println("computation time: " + timer.measureAndFormat());
+    }
+  }
+
+  private static final void test12() {
+    final Signature sigma = new Signature(IRI.create("foo"));
+    sigma.addConceptNames("A1", "A2", "A3", "A4");
+    sigma.addRoleNames("r", "s");
+    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓∃r.(A1⊓A2⊓A3)⊓∃s.(A1 and ∃r.A3))");
+    C.reduce();
+    final int radius = 3;
+    System.out.println(C);
+    System.out.println("radius: " + radius);
+    final Meter<Long> timer = Meter.newNanoStopWatch();
+    for (int i = 0; i < 3; i++) {
+      timer.reset();
+      final Set<ELConceptDescription> neighborhood = C.neighborhood(radius, sigma);
+      final String ctime = timer.measureAndFormat();
+      System.out.println(neighborhood.size() + " neighbors:");
+      neighborhood.forEach(D -> System.out.println(D));
+//      neighborhood.forEach(D -> System.out.println(D.rank() + "   " + D));
+      System.out.println("computation time: " + ctime);
     }
   }
 
