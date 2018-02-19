@@ -84,21 +84,32 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
     return conjunction;
   }
 
-  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         quasiOrder       =
-      (X, Y) -> X.isSubsumedBy(Y);
-  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         dualQuasiOrder   =
-      (X, Y) -> X.subsumes(Y);
-  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         equivalence      =
-      (X, Y) -> X.isEquivalentTo(Y);
-  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         neighborhood     =
-      (X, Y) -> X.isLowerNeighborOf(Y);
-  public static final BiPredicate<ELConceptDescription, ELConceptDescription>         dualNeighborhood =
-      (X, Y) -> X.isUpperNeighborOf(Y);
-  public static final BiFunction<ELConceptDescription, ELConceptDescription, Integer> distance         =
-      (X, Y) -> X.distanceTo(Y);
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription> quasiOrder() {
+    return (x, y) -> x.isSubsumedBy(y);
+  }
 
-  private final Set<IRI>                                                              conceptNames;
-  private final Multimap<IRI, ELConceptDescription>                                   existentialRestrictions;
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription> dualQuasiOrder() {
+    return (x, y) -> x.subsumes(y);
+  }
+
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription> equivalence() {
+    return (x, y) -> x.isEquivalentTo(y);
+  }
+
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription> neighborhood() {
+    return (x, y) -> x.isLowerNeighborOf(y);
+  }
+
+  public static final BiPredicate<ELConceptDescription, ELConceptDescription> dualNeighborhood() {
+    return (x, y) -> x.isUpperNeighborOf(y);
+  }
+
+  public static final BiFunction<ELConceptDescription, ELConceptDescription, Integer> distance() {
+    return (x, y) -> x.distanceTo(y);
+  }
+
+  private final Set<IRI>                            conceptNames;
+  private final Multimap<IRI, ELConceptDescription> existentialRestrictions;
   // private final Set<Pair<IRI, ELConceptDescription>> valueRestrictions;
   // private final Set<Pair<Pair<Integer, IRI>, ELConceptDescription>>
   // qualifiedGreaterThanRestrictions;
