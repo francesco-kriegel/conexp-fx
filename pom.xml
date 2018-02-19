@@ -65,7 +65,7 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>de.tudresden.inf.tcs.fcalib</groupId>
+			<groupId>de.tu-dresden.inf.tcs.fcalib</groupId>
 			<artifactId>fcalib</artifactId>
 			<version>0.11.0</version>
 		</dependency>
