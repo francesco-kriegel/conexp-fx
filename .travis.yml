@@ -1,6 +1,11 @@
-language: java
+language: java, scala
+
 jdk:
   - oraclejdk8
+
+scala:
+  - 2.12.4
   
 install: mvn validate -Pinstall-dependencies
-script: mvn clean compile scala:compile
+
+script: mvn clean scala:compile compile
