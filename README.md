@@ -1,4 +1,4 @@
-# Concept Explorer FX (conexp-fx) ![Continuous Integration Status](https://travis-ci.org/francesco-kriegel/conexp-fx.svg "Continuous Integration Status")
+# Concept Explorer FX (conexp-fx) [![Build Status](https://travis-ci.org/francesco-kriegel/conexp-fx.svg?branch=master)](https://travis-ci.org/francesco-kriegel/conexp-fx)
 Copyright ⓒ 2010-2018 Francesco Kriegel
 
 ## Requirements
