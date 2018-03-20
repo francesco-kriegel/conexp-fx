@@ -30,6 +30,7 @@
 		<javafx.jar>${java.home}/lib/ext/jfxrt.jar</javafx.jar>
 		<javafx.javadoc>lib/javafx-${javafx.version}-apidocs.zip</javafx.javadoc>
 		<javafx.sources>${java.home}/../javafx-src.zip</javafx.sources>
+    <javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<encoding>UTF-8</encoding>
@@ -417,6 +418,7 @@
 								<linksource>true</linksource>
 								<detectLinks>true</detectLinks>
 								<quiet>true</quiet>
+                <additionalOptions>${javadoc.opts}</additionalOptions>
 								<links>
 									<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/</link>
 									<link>http://docs.oracle.com/javase/8/javafx/api/</link>
