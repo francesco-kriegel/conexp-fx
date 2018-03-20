@@ -5,7 +5,7 @@ Copyright ⓒ 2010-2018 Francesco Kriegel
 
 Please cite Concept Explorer FX as follows.
 
-* Francesco Kriegel. *Concept Explorer FX.* Software for Formal Concept Analysis with Description Logic Extensions. 2010–2018. URL: [`https://github.com/francesco-kriegel/conexp-fx'](https://github.com/francesco-kriegel/conexp-fx).
+* Francesco Kriegel. *Concept Explorer FX.* Software for Formal Concept Analysis with Description Logic Extensions. 2010–2018. URL: [https://github.com/francesco-kriegel/conexp-fx](https://github.com/francesco-kriegel/conexp-fx).
 
 Alternatively, you can use the following BibTeX entry for referencing.
 
