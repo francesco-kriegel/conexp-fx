@@ -839,10 +839,10 @@
       <id>mac</id>
       <activation>
         <activeByDefault>true</activeByDefault>
-        <!-- <os> -->
-        <!-- <family>mac</family> -->
-        <!-- <name>mac os x</name> -->
-        <!-- </os> -->
+        <os>
+          <!-- <family>mac</family> -->
+          <name>mac os x</name>
+        </os>
       </activation>
       <properties>
         <upload.executable>./src/main/deploy/upload/mac.sh</upload.executable>
@@ -856,7 +856,7 @@
       <activation>
         <os>
           <family>unix</family>
-          <!-- <name>Linux</name> -->
+          <name>linux</name>
         </os>
       </activation>
       <properties>
