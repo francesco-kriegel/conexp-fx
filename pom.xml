@@ -570,7 +570,7 @@
               <!-- <buildRoot>target/jfx/buildRoot</buildRoot> -->
             </bundleArguments>
             <!-- <verbose>true</verbose> -->
-            <!-- <skipJNLP>true</skipJNLP> -->
+            <skipJNLP>${skip.jnlp}</skipJNLP>
             <!-- <jnlpTemplates> <jnlpTemplate>src/main/deploy/templates/conexp-fx-embed.html</jnlpTemplate> 
               <jnlpTemplate>src/main/deploy/templates/conexp-fx-launch.html</jnlpTemplate> 
               </jnlpTemplates> -->
@@ -846,6 +846,7 @@
         <upload.executable>./src/main/deploy/upload/mac.sh</upload.executable>
         <upload.argument></upload.argument>
         <skip.deploy>true</skip.deploy>
+        <skip.jnlp>false</skip.jnlp>
       </properties>
     </profile>
     <profile>
@@ -859,6 +860,7 @@
         <upload.executable>./src/main/deploy/upload/unix.sh</upload.executable>
         <upload.argument></upload.argument>
         <skip.deploy>true</skip.deploy>
+        <skip.jnlp>true</skip.jnlp>
       </properties>
     </profile>
     <profile>
@@ -872,6 +874,7 @@
         <upload.executable>"C:\Program Files\Git\bin\sh.exe"</upload.executable>
         <upload.argument>src\main\deploy\upload\windows.sh</upload.argument>
         <skip.deploy>true</skip.deploy>
+        <skip.jnlp>true</skip.jnlp>
       </properties>
     </profile>
     <profile>
