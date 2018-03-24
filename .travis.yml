@@ -4,8 +4,8 @@ jdk:
   - oraclejdk8
 
 scala:
-  - 2.12.4
+  - 2.12.5
   
 install: mvn validate -Pinstall-dependencies
 
-script: mvn clean scala:compile compile
+script: mvn clean compile

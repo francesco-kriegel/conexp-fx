@@ -1,0 +1,10 @@
+#set($h1 = '#')
+#set($h2 = '##')
+#set($h3 = '###')
+#set($h4 = '####')
+
+$h2 Downloads
+
+Packaged JAR files as well as installer bundles for different operating systems can be downloaded at [$context.get("bundles.url")]($context.get("bundles.url")).
+
+<iframe src='$context.get("bundles.url")' frameborder="0" style="position:absolute;overflow:hidden;height:100%;width:100%" height="100%" width="100%" />

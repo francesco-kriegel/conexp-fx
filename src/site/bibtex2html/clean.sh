@@ -1,0 +1,1 @@
+rm -f src/site/markdown/mathematical-background.md

@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/DECORATION/1.8.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0
+                          http://maven.apache.org/xsd/decoration-1.8.0.xsd"
+  name="${project.name}">
+
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>1.7</version>
+  </skin>
+
+  <custom>
+    <fluidoSkin>
+      <topBarEnabled>true</topBarEnabled>
+      <topBarContainerStyle>width: 66%;</topBarContainerStyle>
+      <topBarIcon>
+        <name>${project.name}</name>
+        <alt>${project.name}</alt>
+        <src>images/conexp-fx-24.png</src>
+        <href>/index.html</href>
+      </topBarIcon>
+      <navBarStyle>navbar-inverse</navBarStyle>
+      <sideBarEnabled>false</sideBarEnabled>
+      <googleSearch />
+      <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+    </fluidoSkin>
+  </custom>
+
+  <body>
+    <head>
+      <![CDATA[<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$']],
+    displayMath: [['$$','$$']],
+    processEscapes: true
+  }
+});
+</script>]]>
+      <![CDATA[<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-MML-AM_CHTML' async ></script>]]>
+    </head>
+    <menu name="Overview">
+      <item name="Introduction" href="index.html" />
+      <item name="Usage" href="usage.html" />
+      <item name="Examples" href="examples.html" />
+      <item name="Mathematical Background"
+        href="mathematical-background.html" />
+      <item name="Referencing" href="referencing.html" />
+      <item name="License" href="license.html" />
+    </menu>
+    <menu name="Download">
+      <item name="Download Bundles" href="download.html" />
+      <!-- <item name="Download Bundles" href="${bundles.url}" /> -->
+      <item name="Java WebStart" href="webstart.html" />
+      <!-- <item name="Java WebStart" href="${webstart.url}" /> -->
+    </menu>
+    <menu name="Development">
+      <item name="Development" href="development.html" />
+      <item name="Source Code" href="${project.scm.url}" />
+      <item name="Report Issue" href="${issues.url}" />
+    </menu>
+    <menu ref="reports" />
+  </body>
+
+</project>

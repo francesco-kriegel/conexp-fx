@@ -1,876 +1,973 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<groupId>conexp-fx</groupId>
-	<artifactId>conexp-fx</artifactId>
-	<version>5.4-SNAPSHOT</version>
-	<name>Concept Explorer FX</name>
-	<description>Software for Formal Concept Analysis with Description Logics Extensions</description>
-	<packaging>jar</packaging>
-	<inceptionYear>2010</inceptionYear>
+  <groupId>conexp-fx</groupId>
+  <artifactId>conexp-fx</artifactId>
+  <version>5.5.0-SNAPSHOT</version>
+  <name>Concept Explorer FX</name>
+  <description>Software for Formal Concept Analysis with Description Logics Extensions</description>
+  <packaging>jar</packaging>
+  <inceptionYear>2010</inceptionYear>
+  <url>https://francesco-kriegel.github.io/conexp-fx</url>
 
-	<developers>
-		<developer>
-			<name>Francesco Kriegel</name>
-			<email>francesco.kriegel@tu-dresden.de</email>
-			<url>http://lat.inf.tu-dresden.de/~francesco</url>
-		</developer>
-	</developers>
+  <developers>
+    <developer>
+      <name>Francesco Kriegel</name>
+      <email>francesco.kriegel@tu-dresden.de</email>
+      <url>https://lat.inf.tu-dresden.de/~francesco</url>
+    </developer>
+  </developers>
 
-	<organization>
-		<!-- workaround for the license-maven-plugin -->
-		<name>Francesco Kriegel</name>
-	</organization>
+  <organization>
+    <!-- workaround for the license-maven-plugin -->
+    <name>Francesco Kriegel</name>
+  </organization>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<application.javaVersion>1.8</application.javaVersion>
-		<javafx.version>8u162</javafx.version>
-		<javafx.jar>${java.home}/lib/ext/jfxrt.jar</javafx.jar>
-		<javafx.javadoc>lib/javafx-${javafx.version}-apidocs.zip</javafx.javadoc>
-		<javafx.sources>${java.home}/../javafx-src.zip</javafx.sources>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <application.javaVersion>1.8</application.javaVersion>
+    <javafx.version>8u162</javafx.version>
+    <javafx.jar>${java.home}/lib/ext/jfxrt.jar</javafx.jar>
+    <javafx.javadoc>lib/javafx-${javafx.version}-apidocs.zip</javafx.javadoc>
+    <javafx.sources>${java.home}/../javafx-src.zip</javafx.sources>
     <javadoc.opts>-Xdoclint:none</javadoc.opts>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<encoding>UTF-8</encoding>
-		<scala.version>2.12.4</scala.version>
-		<scala.compat.version>2.12</scala.compat.version>
-	</properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <encoding>UTF-8</encoding>
+    <scala.version>2.12.5</scala.version>
+    <scala.compat.version>2.12</scala.compat.version>
+    <bundles.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/download/</bundles.url>
+    <webstart.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/webstart/${project.build.finalName}.html</webstart.url>
+    <issues.url>https://github.com/francesco-kriegel/conexp-fx/issues/</issues.url>
+  </properties>
 
-	<scm>
-		<developerConnection>scm:git:https://github.com/francesco-kriegel/conexp-fx.git</developerConnection>
-	</scm>
+  <scm>
+    <url>https://github.com/francesco-kriegel/conexp-fx/</url>
+    <connection>scm:git:git@github.com:francesco-kriegel/conexp-fx.git</connection>
+    <developerConnection>scm:git:git@github.com:francesco-kriegel/conexp-fx.git</developerConnection>
+  </scm>
 
-	<distributionManagement>
-		<repository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>central</id>
-			<name>libs-release</name>
-			<url>http://artifactory.tcs.inf.tu-dresden.de/artifactory/libs-release</url>
-			<layout>default</layout>
-		</repository>
-		<snapshotRepository>
-			<uniqueVersion>true</uniqueVersion>
-			<id>snapshots</id>
-			<name>libs-snapshot</name>
-			<url>http://artifactory.tcs.inf.tu-dresden.de/artifactory/libs-snapshot</url>
-			<layout>default</layout>
-		</snapshotRepository>
-	</distributionManagement>
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>central</id>
+      <name>libs-release</name>
+      <url>https://artifactory.tcs.inf.tu-dresden.de/artifactory/libs-release-local</url>
+      <layout>default</layout>
+    </repository>
+    <snapshotRepository>
+      <uniqueVersion>true</uniqueVersion>
+      <id>snapshots</id>
+      <name>libs-snapshot</name>
+      <url>https://artifactory.tcs.inf.tu-dresden.de/artifactory/libs-snapshot-local</url>
+      <layout>default</layout>
+    </snapshotRepository>
+  </distributionManagement>
 
-	<dependencies>
-		<dependency>
-			<groupId>be.humphreys.simplevoronoi</groupId>
-			<artifactId>simplevoronoi</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>de.tu-dresden.inf.lat.fcalib</groupId>
-			<artifactId>fcalib</artifactId>
-			<version>0.11.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>24.0-jre</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<version>4.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ujmp</groupId>
-			<artifactId>ujmp-complete</artifactId>
-			<version>0.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jsoup</groupId>
-			<artifactId>jsoup</artifactId>
-			<version>1.11.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.5</version>
-		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>com.oracle</groupId> -->
-		<!-- <artifactId>javafx</artifactId> -->
-		<!-- <version>${javafx.version}</version> -->
-		<!-- </dependency> -->
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>2.10.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math4</artifactId>
-			<version>4.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>4.5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-svg-dom</artifactId>
-			<version>1.7</version>
-			<!-- <version>1.9.1</version> -->
-		</dependency>
-		<dependency>
-			<groupId>org.jfxtras</groupId>
-			<artifactId>jfxtras-labs</artifactId>
-			<version>8.0-r5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scilab.forge</groupId>
-			<artifactId>jlatexmath</artifactId>
-			<version>1.0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-distribution</artifactId>
-			<!-- <version>4.0.1</version> -->
-			<version>3.5.7</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.semanticweb.elk</groupId>
-			<artifactId>elk-owlapi</artifactId>
-			<version>0.4.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.hermit-reasoner</groupId>
-			<artifactId>org.semanticweb.hermit</artifactId>
-			<version>1.3.8.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openrdf.sesame</groupId>
-			<artifactId>sesame-runtime</artifactId>
-			<!-- <version>4.1.2</version> -->
-			<version>2.9.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>commons-cli</groupId>
-			<artifactId>commons-cli</artifactId>
-			<version>1.4</version>
-			<!-- <version>2.0-gt2-pre1</version> -->
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.carrotsearch</groupId>
-			<artifactId>junit-benchmarks</artifactId>
-			<version>0.7.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.4.196</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jdt</groupId>
-			<artifactId>org.eclipse.jdt.annotation</artifactId>
-			<version>2.1.100</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>${scala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang.modules</groupId>
-			<artifactId>scala-parser-combinators_${scala.compat.version}</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.specs2</groupId>
-			<artifactId>specs2-core_${scala.compat.version}</artifactId>
-			<version>4.0.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.specs2</groupId>
-			<artifactId>specs2-junit_${scala.compat.version}</artifactId>
-			<version>4.0.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.scalatest</groupId>
-			<artifactId>scalatest_${scala.compat.version}</artifactId>
-			<version>3.0.5</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.scala-lang.modules</groupId> -->
-		<!-- <artifactId>scala-java8-compat_2.11</artifactId> -->
-		<!-- <version>0.7.0</version> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>me.enkode</groupId> -->
-		<!-- <artifactId>java8-converters_2.11</artifactId> -->
-		<!-- <version>1.2.0-SNAPSHOT</version> -->
-		<!-- </dependency> -->
-	</dependencies>
+  <repositories>
+    <repository>
+      <id>apache-snapshots</id>
+      <url>https://repository.apache.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
-	<build>
-		<!-- <finalName>${project.name} ${project.version}</finalName> -->
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>build-helper-maven-plugin</artifactId>
-										<versionRange>[1.8,)</versionRange>
-										<goals>
-											<goal>regex-property</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>license-maven-plugin</artifactId>
-										<versionRange>[1.8,)</versionRange>
-										<goals>
-											<goal>update-file-header</goal>
-											<goal>update-project-license</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<!-- <pluginExecution> -->
-								<!-- <pluginExecutionFilter> -->
-								<!-- <groupId>net.alchim31.maven</groupId> -->
-								<!-- <artifactId>scala-maven-plugin</artifactId> -->
-								<!-- <versionRange>[3.2.2,)</versionRange> -->
-								<!-- <goals> -->
-								<!-- <goal>add-source</goal> -->
-								<!-- <goal>compile</goal> -->
-								<!-- <goal>testCompile</goal> -->
-								<!-- </goals> -->
-								<!-- </pluginExecutionFilter> -->
-								<!-- <action> -->
-								<!-- <ignore /> -->
-								<!-- </action> -->
-								<!-- </pluginExecution> -->
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>build-helper-maven-plugin</artifactId>
-										<versionRange>[1.10,)</versionRange>
-										<goals>
-											<goal>add-source</goal>
-											<goal>add-test-source</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<!-- <pluginExecution> -->
-								<!-- <pluginExecutionFilter> -->
-								<!-- <groupId>com.theoryinpractise.frege</groupId> -->
-								<!-- <artifactId>frege-maven-plugin</artifactId> -->
-								<!-- <versionRange>[1.0.7,)</versionRange> -->
-								<!-- <goals> -->
-								<!-- <goal>compile</goal> -->
-								<!-- <goal>test-compile</goal> -->
-								<!-- </goals> -->
-								<!-- </pluginExecutionFilter> -->
-								<!-- <action> -->
-								<!-- <ignore /> -->
-								<!-- </action> -->
-								<!-- </pluginExecution> -->
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>license-maven-plugin</artifactId>
-					<version>1.14</version>
-					<configuration>
-						<verbose>false</verbose>
-						<addSvnKeyWords>false</addSvnKeyWords>
-						<licenseName>mylicense</licenseName>
-						<licenseResolver>${project.baseUri}/src/main/deploy/license</licenseResolver>
-						<force>true</force>
-						<canUpdateDescription>true</canUpdateDescription>
-						<canUpdateCopyright>true</canUpdateCopyright>
-						<canUpdateLicense>true</canUpdateLicense>
-						<roots>
-							<root>src/main/java</root>
-							<root>src/test/java</root>
-						</roots>
-					</configuration>
-					<executions>
-						<execution>
-							<id>add-license-headers</id>
-							<phase>process-sources</phase>
-							<goals>
-								<goal>update-file-header</goal>
-								<goal>update-project-license</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<!-- <plugin> -->
-				<!-- <groupId>com.coderplus.maven.plugins</groupId> -->
-				<!-- <artifactId>copy-rename-maven-plugin</artifactId> -->
-				<!-- <version>1.0.1</version> -->
-				<!-- <executions> -->
-				<!-- <execution> -->
-				<!-- <id>copy</id> -->
-				<!-- <phase>generate-resources</phase> -->
-				<!-- <goals> -->
-				<!-- <goal>copy</goal> -->
-				<!-- </goals> -->
-				<!-- <configuration> -->
-				<!-- <overWrite>false</overWrite> -->
-				<!-- <fileSets> -->
-				<!-- <fileSet> -->
-				<!-- <sourceFile>src/main/deploy/package/windows/conexp-fx.ico</sourceFile> -->
-				<!-- <destinationFile>src/main/deploy/package/windows/${project.build.finalName}.ico</destinationFile> -->
-				<!-- </fileSet> -->
-				<!-- <fileSet> -->
-				<!-- <sourceFile>src/main/deploy/package/macosx/conexp-fx.icns</sourceFile> -->
-				<!-- <destinationFile>src/main/deploy/package/macosx/${project.build.finalName}.icns</destinationFile> -->
-				<!-- </fileSet> -->
-				<!-- </fileSets> -->
-				<!-- </configuration> -->
-				<!-- </execution> -->
-				<!-- </executions> -->
-				<!-- </plugin> -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.7.0</version>
-					<configuration>
-						<source>${application.javaVersion}</source>
-						<target>${application.javaVersion}</target>
-						<encoding>${project.build.sourceEncoding}</encoding>
-						<showDeprecation>false</showDeprecation>
-						<showWarnings>true</showWarnings>
-						<fork>true</fork>
-					</configuration>
-					<!-- <executions> -->
-					<!-- <execution> -->
-					<!-- <phase>compile</phase> -->
-					<!-- <goals> -->
-					<!-- <goal>compile</goal> -->
-					<!-- </goals> -->
-					<!-- </execution> -->
-					<!-- </executions> -->
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.0</version>
-					<executions>
-						<execution>
-							<id>build-javadoc</id>
-							<phase>package</phase>
-							<configuration>
-								<linksource>true</linksource>
-								<detectLinks>true</detectLinks>
-								<quiet>true</quiet>
+  <dependencies>
+    <dependency>
+      <!-- https://sourceforge.net/projects/simplevoronoi/ -->
+      <groupId>be.humphreys.simplevoronoi</groupId>
+      <artifactId>simplevoronoi</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>de.tu-dresden.inf.lat.fcalib</groupId>
+      <artifactId>fcalib</artifactId>
+      <version>0.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>24.0-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ujmp</groupId>
+      <artifactId>ujmp-complete</artifactId>
+      <version>0.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.11.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.5</version>
+    </dependency>
+    <!-- <dependency> <groupId>com.oracle</groupId> <artifactId>javafx</artifactId> 
+      <version>${javafx.version}</version> </dependency> -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.9.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math4</artifactId>
+      <version>4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>4.5.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-svg-dom</artifactId>
+      <version>1.7</version>
+      <!-- <version>1.9.1</version> -->
+    </dependency>
+    <dependency>
+      <groupId>org.jfxtras</groupId>
+      <artifactId>jfxtras-labs</artifactId>
+      <version>8.0-r5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scilab.forge</groupId>
+      <artifactId>jlatexmath</artifactId>
+      <version>1.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-distribution</artifactId>
+      <!-- <version>4.0.1</version> -->
+      <version>3.5.7</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.semanticweb.elk</groupId>
+      <artifactId>elk-owlapi</artifactId>
+      <version>0.4.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hermit-reasoner</groupId>
+      <artifactId>org.semanticweb.hermit</artifactId>
+      <version>1.3.8.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openrdf.sesame</groupId>
+      <artifactId>sesame-runtime</artifactId>
+      <!-- <version>4.1.2</version> -->
+      <version>2.9.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.4</version>
+      <!-- <version>2.0-gt2-pre1</version> -->
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.carrotsearch</groupId>
+      <artifactId>junit-benchmarks</artifactId>
+      <version>0.7.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.196</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jdt</groupId>
+      <artifactId>org.eclipse.jdt.annotation</artifactId>
+      <version>2.1.100</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-parser-combinators_${scala.compat.version}</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+    <!-- <dependency> <groupId>org.specs2</groupId> <artifactId>specs2-core_${scala.compat.version}</artifactId> 
+      <version>4.0.2</version> <scope>test</scope> </dependency> <dependency> <groupId>org.specs2</groupId> 
+      <artifactId>specs2-junit_${scala.compat.version}</artifactId> <version>4.0.2</version> 
+      <scope>test</scope> </dependency> <dependency> <groupId>org.scalatest</groupId> 
+      <artifactId>scalatest_${scala.compat.version}</artifactId> <version>3.0.5</version> 
+      <scope>test</scope> </dependency> <dependency> <groupId>org.scala-lang.modules</groupId> 
+      <artifactId>scala-java8-compat_2.11</artifactId> <version>0.7.0</version> 
+      </dependency> <dependency> <groupId>me.enkode</groupId> <artifactId>java8-converters_2.11</artifactId> 
+      <version>1.2.0-SNAPSHOT</version> </dependency> -->
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <versionRange>[1.8,)</versionRange>
+                    <goals>
+                      <goal>regex-property</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <versionRange>[1.8,)</versionRange>
+                    <goals>
+                      <goal>update-file-header</goal>
+                      <goal>update-project-license</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <versionRange>[1.10,)</versionRange>
+                    <goals>
+                      <goal>add-source</goal>
+                      <goal>add-test-source</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>1.14</version>
+          <configuration>
+            <verbose>false</verbose>
+            <addSvnKeyWords>false</addSvnKeyWords>
+            <licenseName>gpl_v3</licenseName>
+            <licenseResolver>${project.baseUri}/src/main/deploy/license</licenseResolver>
+            <force>true</force>
+            <canUpdateDescription>true</canUpdateDescription>
+            <canUpdateCopyright>true</canUpdateCopyright>
+            <canUpdateLicense>true</canUpdateLicense>
+            <roots>
+              <root>src/main/java</root>
+              <root>src/test/java</root>
+            </roots>
+          </configuration>
+          <executions>
+            <execution>
+              <id>add-license-headers</id>
+              <phase>process-sources</phase>
+              <goals>
+                <goal>update-file-header</goal>
+                <goal>update-project-license</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- <plugin> <groupId>com.coderplus.maven.plugins</groupId> <artifactId>copy-rename-maven-plugin</artifactId> 
+          <version>1.0.1</version> <executions> <execution> <id>copy</id> <phase>generate-resources</phase> 
+          <goals> <goal>copy</goal> </goals> <configuration> <overWrite>false</overWrite> 
+          <fileSets> <fileSet> <sourceFile>src/main/deploy/package/windows/conexp-fx.ico</sourceFile> 
+          <destinationFile>src/main/deploy/package/windows/${project.build.finalName}.ico</destinationFile> 
+          </fileSet> <fileSet> <sourceFile>src/main/deploy/package/macosx/conexp-fx.icns</sourceFile> 
+          <destinationFile>src/main/deploy/package/macosx/${project.build.finalName}.icns</destinationFile> 
+          </fileSet> </fileSets> </configuration> </execution> </executions> </plugin> -->
+        <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>3.3.2</version>
+          <executions>
+            <execution>
+              <id>scala-compile-first</id>
+              <phase>process-resources</phase>
+              <!-- <phase>compile</phase> -->
+              <goals>
+                <goal>add-source</goal>
+                <goal>compile</goal>
+              </goals>
+              <configuration>
+                <args>
+                  <!-- <arg>-make:transitive</arg> -->
+                  <arg>-dependencyfile</arg>
+                  <arg>${project.build.directory}/.scala_dependencies</arg>
+                </args>
+              </configuration>
+            </execution>
+            <execution>
+              <id>scala-test-compile</id>
+              <phase>process-test-resources</phase>
+              <!-- <phase>test-compile</phase> -->
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+              <configuration>
+                <args>
+                  <!-- <arg>-make:transitive</arg> -->
+                  <arg>-dependencyfile</arg>
+                  <arg>${project.build.directory}/.scala_dependencies</arg>
+                </args>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+          <configuration>
+            <source>${application.javaVersion}</source>
+            <target>${application.javaVersion}</target>
+            <encoding>${project.build.sourceEncoding}</encoding>
+            <showDeprecation>false</showDeprecation>
+            <showWarnings>true</showWarnings>
+            <fork>true</fork>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <id>build-javadoc</id>
+              <phase>package</phase>
+              <configuration>
+                <linksource>true</linksource>
+                <detectLinks>true</detectLinks>
+                <quiet>true</quiet>
                 <additionalOptions>${javadoc.opts}</additionalOptions>
-								<links>
-									<link>http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/</link>
-									<link>http://docs.oracle.com/javase/8/javafx/api/</link>
-									<link>http://jfxtras.org/doc/8.0labs/</link>
-									<link>http://owlapi.sourceforge.net/javadoc/</link>
-									<link>http://elk.semanticweb.org/maven/0.4.2/apidocs/</link>
-									<link>http://rdf4j.org/sesame/2.7/apidocs/</link>
-									<link>http://nlp.stanford.edu/nlp/javadoc/javanlp/</link>
-								</links>
-							</configuration>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
-					<executions>
-						<execution>
-							<id>build-sources</id>
-							<phase>package</phase>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.0</version>
-					<executions>
-						<execution>
-							<id>build-assembly-jar</id>
-							<phase>package</phase>
-							<goals>
-								<goal>single</goal>
-							</goals>
-							<configuration>
-								<archive>
-									<manifest>
-										<mainClass>conexp.fx.cli.CLI</mainClass>
-									</manifest>
-									<manifestEntries>
-										<Permissions>all-permissions</Permissions>
-										<!-- <Codebase>*.tu-dresden.de</Codebase> -->
-										<Application-Name>${project.name}</Application-Name>
-									</manifestEntries>
-								</archive>
-								<descriptorRefs>
-									<descriptorRef>jar-with-dependencies</descriptorRef>
-								</descriptorRefs>
-								<appendAssemblyId>true</appendAssemblyId>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.0.0</version>
-					<executions>
-						<!-- <execution> -->
-						<!-- <id>add-source</id> -->
-						<!-- <phase>generate-sources</phase> -->
-						<!-- <goals> -->
-						<!-- <goal>add-source</goal> -->
-						<!-- </goals> -->
-						<!-- <configuration> -->
-						<!-- <sources> -->
-						<!-- <source>src/main/scala</source> -->
-						<!-- </sources> -->
-						<!-- </configuration> -->
-						<!-- </execution> -->
-						<!-- <execution> -->
-						<!-- <id>add-test-source</id> -->
-						<!-- <phase>generate-test-sources</phase> -->
-						<!-- <goals> -->
-						<!-- <goal>add-test-source</goal> -->
-						<!-- </goals> -->
-						<!-- <configuration> -->
-						<!-- <sources> -->
-						<!-- <source>src/test/scala</source> -->
-						<!-- </sources> -->
-						<!-- </configuration> -->
-						<!-- </execution> -->
-						<!-- <execution> -->
-						<!-- <id>regex-property</id> -->
-						<!-- <phase>initialize</phase> -->
-						<!-- <goals> -->
-						<!-- <goal>regex-property</goal> -->
-						<!-- </goals> -->
-						<!-- <configuration> -->
-						<!-- <name>setup.version</name> -->
-						<!-- <value>${project.version}</value> -->
-						<!-- <regex>(.*)-(SNAPSHOT)</regex> -->
-						<!-- <replacement>$1</replacement> -->
-						<!-- <failIfNoMatch>false</failIfNoMatch> -->
-						<!-- </configuration> -->
-						<!-- </execution> -->
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>com.zenjava</groupId>
-					<artifactId>javafx-maven-plugin</artifactId>
-					<version>8.1.3-SNAPSHOT</version>
-					<configuration>
-						<appName>${project.name}</appName>
-						<updateExistingJar>true</updateExistingJar>
-						<existingJar>${project.build.finalName}-jar-with-dependencies.jar</existingJar>
-						<createLibDir>false</createLibDir>
-						<!-- <vendor>Francesco Kriegel</vendor> -->
-						<mainClass>conexp.fx.gui.ConExpFX</mainClass>
-						<j2seVersion>1.8+</j2seVersion>
-						<allPermissions>true</allPermissions>
-						<!-- <keyPassword>conexp-fx</keyPassword> -->
-						<keyStoreAlias>conexp-fx</keyStoreAlias>
-						<keyStorePassword>conexp-fx</keyStorePassword>
-						<keyStore>src/main/deploy/security/conexp-fx.jks</keyStore>
-						<keyStoreType>jks</keyStoreType>
-						<!-- <certCountry>DE</certCountry> -->
-						<!-- <certDomain>francesco.kriegel</certDomain> -->
-						<!-- <certOrg>Francesco Kriegel</certOrg> -->
-						<!-- <certOrgUnit>Francesco Kriegel</certOrgUnit> -->
-						<!-- <certState>Germany</certState> -->
-						<!-- <overwriteKeyStore>true</overwriteKeyStore> -->
-						<!-- <nativeReleaseVersion>${setup.version}</nativeReleaseVersion> -->
-						<embeddedHeight>100%</embeddedHeight>
-						<embeddedWidth>100%</embeddedWidth>
-						<templates>
-							<template>src/main/deploy/templates/conexp-fx-embed.html</template>
-							<template>src/main/deploy/templates/conexp-fx-launch.html</template>
-						</templates>
-						<jvmArgs>
-							<jvmArg>-Xms256m</jvmArg>
-							<jvmArg>-Xmx2048m</jvmArg>
-						</jvmArgs>
-						<!-- <jfxMainAppJarName>${project.build.finalName}-gui.jar</jfxMainAppJarName> -->
-					</configuration>
-					<executions>
-						<execution>
-							<id>build-jfx-web</id>
-							<phase>package</phase>
-							<goals>
-								<goal>build-jar</goal>
-								<goal>build-web</goal>
-								<goal>build-native</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.6.0</version>
-					<executions>
-						<execution>
-							<id>upload</id>
-							<phase>deploy</phase>
-							<goals>
-								<goal>exec</goal>
-							</goals>
-							<configuration>
-								<executable>./${upload.script}</executable>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>2.5.3</version>
-				</plugin>
-				<plugin>
-					<groupId>net.alchim31.maven</groupId>
-					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.3.1</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>compile</goal>
-								<goal>testCompile</goal>
-							</goals>
-							<configuration>
-								<args>
-									<!-- <arg>-make:transitive</arg> -->
-									<arg>-dependencyfile</arg>
-									<arg>${project.build.directory}/.scala_dependencies</arg>
-								</args>
-							</configuration>
-						</execution>
-						<!-- <execution> -->
-						<!-- <id>scala-compile-first</id> -->
-						<!-- <phase>process-resources</phase> -->
-						<!-- <phase>compile</phase> -->
-						<!-- <goals> -->
-						<!-- <goal>add-source</goal> -->
-						<!-- <goal>compile</goal> -->
-						<!-- </goals> -->
-						<!-- <configuration> -->
-						<!-- <args> -->
-						<!-- <arg>-make:transitive</arg> -->
-						<!-- <arg>-dependencyfile</arg> -->
-						<!-- <arg>${project.build.directory}/.scala_dependencies</arg> -->
-						<!-- </args> -->
-						<!-- </configuration> -->
-						<!-- </execution> -->
-						<!-- <execution> -->
-						<!-- <id>scala-test-compile</id> -->
-						<!-- <phase>process-test-resources</phase> -->
-						<!-- <phase>test-compile</phase> -->
-						<!-- <goals> -->
-						<!-- <goal>testCompile</goal> -->
-						<!-- </goals> -->
-						<!-- <configuration> -->
-						<!-- <args> -->
-						<!-- <arg>-make:transitive</arg> -->
-						<!-- <arg>-dependencyfile</arg> -->
-						<!-- <arg>${project.build.directory}/.scala_dependencies</arg> -->
-						<!-- </args> -->
-						<!-- </configuration> -->
-						<!-- </execution> -->
-					</executions>
-				</plugin>
-				<!-- <plugin> -->
-				<!-- <groupId>com.theoryinpractise.frege</groupId> -->
-				<!-- <artifactId>frege-maven-plugin</artifactId> -->
-				<!-- <version>1.0.7</version> -->
-				<!-- <executions> -->
-				<!-- <execution> -->
-				<!-- <id>compile</id> -->
-				<!-- <phase>process-resources</phase> -->
-				<!-- <goals> -->
-				<!-- <goal>compile</goal> -->
-				<!-- </goals> -->
-				<!-- </execution> -->
-				<!-- <execution> -->
-				<!-- <id>test-compile</id> -->
-				<!-- <phase>process-test-resources</phase> -->
-				<!-- <goals> -->
-				<!-- <goal>test-compile</goal> -->
-				<!-- </goals> -->
-				<!-- </execution> -->
-				<!-- </executions> -->
-				<!-- <configuration> -->
-				<!-- <inline>true</inline> -->
-				<!-- <hints>true</hints> -->
-				<!-- <sourceDirectory>src/main/java</sourceDirectory> -->
-				<!-- <testSourceDirectory>src/test/java</testSourceDirectory> -->
-				<!-- <outputDirectory>target/generated-sources/frege</outputDirectory> -->
-				<!-- <testOutputDirectory>target/generated-test-sources/frege</testOutputDirectory> -->
-				<!-- </configuration> -->
-				<!-- </plugin> -->
-			</plugins>
-		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>scala-maven-plugin</artifactId>
-			</plugin>
-			<!-- <plugin> -->
-			<!-- <groupId>com.theoryinpractise.frege</groupId> -->
-			<!-- <artifactId>frege-maven-plugin</artifactId> -->
-			<!-- </plugin> -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-			</plugin>
-			<!-- <plugin> -->
-			<!-- <groupId>com.coderplus.maven.plugins</groupId> -->
-			<!-- <artifactId>copy-rename-maven-plugin</artifactId> -->
-			<!-- </plugin> -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>com.zenjava</groupId>
-				<artifactId>javafx-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-		<!-- <resources> -->
-		<!-- <resource> -->
-		<!-- <directory>src/main/resources</directory> -->
-		<!-- </resource> -->
-		<!-- <resource> -->
-		<!-- <directory>src/main/deploy</directory> -->
-		<!-- </resource> -->
-		<!-- <resource> -->
-		<!-- <directory>src/main/frege</directory> -->
-		<!-- </resource> -->
-		<!-- </resources> -->
-		<!-- <testResources> -->
-		<!-- <testResource> -->
-		<!-- <directory>src/test/frege</directory> -->
-		<!-- </testResource> -->
-		<!-- </testResources> -->
-	</build>
-	<profiles>
-		<profile>
-			<id>unix</id>
-			<activation>
-				<os>
-					<family>unix</family>
-				</os>
-			</activation>
-			<properties>
-				<upload.script>upload-unix.sh</upload.script>
-			</properties>
-		</profile>
-		<profile>
-			<id>mac</id>
-			<activation>
-				<os>
-					<family>mac</family>
-					<!-- <family>!unix</family> -->
-				</os>
-			</activation>
-			<properties>
-				<upload.script>upload-mac.sh</upload.script>
-			</properties>
-		</profile>
-		<profile>
-			<id>windows</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
-			<properties>
-				<upload.script>upload-windows.bat</upload.script>
-			</properties>
-		</profile>
-		<profile>
-			<id>install-dependencies</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-install-plugin</artifactId>
-						<version>2.5.2</version>
-						<executions>
-							<execution>
-								<id>javafx</id>
-								<goals>
-									<goal>install-file</goal>
-								</goals>
-								<phase>validate</phase>
-								<configuration>
-									<file>${javafx.jar}</file>
-									<groupId>com.oracle</groupId>
-									<artifactId>javafx</artifactId>
-									<version>${javafx.version}</version>
-									<packaging>jar</packaging>
-									<javadoc>${javafx.javadoc}</javadoc>
-									<sources>${javafx.sources}</sources>
-								</configuration>
-							</execution>
-							<execution>
-								<id>simplevoronoi</id>
-								<goals>
-									<goal>install-file</goal>
-								</goals>
-								<phase>validate</phase>
-								<configuration>
-									<file>lib/simplevoronoi-1.0.jar</file>
-									<groupId>be.humphreys.simplevoronoi</groupId>
-									<artifactId>simplevoronoi</artifactId>
-									<version>1.0</version>
-									<packaging>jar</packaging>
-									<sources>lib/simplevoronoi-1.0-sources.jar</sources>
-								</configuration>
-							</execution>
-							<!-- <execution> -->
-							<!-- <id>jlatexmath</id> -->
-							<!-- <goals> -->
-							<!-- <goal>install-file</goal> -->
-							<!-- </goals> -->
-							<!-- <phase>validate</phase> -->
-							<!-- <configuration> -->
-							<!-- <file>lib/jlatexmath-1.0.3.jar</file> -->
-							<!-- <groupId>org.scilab.forge</groupId> -->
-							<!-- <artifactId>jlatexmath</artifactId> -->
-							<!-- <version>1.0.3</version> -->
-							<!-- <packaging>jar</packaging> -->
-							<!-- </configuration> -->
-							<!-- </execution> -->
-							<!-- <execution> -->
-							<!-- <id>ujmp</id> -->
-							<!-- <goals> -->
-							<!-- <goal>install-file</goal> -->
-							<!-- </goals> -->
-							<!-- <phase>validate</phase> -->
-							<!-- <configuration> -->
-							<!-- <file>lib/ujmp-complete-0.2.5.jar</file> -->
-							<!-- <groupId>org.ujmp</groupId> -->
-							<!-- <artifactId>ujmp</artifactId> -->
-							<!-- <version>0.2.5</version> -->
-							<!-- <packaging>jar</packaging> -->
-							<!-- </configuration> -->
-							<!-- </execution> -->
-							<!-- <execution> -->
-							<!-- <id>fcalib</id> -->
-							<!-- <goals> -->
-							<!-- <goal>install-file</goal> -->
-							<!-- </goals> -->
-							<!-- <phase>validate</phase> -->
-							<!-- <configuration> -->
-							<!-- <file>lib/fcalib-0.11.0.jar</file> -->
-							<!-- <groupId>de.tudresden.inf.tcs.fcalib</groupId> -->
-							<!-- <artifactId>fcalib</artifactId> -->
-							<!-- <version>0.11.0</version> -->
-							<!-- <packaging>jar</packaging> -->
-							<!-- </configuration> -->
-							<!-- </execution> -->
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+                <links>
+                  <link>http://google.github.io/guava/releases/24.0-jre/api/docs/</link>
+                  <link>http://docs.oracle.com/javase/8/javafx/api/</link>
+                  <link>http://jfxtras.org/doc/8.0labs/</link>
+                  <!-- <link>http://owlapi.sourceforge.net/javadoc/</link> -->
+                  <link>http://elk.semanticweb.org/maven/0.4.3/apidocs/</link>
+                  <link>http://archive.rdf4j.org/javadoc/sesame-2.9.0/</link>
+                  <link>http://nlp.stanford.edu/nlp/javadoc/javanlp/</link>
+                </links>
+              </configuration>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7</version>
+          <configuration>
+            <skipDeploy>true</skipDeploy>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>lt.velykis.maven.skins</groupId>
+              <artifactId>reflow-velocity-tools</artifactId>
+              <version>1.1.1</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.velocity</groupId>
+              <artifactId>velocity</artifactId>
+              <version>1.7</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>build-site</id>
+              <phase>site</phase>
+              <goals>
+                <goal>site</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>com.github.github</groupId>
+          <artifactId>site-maven-plugin</artifactId>
+          <version>0.12</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>site</goal>
+              </goals>
+              <phase>site-deploy</phase>
+              <configuration>
+                <server>github</server>
+                <message>New site for version ${project.version}</message>
+                <path>${site.path}</path>
+                <!-- <merge>true</merge> -->
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.0.1</version>
+          <executions>
+            <execution>
+              <id>build-sources</id>
+              <phase>package</phase>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>3.1.0</version>
+          <executions>
+            <execution>
+              <id>build-assembly-jar</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <archive>
+                  <manifest>
+                    <mainClass>conexp.fx.cli.CLI</mainClass>
+                  </manifest>
+                  <manifestEntries>
+                    <Permissions>all-permissions</Permissions>
+                    <!-- <Codebase>*.tu-dresden.de</Codebase> -->
+                    <Application-Name>${project.name}</Application-Name>
+                  </manifestEntries>
+                </archive>
+                <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+                <appendAssemblyId>true</appendAssemblyId>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <!-- <execution> <id>add-source</id> <phase>generate-sources</phase> 
+              <goals> <goal>add-source</goal> </goals> <configuration> <sources> <source>src/main/scala</source> 
+              </sources> </configuration> </execution> <execution> <id>add-test-source</id> 
+              <phase>generate-test-sources</phase> <goals> <goal>add-test-source</goal> 
+              </goals> <configuration> <sources> <source>src/test/scala</source> </sources> 
+              </configuration> </execution> <execution> <id>regex-property</id> <phase>initialize</phase> 
+              <goals> <goal>regex-property</goal> </goals> <configuration> <name>setup.version</name> 
+              <value>${project.version}</value> <regex>(.*)-(SNAPSHOT)</regex> <replacement>$1</replacement> 
+              <failIfNoMatch>false</failIfNoMatch> </configuration> </execution> -->
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>com.zenjava</groupId>
+          <artifactId>javafx-maven-plugin</artifactId>
+          <version>8.8.3</version>
+          <configuration>
+            <appName>${project.name}</appName>
+            <!-- <updateExistingJar>true</updateExistingJar> -->
+            <!-- <existingJar>${project.build.finalName}-jar-with-dependencies.jar</existingJar> -->
+            <!-- <createLibDir>false</createLibDir> -->
+            <!-- <vendor>Francesco Kriegel</vendor> -->
+            <mainClass>conexp.fx.gui.ConExpFX</mainClass>
+            <j2seVersion>1.8+</j2seVersion>
+            <allPermissions>true</allPermissions>
+            <keyPassword>${settings.servers.conexp-fx.password}</keyPassword>
+            <keyStoreAlias>conexp-fx</keyStoreAlias>
+            <keyStorePassword>${settings.servers.conexp-fx.password}</keyStorePassword>
+            <keyStore>src/main/deploy/security/conexp-fx.jks</keyStore>
+            <keyStoreType>jks</keyStoreType>
+            <certCountry>DE</certCountry>
+            <certDomain>conexp-fx</certDomain>
+            <certOrg>Francesco Kriegel</certOrg>
+            <certOrgUnit>Francesco Kriegel</certOrgUnit>
+            <certState>Germany</certState>
+            <overwriteKeyStore>true</overwriteKeyStore>
+            <additionalKeytoolParameters>
+              <additionalKeytoolParameter>-validity</additionalKeytoolParameter>
+              <additionalKeytoolParameter>730</additionalKeytoolParameter>
+              <additionalKeytoolParameter>-keysize</additionalKeytoolParameter>
+              <additionalKeytoolParameter>4096</additionalKeytoolParameter>
+            </additionalKeytoolParameters>
+            <embeddedHeight>100%</embeddedHeight>
+            <embeddedWidth>100%</embeddedWidth>
+            <jvmArgs>
+              <jvmArg>-Xms256m</jvmArg>
+              <jvmArg>-Xmx2048m</jvmArg>
+            </jvmArgs>
+            <!-- <jfxMainAppJarName>${project.build.finalName}-gui.jar</jfxMainAppJarName> -->
+            <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
+            <bundleArguments>
+              <jnlp.includeDT>true</jnlp.includeDT>
+              <jnlp.outfile>${project.build.finalName}</jnlp.outfile>
+              <jnlp.allPermisions>true</jnlp.allPermisions>
+              <!-- <mac.dmg.simple>false</mac.dmg.simple> -->
+              <!-- <signBundle>false</signBundle> -->
+              <!-- <buildRoot>target/jfx/buildRoot</buildRoot> -->
+            </bundleArguments>
+            <!-- <verbose>true</verbose> -->
+            <!-- <skipJNLP>true</skipJNLP> -->
+            <!-- <jnlpTemplates> <jnlpTemplate>src/main/deploy/templates/conexp-fx-embed.html</jnlpTemplate> 
+              <jnlpTemplate>src/main/deploy/templates/conexp-fx-launch.html</jnlpTemplate> 
+              </jnlpTemplates> -->
+            <noBlobSigning>true</noBlobSigning>
+          </configuration>
+          <executions>
+            <execution>
+              <id>build-jfx-jar</id>
+              <phase>package</phase>
+              <goals>
+                <goal>build-jar</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>build-jfx-dmg</id>
+              <phase>package</phase>
+              <goals>
+                <goal>build-native</goal>
+              </goals>
+              <configuration>
+                <bundler>dmg</bundler>
+              </configuration>
+            </execution>
+            <execution>
+              <id>build-jfx-deb</id>
+              <phase>package</phase>
+              <goals>
+                <goal>build-native</goal>
+              </goals>
+              <configuration>
+                <bundler>deb</bundler>
+              </configuration>
+            </execution>
+            <execution>
+              <id>build-jfx-rpm</id>
+              <phase>package</phase>
+              <goals>
+                <goal>build-native</goal>
+              </goals>
+              <configuration>
+                <bundler>rpm</bundler>
+              </configuration>
+            </execution>
+            <execution>
+              <id>build-jfx-msi</id>
+              <phase>package</phase>
+              <goals>
+                <goal>build-native</goal>
+              </goals>
+              <configuration>
+                <bundler>msi</bundler>
+              </configuration>
+            </execution>
+            <execution>
+              <id>build-jfx-jnlp</id>
+              <phase>package</phase>
+              <goals>
+                <goal>build-native</goal>
+              </goals>
+              <configuration>
+                <bundler>jnlp</bundler>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+          <configuration>
+            <skip>${skip.deploy}</skip>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.6.0</version>
+          <executions>
+            <execution>
+              <id>bibtex2html-generate</id>
+              <phase>pre-site</phase>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+              <configuration>
+                <executable>./src/site/bibtex2html/generate.sh</executable>
+              </configuration>
+            </execution>
+            <execution>
+              <id>bibtex2html-clean</id>
+              <!-- <phase>post-site</phase> -->
+              <phase>site</phase>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+              <configuration>
+                <executable>./src/site/bibtex2html/clean.sh</executable>
+              </configuration>
+            </execution>
+            <execution>
+              <id>protect-math</id>
+              <phase>pre-site</phase>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+              <configuration>
+                <executable>./src/site/markdown/protect-math.sh</executable>
+              </configuration>
+            </execution>
+            <execution>
+              <id>unprotect-math</id>
+              <!-- <phase>post-site</phase> -->
+              <phase>site</phase>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+              <configuration>
+                <executable>./src/site/markdown/unprotect-math.sh</executable>
+              </configuration>
+            </execution>
+            <execution>
+              <id>upload</id>
+              <phase>deploy</phase>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+              <configuration>
+                <executable>${upload.executable}</executable>
+                <arguments>
+                  <argument>${upload.argument}</argument>
+                </arguments>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.5.3</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+      </plugin>
+      <!-- <plugin> <groupId>com.coderplus.maven.plugins</groupId> <artifactId>copy-rename-maven-plugin</artifactId> 
+        </plugin> -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.zenjava</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+    <extensions>
+      <extension>
+        <groupId>com.github.shyiko.servers-maven-extension</groupId>
+        <artifactId>servers-maven-extension</artifactId>
+        <version>1.3.1</version>
+      </extension>
+    </extensions>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.9</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>cim</report>
+              <report>dependencies</report>
+              <report>dependency-convergence</report>
+              <report>dependency-info</report>
+              <report>dependency-management</report>
+              <report>distribution-management</report>
+              <report>index</report>
+              <report>issue-tracking</report>
+              <report>license</report>
+              <report>mailing-list</report>
+              <report>modules</report>
+              <report>plugin-management</report>
+              <report>plugins</report>
+              <report>project-team</report>
+              <report>scm</report>
+              <report>summary</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <additionalOptions>${javadoc.opts}</additionalOptions>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>javadoc</report>
+              <report>test-javadoc</report>
+            </reports>
+          </reportSet>
+          <reportSet>
+            <id>aggregate</id>
+            <inherited>false</inherited>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changelog-plugin</artifactId>
+        <version>2.3</version>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <profiles>
+    <profile>
+      <id>mac</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <upload.executable>./src/main/deploy/upload/mac.sh</upload.executable>
+        <upload.argument></upload.argument>
+        <skip.deploy>true</skip.deploy>
+      </properties>
+    </profile>
+    <profile>
+      <id>unix</id>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+      <properties>
+        <upload.executable>./src/main/deploy/upload/unix.sh</upload.executable>
+        <upload.argument></upload.argument>
+        <skip.deploy>true</skip.deploy>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+        <upload.executable>"C:\Program Files\Git\bin\sh.exe"</upload.executable>
+        <upload.argument>src\main\deploy\upload\windows.sh</upload.argument>
+        <skip.deploy>true</skip.deploy>
+      </properties>
+    </profile>
+    <profile>
+      <id>install-dependencies</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <version>2.5.2</version>
+            <executions>
+              <execution>
+                <id>javafx</id>
+                <goals>
+                  <goal>install-file</goal>
+                </goals>
+                <phase>validate</phase>
+                <configuration>
+                  <file>${javafx.jar}</file>
+                  <groupId>com.oracle</groupId>
+                  <artifactId>javafx</artifactId>
+                  <version>${javafx.version}</version>
+                  <packaging>jar</packaging>
+                  <javadoc>${javafx.javadoc}</javadoc>
+                  <sources>${javafx.sources}</sources>
+                </configuration>
+              </execution>
+              <execution>
+                <id>simplevoronoi</id>
+                <goals>
+                  <goal>install-file</goal>
+                </goals>
+                <phase>validate</phase>
+                <configuration>
+                  <file>lib/simplevoronoi-1.0.jar</file>
+                  <groupId>be.humphreys.simplevoronoi</groupId>
+                  <artifactId>simplevoronoi</artifactId>
+                  <version>1.0</version>
+                  <packaging>jar</packaging>
+                  <sources>lib/simplevoronoi-1.0-sources.jar</sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>generate-new-keypair</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.zenjava</groupId>
+            <artifactId>javafx-maven-plugin</artifactId>
+            <version>8.9.0-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <id>generate-keystore</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>generate-key-store</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.6.0</version>
+            <executions>
+              <execution>
+                <id>export-public-key</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>keytool</executable>
+                  <arguments>
+                    <argument>-export</argument>
+                    <argument>-alias</argument>
+                    <argument>conexp-fx</argument>
+                    <argument>-file</argument>
+                    <argument>src/main/deploy/security/conexp-fx.cer</argument>
+                    <argument>-keystore</argument>
+                    <argument>src/main/deploy/security/conexp-fx.jks</argument>
+                    <argument>-storepass</argument>
+                    <argument>${settings.servers.conexp-fx.password}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

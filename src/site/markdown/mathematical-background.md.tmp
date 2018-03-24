@@ -1,0 +1,17 @@
+# Mathematical Background
+
+* A formal context $\mathbb{K}=(G,M,I)$ consists of a set $G$ of objects, ...
+* Another formula $\int f(x)+g(x)\mathrm{d}x$
+
+Lorem Ipsum...
+
+1. foo
+2. bar
+3. baz
+
+<pre>curly braces \{ and \} </pre>
+
+A centered formula:
+$$\mathfrak{B}(\mathbb{K})=\{\ldots\}$$
+
+# References
