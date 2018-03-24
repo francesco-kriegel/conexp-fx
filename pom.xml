@@ -839,7 +839,8 @@
       <id>mac</id>
       <activation>
         <os>
-          <family>mac</family>
+          <!-- <family>mac</family> -->
+          <name>mac os x</name>
         </os>
       </activation>
       <properties>
@@ -854,6 +855,7 @@
       <activation>
         <os>
           <family>unix</family>
+          <!-- <name>Linux</name> -->
         </os>
       </activation>
       <properties>
