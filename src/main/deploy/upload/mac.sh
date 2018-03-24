@@ -1,3 +1,5 @@
+echo "Uploading Mac Bundles..."
+
 version=$(printf 'VERSION=${project.version}' | mvn help:evaluate | grep '^VERSION=' | sed 's/^VERSION=//g')
 date=$(date +%Y-%m-%d)
 
