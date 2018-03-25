@@ -40,7 +40,6 @@
     <scala.compat.version>2.12</scala.compat.version>
     <bundles.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/download/</bundles.url>
     <webstart.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/webstart/${project.build.finalName}.html</webstart.url>
-    <issues.url>https://github.com/francesco-kriegel/conexp-fx/issues/</issues.url>
     <badge.style>flat</badge.style>
   </properties>
 

@@ -78,19 +78,14 @@ MathJax.Hub.Config({
       <item name="Examples" href="examples.html" />
       <item name="Mathematical Background"
         href="mathematical-background.html" />
+      <item name="Development" href="development.html" />
       <item name="Referencing" href="referencing.html" />
-      <item name="License" href="license.html" />
     </menu>
     <menu name="Download">
       <item name="Download Bundles" href="download.html" />
       <!-- <item name="Download Bundles" href="${bundles.url}" /> -->
       <item name="Java Web Start" href="webstart.html" />
       <!-- <item name="Java WebStart" href="${webstart.url}" /> -->
-    </menu>
-    <menu name="Development">
-      <item name="Development" href="development.html" />
-      <item name="Source Code" href="${project.scm.url}" />
-      <item name="Report Issue" href="${issues.url}" />
     </menu>
     <menu ref="reports" />
     <breadcrumbs>
