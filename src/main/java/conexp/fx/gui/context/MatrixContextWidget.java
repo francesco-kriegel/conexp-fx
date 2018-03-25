@@ -246,7 +246,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
   }
 
-  private final class RowHeaderCell extends Cell<RowHeaderCell, RowHeaderPane> {
+  public final class RowHeaderCell extends Cell<RowHeaderCell, RowHeaderPane> {
 
     private ImageView view = ImageViewBuilder.create().build();
 
@@ -383,7 +383,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
   }
 
-  private final class ColHeaderCell extends Cell<ColHeaderCell, ColHeaderPane> {
+  public final class ColHeaderCell extends Cell<ColHeaderCell, ColHeaderPane> {
 
     private ImageView view = ImageViewBuilder.create().build();
 
@@ -513,7 +513,7 @@ public class MatrixContextWidget<G, M> extends BorderPane {
     }
   }
 
-  private final class ContextCell extends Cell<ContextCell, ContextPane> {
+  public final class ContextCell extends Cell<ContextCell, ContextPane> {
 
     private ContextCell(final int row, final int column) {
       super(contextPane, row, column, Pos.CENTER, TextAlignment.CENTER, false, null, false);

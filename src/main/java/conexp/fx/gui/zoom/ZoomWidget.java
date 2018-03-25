@@ -25,16 +25,11 @@ package conexp.fx.gui.zoom;
 
 import conexp.fx.gui.util.Colors;
 import conexp.fx.gui.util.CoordinateUtil;
-import javafx.animation.FadeTransitionBuilder;
-import javafx.animation.KeyFrame;
-import javafx.animation.TimelineBuilder;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -49,11 +44,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraintsBuilder;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Popup;
-import javafx.util.Duration;
 
 public class ZoomWidget extends Label {
 

@@ -33,9 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
-
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -43,6 +40,8 @@ import com.google.common.collect.Sets;
 import conexp.fx.core.collections.relation.MatrixRelation;
 import conexp.fx.core.collections.relation.RelationEvent;
 import conexp.fx.core.collections.relation.RelationEventHandler;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 
 public final class ConceptLattice<G, M> extends MatrixRelation<Concept<G, M>, Concept<G, M>> {
 

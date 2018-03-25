@@ -69,19 +69,21 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
     }
   }
 
-  public final ObservableMap<G, Point3D> seedsG       = FXCollections.observableMap(new ConcurrentHashMap<>());
-  public final Map<G, Point3D>           seedHistoryG = new ConcurrentHashMap<G, Point3D>();
+  public final ObservableMap<G, Point3D>             seedsG       =
+      FXCollections.observableMap(new ConcurrentHashMap<>());
+  public final Map<G, Point3D>                       seedHistoryG = new ConcurrentHashMap<G, Point3D>();
 
-  public final ObservableMap<M, Point3D> seedsM       = FXCollections.observableMap(new ConcurrentHashMap<>());
-  public final Map<M, Point3D>           seedHistoryM = new ConcurrentHashMap<M, Point3D>();
+  public final ObservableMap<M, Point3D>             seedsM       =
+      FXCollections.observableMap(new ConcurrentHashMap<>());
+  public final Map<M, Point3D>                       seedHistoryM = new ConcurrentHashMap<M, Point3D>();
 
-  private final Property<Type>           type;
+  private final Property<AdditiveConceptLayout.Type> type;
 
   public AdditiveConceptLayout(
       final ConceptLattice<G, M> conceptLattice,
       final @Nullable Map<G, Point3D> initialSeedsG,
       final @Nullable Map<M, Point3D> initialSeedsM,
-      final Type type) {
+      final AdditiveConceptLayout.Type type) {
     super(conceptLattice);
     this.type = new SimpleObjectProperty<>(type);
     initializePositionBindings();
@@ -91,11 +93,11 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
       seedsM.putAll(initialSeedsM);
   }
 
-  public final void setType(final Type type) {
+  public final void setType(final AdditiveConceptLayout.Type type) {
     this.type.setValue(type);
   }
 
-  public final void bindType(final ObservableValue<Type> observable) {
+  public final void bindType(final ObservableValue<AdditiveConceptLayout.Type> observable) {
     this.type.bind(observable);
   }
 
@@ -123,7 +125,8 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
         double x = 0d;
         double y = 0d;
         double z = 0d;
-        if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.OBJECT))
+        if (type.getValue().equals(AdditiveConceptLayout.Type.HYBRID)
+            || type.getValue().equals(AdditiveConceptLayout.Type.OBJECT))
           synchronized (concept.extent()) {
             synchronized (seedsG) {
               for (G g : Sets.difference(seedsG.keySet(), concept.extent())) {
@@ -134,7 +137,8 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
               }
             }
           }
-        if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.ATTRIBUTE))
+        if (type.getValue().equals(AdditiveConceptLayout.Type.HYBRID)
+            || type.getValue().equals(AdditiveConceptLayout.Type.ATTRIBUTE))
           synchronized (concept.intent()) {
             synchronized (seedsM) {
               for (M m : Sets.intersection(seedsM.keySet(), concept.intent())) {
@@ -246,7 +250,8 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
               Points.absoluteSum(Collections2.transform(affectedSeedsM, seedsM::get)));
           switch (movement) {
           case INTENT_SEEDS:
-            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.OBJECT))
+            if (type.getValue().equals(AdditiveConceptLayout.Type.HYBRID)
+                || type.getValue().equals(AdditiveConceptLayout.Type.OBJECT))
               for (G g : affectedSeedsG) {
                 final Point3D s = seedsG.get(g);
                 final double fx = a.getX() == 0 ? 1d / (double) affectedSeedsG.size() : Math.abs(s.getX()) / a.getX();
@@ -256,7 +261,8 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
                     new Point3D(s.getX() + fx * dx, Math.max(0.1d, s.getY() + fy * dy), s.getZ() + fz * dz);
                 seedsG.put(g, t);
               }
-            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.ATTRIBUTE))
+            if (type.getValue().equals(AdditiveConceptLayout.Type.HYBRID)
+                || type.getValue().equals(AdditiveConceptLayout.Type.ATTRIBUTE))
               for (M m : affectedSeedsM) {
                 final Point3D s = seedsM.get(m);
                 final double fx = a.getX() == 0 ? 1d / (double) affectedSeedsM.size() : Math.abs(s.getX()) / a.getX();
@@ -284,7 +290,8 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
               break;
             }
 
-            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.OBJECT))
+            if (type.getValue().equals(AdditiveConceptLayout.Type.HYBRID)
+                || type.getValue().equals(AdditiveConceptLayout.Type.OBJECT))
               while (!affectedSeedsG.isEmpty()) {
                 final G g = Iterables.getFirst(affectedSeedsG, null);
                 final Point3D s = seedsG.get(g);
@@ -303,7 +310,8 @@ public final class AdditiveConceptLayout<G, M> extends ConceptLayout<G, M, Bindi
                 for (G h : eq)
                   seedsG.put(h, t);
               }
-            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.ATTRIBUTE))
+            if (type.getValue().equals(AdditiveConceptLayout.Type.HYBRID)
+                || type.getValue().equals(AdditiveConceptLayout.Type.ATTRIBUTE))
               while (!affectedSeedsM.isEmpty()) {
                 final M m = Iterables.getFirst(affectedSeedsM, null);
                 final Point3D s = seedsM.get(m);

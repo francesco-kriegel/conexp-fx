@@ -26,9 +26,9 @@ package conexp.fx.core.math;
 import java.util.Collection;
 import java.util.List;
 
-import javafx.geometry.Point3D;
 import be.humphreys.simplevoronoi.GraphEdge;
 import be.humphreys.simplevoronoi.Voronoi;
+import javafx.geometry.Point3D;
 
 public class VoronoiGenerator {
 

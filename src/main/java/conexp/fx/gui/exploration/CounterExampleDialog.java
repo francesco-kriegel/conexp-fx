@@ -1,5 +1,13 @@
 package conexp.fx.gui.exploration;
 
+import conexp.fx.core.algorithm.exploration.CounterExample;
+import conexp.fx.core.context.Implication;
+import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.util.IdGenerator;
+import conexp.fx.gui.ConExpFX;
+import conexp.fx.gui.dialog.ErrorDialog;
+import conexp.fx.gui.dialog.FXDialog;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -33,13 +41,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import conexp.fx.core.algorithm.exploration.CounterExample;
-import conexp.fx.core.context.Implication;
-import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.util.IdGenerator;
-import conexp.fx.gui.ConExpFX;
-import conexp.fx.gui.dialog.ErrorDialog;
-import conexp.fx.gui.dialog.FXDialog;
 
 public class CounterExampleDialog extends FXDialog<CounterExample<String, String>> {
 

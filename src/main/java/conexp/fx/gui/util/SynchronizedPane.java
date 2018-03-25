@@ -23,13 +23,12 @@ package conexp.fx.gui.util;
  */
 
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
-
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 
 import com.sun.javafx.geom.BaseBounds;
 import com.sun.javafx.geom.transform.BaseTransform;
+
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 
 public final class SynchronizedPane extends Pane {
 

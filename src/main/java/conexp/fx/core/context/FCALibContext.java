@@ -35,11 +35,10 @@ import de.tudresden.inf.tcs.fcaapi.FCAObject;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalAttributeException;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcaapi.utils.IndexedSet;
-import de.tudresden.inf.tcs.fcalib.AbstractContext;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.FullObjectDescription;
 
-public final class FCALibContext<G, M> extends AbstractContext<M, G, FCAObject<M, G>> {
+public final class FCALibContext<G, M> extends de.tudresden.inf.tcs.fcalib.AbstractContext<M, G, FCAObject<M, G>> {
 
   private final MatrixContext<G, M>     cxt;
   private Expert<M, G, FCAObject<M, G>> expert;

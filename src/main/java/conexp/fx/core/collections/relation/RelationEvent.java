@@ -58,30 +58,31 @@ public final class RelationEvent<R, C> {
     }
   }
 
-  public static final Type      ANY               = Type.ANY;
-  public static final Type      ROWS              = Type.ROWS;
-  public static final Type      ROWS_ADDED        = Type.ROWS_ADDED;
-  public static final Type      ROWS_SET          = Type.ROWS_SET;
-  public static final Type      ROWS_REMOVED      = Type.ROWS_REMOVED;
-  public static final Type      ROWS_CLEARED      = Type.ROWS_CLEARED;
-  public static final Type      COLUMNS           = Type.COLUMNS;
-  public static final Type      COLUMNS_ADDED     = Type.COLUMNS_ADDED;
-  public static final Type      COLUMNS_SET       = Type.COLUMNS_SET;
-  public static final Type      COLUMNS_REMOVED   = Type.COLUMNS_REMOVED;
-  public static final Type      COLUMNS_CLEARED   = Type.COLUMNS_CLEARED;
-  public static final Type      ENTRIES           = Type.ENTRIES;
-  public static final Type      ENTRIES_ADDED     = Type.ENTRIES_ADDED;
-  public static final Type      ENTRIES_REMOVED   = Type.ENTRIES_REMOVED;
-  public static final Type      ALL_CHANGED       = Type.ALL_CHANGED;
-  public static final Type      SELECTION_CHANGED = Type.SELECTION_CHANGED;
-  private final Type            type;
-  private final Set<R>          rows;
-  private final Set<Pair<R, R>> setRows;
-  private final Set<C>          cols;
-  private final Set<Pair<C, C>> setCols;
-  private final Set<Pair<R, C>> entries;
+  public static final RelationEvent.Type ANY               = RelationEvent.Type.ANY;
+  public static final RelationEvent.Type ROWS              = RelationEvent.Type.ROWS;
+  public static final RelationEvent.Type ROWS_ADDED        = RelationEvent.Type.ROWS_ADDED;
+  public static final RelationEvent.Type ROWS_SET          = RelationEvent.Type.ROWS_SET;
+  public static final RelationEvent.Type ROWS_REMOVED      = RelationEvent.Type.ROWS_REMOVED;
+  public static final RelationEvent.Type ROWS_CLEARED      = RelationEvent.Type.ROWS_CLEARED;
+  public static final RelationEvent.Type COLUMNS           = RelationEvent.Type.COLUMNS;
+  public static final RelationEvent.Type COLUMNS_ADDED     = RelationEvent.Type.COLUMNS_ADDED;
+  public static final RelationEvent.Type COLUMNS_SET       = RelationEvent.Type.COLUMNS_SET;
+  public static final RelationEvent.Type COLUMNS_REMOVED   = RelationEvent.Type.COLUMNS_REMOVED;
+  public static final RelationEvent.Type COLUMNS_CLEARED   = RelationEvent.Type.COLUMNS_CLEARED;
+  public static final RelationEvent.Type ENTRIES           = RelationEvent.Type.ENTRIES;
+  public static final RelationEvent.Type ENTRIES_ADDED     = RelationEvent.Type.ENTRIES_ADDED;
+  public static final RelationEvent.Type ENTRIES_REMOVED   = RelationEvent.Type.ENTRIES_REMOVED;
+  public static final RelationEvent.Type ALL_CHANGED       = RelationEvent.Type.ALL_CHANGED;
+  public static final RelationEvent.Type SELECTION_CHANGED = RelationEvent.Type.SELECTION_CHANGED;
 
-  public RelationEvent(final Type type) {
+  private final RelationEvent.Type       type;
+  private final Set<R>                   rows;
+  private final Set<Pair<R, R>>          setRows;
+  private final Set<C>                   cols;
+  private final Set<Pair<C, C>>          setCols;
+  private final Set<Pair<R, C>>          entries;
+
+  public RelationEvent(final RelationEvent.Type type) {
     super();
     this.type = type;
     this.rows = Collections.unmodifiableSet(Collections.<R> emptySet());
@@ -91,11 +92,15 @@ public final class RelationEvent<R, C> {
     this.entries = Collections.unmodifiableSet(Collections.<Pair<R, C>> emptySet());
   }
 
-  public RelationEvent(final Type type, final R row, final C col) {
+  public RelationEvent(final RelationEvent.Type type, final R row, final C col) {
     this(type, row == null ? null : Collections.singleton(row), col == null ? null : Collections.singleton(col), null);
   }
 
-  public RelationEvent(final Type type, final Set<R> rows, final Set<C> columns, final Set<Pair<R, C>> entries) {
+  public RelationEvent(
+      final RelationEvent.Type type,
+      final Set<R> rows,
+      final Set<C> columns,
+      final Set<Pair<R, C>> entries) {
     super();
     this.type = type;
     this.rows = Collections.unmodifiableSet(rows == null ? Collections.<R> emptySet() : rows);
@@ -105,14 +110,14 @@ public final class RelationEvent<R, C> {
     this.entries = Collections.unmodifiableSet(entries == null ? Collections.<Pair<R, C>> emptySet() : entries);
   }
 
-  public RelationEvent(final Type type, final Pair<R, R> setRow, final Pair<C, C> setColumn) {
+  public RelationEvent(final RelationEvent.Type type, final Pair<R, R> setRow, final Pair<C, C> setColumn) {
     this(
         type,
         setRow == null ? null : Collections.singleton(setRow),
         setColumn == null ? null : Collections.singleton(setColumn));
   }
 
-  public RelationEvent(final Type type, final Set<Pair<R, R>> setRows, final Set<Pair<C, C>> setColumns) {
+  public RelationEvent(final RelationEvent.Type type, final Set<Pair<R, R>> setRows, final Set<Pair<C, C>> setColumns) {
     super();
     this.type = type;
     this.rows = Collections.unmodifiableSet(Collections.<R> emptySet());
@@ -122,7 +127,7 @@ public final class RelationEvent<R, C> {
     this.entries = Collections.unmodifiableSet(Collections.<Pair<R, C>> emptySet());
   }
 
-  public final Type getType() {
+  public final RelationEvent.Type getType() {
     return type;
   }
 

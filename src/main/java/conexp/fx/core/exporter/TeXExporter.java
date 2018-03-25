@@ -43,16 +43,16 @@ public class TeXExporter<G, M> {
     FitHeight,
     FitRatio;
 
-    public ScaleOption toOption(final int w, final int h) {
+    public TeXExporter.ScaleOption toOption(final int w, final int h) {
       switch (this) {
       case Fit:
-        return new FitScale(w, h);
+        return new TeXExporter.FitScale(w, h);
       case FitWidth:
-        return new FitWidthScale(w);
+        return new TeXExporter.FitWidthScale(w);
       case FitHeight:
-        return new FitHeightScale(h);
+        return new TeXExporter.FitHeightScale(h);
       case FitRatio:
-        return new FitRatioScale(w, h);
+        return new TeXExporter.FitRatioScale(w, h);
       }
       return null;
     }
@@ -60,19 +60,19 @@ public class TeXExporter<G, M> {
 
   public static abstract class ScaleOption {
 
-    protected ScaleEnum scale;
-    protected double    widthInMillimeter, heightInMillimeter;
+    protected TeXExporter.ScaleEnum scale;
+    protected double                widthInMillimeter, heightInMillimeter;
 
     public abstract double widthFactor(double dWidth, double dHeight);
 
     public abstract double heightFactor(double dWidth, double dHeight);
   }
 
-  public static final class FitScale extends ScaleOption {
+  public static final class FitScale extends TeXExporter.ScaleOption {
 
     public FitScale(final int widthInMillimeter, final int heightInMillimeter) {
       super();
-      this.scale = ScaleEnum.Fit;
+      this.scale = TeXExporter.ScaleEnum.Fit;
       this.widthInMillimeter = widthInMillimeter;
       this.heightInMillimeter = heightInMillimeter;
     }
@@ -88,11 +88,11 @@ public class TeXExporter<G, M> {
     }
   }
 
-  public static final class FitRatioScale extends ScaleOption {
+  public static final class FitRatioScale extends TeXExporter.ScaleOption {
 
     public FitRatioScale(final int widthInMillimeter, final int heightInMillimeter) {
       super();
-      this.scale = ScaleEnum.FitRatio;
+      this.scale = TeXExporter.ScaleEnum.FitRatio;
       this.widthInMillimeter = widthInMillimeter;
       this.heightInMillimeter = heightInMillimeter;
     }
@@ -110,11 +110,11 @@ public class TeXExporter<G, M> {
     }
   }
 
-  public static final class FitHeightScale extends ScaleOption {
+  public static final class FitHeightScale extends TeXExporter.ScaleOption {
 
     public FitHeightScale(final int heightInMillimeter) {
       super();
-      this.scale = ScaleEnum.FitHeight;
+      this.scale = TeXExporter.ScaleEnum.FitHeight;
       this.heightInMillimeter = heightInMillimeter;
     }
 
@@ -129,11 +129,11 @@ public class TeXExporter<G, M> {
     }
   }
 
-  public static final class FitWidthScale extends ScaleOption {
+  public static final class FitWidthScale extends TeXExporter.ScaleOption {
 
     public FitWidthScale(final int widthInMillimeter) {
       super();
-      this.scale = ScaleEnum.FitWidth;
+      this.scale = TeXExporter.ScaleEnum.FitWidth;
       this.widthInMillimeter = widthInMillimeter;
     }
 
@@ -150,13 +150,13 @@ public class TeXExporter<G, M> {
 
   public static final class TeXOptions {
 
-    public File              file              = null;
-    public boolean           arrows            = false;
-    public boolean           labels            = true;
-    public boolean           standAlone        = false;
-    public ContextTeXPackage contextTeXPackage = ContextTeXPackage.Tabular;
-    public DiagramTeXPackage diagramTeXPackage = DiagramTeXPackage.ConExpFX;
-    public ScaleOption       scale             = null;
+    public File                    file              = null;
+    public boolean                 arrows            = false;
+    public boolean                 labels            = true;
+    public boolean                 standAlone        = false;
+    public ContextTeXPackage       contextTeXPackage = ContextTeXPackage.Tabular;
+    public DiagramTeXPackage       diagramTeXPackage = DiagramTeXPackage.ConExpFX;
+    public TeXExporter.ScaleOption scale             = null;
 
     public TeXOptions(
         File file,
@@ -165,7 +165,7 @@ public class TeXExporter<G, M> {
         boolean standAlone,
         ContextTeXPackage contextTeXPackage,
         DiagramTeXPackage diagramTeXPackage,
-        ScaleOption scale) {
+        TeXExporter.ScaleOption scale) {
       super();
       this.file = file;
       this.arrows = arrows;
@@ -193,7 +193,7 @@ public class TeXExporter<G, M> {
   private final Map<Integer, Integer>       objectPermutation;
   private final Map<Integer, Integer>       attributePermutation;
   private final AdditiveConceptLayout<G, M> conceptLayout;
-  private final TeXOptions                  teXOptions;
+  private final TeXExporter.TeXOptions      teXOptions;
   private final StringBuffer                buffer = new StringBuffer();
 
   public TeXExporter(
@@ -201,7 +201,7 @@ public class TeXExporter<G, M> {
       final Map<Integer, Integer> objectPermutation,
       final Map<Integer, Integer> attributePermutation,
       final AdditiveConceptLayout<G, M> conceptLayout,
-      final TeXOptions teXOptions) {
+      final TeXExporter.TeXOptions teXOptions) {
     this.formalContext = formalContext;
     this.objectPermutation = objectPermutation;
     this.attributePermutation = attributePermutation;
@@ -391,8 +391,8 @@ public class TeXExporter<G, M> {
     final double height = conceptLayout.getCurrentBoundingBox(false, false).getHeight();
     final double w = teXOptions.scale.widthFactor(width, height);
     final double h = teXOptions.scale.heightFactor(width, height);
-    final double unit = (teXOptions.scale.scale == ScaleEnum.FitHeight ? h
-        : (teXOptions.scale.scale == ScaleEnum.FitWidth ? w : Math.min(w, h)));
+    final double unit = (teXOptions.scale.scale == TeXExporter.ScaleEnum.FitHeight ? h
+        : (teXOptions.scale.scale == TeXExporter.ScaleEnum.FitWidth ? w : Math.min(w, h)));
     append("\\begin{diagram}{" + width + "}{" + height + "}\r\n");
     append("\\unitlength " + unit + "mm\r\n");
     append("\\CircleSize{1}\r\n");

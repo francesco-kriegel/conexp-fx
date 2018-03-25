@@ -30,10 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.ujmp.core.Matrix;
-import org.ujmp.core.Matrix2D;
 import org.ujmp.core.enums.ValueType;
-import org.ujmp.core.matrix.factory.Matrix2DFactory;
-import org.ujmp.core.matrix.factory.MatrixMultiDFactory;
 
 import conexp.fx.core.collections.Pair;
 

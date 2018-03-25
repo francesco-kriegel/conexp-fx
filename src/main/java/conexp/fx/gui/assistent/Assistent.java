@@ -25,6 +25,9 @@ package conexp.fx.gui.assistent;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.base.Function;
+
+import conexp.fx.gui.util.ColorScheme;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
@@ -63,10 +66,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageBuilder;
 import javafx.stage.StageStyle;
-
-import com.google.common.base.Function;
-
-import conexp.fx.gui.util.ColorScheme;
 
 @SuppressWarnings("deprecation")
 public abstract class Assistent<T> extends AssistentPage<T> {

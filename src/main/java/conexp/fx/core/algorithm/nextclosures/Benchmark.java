@@ -26,8 +26,6 @@ import java.io.File;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Sets;
-
 import conexp.fx.core.algorithm.nextclosures.NextClosures1.Result;
 import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Concept;

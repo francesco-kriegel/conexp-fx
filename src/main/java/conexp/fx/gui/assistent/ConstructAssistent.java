@@ -1,5 +1,13 @@
 package conexp.fx.gui.assistent;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+
+import conexp.fx.core.builder.Requests.Metatype;
+import conexp.fx.core.builder.Requests.Type;
+import conexp.fx.gui.ConExpFX;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -32,14 +40,6 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.text.FontBuilder;
-
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-
-import conexp.fx.core.builder.Requests.Metatype;
-import conexp.fx.core.builder.Requests.Type;
-import conexp.fx.gui.ConExpFX;
 
 @SuppressWarnings("deprecation")
 public class ConstructAssistent extends Assistent<Type> {

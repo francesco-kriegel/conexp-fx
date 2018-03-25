@@ -24,12 +24,6 @@ package conexp.fx.gui.dataset;
 
 import java.util.Set;
 
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-
 import org.semanticweb.owlapi.model.IRI;
 
 import conexp.fx.core.collections.Pair;
@@ -37,6 +31,11 @@ import conexp.fx.core.dl.OWLInterpretation;
 import conexp.fx.core.util.IdGenerator;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.assistent.InducedContextAssistent;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 
 public class DLDataset extends Dataset {
 

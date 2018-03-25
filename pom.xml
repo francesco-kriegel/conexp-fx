@@ -50,6 +50,11 @@
     <developerConnection>scm:git:git@github.com:francesco-kriegel/conexp-fx.git</developerConnection>
   </scm>
 
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/francesco-kriegel/conexp-fx/issues/</url>
+  </issueManagement>
+
   <distributionManagement>
     <repository>
       <uniqueVersion>false</uniqueVersion>
@@ -66,6 +71,14 @@
       <layout>default</layout>
     </snapshotRepository>
   </distributionManagement>
+
+  <licenses>
+    <license>
+      <name>GNU GENERAL PUBLIC LICENSE Version 3</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <repositories>
     <repository>
@@ -374,6 +387,20 @@
                   <arg>-dependencyfile</arg>
                   <arg>${project.build.directory}/.scala_dependencies</arg>
                 </args>
+              </configuration>
+            </execution>
+            <execution>
+              <id>scaladoc</id>
+              <phase>package</phase>
+              <goals>
+                <goal>doc-jar</goal>
+              </goals>
+              <configuration>
+                <classifier>scaladoc</classifier>
+                <jvmArgs>
+                  <jvmArg>-Xms64m</jvmArg>
+                  <jvmArg>-Xmx1024m</jvmArg>
+                </jvmArgs>
               </configuration>
             </execution>
           </executions>
@@ -841,8 +868,26 @@
         <artifactId>maven-changelog-plugin</artifactId>
         <version>2.3</version>
       </plugin>
-      <!-- <plugin> <groupId>net.alchim31.maven</groupId> <artifactId>scala-maven-plugin</artifactId> 
-        <version>3.3.2</version> </plugin> -->
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.3.2</version>
+        <configuration>
+          <jvmArgs>
+            <jvmArg>-Xms64m</jvmArg>
+            <jvmArg>-Xmx1024m</jvmArg>
+          </jvmArgs>
+          <!-- <classifier>scaladoc</classifier> <verbose>true</verbose> 
+            <displayCmd>true</displayCmd> <failOnError>false</failOnError> -->
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>doc</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
     </plugins>
   </reporting>
 

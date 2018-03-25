@@ -30,7 +30,6 @@ import java.util.Set;
 
 import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.ConExpFX;
-import conexp.fx.gui.ConExpFX.DatasetTreeView;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -52,7 +51,7 @@ public abstract class Dataset {
 
   public final class DatasetTreeItem extends TreeItem<Control> {
 
-    public DatasetTreeItem(DatasetTreeView treeView) {
+    public DatasetTreeItem(ConExpFX.DatasetTreeView treeView) {
       super();
       final Label label = new Label(id.get());
       label.textProperty().bind(
@@ -97,7 +96,7 @@ public abstract class Dataset {
   public final Set<String>          defaultActiveViews = new HashSet<String>();
   public final List<DatasetAction>  actions            = new ArrayList<DatasetAction>();
   public final Dataset              parent;
-  public DatasetTreeItem            treeItem;
+  public Dataset.DatasetTreeItem    treeItem;
 
   protected Dataset(final Dataset parent) {
     super();
@@ -111,12 +110,12 @@ public abstract class Dataset {
     this.id.set(file.getName());
   }
 
-  public final DatasetTreeItem getTreeItem() {
+  public final Dataset.DatasetTreeItem getTreeItem() {
     return treeItem;
   }
 
-  public final void addToTree(final DatasetTreeView treeView) {
-    this.treeItem = new DatasetTreeItem(treeView);
+  public final void addToTree(final ConExpFX.DatasetTreeView treeView) {
+    this.treeItem = new Dataset.DatasetTreeItem(treeView);
     treeView.getParentItem(Dataset.this).getChildren().add(treeItem);
     treeView.getParentItem(Dataset.this).setExpanded(true);
     treeItem.setExpanded(true);

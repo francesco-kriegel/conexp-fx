@@ -30,12 +30,9 @@ import org.semanticweb.owlapi.model.IRI;
 
 import com.google.common.collect.Collections2;
 
-import conexp.fx.core.dl.OWLInterpretation;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.assistent.ModelAssistent.Result;
-import conexp.fx.gui.dataset.DLDataset;
 import conexp.fx.gui.dataset.RDFDataset;
-import conexp.fx.gui.task.TimeTask;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;

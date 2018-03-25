@@ -24,6 +24,11 @@ package conexp.fx.gui.graph;
 
 import java.util.Set;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
+import conexp.fx.core.context.Concept;
+import conexp.fx.core.context.ConceptLattice;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
@@ -32,12 +37,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
-import conexp.fx.core.context.Concept;
-import conexp.fx.core.context.ConceptLattice;
 
 public class CircularGraph<G, M> {
 

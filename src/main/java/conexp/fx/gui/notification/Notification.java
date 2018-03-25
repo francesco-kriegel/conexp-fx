@@ -22,11 +22,13 @@ package conexp.fx.gui.notification;
  * #L%
  */
 
-
 import java.awt.Window.Type;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.JDialog;
+
+import conexp.fx.gui.util.CoordinateUtil;
 import javafx.animation.FadeTransitionBuilder;
 import javafx.animation.Interpolator;
 import javafx.animation.ParallelTransitionBuilder;
@@ -43,10 +45,6 @@ import javafx.scene.layout.StackPaneBuilder;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.util.Duration;
-
-import javax.swing.JDialog;
-
-import conexp.fx.gui.util.CoordinateUtil;
 
 public class Notification {
 
@@ -69,7 +67,7 @@ public class Notification {
       final Pos position,
       final int xShift,
       final int yShift,
-      final TransitionType type) {
+      final Notification.TransitionType type) {
     this(contentPane, position, xShift, yShift, type, DEFAULT_DURATION);
   }
 
@@ -78,7 +76,7 @@ public class Notification {
       final Pos position,
       final int xShift,
       final int yShift,
-      final TransitionType type,
+      final Notification.TransitionType type,
       final Duration duration) {
     this();
     setContentPane(contentPane, position, xShift, yShift, type, duration);
@@ -106,7 +104,7 @@ public class Notification {
       final Pos position,
       final int xShift,
       final int yShift,
-      final TransitionType type) {
+      final Notification.TransitionType type) {
     setContentPane(contentPane, position, xShift, yShift, type, DEFAULT_DURATION);
   }
 
@@ -115,16 +113,13 @@ public class Notification {
       final Pos position,
       final int xShift,
       final int yShift,
-      final TransitionType type,
+      final Notification.TransitionType type,
       final Duration duration) {
     final int width = (int) contentPane.getMaxWidth();
     final int height = (int) contentPane.getMaxHeight();
-    final Scene scene =
-        new Scene(StackPaneBuilder
-            .create()
-            .alignment(CoordinateUtil.contraryPosition(position))
-            .children(contentPane)
-            .build(), Color.TRANSPARENT);
+    final Scene scene = new Scene(
+        StackPaneBuilder.create().alignment(CoordinateUtil.contraryPosition(position)).children(contentPane).build(),
+        Color.TRANSPARENT);
     panel.setScene(scene);
     panel.setSize(width + xShift, height + yShift);
     dialog.add(panel);
@@ -152,7 +147,7 @@ public class Notification {
       final Pos position,
       final int xShift,
       final int yShift,
-      final TransitionType type) {
+      final Notification.TransitionType type) {
     switch (type) {
     case FADE:
       createFadeTransition(contentPane);
@@ -165,67 +160,62 @@ public class Notification {
 
   private final void createFadeTransition(final Pane contentPane) {
     contentPane.setOpacity(0);
-    showTransition =
-        ParallelTransitionBuilder
-            .create()
-            .children(
-                FadeTransitionBuilder
-                    .create()
-                    .node(contentPane)
-                    .fromValue(0)
-                    .toValue(1)
-                    .interpolator(Interpolator.EASE_OUT)
-                    .duration(Duration.millis(700))
-                    .build(),
-                ScaleTransitionBuilder
-                    .create()
-                    .node(contentPane)
-                    .fromX(0)
-                    .fromY(0)
-                    .toX(1)
-                    .toY(1)
-                    .interpolator(Interpolator.EASE_OUT)
-                    .duration(Duration.millis(700))
-                    .build())
-            .build();
-    hideTransition =
-        ParallelTransitionBuilder
-            .create()
-            .children(
-                FadeTransitionBuilder
-                    .create()
-                    .node(contentPane)
-                    .fromValue(1)
-                    .toValue(0)
-                    .interpolator(Interpolator.EASE_IN)
-                    .duration(Duration.millis(700))
-                    .build(),
-                ScaleTransitionBuilder
-                    .create()
-                    .node(contentPane)
-                    .fromX(1)
-                    .fromY(1)
-                    .toX(0)
-                    .toY(0)
-                    .interpolator(Interpolator.EASE_IN)
-                    .duration(Duration.millis(700))
-                    .build())
-            .onFinished(new EventHandler<ActionEvent>() {
+    showTransition = ParallelTransitionBuilder
+        .create()
+        .children(
+            FadeTransitionBuilder
+                .create()
+                .node(contentPane)
+                .fromValue(0)
+                .toValue(1)
+                .interpolator(Interpolator.EASE_OUT)
+                .duration(Duration.millis(700))
+                .build(),
+            ScaleTransitionBuilder
+                .create()
+                .node(contentPane)
+                .fromX(0)
+                .fromY(0)
+                .toX(1)
+                .toY(1)
+                .interpolator(Interpolator.EASE_OUT)
+                .duration(Duration.millis(700))
+                .build())
+        .build();
+    hideTransition = ParallelTransitionBuilder
+        .create()
+        .children(
+            FadeTransitionBuilder
+                .create()
+                .node(contentPane)
+                .fromValue(1)
+                .toValue(0)
+                .interpolator(Interpolator.EASE_IN)
+                .duration(Duration.millis(700))
+                .build(),
+            ScaleTransitionBuilder
+                .create()
+                .node(contentPane)
+                .fromX(1)
+                .fromY(1)
+                .toX(0)
+                .toY(0)
+                .interpolator(Interpolator.EASE_IN)
+                .duration(Duration.millis(700))
+                .build())
+        .onFinished(new EventHandler<ActionEvent>() {
 
-              @Override
-              public void handle(ActionEvent event) {
-                dialog.setVisible(false);
-                dialog.dispose();
-              }
-            })
-            .build();
+          @Override
+          public void handle(ActionEvent event) {
+            dialog.setVisible(false);
+            dialog.dispose();
+          }
+        })
+        .build();
   }
 
-  private final void createTranslateTransition(
-      final Pane contentPane,
-      final Pos position,
-      final int xShift,
-      final int yShift) {
+  private final void
+      createTranslateTransition(final Pane contentPane, final Pos position, final int xShift, final int yShift) {
     int translateX = 0;
     switch (position) {
     case BOTTOM_RIGHT:
@@ -256,32 +246,30 @@ public class Notification {
     }
     contentPane.setTranslateX(translateX);
     contentPane.setTranslateY(translateY);
-    showTransition =
-        TranslateTransitionBuilder
-            .create()
-            .node(contentPane)
-            .byX(-translateX)
-            .byY(-translateY)
-            .interpolator(Interpolator.EASE_OUT)
-            .duration(Duration.millis(700))
-            .build();
-    hideTransition =
-        TranslateTransitionBuilder
-            .create()
-            .node(contentPane)
-            .byX(translateX)
-            .byY(translateY)
-            .interpolator(Interpolator.EASE_IN)
-            .duration(Duration.millis(700))
-            .onFinished(new EventHandler<ActionEvent>() {
+    showTransition = TranslateTransitionBuilder
+        .create()
+        .node(contentPane)
+        .byX(-translateX)
+        .byY(-translateY)
+        .interpolator(Interpolator.EASE_OUT)
+        .duration(Duration.millis(700))
+        .build();
+    hideTransition = TranslateTransitionBuilder
+        .create()
+        .node(contentPane)
+        .byX(translateX)
+        .byY(translateY)
+        .interpolator(Interpolator.EASE_IN)
+        .duration(Duration.millis(700))
+        .onFinished(new EventHandler<ActionEvent>() {
 
-              @Override
-              public void handle(ActionEvent event) {
-                dialog.setVisible(false);
-                dialog.dispose();
-              }
-            })
-            .build();
+          @Override
+          public void handle(ActionEvent event) {
+            dialog.setVisible(false);
+            dialog.dispose();
+          }
+        })
+        .build();
   }
 
   private final int getDialogX(final Pos position, final int width, final int shift) {

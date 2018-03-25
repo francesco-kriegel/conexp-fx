@@ -68,7 +68,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;

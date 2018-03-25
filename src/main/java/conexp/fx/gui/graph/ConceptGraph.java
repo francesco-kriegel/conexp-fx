@@ -63,7 +63,6 @@ import conexp.fx.gui.graph.option.VertexHighlight;
 import conexp.fx.gui.graph.option.VertexRadius;
 import conexp.fx.gui.util.FXControls;
 import conexp.fx.gui.util.NumberPropertyTransition;
-import conexp.fx.gui.util.Platform2;
 import conexp.fx.gui.util.SearchBox;
 import de.tudresden.inf.tcs.fcalib.Implication;
 import javafx.animation.FillTransition;
@@ -130,7 +129,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
   public static final Color COLOR_UPPER        = Color.valueOf("#DD3558");
   public static final Color COLOR_UNCOMPARABLE = Color.valueOf("#EEEEEE");
 
-  protected final class ConceptVertex extends Graph<Concept<G, M>, Circle>.Vertex {
+  protected final class ConceptVertex extends Vertex {
 
     private final class DragHandler implements EventHandler<MouseEvent> {
 
@@ -494,7 +493,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     }
   }
 
-  protected final class ConceptEdge extends Graph<Concept<G, M>, Circle>.Edge {
+  protected final class ConceptEdge extends Edge {
 
     private ConceptEdge(final Pair<Concept<G, M>, Concept<G, M>> concepts) {
       super(concepts);
@@ -517,7 +516,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     }
   }
 
-  protected final class ObjectLabel extends Graph<Concept<G, M>, Circle>.LowerLabel {
+  protected final class ObjectLabel extends LowerLabel {
 
     private ObjectLabel(final G object, final Concept<G, M> concept) {
       super(new ObjectBinding<Concept<G, M>>() {
@@ -574,7 +573,7 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
     }
   }
 
-  protected final class AttributeLabel extends Graph<Concept<G, M>, Circle>.UpperLabel {
+  protected final class AttributeLabel extends UpperLabel {
 
     private AttributeLabel(final M attribute, final Concept<G, M> concept) {
       super(new ObjectBinding<Concept<G, M>>() {

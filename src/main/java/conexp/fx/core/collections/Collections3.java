@@ -79,14 +79,14 @@ public final class Collections3 {
     return s;
   }
 
-  public static final <E extends Number & Comparable<? super E>> double sum(final Collection<? extends E> c) {
+  public static final <E extends Number & Comparable<E>> double sum(final Collection<? extends E> c) {
     double s = 0d;
     for (E e : c)
       s += e.doubleValue();
     return s;
   }
 
-  public static final <E extends Number & Comparable<? super E>> double avg(final Collection<? extends E> c) {
+  public static final <E extends Number & Comparable<E>> double avg(final Collection<? extends E> c) {
     return sum(c) / (double) c.size();
   }
 

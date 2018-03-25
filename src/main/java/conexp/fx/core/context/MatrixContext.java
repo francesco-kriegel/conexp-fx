@@ -42,19 +42,16 @@ import com.google.common.base.Functions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
 import conexp.fx.core.algorithm.nextclosure.NextConcept;
 import conexp.fx.core.collections.Collections3;
-import conexp.fx.core.collections.ListIterators;
 import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.relation.AbstractRelation;
 import conexp.fx.core.collections.relation.MatrixRelation;
 import conexp.fx.core.collections.relation.Relation;
 import conexp.fx.core.collections.relation.RelationEvent;
-import conexp.fx.core.collections.relation.RelationEventHandler;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.collections.setlist.SetLists;
@@ -98,52 +95,95 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   public final Context<Set<Integer>, Set<Integer>>    _cleaned                =
       new AbstractContext<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
-        @SuppressWarnings("unchecked")
-        public final boolean contains(final Object _i, final Object _j) {
-          return matrix.getBoolean(
-              (long) Collections3.firstElement((Set<Integer>) _i),
-              (long) Collections3.firstElement((Set<Integer>) _j));
-        }
+                                                                                    @SuppressWarnings("unchecked")
+                                                                                    public final boolean contains(
+                                                                                        final Object _i,
+                                                                                        final Object _j) {
+                                                                                      return matrix.getBoolean(
+                                                                                          (long) Collections3
+                                                                                              .firstElement(
+                                                                                                  (Set<Integer>) _i),
+                                                                                          (long) Collections3
+                                                                                              .firstElement(
+                                                                                                  (Set<Integer>) _j));
+                                                                                    }
 
-        public final MatrixContext<Set<Integer>, Set<Integer>> clone() {
-          return new MatrixContext<Set<Integer>, Set<Integer>>(
-              _objects,
-              _attributes,
-              (BooleanMatrix) matrix.selectRows(Ret.NEW, i).selectColumns(Ret.NEW, j),
-              false);
-        }
-      };
+                                                                                    public final
+                                                                                        MatrixContext<Set<Integer>, Set<Integer>>
+                                                                                        clone() {
+                                                                                      return new MatrixContext<Set<Integer>, Set<Integer>>(
+                                                                                          _objects,
+                                                                                          _attributes,
+                                                                                          (BooleanMatrix) matrix
+                                                                                              .selectRows(Ret.NEW, i)
+                                                                                              .selectColumns(
+                                                                                                  Ret.NEW,
+                                                                                                  j),
+                                                                                          false);
+                                                                                    }
+                                                                                  };
   public Relation<Set<Integer>, Set<Integer>>         _downArrows             =
       new AbstractRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
-        public final boolean contains(final Object object, final Object attribute) {
-          @SuppressWarnings("unchecked")
-          final int rowIndex = Collections3.firstElement((Set<Integer>) object);
-          @SuppressWarnings("unchecked")
-          final int columnIndex = Collections3.firstElement((Set<Integer>) attribute);
-          if (!matrix.getBoolean(rowIndex, columnIndex))
-            return _col(columnIndex, i).containsAll(
-                _extent(
-                    Collections.singleton(rowIndex),
-                    Collections2.filter(i, Predicates.not(Predicates.equalTo(rowIndex))),
-                    j));
-          return false;
-        }
-      };
+                                                                                    public final boolean contains(
+                                                                                        final Object object,
+                                                                                        final Object attribute) {
+                                                                                      @SuppressWarnings("unchecked")
+                                                                                      final int rowIndex =
+                                                                                          Collections3.firstElement(
+                                                                                              (Set<Integer>) object);
+                                                                                      @SuppressWarnings("unchecked")
+                                                                                      final int columnIndex =
+                                                                                          Collections3.firstElement(
+                                                                                              (Set<Integer>) attribute);
+                                                                                      if (!matrix.getBoolean(
+                                                                                          rowIndex,
+                                                                                          columnIndex))
+                                                                                        return _col(columnIndex, i)
+                                                                                            .containsAll(
+                                                                                                _extent(
+                                                                                                    Collections
+                                                                                                        .singleton(
+                                                                                                            rowIndex),
+                                                                                                    Collections2.filter(
+                                                                                                        i,
+                                                                                                        Predicates.not(
+                                                                                                            Predicates
+                                                                                                                .equalTo(
+                                                                                                                    rowIndex))),
+                                                                                                    j));
+                                                                                      return false;
+                                                                                    }
+                                                                                  };
   public Relation<Set<Integer>, Set<Integer>>         _upArrows               =
       new AbstractRelation<Set<Integer>, Set<Integer>>(_objects, _attributes, false) {
 
-        public final boolean contains(final Object object, final Object attribute) {
-          @SuppressWarnings("unchecked")
-          final int _i = Collections3.firstElement((Set<Integer>) object);
-          @SuppressWarnings("unchecked")
-          final int _j = Collections3.firstElement((Set<Integer>) attribute);
-          if (!matrix.getBoolean(_i, _j))
-            return _row(_i, j).containsAll(
-                _intent(Collections.singleton(_j), i, Collections2.filter(j, Predicates.not(Predicates.equalTo(_j)))));
-          return false;
-        }
-      };;
+                                                                                    public final boolean contains(
+                                                                                        final Object object,
+                                                                                        final Object attribute) {
+                                                                                      @SuppressWarnings("unchecked")
+                                                                                      final int _i =
+                                                                                          Collections3.firstElement(
+                                                                                              (Set<Integer>) object);
+                                                                                      @SuppressWarnings("unchecked")
+                                                                                      final int _j =
+                                                                                          Collections3.firstElement(
+                                                                                              (Set<Integer>) attribute);
+                                                                                      if (!matrix.getBoolean(_i, _j))
+                                                                                        return _row(_i, j).containsAll(
+                                                                                            _intent(
+                                                                                                Collections
+                                                                                                    .singleton(_j),
+                                                                                                i,
+                                                                                                Collections2.filter(
+                                                                                                    j,
+                                                                                                    Predicates.not(
+                                                                                                        Predicates
+                                                                                                            .equalTo(
+                                                                                                                _j)))));
+                                                                                      return false;
+                                                                                    }
+                                                                                  };;
   public Relation<Set<Integer>, Set<Integer>>         _downPaths;
   public Relation<Set<Integer>, Set<Integer>>         _upPaths;
   private final Predicate<Set<Integer>>               _isIrreducibleObject    = new Predicate<Set<Integer>>() {
@@ -171,27 +211,43 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   public final Context<Set<Integer>, Set<Integer>>    _reduced                =
       new AbstractContext<Set<Integer>, Set<Integer>>(_irreducibleObjects, _irreducibleAttributes, false) {
 
-        @SuppressWarnings("unchecked")
-        public final boolean contains(final Object _i, final Object _j) {
-          return matrix.getBoolean(
-              (long) Collections3.firstElement((Set<Integer>) _i),
-              (long) Collections3.firstElement((Set<Integer>) _j));
-        }
+                                                                                    @SuppressWarnings("unchecked")
+                                                                                    public final boolean contains(
+                                                                                        final Object _i,
+                                                                                        final Object _j) {
+                                                                                      return matrix.getBoolean(
+                                                                                          (long) Collections3
+                                                                                              .firstElement(
+                                                                                                  (Set<Integer>) _i),
+                                                                                          (long) Collections3
+                                                                                              .firstElement(
+                                                                                                  (Set<Integer>) _j));
+                                                                                    }
 
-        public final MatrixContext<Set<Integer>, Set<Integer>> clone() {
-          return new MatrixContext<Set<Integer>, Set<Integer>>(
-              _irreducibleObjects,
-              _irreducibleAttributes,
-              (BooleanMatrix) matrix
-                  .selectRows(
-                      Ret.NEW,
-                      Collections2.transform(_irreducibleObjects, Collections3.<Integer> firstElement()))
-                  .selectColumns(
-                      Ret.NEW,
-                      Collections2.transform(_irreducibleAttributes, Collections3.<Integer> firstElement())),
-              false);
-        }
-      };;
+                                                                                    public final
+                                                                                        MatrixContext<Set<Integer>, Set<Integer>>
+                                                                                        clone() {
+                                                                                      return new MatrixContext<Set<Integer>, Set<Integer>>(
+                                                                                          _irreducibleObjects,
+                                                                                          _irreducibleAttributes,
+                                                                                          (BooleanMatrix) matrix
+                                                                                              .selectRows(
+                                                                                                  Ret.NEW,
+                                                                                                  Collections2
+                                                                                                      .transform(
+                                                                                                          _irreducibleObjects,
+                                                                                                          Collections3
+                                                                                                              .<Integer> firstElement()))
+                                                                                              .selectColumns(
+                                                                                                  Ret.NEW,
+                                                                                                  Collections2
+                                                                                                      .transform(
+                                                                                                          _irreducibleAttributes,
+                                                                                                          Collections3
+                                                                                                              .<Integer> firstElement())),
+                                                                                          false);
+                                                                                    }
+                                                                                  };;
   public final Function<Iterable<Integer>, G>         _firstObject            =
       Functions.compose(rowHeads.indexGuava().inverse(), Collections3.<Integer> firstElement());
   public final Function<Iterable<Integer>, M>         _firstAttribute         =
@@ -199,32 +255,43 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   public final GuavaIsomorphism<Set<Integer>, Set<G>> _allObjects             =
       new GuavaIsomorphism<Set<Integer>, Set<G>>() {
 
-        public final Set<G> apply(final Set<Integer> set) {
-          return Collections3.transform(set, GuavaIsomorphism.invert(rowHeads().indexGuava()));
-        }
+                                                                                    public final Set<G>
+                                                                                        apply(final Set<Integer> set) {
+                                                                                      return Collections3.transform(
+                                                                                          set,
+                                                                                          GuavaIsomorphism.invert(
+                                                                                              rowHeads().indexGuava()));
+                                                                                    }
 
-        public Set<Integer> invert(final Set<G> set) {
-          return Collections3.transform(set, rowHeads().indexGuava());
-        }
-      };
+                                                                                    public Set<Integer>
+                                                                                        invert(final Set<G> set) {
+                                                                                      return Collections3.transform(
+                                                                                          set,
+                                                                                          rowHeads().indexGuava());
+                                                                                    }
+                                                                                  };
   public final GuavaIsomorphism<Set<Integer>, Set<M>> _allAttributes          =
       new GuavaIsomorphism<Set<Integer>, Set<M>>() {
 
-        public final Set<M> apply(final Set<Integer> set) {
-          return Collections3.transform(set, GuavaIsomorphism.invert(colHeads().indexGuava()));
-        }
+                                                                                    public final Set<M>
+                                                                                        apply(final Set<Integer> set) {
+                                                                                      return Collections3.transform(
+                                                                                          set,
+                                                                                          GuavaIsomorphism.invert(
+                                                                                              colHeads().indexGuava()));
+                                                                                    }
 
-        public Set<Integer> invert(final Set<M> set) {
-          return Collections3.transform(set, colHeads().indexGuava());
-        }
-      };
+                                                                                    public Set<Integer>
+                                                                                        invert(final Set<M> set) {
+                                                                                      return Collections3.transform(
+                                                                                          set,
+                                                                                          colHeads().indexGuava());
+                                                                                    }
+                                                                                  };
   public final AbstractContext<Set<G>, Set<M>>        cleaned                 = new AbstractContext<Set<G>, Set<M>>(
-                                                                                  SetLists
-                                                                                      .transform(_objects, _allObjects),
-                                                                                  SetLists.transform(
-                                                                                      _attributes,
-                                                                                      _allAttributes),
-                                                                                  false) {
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
                                                                                 @SuppressWarnings("unchecked")
                                                                                 public boolean
@@ -245,13 +312,9 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
                                                                                 };
                                                                               };
   public final AbstractContext<Set<G>, Set<M>>        reduced                 = new AbstractContext<Set<G>, Set<M>>(
-                                                                                  SetLists.transform(
-                                                                                      _irreducibleObjects,
-                                                                                      _allObjects),
-                                                                                  SetLists.transform(
-                                                                                      _irreducibleAttributes,
-                                                                                      _allAttributes),
-                                                                                  false) {
+      SetLists.transform(_irreducibleObjects, _allObjects),
+      SetLists.transform(_irreducibleAttributes, _allAttributes),
+      false) {
 
                                                                                 @SuppressWarnings("unchecked")
                                                                                 public boolean
@@ -263,12 +326,9 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
                                                                                 }
                                                                               };
   public final AbstractRelation<Set<G>, Set<M>>       downArrows              = new AbstractRelation<Set<G>, Set<M>>(
-                                                                                  SetLists
-                                                                                      .transform(_objects, _allObjects),
-                                                                                  SetLists.transform(
-                                                                                      _attributes,
-                                                                                      _allAttributes),
-                                                                                  false) {
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
                                                                                 @SuppressWarnings("unchecked")
                                                                                 public boolean
@@ -280,12 +340,9 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
                                                                                 }
                                                                               };
   public final AbstractRelation<Set<G>, Set<M>>       upArrows                = new AbstractRelation<Set<G>, Set<M>>(
-                                                                                  SetLists
-                                                                                      .transform(_objects, _allObjects),
-                                                                                  SetLists.transform(
-                                                                                      _attributes,
-                                                                                      _allAttributes),
-                                                                                  false) {
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
                                                                                 @SuppressWarnings("unchecked")
                                                                                 public boolean
@@ -299,28 +356,31 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   public final AbstractRelation<G, M>                 DownArrows              =
       new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-        public boolean contains(Object o1, Object o2) {
-          return _downArrows.contains(
-              _objectEquivalence().col(rowHeads().indexOf(o1)),
-              _attributeEquivalence().col(colHeads().indexOf(o2)));
-        }
-      };
+                                                                                    public boolean
+                                                                                        contains(Object o1, Object o2) {
+                                                                                      return _downArrows.contains(
+                                                                                          _objectEquivalence().col(
+                                                                                              rowHeads().indexOf(o1)),
+                                                                                          _attributeEquivalence().col(
+                                                                                              colHeads().indexOf(o2)));
+                                                                                    }
+                                                                                  };
   public final AbstractRelation<G, M>                 UpArrows                =
       new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-        public boolean contains(Object o1, Object o2) {
-          return _upArrows.contains(
-              _objectEquivalence().col(rowHeads().indexOf(o1)),
-              _attributeEquivalence().col(colHeads().indexOf(o2)));
-        }
-      };
+                                                                                    public boolean
+                                                                                        contains(Object o1, Object o2) {
+                                                                                      return _upArrows.contains(
+                                                                                          _objectEquivalence().col(
+                                                                                              rowHeads().indexOf(o1)),
+                                                                                          _attributeEquivalence().col(
+                                                                                              colHeads().indexOf(o2)));
+                                                                                    }
+                                                                                  };
   public final AbstractRelation<Set<G>, Set<M>>       downPaths               = new AbstractRelation<Set<G>, Set<M>>(
-                                                                                  SetLists
-                                                                                      .transform(_objects, _allObjects),
-                                                                                  SetLists.transform(
-                                                                                      _attributes,
-                                                                                      _allAttributes),
-                                                                                  false) {
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
                                                                                 @SuppressWarnings("unchecked")
                                                                                 public boolean
@@ -332,12 +392,9 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
                                                                                 }
                                                                               };
   public final AbstractRelation<Set<G>, Set<M>>       upPaths                 = new AbstractRelation<Set<G>, Set<M>>(
-                                                                                  SetLists
-                                                                                      .transform(_objects, _allObjects),
-                                                                                  SetLists.transform(
-                                                                                      _attributes,
-                                                                                      _allAttributes),
-                                                                                  false) {
+      SetLists.transform(_objects, _allObjects),
+      SetLists.transform(_attributes, _allAttributes),
+      false) {
 
                                                                                 @SuppressWarnings("unchecked")
                                                                                 public boolean
@@ -351,32 +408,38 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
   public final AbstractRelation<G, M>                 DownPaths               =
       new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-        public boolean contains(Object o1, Object o2) {
-          return _downPaths.contains(
-              _objectEquivalence().col(rowHeads().indexOf(o1)),
-              _attributeEquivalence().col(colHeads().indexOf(o2)));
-        }
-      };
+                                                                                    public boolean
+                                                                                        contains(Object o1, Object o2) {
+                                                                                      return _downPaths.contains(
+                                                                                          _objectEquivalence().col(
+                                                                                              rowHeads().indexOf(o1)),
+                                                                                          _attributeEquivalence().col(
+                                                                                              colHeads().indexOf(o2)));
+                                                                                    }
+                                                                                  };
   public final AbstractRelation<G, M>                 UpPaths                 =
       new AbstractRelation<G, M>(rowHeads, colHeads, false) {
 
-        public boolean contains(Object o1, Object o2) {
-          return _upPaths.contains(
-              _objectEquivalence().col(rowHeads().indexOf(o1)),
-              _attributeEquivalence().col(colHeads().indexOf(o2)));
-        }
-      };
+                                                                                    public boolean
+                                                                                        contains(Object o1, Object o2) {
+                                                                                      return _upPaths.contains(
+                                                                                          _objectEquivalence().col(
+                                                                                              rowHeads().indexOf(o1)),
+                                                                                          _attributeEquivalence().col(
+                                                                                              colHeads().indexOf(o2)));
+                                                                                    }
+                                                                                  };
   private final Set<M>                                ignoredAttributes       = new HashSet<M>();
   private final Set<G>                                ignoredObjects          = new HashSet<G>();
 
   public MatrixContext(final boolean homogen) {
     super(homogen);
-    initHandlers(true, AutomaticMode.REDUCE);
+    initHandlers(true, MatrixContext.AutomaticMode.REDUCE);
   }
 
   public MatrixContext(final SetList<G> objects, final SetList<M> attributes, final boolean homogen) {
     super(objects, attributes, homogen);
-    initHandlers(true, AutomaticMode.REDUCE);
+    initHandlers(true, MatrixContext.AutomaticMode.REDUCE);
   }
 
   public MatrixContext(
@@ -385,10 +448,10 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
       final BooleanMatrix matrix,
       final boolean homogen) {
     super(objects, attributes, matrix, homogen);
-    initHandlers(true, AutomaticMode.REDUCE);
+    initHandlers(true, MatrixContext.AutomaticMode.REDUCE);
   }
 
-  public MatrixContext(final boolean homogen, final AutomaticMode automaticMode) {
+  public MatrixContext(final boolean homogen, final MatrixContext.AutomaticMode automaticMode) {
     super(homogen);
     initHandlers(true, automaticMode);
   }
@@ -397,7 +460,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
       final SetList<G> objects,
       final SetList<M> attributes,
       final boolean homogen,
-      final AutomaticMode automaticMode) {
+      final MatrixContext.AutomaticMode automaticMode) {
     super(objects, attributes, homogen);
     initHandlers(true, automaticMode);
   }
@@ -407,7 +470,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
       final SetList<M> attributes,
       final BooleanMatrix matrix,
       final boolean homogen,
-      final AutomaticMode automaticMode) {
+      final MatrixContext.AutomaticMode automaticMode) {
     super(objects, attributes, matrix, homogen);
     initHandlers(true, automaticMode);
   }
@@ -436,7 +499,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
     }
   }
 
-  public void initHandlers(final boolean selfSelecting, final AutomaticMode auto) {
+  public void initHandlers(final boolean selfSelecting, final MatrixContext.AutomaticMode auto) {
     if (selfSelecting) {
       addEventHandler(__ -> select(), RelationEvent.SELECTION_CHANGED);
       select();
@@ -447,7 +510,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
         if (!lock) {
           reduce();
         }
-      } , RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
+      }, RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
       reduce();
       break;
     case CLEAN:
@@ -455,7 +518,7 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
         if (!lock) {
           clean();
         }
-      } , RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
+      }, RelationEvent.ALL_CHANGED, RelationEvent.ENTRIES);
       clean();
       break;
     case NONE:
@@ -550,25 +613,26 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
 //    }
   }
 
-  public final Pair<Incidence, Incidence> getValue(final G g, final M m, final boolean... withArrows) {
+  public final Pair<MatrixContext.Incidence, MatrixContext.Incidence>
+      getValue(final G g, final M m, final boolean... withArrows) {
     if (withArrows.length == 0 || withArrows[0]) {
-      Incidence first;
-      Incidence second;
+      MatrixContext.Incidence first;
+      MatrixContext.Incidence second;
       boolean down = false;
       boolean up = false;
       if (contains(g, m))
-        first = Incidence.CROSS;
+        first = MatrixContext.Incidence.CROSS;
       else {
         down = DownArrows.contains(g, m);
         up = UpArrows.contains(g, m);
         if (down && up)
-          first = Incidence.BOTH_ARROW;
+          first = MatrixContext.Incidence.BOTH_ARROW;
         else if (down)
-          first = Incidence.DOWN_ARROW;
+          first = MatrixContext.Incidence.DOWN_ARROW;
         else if (up)
-          first = Incidence.UP_ARROW;
+          first = MatrixContext.Incidence.UP_ARROW;
         else
-          first = Incidence.NO_CROSS;
+          first = MatrixContext.Incidence.NO_CROSS;
       }
       second = null;
       if (withArrows.length == 0 || (withArrows.length > 1 && withArrows[1])) {
@@ -577,18 +641,18 @@ public class MatrixContext<G, M> extends MatrixRelation<G, M> implements Context
         if (up || down)
           second = null;
         else if (Down && Up)
-          second = Incidence.BOTH_PATH;
+          second = MatrixContext.Incidence.BOTH_PATH;
         else if (Down)
-          second = Incidence.DOWN_PATH;
+          second = MatrixContext.Incidence.DOWN_PATH;
         else if (Up)
-          second = Incidence.UP_PATH;
+          second = MatrixContext.Incidence.UP_PATH;
       }
       return Pair.of(first, second);
     } else {
       if (contains(g, m))
-        return Pair.of(Incidence.CROSS, null);
+        return Pair.of(MatrixContext.Incidence.CROSS, null);
       else
-        return Pair.of(Incidence.NO_CROSS, null);
+        return Pair.of(MatrixContext.Incidence.NO_CROSS, null);
     }
   }
 

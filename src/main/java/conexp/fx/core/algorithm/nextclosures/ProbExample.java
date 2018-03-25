@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,7 +39,6 @@ import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter;
-import conexp.fx.core.math.ClosureOperator;
 
 public final class ProbExample {
 

@@ -29,24 +29,24 @@ public class Literal<M> {
     NEGATIVE;
   }
 
-  private final Type type;
-  private final M    m;
+  private final Literal.Type type;
+  private final M            m;
 
-  public Literal(final Type type, final M m) {
+  public Literal(final Literal.Type type, final M m) {
     super();
     this.type = type;
     this.m = m;
   }
 
   public Literal(final M m) {
-    this(Type.POSITIVE, m);
+    this(Literal.Type.POSITIVE, m);
   }
 
   public final M getM() {
     return m;
   }
 
-  public final Type getType() {
+  public final Literal.Type getType() {
     return type;
   }
 

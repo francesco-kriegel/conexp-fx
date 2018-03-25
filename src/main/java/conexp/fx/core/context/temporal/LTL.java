@@ -50,15 +50,15 @@ public final class LTL<M> {
     }
   }
 
-  private final Type type;
-  private final M    m;
-  private final M    n;
+  private final LTL.Type type;
+  private final M        m;
+  private final M        n;
 
-  public LTL(final Type type, final M m) {
+  public LTL(final LTL.Type type, final M m) {
     this(type, m, null);
   }
 
-  public LTL(final Type type, final M m, final M n) {
+  public LTL(final LTL.Type type, final M m, final M n) {
     super();
     if (m == null)
       throw new NullPointerException("temporalized attribute m cannot be null.");
@@ -67,7 +67,7 @@ public final class LTL<M> {
     this.n = n;
   }
 
-  public final Type getType() {
+  public final LTL.Type getType() {
     return type;
   }
 

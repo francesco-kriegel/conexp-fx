@@ -61,7 +61,6 @@ import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.layout.GeneticLayouter;
 import conexp.fx.core.layout.LayoutEvolution;
 import conexp.fx.core.layout.QualityMeasure;
-import conexp.fx.core.layout.SimpleConceptLayout;
 import conexp.fx.core.util.Constants;
 import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.ConExpFX;

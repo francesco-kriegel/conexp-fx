@@ -46,14 +46,11 @@ import conexp.fx.core.xml.XMLFile;
 import conexp.fx.gui.assistent.ConstructAssistent;
 import conexp.fx.gui.assistent.ExportAssistent;
 import conexp.fx.gui.dataset.Dataset;
-import conexp.fx.gui.dataset.Dataset.DatasetTreeItem;
 import conexp.fx.gui.dataset.DatasetView;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.dataset.RDFDataset;
 import conexp.fx.gui.dialog.ErrorDialog;
 import conexp.fx.gui.dialog.FXDialog;
-import conexp.fx.gui.dialog.FXDialog.Answer;
-import conexp.fx.gui.dialog.FXDialog.Style;
 import conexp.fx.gui.dialog.InfoDialog;
 import conexp.fx.gui.task.BlockingExecutor;
 import conexp.fx.gui.task.ExecutorStatusBar;
@@ -258,8 +255,8 @@ public class ConExpFX extends Application {
             TreeItem<?> selectedItem = it.next();
             if (selectedItem.isLeaf())
               selectedItem = selectedItem.getParent();
-            if (selectedItem instanceof DatasetTreeItem) {
-              active = ((DatasetTreeItem) selectedItem).getDataset();
+            if (selectedItem instanceof Dataset.DatasetTreeItem) {
+              active = ((Dataset.DatasetTreeItem) selectedItem).getDataset();
               while (it.hasNext()) {
                 selectedItem = it.next();
                 if (selectedItem.isLeaf())
@@ -544,10 +541,10 @@ public class ConExpFX extends Application {
   private final void askForUnsavedChanges(final Dataset dataset) {
     if (dataset.unsavedChanges.get() && new FXDialog<Void>(
         primaryStage,
-        Style.QUESTION,
+        FXDialog.Style.QUESTION,
         "Unsaved Changes",
         dataset.id.get() + " has unsaved changes. Do you want to save?",
-        null).showAndWait().result().equals(Answer.YES))
+        null).showAndWait().result().equals(FXDialog.Answer.YES))
       dataset.save();
   }
 

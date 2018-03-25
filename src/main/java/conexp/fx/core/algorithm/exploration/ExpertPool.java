@@ -64,7 +64,7 @@ public class ExpertPool<G, M> implements Expert<G, M> {
   private final Strategy                             strategy;
   private final ExecutorService                      exe;
 
-  public ExpertPool(final Strategy strategy, final ExecutorService executor) {
+  public ExpertPool(final ExpertPool.Strategy strategy, final ExecutorService executor) {
     this.strategy = strategy;
     this.exe = executor;
     this.experts.addListener((MapChangeListener<Expert<G, M>, Boolean>) change -> {

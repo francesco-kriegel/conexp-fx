@@ -26,6 +26,7 @@ package conexp.fx.gui.util;
 import java.util.Arrays;
 import java.util.List;
 
+import conexp.fx.gui.ConExpFX;
 import javafx.beans.binding.StringBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -38,7 +39,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import jfxtras.scene.control.ListSpinner;
-import conexp.fx.gui.ConExpFX;
 
 public final class FXControls
 {

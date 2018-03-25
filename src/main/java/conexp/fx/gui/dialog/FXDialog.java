@@ -79,81 +79,81 @@ public class FXDialog<T> {
 
   }
 
-  private final int          width;
-  private final Stage        stage        = StageBuilder.create().build();
-  protected final BorderPane pane         = BorderPaneBuilder.create().build();
-  private final Text         text;
-  private final Style        style;
-  private Answer             result       = Answer.UNKNOWN;
-  protected T                value        = null;
-  private StackPane          topPane;
-  private StackPane          bottomPane;
-  private Rectangle          topBackground;
-  private Rectangle          bottomBackground;
-  private final Button       okButton     = ButtonBuilder
-                                              .create()
-                                              .text("OK")
-                                              .minHeight(20)
-                                              .minWidth(100)
-                                              .effect(new DropShadow())
-                                              .onAction(new EventHandler<ActionEvent>() {
+  private final int            width;
+  private final Stage          stage        = StageBuilder.create().build();
+  protected final BorderPane   pane         = BorderPaneBuilder.create().build();
+  private final Text           text;
+  private final FXDialog.Style style;
+  private Answer               result       = Answer.UNKNOWN;
+  protected T                  value        = null;
+  private StackPane            topPane;
+  private StackPane            bottomPane;
+  private Rectangle            topBackground;
+  private Rectangle            bottomBackground;
+  private final Button         okButton     = ButtonBuilder
+      .create()
+      .text("OK")
+      .minHeight(20)
+      .minWidth(100)
+      .effect(new DropShadow())
+      .onAction(new EventHandler<ActionEvent>() {
 
-                                                @Override
-                                                public void handle(ActionEvent event) {
-                                                  result = Answer.OK;
-                                                  stage.close();
-                                                }
-                                              })
-                                              .build();
-  private final Button       cancelButton = ButtonBuilder
-                                              .create()
-                                              .text("Cancel")
-                                              .minHeight(20)
-                                              .minWidth(100)
-                                              .effect(new DropShadow())
-                                              .onAction(new EventHandler<ActionEvent>() {
+                                                  @Override
+                                                  public void handle(ActionEvent event) {
+                                                    result = Answer.OK;
+                                                    stage.close();
+                                                  }
+                                                })
+      .build();
+  private final Button         cancelButton = ButtonBuilder
+      .create()
+      .text("Cancel")
+      .minHeight(20)
+      .minWidth(100)
+      .effect(new DropShadow())
+      .onAction(new EventHandler<ActionEvent>() {
 
-                                                @Override
-                                                public void handle(ActionEvent event) {
-                                                  result = Answer.CANCEL;
-                                                  stage.close();
-                                                }
-                                              })
-                                              .build();
-  private final Button       yesButton    = ButtonBuilder
-                                              .create()
-                                              .text("Yes")
-                                              .minHeight(20)
-                                              .minWidth(100)
-                                              .effect(new DropShadow())
-                                              .onAction(new EventHandler<ActionEvent>() {
+                                                  @Override
+                                                  public void handle(ActionEvent event) {
+                                                    result = Answer.CANCEL;
+                                                    stage.close();
+                                                  }
+                                                })
+      .build();
+  private final Button         yesButton    = ButtonBuilder
+      .create()
+      .text("Yes")
+      .minHeight(20)
+      .minWidth(100)
+      .effect(new DropShadow())
+      .onAction(new EventHandler<ActionEvent>() {
 
-                                                @Override
-                                                public void handle(ActionEvent event) {
-                                                  result = Answer.YES;
-                                                  stage.close();
-                                                }
-                                              })
-                                              .build();
-  private final Button       noButton     = ButtonBuilder
-                                              .create()
-                                              .text("No")
-                                              .minHeight(20)
-                                              .minWidth(100)
-                                              .effect(new DropShadow())
-                                              .onAction(new EventHandler<ActionEvent>() {
+                                                  @Override
+                                                  public void handle(ActionEvent event) {
+                                                    result = Answer.YES;
+                                                    stage.close();
+                                                  }
+                                                })
+      .build();
+  private final Button         noButton     = ButtonBuilder
+      .create()
+      .text("No")
+      .minHeight(20)
+      .minWidth(100)
+      .effect(new DropShadow())
+      .onAction(new EventHandler<ActionEvent>() {
 
-                                                @Override
-                                                public void handle(ActionEvent event) {
-                                                  result = Answer.NO;
-                                                  stage.close();
-                                                }
-                                              })
-                                              .build();
+                                                  @Override
+                                                  public void handle(ActionEvent event) {
+                                                    result = Answer.NO;
+                                                    stage.close();
+                                                  }
+                                                })
+      .build();
 
   public FXDialog(
       final Stage primaryStage,
-      final Style style,
+      final FXDialog.Style style,
       final String title,
       final String message,
       final Node optionalCenterNode) {
@@ -162,7 +162,7 @@ public class FXDialog<T> {
 
   public FXDialog(
       final Stage primaryStage,
-      final Style style,
+      final FXDialog.Style style,
       final String title,
       final String message,
       final Node optionalCenterNode,

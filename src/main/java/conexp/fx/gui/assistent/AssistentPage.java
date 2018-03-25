@@ -1,5 +1,7 @@
 package conexp.fx.gui.assistent;
 
+import com.google.common.base.Function;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -29,8 +31,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
-
-import com.google.common.base.Function;
 
 public abstract class AssistentPage<T>
 {

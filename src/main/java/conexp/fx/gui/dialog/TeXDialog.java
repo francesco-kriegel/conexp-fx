@@ -1,5 +1,11 @@
 package conexp.fx.gui.dialog;
 
+import conexp.fx.core.exporter.TeXExporter.ContextTeXPackage;
+import conexp.fx.core.exporter.TeXExporter.DiagramTeXPackage;
+import conexp.fx.core.exporter.TeXExporter.FitScale;
+import conexp.fx.core.exporter.TeXExporter.ScaleEnum;
+import conexp.fx.core.exporter.TeXExporter.TeXOptions;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -38,11 +44,6 @@ import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 import jfxtras.scene.control.ListSpinner;
-import conexp.fx.core.exporter.TeXExporter.ContextTeXPackage;
-import conexp.fx.core.exporter.TeXExporter.DiagramTeXPackage;
-import conexp.fx.core.exporter.TeXExporter.FitScale;
-import conexp.fx.core.exporter.TeXExporter.ScaleEnum;
-import conexp.fx.core.exporter.TeXExporter.TeXOptions;
 
 public final class TeXDialog<G, M> extends FXDialog<TeXOptions> {
 

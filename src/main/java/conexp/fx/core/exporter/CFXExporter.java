@@ -30,13 +30,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javafx.geometry.Point3D;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.layout.AdditiveConceptLayout;
+import javafx.geometry.Point3D;
 
 public class CFXExporter<G, M> {
 

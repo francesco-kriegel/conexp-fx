@@ -22,7 +22,6 @@ package conexp.fx.core.xml;
  * #L%
  */
 
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -42,11 +41,10 @@ public abstract class AbstractCompoundData extends Data<Map<String, Data<?>>> im
 
   private static final Function<Element, String> ELEMENT_TO_TEXT_FUNCTION = new Function<Element, String>() {
 
-                                                                            public final String apply(
-                                                                                final Element element) {
-                                                                              return element.text();
-                                                                            }
-                                                                          };
+    public final String apply(final Element element) {
+      return element.text();
+    }
+  };
 
   public AbstractCompoundData(final Datatype type, final String key) {
     super(type, key, new ConcurrentHashMap<String, Data<?>>());
@@ -61,11 +59,10 @@ public abstract class AbstractCompoundData extends Data<Map<String, Data<?>>> im
     super(type, key, readDataFromElement(element, metadata));
   }
 
-  protected synchronized static final Map<String, Data<?>> readDataFromElement(
-      final Element element,
-      final Metadata metadata) {
+  protected synchronized static final Map<String, Data<?>>
+      readDataFromElement(final Element element, final Metadata metadata) {
     final Map<String, Data<?>> map = new ConcurrentHashMap<String, Data<?>>();
-    for (Entry<String, Pair<Datatype, Metadata>> entry : metadata.getKeyDatatypeMap().entrySet()) {
+    for (Map.Entry<String, Pair<Datatype, Metadata>> entry : metadata.getKeyDatatypeMap().entrySet()) {
       final String key = entry.getKey();
       final Datatype type = entry.getValue().first();
       final Metadata _metadata = entry.getValue().second();
@@ -114,9 +111,8 @@ public abstract class AbstractCompoundData extends Data<Map<String, Data<?>>> im
 
   protected static List<String> readStringDataFromElement(final Element element, final Metadata metadata) {
     List<String> list = new LinkedList<String>();
-    for (String value : Iterables.transform(
-        JsoupUtil.childrenByTag(element, metadata.getSubkey()),
-        ELEMENT_TO_TEXT_FUNCTION))
+    for (String value : Iterables
+        .transform(JsoupUtil.childrenByTag(element, metadata.getSubkey()), ELEMENT_TO_TEXT_FUNCTION))
       list.add(value);
     return Collections.synchronizedList(list);
   }
@@ -177,7 +173,7 @@ public abstract class AbstractCompoundData extends Data<Map<String, Data<?>>> im
   }
 
   @Override
-  public final Set<Entry<String, Data<?>>> entrySet() {
+  public final Set<Map.Entry<String, Data<?>>> entrySet() {
     return value.entrySet();
   }
 

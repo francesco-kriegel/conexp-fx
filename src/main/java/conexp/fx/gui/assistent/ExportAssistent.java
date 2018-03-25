@@ -25,6 +25,15 @@ package conexp.fx.gui.assistent;
 import java.io.File;
 import java.io.IOException;
 
+import conexp.fx.core.exporter.TeXExporter;
+import conexp.fx.core.exporter.TeXExporter.ContextTeXPackage;
+import conexp.fx.core.exporter.TeXExporter.DiagramTeXPackage;
+import conexp.fx.core.exporter.TeXExporter.FitScale;
+import conexp.fx.core.exporter.TeXExporter.ScaleEnum;
+import conexp.fx.core.exporter.TeXExporter.TeXOptions;
+import conexp.fx.core.util.FileFormat;
+import conexp.fx.gui.ConExpFX;
+import conexp.fx.gui.dataset.FCADataset;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -45,15 +54,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 import jfxtras.scene.control.ListSpinner;
-import conexp.fx.core.exporter.TeXExporter;
-import conexp.fx.core.exporter.TeXExporter.ContextTeXPackage;
-import conexp.fx.core.exporter.TeXExporter.DiagramTeXPackage;
-import conexp.fx.core.exporter.TeXExporter.FitScale;
-import conexp.fx.core.exporter.TeXExporter.ScaleEnum;
-import conexp.fx.core.exporter.TeXExporter.TeXOptions;
-import conexp.fx.core.util.FileFormat;
-import conexp.fx.gui.ConExpFX;
-import conexp.fx.gui.dataset.FCADataset;
 
 @SuppressWarnings("deprecation")
 public class ExportAssistent extends Assistent<String> {

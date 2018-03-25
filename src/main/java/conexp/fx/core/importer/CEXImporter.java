@@ -28,12 +28,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.geometry.Point3D;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
 import conexp.fx.core.context.MatrixContext;
+import javafx.geometry.Point3D;
 
 public class CEXImporter {
 

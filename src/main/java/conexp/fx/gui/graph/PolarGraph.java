@@ -30,15 +30,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javafx.geometry.Point2D;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
-import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
-
 import org.ujmp.core.util.RandomSimple;
 
 import com.google.common.collect.Collections2;
@@ -48,6 +39,13 @@ import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.ConceptLattice;
 import conexp.fx.core.layout.ChainDecomposer;
 import conexp.fx.core.math.Math3;
+import javafx.geometry.Point2D;
+import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
 
 public class PolarGraph<G, M> {
 

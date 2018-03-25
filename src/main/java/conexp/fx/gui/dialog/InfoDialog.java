@@ -25,6 +25,7 @@ package conexp.fx.gui.dialog;
 import java.awt.Desktop;
 import java.net.URI;
 
+import conexp.fx.gui.ConExpFX;
 import javafx.geometry.InsetsBuilder;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.HyperlinkBuilder;
@@ -37,7 +38,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
-import conexp.fx.gui.ConExpFX;
 
 public final class InfoDialog extends FXDialog<Void> {
 

@@ -31,7 +31,6 @@ import java.util.NoSuchElementException;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.collect.UnmodifiableListIterator;
 
