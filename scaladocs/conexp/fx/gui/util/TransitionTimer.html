@@ -1,0 +1,1369 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>Concept Explorer FX 5.5.0-SNAPSHOT API  - conexp.fx.gui.util.TransitionTimer</title>
+          <meta name="description" content="Concept Explorer FX 5.5.0 - SNAPSHOT API - conexp.fx.gui.util.TransitionTimer" />
+          <meta name="keywords" content="Concept Explorer FX 5.5.0 SNAPSHOT API conexp.fx.gui.util.TransitionTimer" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title">Concept Explorer FX 5.5.0-SNAPSHOT API<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="index.html#_root_" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.conexp" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="conexp"></a><a id="conexp:conexp"></a>
+      <span class="permalink">
+      <a href="index.html#conexp" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">conexp</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="conexp.fx" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fx"></a><a id="fx:fx"></a>
+      <span class="permalink">
+      <a href="../conexp/index.html#fx" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">fx</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="conexp">conexp</a></dd></dl></div>
+    </li><li name="conexp.fx.gui" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="gui"></a><a id="gui:gui"></a>
+      <span class="permalink">
+      <a href="../../conexp/fx/index.html#gui" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">gui</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="conexp.fx">fx</a></dd></dl></div>
+    </li><li name="conexp.fx.gui.util" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="util"></a><a id="util:util"></a>
+      <span class="permalink">
+      <a href="../../../conexp/fx/gui/index.html#util" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="index.html"><span class="name">util</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="conexp.fx.gui">gui</a></dd></dl></div>
+    </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="AppUserModelIdUtility.html" title=""></a>
+                        <a href="AppUserModelIdUtility.html" title="">AppUserModelIdUtility</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ColorScheme.html" title=""></a>
+                        <a href="ColorScheme.html" title="">ColorScheme</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Colors.html" title=""></a>
+                        <a href="Colors.html" title="">Colors</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="CoordinateUtil.html" title=""></a>
+                        <a href="CoordinateUtil.html" title="">CoordinateUtil</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FXControls.html" title=""></a>
+                        <a href="FXControls.html" title="">FXControls</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="JFXInit.html" title=""></a>
+                        <a href="JFXInit.html" title="">JFXInit</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="LaTeX.html" title=""></a>
+                        <a href="LaTeX.html" title="">LaTeX</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NumberPropertyTransition.html" title=""></a>
+                        <a href="NumberPropertyTransition.html" title="">NumberPropertyTransition</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Platform2.html" title=""></a>
+                        <a href="Platform2.html" title="">Platform2</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SearchBox.html" title=""></a>
+                        <a href="SearchBox.html" title="">SearchBox</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SynchronizedPane.html" title=""></a>
+                        <a href="SynchronizedPane.html" title="">SynchronizedPane</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="TextWidthCalculator.html" title=""></a>
+                        <a href="TextWidthCalculator.html" title="">TextWidthCalculator</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="" title=""></a>
+                        <a href="" title="">TransitionTimer</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="class type">
+      <div id="definition">
+        <div class="big-circle class">c</div>
+        <p id="owner"><a href="../../../index.html" class="extype" name="conexp">conexp</a>.<a href="../../index.html" class="extype" name="conexp.fx">fx</a>.<a href="../index.html" class="extype" name="conexp.fx.gui">gui</a>.<a href="index.html" class="extype" name="conexp.fx.gui.util">util</a></p>
+        <h1>TransitionTimer<span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        <h3><span class="morelinks"></span></h3>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TransitionTimer</span><span class="result"> extends <span class="extype" name="javafx.animation.Transition">Transition</span></span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><span class="extype" name="javafx.animation.Transition">Transition</span>, <span class="extype" name="javafx.animation.Animation">Animation</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
+            </ol>
+          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="conexp.fx.gui.util.TransitionTimer"><span>TransitionTimer</span></li><li class="in" name="javafx.animation.Transition"><span>Transition</span></li><li class="in" name="javafx.animation.Animation"><span>Animation</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="conexp.fx.gui.util.TransitionTimer#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(duration:javafx.util.Duration,onExecution:javafx.event.EventHandler[javafx.event.ActionEvent]):conexp.fx.gui.util.TransitionTimer"></a><a id="&lt;init&gt;:TransitionTimer"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#&lt;init&gt;(duration:javafx.util.Duration,onExecution:javafx.event.EventHandler[javafx.event.ActionEvent]):conexp.fx.gui.util.TransitionTimer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TransitionTimer</span><span class="params">(<span name="duration">duration: <span class="extype" name="javafx.util.Duration">Duration</span></span>, <span name="onExecution">onExecution: <span class="extype" name="javafx.event.EventHandler">EventHandler</span>[<span class="extype" name="javafx.event.ActionEvent">ActionEvent</span>]</span>)</span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#!=(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html###():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#==(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#asInstanceOf[T0]:T0" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="javafx.animation.Animation#autoReverseProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="autoReverseProperty():javafx.beans.property.BooleanProperty"></a><a id="autoReverseProperty():BooleanProperty"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#autoReverseProperty():javafx.beans.property.BooleanProperty" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">autoReverseProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.BooleanProperty">BooleanProperty</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a><a id="clone():AnyRef"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#clone():Object" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="javafx.animation.Animation#currentRateProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="currentRateProperty():javafx.beans.property.ReadOnlyDoubleProperty"></a><a id="currentRateProperty():ReadOnlyDoubleProperty"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#currentRateProperty():javafx.beans.property.ReadOnlyDoubleProperty" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">currentRateProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ReadOnlyDoubleProperty">ReadOnlyDoubleProperty</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#currentTimeProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="currentTimeProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.util.Duration]"></a><a id="currentTimeProperty():ReadOnlyObjectProperty[Duration]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#currentTimeProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.util.Duration]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">currentTimeProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ReadOnlyObjectProperty">ReadOnlyObjectProperty</span>[<span class="extype" name="javafx.util.Duration">Duration</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#cycleCountProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cycleCountProperty():javafx.beans.property.IntegerProperty"></a><a id="cycleCountProperty():IntegerProperty"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#cycleCountProperty():javafx.beans.property.IntegerProperty" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cycleCountProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.IntegerProperty">IntegerProperty</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#cycleDurationProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cycleDurationProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.util.Duration]"></a><a id="cycleDurationProperty():ReadOnlyObjectProperty[Duration]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#cycleDurationProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.util.Duration]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cycleDurationProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ReadOnlyObjectProperty">ReadOnlyObjectProperty</span>[<span class="extype" name="javafx.util.Duration">Duration</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#delayProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="delayProperty():javafx.beans.property.ObjectProperty[javafx.util.Duration]"></a><a id="delayProperty():ObjectProperty[Duration]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#delayProperty():javafx.beans.property.ObjectProperty[javafx.util.Duration]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">delayProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ObjectProperty">ObjectProperty</span>[<span class="extype" name="javafx.util.Duration">Duration</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="javafx.animation.Transition#getCachedInterpolator" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCachedInterpolator():javafx.animation.Interpolator"></a><a id="getCachedInterpolator():Interpolator"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getCachedInterpolator():javafx.animation.Interpolator" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCachedInterpolator</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.animation.Interpolator">Interpolator</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../javafx/animation/index.html" class="extype" name="javafx.animation">javafx.animation</a>] </dd><dt>Definition Classes</dt><dd>Transition</dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getClass():Class[_]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="javafx.animation.Animation#getCuePoints" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCuePoints():javafx.collections.ObservableMap[String,javafx.util.Duration]"></a><a id="getCuePoints():ObservableMap[String,Duration]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getCuePoints():javafx.collections.ObservableMap[String,javafx.util.Duration]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCuePoints</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.collections.ObservableMap">ObservableMap</span>[<span class="extype" name="java.lang.String">String</span>, <span class="extype" name="javafx.util.Duration">Duration</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getCurrentRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCurrentRate():Double"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getCurrentRate():Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCurrentRate</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getCurrentTime" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCurrentTime():javafx.util.Duration"></a><a id="getCurrentTime():Duration"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getCurrentTime():javafx.util.Duration" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCurrentTime</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.util.Duration">Duration</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getCycleCount" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCycleCount():Int"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getCycleCount():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCycleCount</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getCycleDuration" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCycleDuration():javafx.util.Duration"></a><a id="getCycleDuration():Duration"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getCycleDuration():javafx.util.Duration" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCycleDuration</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.util.Duration">Duration</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getDelay" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getDelay():javafx.util.Duration"></a><a id="getDelay():Duration"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getDelay():javafx.util.Duration" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getDelay</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.util.Duration">Duration</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Transition#getInterpolator" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getInterpolator():javafx.animation.Interpolator"></a><a id="getInterpolator():Interpolator"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getInterpolator():javafx.animation.Interpolator" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getInterpolator</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.animation.Interpolator">Interpolator</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Transition</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getOnFinished" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getOnFinished():javafx.event.EventHandler[javafx.event.ActionEvent]"></a><a id="getOnFinished():EventHandler[ActionEvent]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getOnFinished():javafx.event.EventHandler[javafx.event.ActionEvent]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getOnFinished</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.event.EventHandler">EventHandler</span>[<span class="extype" name="javafx.event.ActionEvent">ActionEvent</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Transition#getParentTargetNode" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getParentTargetNode():javafx.scene.Node"></a><a id="getParentTargetNode():Node"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getParentTargetNode():javafx.scene.Node" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getParentTargetNode</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.scene.Node">Node</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../javafx/animation/index.html" class="extype" name="javafx.animation">javafx.animation</a>] </dd><dt>Definition Classes</dt><dd>Transition</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getRate():Double"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getRate():Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getRate</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getStatus" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getStatus():javafx.animation.Animation.Status"></a><a id="getStatus():Status"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getStatus():javafx.animation.Animation.Status" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getStatus</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.animation.Animation.Status">Status</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getTargetFramerate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getTargetFramerate():Double"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getTargetFramerate():Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getTargetFramerate</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#getTotalDuration" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getTotalDuration():javafx.util.Duration"></a><a id="getTotalDuration():Duration"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#getTotalDuration():javafx.util.Duration" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getTotalDuration</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.util.Duration">Duration</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="conexp.fx.gui.util.TransitionTimer#interpolate" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="interpolate(frac:Double):Unit"></a><a id="interpolate(Double):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#interpolate(frac:Double):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">interpolate</span><span class="params">(<span name="frac">frac: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="conexp.fx.gui.util">conexp.fx.gui.util</a>] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="conexp.fx.gui.util.TransitionTimer">TransitionTimer</a> → Transition</dd></dl></div>
+    </li><li name="javafx.animation.Transition#interpolatorProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="interpolatorProperty():javafx.beans.property.ObjectProperty[javafx.animation.Interpolator]"></a><a id="interpolatorProperty():ObjectProperty[Interpolator]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#interpolatorProperty():javafx.beans.property.ObjectProperty[javafx.animation.Interpolator]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">interpolatorProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ObjectProperty">ObjectProperty</span>[<span class="extype" name="javafx.animation.Interpolator">Interpolator</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Transition</dd></dl></div>
+    </li><li name="javafx.animation.Animation#isAutoReverse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isAutoReverse():Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#isAutoReverse():Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isAutoReverse</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#isInstanceOf[T0]:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="javafx.animation.Animation#jumpTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="jumpTo(x$1:String):Unit"></a><a id="jumpTo(String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#jumpTo(x$1:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">jumpTo</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#jumpTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="jumpTo(x$1:javafx.util.Duration):Unit"></a><a id="jumpTo(Duration):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#jumpTo(x$1:javafx.util.Duration):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">jumpTo</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javafx.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#notify():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#notifyAll():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="javafx.animation.Animation#onFinishedProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onFinishedProperty():javafx.beans.property.ObjectProperty[javafx.event.EventHandler[javafx.event.ActionEvent]]"></a><a id="onFinishedProperty():ObjectProperty[EventHandler[ActionEvent]]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#onFinishedProperty():javafx.beans.property.ObjectProperty[javafx.event.EventHandler[javafx.event.ActionEvent]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onFinishedProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ObjectProperty">ObjectProperty</span>[<span class="extype" name="javafx.event.EventHandler">EventHandler</span>[<span class="extype" name="javafx.event.ActionEvent">ActionEvent</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#pause" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pause():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#pause():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pause</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#play" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="play():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#play():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">play</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#playFrom" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="playFrom(x$1:javafx.util.Duration):Unit"></a><a id="playFrom(Duration):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#playFrom(x$1:javafx.util.Duration):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">playFrom</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javafx.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#playFrom" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="playFrom(x$1:String):Unit"></a><a id="playFrom(String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#playFrom(x$1:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">playFrom</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#playFromStart" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="playFromStart():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#playFromStart():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">playFromStart</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#rateProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rateProperty():javafx.beans.property.DoubleProperty"></a><a id="rateProperty():DoubleProperty"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#rateProperty():javafx.beans.property.DoubleProperty" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rateProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.DoubleProperty">DoubleProperty</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#setAutoReverse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setAutoReverse(x$1:Boolean):Unit"></a><a id="setAutoReverse(Boolean):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setAutoReverse(x$1:Boolean):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setAutoReverse</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#setCycleCount" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setCycleCount(x$1:Int):Unit"></a><a id="setCycleCount(Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setCycleCount(x$1:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setCycleCount</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#setCycleDuration" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setCycleDuration(x$1:javafx.util.Duration):Unit"></a><a id="setCycleDuration(Duration):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setCycleDuration(x$1:javafx.util.Duration):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setCycleDuration</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javafx.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../javafx/animation/index.html" class="extype" name="javafx.animation">javafx.animation</a>] </dd><dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#setDelay" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setDelay(x$1:javafx.util.Duration):Unit"></a><a id="setDelay(Duration):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setDelay(x$1:javafx.util.Duration):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setDelay</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javafx.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Transition#setInterpolator" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setInterpolator(x$1:javafx.animation.Interpolator):Unit"></a><a id="setInterpolator(Interpolator):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setInterpolator(x$1:javafx.animation.Interpolator):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setInterpolator</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javafx.animation.Interpolator">Interpolator</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Transition</dd></dl></div>
+    </li><li name="javafx.animation.Animation#setOnFinished" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setOnFinished(x$1:javafx.event.EventHandler[javafx.event.ActionEvent]):Unit"></a><a id="setOnFinished(EventHandler[ActionEvent]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setOnFinished(x$1:javafx.event.EventHandler[javafx.event.ActionEvent]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setOnFinished</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javafx.event.EventHandler">EventHandler</span>[<span class="extype" name="javafx.event.ActionEvent">ActionEvent</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#setRate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setRate(x$1:Double):Unit"></a><a id="setRate(Double):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setRate(x$1:Double):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setRate</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#setStatus" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setStatus(x$1:javafx.animation.Animation.Status):Unit"></a><a id="setStatus(Status):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#setStatus(x$1:javafx.animation.Animation.Status):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setStatus</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javafx.animation.Animation.Status">Status</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../javafx/animation/index.html" class="extype" name="javafx.animation">javafx.animation</a>] </dd><dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#statusProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="statusProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.animation.Animation.Status]"></a><a id="statusProperty():ReadOnlyObjectProperty[Status]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#statusProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.animation.Animation.Status]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">statusProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ReadOnlyObjectProperty">ReadOnlyObjectProperty</span>[<span class="extype" name="javafx.animation.Animation.Status">Status</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="javafx.animation.Animation#stop" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stop():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#stop():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stop</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="javafx.animation.Animation#totalDurationProperty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="totalDurationProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.util.Duration]"></a><a id="totalDurationProperty():ReadOnlyObjectProperty[Duration]"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#totalDurationProperty():javafx.beans.property.ReadOnlyObjectProperty[javafx.util.Duration]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">totalDurationProperty</span><span class="params">()</span><span class="result">: <span class="extype" name="javafx.beans.property.ReadOnlyObjectProperty">ReadOnlyObjectProperty</span>[<span class="extype" name="javafx.util.Duration">Duration</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Animation</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../conexp/fx/gui/util/TransitionTimer.html#wait(x$1:Long):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li>
+              </ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="javafx.animation.Transition">
+              <h3>Inherited from <span class="extype" name="javafx.animation.Transition">Transition</span></h3>
+            </div><div class="parent" name="javafx.animation.Animation">
+              <h3>Inherited from <span class="extype" name="javafx.animation.Animation">Animation</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

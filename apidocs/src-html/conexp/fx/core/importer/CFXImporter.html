@@ -35,57 +35,56 @@
 <span class="sourceLineNo">027</span>import java.io.IOException;<a name="line.27"></a>
 <span class="sourceLineNo">028</span>import java.util.Map;<a name="line.28"></a>
 <span class="sourceLineNo">029</span><a name="line.29"></a>
-<span class="sourceLineNo">030</span>import javafx.geometry.Point3D;<a name="line.30"></a>
-<span class="sourceLineNo">031</span><a name="line.31"></a>
-<span class="sourceLineNo">032</span>import org.jsoup.Jsoup;<a name="line.32"></a>
-<span class="sourceLineNo">033</span>import org.jsoup.nodes.Element;<a name="line.33"></a>
-<span class="sourceLineNo">034</span><a name="line.34"></a>
-<span class="sourceLineNo">035</span>import conexp.fx.core.context.MatrixContext;<a name="line.35"></a>
-<span class="sourceLineNo">036</span><a name="line.36"></a>
-<span class="sourceLineNo">037</span>public class CFXImporter {<a name="line.37"></a>
-<span class="sourceLineNo">038</span><a name="line.38"></a>
-<span class="sourceLineNo">039</span>  public static void importt(MatrixContext&lt;String, String&gt; _context, Map&lt;String, Point3D&gt; seedMap, File file) {<a name="line.39"></a>
-<span class="sourceLineNo">040</span>    try {<a name="line.40"></a>
-<span class="sourceLineNo">041</span>      final Element xml = Jsoup.parse(file, null).body();<a name="line.41"></a>
-<span class="sourceLineNo">042</span>      final Element domain = xml.getElementsByTag("domain").first();<a name="line.42"></a>
-<span class="sourceLineNo">043</span>      for (Element objectEl : domain.getElementsByTag("object")) {<a name="line.43"></a>
-<span class="sourceLineNo">044</span>        final String object = objectEl.attr("name");<a name="line.44"></a>
-<span class="sourceLineNo">045</span>        _context.rowHeads().add(object);<a name="line.45"></a>
-<span class="sourceLineNo">046</span>//        if (!Boolean.valueOf(objectEl.attr("selected")))<a name="line.46"></a>
-<span class="sourceLineNo">047</span>//          formalContext.getSelectedObjects().remove(object);<a name="line.47"></a>
-<span class="sourceLineNo">048</span>      }<a name="line.48"></a>
-<span class="sourceLineNo">049</span>      final Element codomain = xml.getElementsByTag("codomain").first();<a name="line.49"></a>
-<span class="sourceLineNo">050</span>      for (Element attributeEl : codomain.getElementsByTag("attribute")) {<a name="line.50"></a>
-<span class="sourceLineNo">051</span>        final String attribute = attributeEl.attr("name");<a name="line.51"></a>
-<span class="sourceLineNo">052</span>        _context.colHeads().add(attribute);<a name="line.52"></a>
-<span class="sourceLineNo">053</span>        if (!Boolean.valueOf(attributeEl.attr("selected")))<a name="line.53"></a>
-<span class="sourceLineNo">054</span>          _context.selectedAttributes().remove(attribute);<a name="line.54"></a>
-<span class="sourceLineNo">055</span>      }<a name="line.55"></a>
-<span class="sourceLineNo">056</span>      final Element context = xml.getElementsByTag("context").first();<a name="line.56"></a>
-<span class="sourceLineNo">057</span>      for (Element incidenceEl : context.getElementsByTag("incidence")) {<a name="line.57"></a>
-<span class="sourceLineNo">058</span>        final String object = incidenceEl.attr("object");<a name="line.58"></a>
-<span class="sourceLineNo">059</span>        final String attribute = incidenceEl.attr("attribute");<a name="line.59"></a>
-<span class="sourceLineNo">060</span>        _context.addFast(object, attribute);<a name="line.60"></a>
-<span class="sourceLineNo">061</span>      }<a name="line.61"></a>
-<span class="sourceLineNo">062</span>      if (seedMap != null) {<a name="line.62"></a>
-<span class="sourceLineNo">063</span>        final Element lattice = xml.getElementsByTag("lattice").first();<a name="line.63"></a>
-<span class="sourceLineNo">064</span>        for (Element seedEl : lattice.getElementsByTag("attribute-seed")) {<a name="line.64"></a>
-<span class="sourceLineNo">065</span>          final String attribute = seedEl.attr("attribute");<a name="line.65"></a>
-<span class="sourceLineNo">066</span>          final Double x = Double.valueOf(seedEl.attr("x"));<a name="line.66"></a>
-<span class="sourceLineNo">067</span>          final Double y = Double.valueOf(seedEl.attr("y"));<a name="line.67"></a>
-<span class="sourceLineNo">068</span>          final Double z = Double.valueOf(seedEl.attr("z"));<a name="line.68"></a>
-<span class="sourceLineNo">069</span>          final Point3D point3d = new Point3D(x, y, z);<a name="line.69"></a>
-<span class="sourceLineNo">070</span>          seedMap.put(attribute, point3d);<a name="line.70"></a>
-<span class="sourceLineNo">071</span>        }<a name="line.71"></a>
-<span class="sourceLineNo">072</span>      }<a name="line.72"></a>
-<span class="sourceLineNo">073</span>      _context.pushAllChangedEvent();<a name="line.73"></a>
-<span class="sourceLineNo">074</span>    } catch (IOException e) {<a name="line.74"></a>
-<span class="sourceLineNo">075</span>      // TODO Auto-generated catch block<a name="line.75"></a>
-<span class="sourceLineNo">076</span>      System.err.println("Unable to parse ConExpFX file from " + file.toString());<a name="line.76"></a>
-<span class="sourceLineNo">077</span>      e.printStackTrace();<a name="line.77"></a>
-<span class="sourceLineNo">078</span>    }<a name="line.78"></a>
-<span class="sourceLineNo">079</span>  }<a name="line.79"></a>
-<span class="sourceLineNo">080</span>}<a name="line.80"></a>
+<span class="sourceLineNo">030</span>import org.jsoup.Jsoup;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.jsoup.nodes.Element;<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>import conexp.fx.core.context.MatrixContext;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import javafx.geometry.Point3D;<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>public class CFXImporter {<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>  public static void importt(MatrixContext&lt;String, String&gt; _context, Map&lt;String, Point3D&gt; seedMap, File file) {<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    try {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>      final Element xml = Jsoup.parse(file, null).body();<a name="line.40"></a>
+<span class="sourceLineNo">041</span>      final Element domain = xml.getElementsByTag("domain").first();<a name="line.41"></a>
+<span class="sourceLineNo">042</span>      for (Element objectEl : domain.getElementsByTag("object")) {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        final String object = objectEl.attr("name");<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        _context.rowHeads().add(object);<a name="line.44"></a>
+<span class="sourceLineNo">045</span>//        if (!Boolean.valueOf(objectEl.attr("selected")))<a name="line.45"></a>
+<span class="sourceLineNo">046</span>//          formalContext.getSelectedObjects().remove(object);<a name="line.46"></a>
+<span class="sourceLineNo">047</span>      }<a name="line.47"></a>
+<span class="sourceLineNo">048</span>      final Element codomain = xml.getElementsByTag("codomain").first();<a name="line.48"></a>
+<span class="sourceLineNo">049</span>      for (Element attributeEl : codomain.getElementsByTag("attribute")) {<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        final String attribute = attributeEl.attr("name");<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        _context.colHeads().add(attribute);<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        if (!Boolean.valueOf(attributeEl.attr("selected")))<a name="line.52"></a>
+<span class="sourceLineNo">053</span>          _context.selectedAttributes().remove(attribute);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>      }<a name="line.54"></a>
+<span class="sourceLineNo">055</span>      final Element context = xml.getElementsByTag("context").first();<a name="line.55"></a>
+<span class="sourceLineNo">056</span>      for (Element incidenceEl : context.getElementsByTag("incidence")) {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        final String object = incidenceEl.attr("object");<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        final String attribute = incidenceEl.attr("attribute");<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        _context.addFast(object, attribute);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>      }<a name="line.60"></a>
+<span class="sourceLineNo">061</span>      if (seedMap != null) {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        final Element lattice = xml.getElementsByTag("lattice").first();<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        for (Element seedEl : lattice.getElementsByTag("attribute-seed")) {<a name="line.63"></a>
+<span class="sourceLineNo">064</span>          final String attribute = seedEl.attr("attribute");<a name="line.64"></a>
+<span class="sourceLineNo">065</span>          final Double x = Double.valueOf(seedEl.attr("x"));<a name="line.65"></a>
+<span class="sourceLineNo">066</span>          final Double y = Double.valueOf(seedEl.attr("y"));<a name="line.66"></a>
+<span class="sourceLineNo">067</span>          final Double z = Double.valueOf(seedEl.attr("z"));<a name="line.67"></a>
+<span class="sourceLineNo">068</span>          final Point3D point3d = new Point3D(x, y, z);<a name="line.68"></a>
+<span class="sourceLineNo">069</span>          seedMap.put(attribute, point3d);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        }<a name="line.70"></a>
+<span class="sourceLineNo">071</span>      }<a name="line.71"></a>
+<span class="sourceLineNo">072</span>      _context.pushAllChangedEvent();<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    } catch (IOException e) {<a name="line.73"></a>
+<span class="sourceLineNo">074</span>      // TODO Auto-generated catch block<a name="line.74"></a>
+<span class="sourceLineNo">075</span>      System.err.println("Unable to parse ConExpFX file from " + file.toString());<a name="line.75"></a>
+<span class="sourceLineNo">076</span>      e.printStackTrace();<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    }<a name="line.77"></a>
+<span class="sourceLineNo">078</span>  }<a name="line.78"></a>
+<span class="sourceLineNo">079</span>}<a name="line.79"></a>
 
 
 

@@ -87,14 +87,14 @@
 <span class="sourceLineNo">079</span>    return s;<a name="line.79"></a>
 <span class="sourceLineNo">080</span>  }<a name="line.80"></a>
 <span class="sourceLineNo">081</span><a name="line.81"></a>
-<span class="sourceLineNo">082</span>  public static final &lt;E extends Number &amp; Comparable&lt;? super E&gt;&gt; double sum(final Collection&lt;? extends E&gt; c) {<a name="line.82"></a>
+<span class="sourceLineNo">082</span>  public static final &lt;E extends Number &amp; Comparable&lt;E&gt;&gt; double sum(final Collection&lt;? extends E&gt; c) {<a name="line.82"></a>
 <span class="sourceLineNo">083</span>    double s = 0d;<a name="line.83"></a>
 <span class="sourceLineNo">084</span>    for (E e : c)<a name="line.84"></a>
 <span class="sourceLineNo">085</span>      s += e.doubleValue();<a name="line.85"></a>
 <span class="sourceLineNo">086</span>    return s;<a name="line.86"></a>
 <span class="sourceLineNo">087</span>  }<a name="line.87"></a>
 <span class="sourceLineNo">088</span><a name="line.88"></a>
-<span class="sourceLineNo">089</span>  public static final &lt;E extends Number &amp; Comparable&lt;? super E&gt;&gt; double avg(final Collection&lt;? extends E&gt; c) {<a name="line.89"></a>
+<span class="sourceLineNo">089</span>  public static final &lt;E extends Number &amp; Comparable&lt;E&gt;&gt; double avg(final Collection&lt;? extends E&gt; c) {<a name="line.89"></a>
 <span class="sourceLineNo">090</span>    return sum(c) / (double) c.size();<a name="line.90"></a>
 <span class="sourceLineNo">091</span>  }<a name="line.91"></a>
 <span class="sourceLineNo">092</span><a name="line.92"></a>

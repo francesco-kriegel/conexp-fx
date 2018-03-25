@@ -36,246 +36,244 @@
 <span class="sourceLineNo">028</span>import java.util.Collections;<a name="line.28"></a>
 <span class="sourceLineNo">029</span>import java.util.HashMap;<a name="line.29"></a>
 <span class="sourceLineNo">030</span>import java.util.HashSet;<a name="line.30"></a>
-<span class="sourceLineNo">031</span>import java.util.List;<a name="line.31"></a>
-<span class="sourceLineNo">032</span>import java.util.Map;<a name="line.32"></a>
-<span class="sourceLineNo">033</span>import java.util.Set;<a name="line.33"></a>
-<span class="sourceLineNo">034</span><a name="line.34"></a>
-<span class="sourceLineNo">035</span>import com.google.common.collect.Lists;<a name="line.35"></a>
-<span class="sourceLineNo">036</span>import com.google.common.collect.Sets;<a name="line.36"></a>
-<span class="sourceLineNo">037</span><a name="line.37"></a>
-<span class="sourceLineNo">038</span>import conexp.fx.core.collections.Pair;<a name="line.38"></a>
-<span class="sourceLineNo">039</span>import conexp.fx.core.context.Concept;<a name="line.39"></a>
-<span class="sourceLineNo">040</span>import conexp.fx.core.context.Implication;<a name="line.40"></a>
-<span class="sourceLineNo">041</span>import conexp.fx.core.context.MatrixContext;<a name="line.41"></a>
-<span class="sourceLineNo">042</span>import conexp.fx.core.importer.CXTImporter;<a name="line.42"></a>
-<span class="sourceLineNo">043</span>import conexp.fx.core.math.ClosureOperator;<a name="line.43"></a>
+<span class="sourceLineNo">031</span>import java.util.Map;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.Set;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>import com.google.common.collect.Lists;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import com.google.common.collect.Sets;<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>import conexp.fx.core.collections.Pair;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import conexp.fx.core.context.Concept;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import conexp.fx.core.context.Implication;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import conexp.fx.core.context.MatrixContext;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.core.importer.CXTImporter;<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>public final class ProbExample {<a name="line.43"></a>
 <span class="sourceLineNo">044</span><a name="line.44"></a>
-<span class="sourceLineNo">045</span>public final class ProbExample {<a name="line.45"></a>
-<span class="sourceLineNo">046</span><a name="line.46"></a>
-<span class="sourceLineNo">047</span>  private static Set&lt;Implication&lt;String, String&gt;&gt; backgroundImplications;<a name="line.47"></a>
-<span class="sourceLineNo">048</span>  private static Map&lt;String, Set&lt;Integer&gt;&gt;        elems;<a name="line.48"></a>
-<span class="sourceLineNo">049</span>  private static Map&lt;String, Double&gt;              probs;<a name="line.49"></a>
-<span class="sourceLineNo">050</span><a name="line.50"></a>
-<span class="sourceLineNo">051</span>  private static final void e(final String s, final Integer... es) {<a name="line.51"></a>
-<span class="sourceLineNo">052</span>    elems.put(s, Sets.newHashSet(es));<a name="line.52"></a>
-<span class="sourceLineNo">053</span>  }<a name="line.53"></a>
-<span class="sourceLineNo">054</span><a name="line.54"></a>
-<span class="sourceLineNo">055</span>  private static final void p(final String s, final Double p) {<a name="line.55"></a>
-<span class="sourceLineNo">056</span>    probs.put(s, p);<a name="line.56"></a>
-<span class="sourceLineNo">057</span>  }<a name="line.57"></a>
-<span class="sourceLineNo">058</span><a name="line.58"></a>
-<span class="sourceLineNo">059</span>  private static final void f(final String p, final String... cs) {<a name="line.59"></a>
-<span class="sourceLineNo">060</span>    for (String c : Arrays.asList(cs))<a name="line.60"></a>
-<span class="sourceLineNo">061</span>      backgroundImplications.add(new Implication&lt;String, String&gt;(Collections.singleton(p), Collections.singleton(c)));<a name="line.61"></a>
-<span class="sourceLineNo">062</span>  }<a name="line.62"></a>
-<span class="sourceLineNo">063</span><a name="line.63"></a>
-<span class="sourceLineNo">064</span>  private static final void g(final String p, final String q, final String c) {<a name="line.64"></a>
-<span class="sourceLineNo">065</span>    backgroundImplications.add(new Implication&lt;String, String&gt;(Sets.newHashSet(p, q), Collections.singleton(c)));<a name="line.65"></a>
-<span class="sourceLineNo">066</span>  }<a name="line.66"></a>
-<span class="sourceLineNo">067</span><a name="line.67"></a>
-<span class="sourceLineNo">068</span>  public static final void main(final String[] args) throws Exception {<a name="line.68"></a>
-<span class="sourceLineNo">069</span>    elems = new HashMap&lt;&gt;();<a name="line.69"></a>
-<span class="sourceLineNo">070</span>//    e("A", 2);<a name="line.70"></a>
-<span class="sourceLineNo">071</span>//    e("B", 3);<a name="line.71"></a>
-<span class="sourceLineNo">072</span>//    e("C", 1, 3);<a name="line.72"></a>
-<span class="sourceLineNo">073</span>//    e("D", 2, 3);<a name="line.73"></a>
-<span class="sourceLineNo">074</span>//    e("E", 1, 2, 3);<a name="line.74"></a>
-<span class="sourceLineNo">075</span>    e("F", 2);<a name="line.75"></a>
-<span class="sourceLineNo">076</span>    e("G", 3);<a name="line.76"></a>
-<span class="sourceLineNo">077</span>    e("H", 1, 3);<a name="line.77"></a>
-<span class="sourceLineNo">078</span>    e("I", 2, 3);<a name="line.78"></a>
-<span class="sourceLineNo">079</span>    e("J", 1, 2, 3);<a name="line.79"></a>
-<span class="sourceLineNo">080</span>    e("K", 2);<a name="line.80"></a>
-<span class="sourceLineNo">081</span>    e("L", 3);<a name="line.81"></a>
-<span class="sourceLineNo">082</span>    e("M", 1, 3);<a name="line.82"></a>
-<span class="sourceLineNo">083</span>    e("N", 2, 3);<a name="line.83"></a>
-<span class="sourceLineNo">084</span>    e("O", 1, 2, 3);<a name="line.84"></a>
-<span class="sourceLineNo">085</span>    e("P", 2);<a name="line.85"></a>
-<span class="sourceLineNo">086</span>    e("Q", 3);<a name="line.86"></a>
-<span class="sourceLineNo">087</span>    e("R", 1, 3);<a name="line.87"></a>
-<span class="sourceLineNo">088</span>    e("S", 2, 3);<a name="line.88"></a>
-<span class="sourceLineNo">089</span>    e("T", 1, 2, 3);<a name="line.89"></a>
-<span class="sourceLineNo">090</span>    e("U", 2);<a name="line.90"></a>
-<span class="sourceLineNo">091</span>    e("V", 3);<a name="line.91"></a>
-<span class="sourceLineNo">092</span>    e("W", 1, 3);<a name="line.92"></a>
-<span class="sourceLineNo">093</span>    e("X", 2, 3);<a name="line.93"></a>
-<span class="sourceLineNo">094</span>    e("Y", 1, 2, 3);<a name="line.94"></a>
-<span class="sourceLineNo">095</span>    e("Z", 2);<a name="line.95"></a>
-<span class="sourceLineNo">096</span>    e("0", 3);<a name="line.96"></a>
-<span class="sourceLineNo">097</span>    e("1", 1, 3);<a name="line.97"></a>
-<span class="sourceLineNo">098</span>    e("2", 2, 3);<a name="line.98"></a>
-<span class="sourceLineNo">099</span>    e("3", 1, 2, 3);<a name="line.99"></a>
-<span class="sourceLineNo">100</span><a name="line.100"></a>
-<span class="sourceLineNo">101</span>    probs = new HashMap&lt;&gt;();<a name="line.101"></a>
-<span class="sourceLineNo">102</span>//    p("A", 0d);<a name="line.102"></a>
-<span class="sourceLineNo">103</span>//    p("B", 0d);<a name="line.103"></a>
-<span class="sourceLineNo">104</span>//    p("C", 0d);<a name="line.104"></a>
-<span class="sourceLineNo">105</span>//    p("D", 0d);<a name="line.105"></a>
-<span class="sourceLineNo">106</span>//    p("E", 0d);<a name="line.106"></a>
-<span class="sourceLineNo">107</span>    p("F", 1d / 6d);<a name="line.107"></a>
-<span class="sourceLineNo">108</span>    p("G", 1d / 6d);<a name="line.108"></a>
-<span class="sourceLineNo">109</span>    p("H", 1d / 6d);<a name="line.109"></a>
-<span class="sourceLineNo">110</span>    p("I", 1d / 6d);<a name="line.110"></a>
-<span class="sourceLineNo">111</span>    p("J", 1d / 6d);<a name="line.111"></a>
-<span class="sourceLineNo">112</span>    p("K", 1d / 3d);<a name="line.112"></a>
-<span class="sourceLineNo">113</span>    p("L", 1d / 3d);<a name="line.113"></a>
-<span class="sourceLineNo">114</span>    p("M", 1d / 3d);<a name="line.114"></a>
-<span class="sourceLineNo">115</span>    p("N", 1d / 3d);<a name="line.115"></a>
-<span class="sourceLineNo">116</span>    p("O", 1d / 3d);<a name="line.116"></a>
-<span class="sourceLineNo">117</span>    p("P", 2d / 3d);<a name="line.117"></a>
-<span class="sourceLineNo">118</span>    p("Q", 2d / 3d);<a name="line.118"></a>
-<span class="sourceLineNo">119</span>    p("R", 2d / 3d);<a name="line.119"></a>
-<span class="sourceLineNo">120</span>    p("S", 2d / 3d);<a name="line.120"></a>
-<span class="sourceLineNo">121</span>    p("T", 2d / 3d);<a name="line.121"></a>
-<span class="sourceLineNo">122</span>    p("U", 5d / 6d);<a name="line.122"></a>
-<span class="sourceLineNo">123</span>    p("V", 5d / 6d);<a name="line.123"></a>
-<span class="sourceLineNo">124</span>    p("W", 5d / 6d);<a name="line.124"></a>
-<span class="sourceLineNo">125</span>    p("X", 5d / 6d);<a name="line.125"></a>
-<span class="sourceLineNo">126</span>    p("Y", 5d / 6d);<a name="line.126"></a>
-<span class="sourceLineNo">127</span>    p("Z", 1d);<a name="line.127"></a>
-<span class="sourceLineNo">128</span>    p("0", 1d);<a name="line.128"></a>
-<span class="sourceLineNo">129</span>    p("1", 1d);<a name="line.129"></a>
-<span class="sourceLineNo">130</span>    p("2", 1d);<a name="line.130"></a>
-<span class="sourceLineNo">131</span>    p("3", 1d);<a name="line.131"></a>
+<span class="sourceLineNo">045</span>  private static Set&lt;Implication&lt;String, String&gt;&gt; backgroundImplications;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>  private static Map&lt;String, Set&lt;Integer&gt;&gt;        elems;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>  private static Map&lt;String, Double&gt;              probs;<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>  private static final void e(final String s, final Integer... es) {<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    elems.put(s, Sets.newHashSet(es));<a name="line.50"></a>
+<span class="sourceLineNo">051</span>  }<a name="line.51"></a>
+<span class="sourceLineNo">052</span><a name="line.52"></a>
+<span class="sourceLineNo">053</span>  private static final void p(final String s, final Double p) {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    probs.put(s, p);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>  }<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>  private static final void f(final String p, final String... cs) {<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    for (String c : Arrays.asList(cs))<a name="line.58"></a>
+<span class="sourceLineNo">059</span>      backgroundImplications.add(new Implication&lt;String, String&gt;(Collections.singleton(p), Collections.singleton(c)));<a name="line.59"></a>
+<span class="sourceLineNo">060</span>  }<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>  private static final void g(final String p, final String q, final String c) {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    backgroundImplications.add(new Implication&lt;String, String&gt;(Sets.newHashSet(p, q), Collections.singleton(c)));<a name="line.63"></a>
+<span class="sourceLineNo">064</span>  }<a name="line.64"></a>
+<span class="sourceLineNo">065</span><a name="line.65"></a>
+<span class="sourceLineNo">066</span>  public static final void main(final String[] args) throws Exception {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    elems = new HashMap&lt;&gt;();<a name="line.67"></a>
+<span class="sourceLineNo">068</span>//    e("A", 2);<a name="line.68"></a>
+<span class="sourceLineNo">069</span>//    e("B", 3);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>//    e("C", 1, 3);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>//    e("D", 2, 3);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>//    e("E", 1, 2, 3);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    e("F", 2);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    e("G", 3);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    e("H", 1, 3);<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    e("I", 2, 3);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    e("J", 1, 2, 3);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    e("K", 2);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    e("L", 3);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    e("M", 1, 3);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    e("N", 2, 3);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    e("O", 1, 2, 3);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    e("P", 2);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>    e("Q", 3);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    e("R", 1, 3);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    e("S", 2, 3);<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    e("T", 1, 2, 3);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    e("U", 2);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    e("V", 3);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    e("W", 1, 3);<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    e("X", 2, 3);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    e("Y", 1, 2, 3);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    e("Z", 2);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    e("0", 3);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    e("1", 1, 3);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    e("2", 2, 3);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>    e("3", 1, 2, 3);<a name="line.97"></a>
+<span class="sourceLineNo">098</span><a name="line.98"></a>
+<span class="sourceLineNo">099</span>    probs = new HashMap&lt;&gt;();<a name="line.99"></a>
+<span class="sourceLineNo">100</span>//    p("A", 0d);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>//    p("B", 0d);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>//    p("C", 0d);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>//    p("D", 0d);<a name="line.103"></a>
+<span class="sourceLineNo">104</span>//    p("E", 0d);<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    p("F", 1d / 6d);<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    p("G", 1d / 6d);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    p("H", 1d / 6d);<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    p("I", 1d / 6d);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    p("J", 1d / 6d);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>    p("K", 1d / 3d);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>    p("L", 1d / 3d);<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    p("M", 1d / 3d);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    p("N", 1d / 3d);<a name="line.113"></a>
+<span class="sourceLineNo">114</span>    p("O", 1d / 3d);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    p("P", 2d / 3d);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    p("Q", 2d / 3d);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    p("R", 2d / 3d);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    p("S", 2d / 3d);<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    p("T", 2d / 3d);<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    p("U", 5d / 6d);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    p("V", 5d / 6d);<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    p("W", 5d / 6d);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    p("X", 5d / 6d);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    p("Y", 5d / 6d);<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    p("Z", 1d);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    p("0", 1d);<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    p("1", 1d);<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    p("2", 1d);<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    p("3", 1d);<a name="line.129"></a>
+<span class="sourceLineNo">130</span><a name="line.130"></a>
+<span class="sourceLineNo">131</span>    backgroundImplications = new HashSet&lt;&gt;();<a name="line.131"></a>
 <span class="sourceLineNo">132</span><a name="line.132"></a>
-<span class="sourceLineNo">133</span>    backgroundImplications = new HashSet&lt;&gt;();<a name="line.133"></a>
-<span class="sourceLineNo">134</span><a name="line.134"></a>
-<span class="sourceLineNo">135</span>//    f("3", "Y", "T", "O", "J", "E");<a name="line.135"></a>
-<span class="sourceLineNo">136</span>//    f("2", "X", "S", "N", "I", "D");<a name="line.136"></a>
-<span class="sourceLineNo">137</span>//    f("1", "W", "R", "M", "H", "C");<a name="line.137"></a>
-<span class="sourceLineNo">138</span>//    f("0", "V", "Q", "L", "G", "B");<a name="line.138"></a>
-<span class="sourceLineNo">139</span>//    f("Z", "U", "P", "K", "F", "A");<a name="line.139"></a>
-<span class="sourceLineNo">140</span>//<a name="line.140"></a>
-<span class="sourceLineNo">141</span>//    f("3", "2", "1", "0", "Z");<a name="line.141"></a>
-<span class="sourceLineNo">142</span>//    f("Y", "X", "W", "V", "U");<a name="line.142"></a>
-<span class="sourceLineNo">143</span>//    f("T", "S", "R", "Q", "P");<a name="line.143"></a>
-<span class="sourceLineNo">144</span>//    f("O", "N", "M", "L", "K");<a name="line.144"></a>
-<span class="sourceLineNo">145</span>//    f("J", "I", "H", "G", "F");<a name="line.145"></a>
-<span class="sourceLineNo">146</span>//    f("E", "D", "C", "B", "A");<a name="line.146"></a>
-<span class="sourceLineNo">147</span>//<a name="line.147"></a>
-<span class="sourceLineNo">148</span>//    f("2", "0", "Z");<a name="line.148"></a>
-<span class="sourceLineNo">149</span>//    f("X", "V", "U");<a name="line.149"></a>
-<span class="sourceLineNo">150</span>//    f("S", "Q", "P");<a name="line.150"></a>
-<span class="sourceLineNo">151</span>//    f("N", "L", "K");<a name="line.151"></a>
-<span class="sourceLineNo">152</span>//    f("I", "G", "F");<a name="line.152"></a>
-<span class="sourceLineNo">153</span>//    f("D", "B", "A");<a name="line.153"></a>
-<span class="sourceLineNo">154</span>//<a name="line.154"></a>
-<span class="sourceLineNo">155</span>//    f("1", "0");<a name="line.155"></a>
-<span class="sourceLineNo">156</span>//    f("W", "V");<a name="line.156"></a>
-<span class="sourceLineNo">157</span>//    f("R", "Q");<a name="line.157"></a>
-<span class="sourceLineNo">158</span>//    f("M", "L");<a name="line.158"></a>
-<span class="sourceLineNo">159</span>//    f("H", "G");<a name="line.159"></a>
-<span class="sourceLineNo">160</span>//    f("C", "B");<a name="line.160"></a>
-<span class="sourceLineNo">161</span><a name="line.161"></a>
-<span class="sourceLineNo">162</span>    for (String p : elems.keySet())<a name="line.162"></a>
-<span class="sourceLineNo">163</span>      for (String q : elems.keySet())<a name="line.163"></a>
-<span class="sourceLineNo">164</span>        if (!p.equals(q))<a name="line.164"></a>
-<span class="sourceLineNo">165</span>          if (probs.get(p) &gt;= probs.get(q))<a name="line.165"></a>
-<span class="sourceLineNo">166</span>            if (elems.get(p).containsAll(elems.get(q)))<a name="line.166"></a>
-<span class="sourceLineNo">167</span>              f(p, q);<a name="line.167"></a>
-<span class="sourceLineNo">168</span><a name="line.168"></a>
-<span class="sourceLineNo">169</span>//    g("Z", "0", "2");<a name="line.169"></a>
-<span class="sourceLineNo">170</span>//    g("Z", "V", "X");<a name="line.170"></a>
-<span class="sourceLineNo">171</span>//    g("Z", "Q", "S");<a name="line.171"></a>
-<span class="sourceLineNo">172</span>//    g("Z", "L", "N");<a name="line.172"></a>
-<span class="sourceLineNo">173</span>//    g("Z", "G", "I");<a name="line.173"></a>
-<span class="sourceLineNo">174</span>//    g("Z", "B", "D");<a name="line.174"></a>
-<span class="sourceLineNo">175</span><a name="line.175"></a>
-<span class="sourceLineNo">176</span>    for (String p : elems.keySet())<a name="line.176"></a>
-<span class="sourceLineNo">177</span>      for (String q : elems.keySet())<a name="line.177"></a>
-<span class="sourceLineNo">178</span>        if (!p.equals(q))<a name="line.178"></a>
-<span class="sourceLineNo">179</span>          for (String c : elems.keySet())<a name="line.179"></a>
-<span class="sourceLineNo">180</span>            if (!c.equals(p))<a name="line.180"></a>
-<span class="sourceLineNo">181</span>              if (!c.equals(q))<a name="line.181"></a>
-<span class="sourceLineNo">182</span>                // if (Collections.disjoint(elems.get(p), elems.get(q)))<a name="line.182"></a>
-<span class="sourceLineNo">183</span>                if (probs.get(p) + probs.get(q) - 1d &gt; 0d)<a name="line.183"></a>
-<span class="sourceLineNo">184</span>                if (probs.get(c) == probs.get(p) + probs.get(q) - 1d)<a name="line.184"></a>
-<span class="sourceLineNo">185</span>                if (elems.get(c).containsAll(Sets.union(elems.get(p), elems.get(q))))<a name="line.185"></a>
-<span class="sourceLineNo">186</span>                if (Sets.union(elems.get(p), elems.get(q)).containsAll(elems.get(c)))<a name="line.186"></a>
-<span class="sourceLineNo">187</span>                g(p, q, c);<a name="line.187"></a>
+<span class="sourceLineNo">133</span>//    f("3", "Y", "T", "O", "J", "E");<a name="line.133"></a>
+<span class="sourceLineNo">134</span>//    f("2", "X", "S", "N", "I", "D");<a name="line.134"></a>
+<span class="sourceLineNo">135</span>//    f("1", "W", "R", "M", "H", "C");<a name="line.135"></a>
+<span class="sourceLineNo">136</span>//    f("0", "V", "Q", "L", "G", "B");<a name="line.136"></a>
+<span class="sourceLineNo">137</span>//    f("Z", "U", "P", "K", "F", "A");<a name="line.137"></a>
+<span class="sourceLineNo">138</span>//<a name="line.138"></a>
+<span class="sourceLineNo">139</span>//    f("3", "2", "1", "0", "Z");<a name="line.139"></a>
+<span class="sourceLineNo">140</span>//    f("Y", "X", "W", "V", "U");<a name="line.140"></a>
+<span class="sourceLineNo">141</span>//    f("T", "S", "R", "Q", "P");<a name="line.141"></a>
+<span class="sourceLineNo">142</span>//    f("O", "N", "M", "L", "K");<a name="line.142"></a>
+<span class="sourceLineNo">143</span>//    f("J", "I", "H", "G", "F");<a name="line.143"></a>
+<span class="sourceLineNo">144</span>//    f("E", "D", "C", "B", "A");<a name="line.144"></a>
+<span class="sourceLineNo">145</span>//<a name="line.145"></a>
+<span class="sourceLineNo">146</span>//    f("2", "0", "Z");<a name="line.146"></a>
+<span class="sourceLineNo">147</span>//    f("X", "V", "U");<a name="line.147"></a>
+<span class="sourceLineNo">148</span>//    f("S", "Q", "P");<a name="line.148"></a>
+<span class="sourceLineNo">149</span>//    f("N", "L", "K");<a name="line.149"></a>
+<span class="sourceLineNo">150</span>//    f("I", "G", "F");<a name="line.150"></a>
+<span class="sourceLineNo">151</span>//    f("D", "B", "A");<a name="line.151"></a>
+<span class="sourceLineNo">152</span>//<a name="line.152"></a>
+<span class="sourceLineNo">153</span>//    f("1", "0");<a name="line.153"></a>
+<span class="sourceLineNo">154</span>//    f("W", "V");<a name="line.154"></a>
+<span class="sourceLineNo">155</span>//    f("R", "Q");<a name="line.155"></a>
+<span class="sourceLineNo">156</span>//    f("M", "L");<a name="line.156"></a>
+<span class="sourceLineNo">157</span>//    f("H", "G");<a name="line.157"></a>
+<span class="sourceLineNo">158</span>//    f("C", "B");<a name="line.158"></a>
+<span class="sourceLineNo">159</span><a name="line.159"></a>
+<span class="sourceLineNo">160</span>    for (String p : elems.keySet())<a name="line.160"></a>
+<span class="sourceLineNo">161</span>      for (String q : elems.keySet())<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        if (!p.equals(q))<a name="line.162"></a>
+<span class="sourceLineNo">163</span>          if (probs.get(p) &gt;= probs.get(q))<a name="line.163"></a>
+<span class="sourceLineNo">164</span>            if (elems.get(p).containsAll(elems.get(q)))<a name="line.164"></a>
+<span class="sourceLineNo">165</span>              f(p, q);<a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>//    g("Z", "0", "2");<a name="line.167"></a>
+<span class="sourceLineNo">168</span>//    g("Z", "V", "X");<a name="line.168"></a>
+<span class="sourceLineNo">169</span>//    g("Z", "Q", "S");<a name="line.169"></a>
+<span class="sourceLineNo">170</span>//    g("Z", "L", "N");<a name="line.170"></a>
+<span class="sourceLineNo">171</span>//    g("Z", "G", "I");<a name="line.171"></a>
+<span class="sourceLineNo">172</span>//    g("Z", "B", "D");<a name="line.172"></a>
+<span class="sourceLineNo">173</span><a name="line.173"></a>
+<span class="sourceLineNo">174</span>    for (String p : elems.keySet())<a name="line.174"></a>
+<span class="sourceLineNo">175</span>      for (String q : elems.keySet())<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        if (!p.equals(q))<a name="line.176"></a>
+<span class="sourceLineNo">177</span>          for (String c : elems.keySet())<a name="line.177"></a>
+<span class="sourceLineNo">178</span>            if (!c.equals(p))<a name="line.178"></a>
+<span class="sourceLineNo">179</span>              if (!c.equals(q))<a name="line.179"></a>
+<span class="sourceLineNo">180</span>                // if (Collections.disjoint(elems.get(p), elems.get(q)))<a name="line.180"></a>
+<span class="sourceLineNo">181</span>                if (probs.get(p) + probs.get(q) - 1d &gt; 0d)<a name="line.181"></a>
+<span class="sourceLineNo">182</span>                if (probs.get(c) == probs.get(p) + probs.get(q) - 1d)<a name="line.182"></a>
+<span class="sourceLineNo">183</span>                if (elems.get(c).containsAll(Sets.union(elems.get(p), elems.get(q))))<a name="line.183"></a>
+<span class="sourceLineNo">184</span>                if (Sets.union(elems.get(p), elems.get(q)).containsAll(elems.get(c)))<a name="line.184"></a>
+<span class="sourceLineNo">185</span>                g(p, q, c);<a name="line.185"></a>
+<span class="sourceLineNo">186</span><a name="line.186"></a>
+<span class="sourceLineNo">187</span>    backgroundImplications.forEach(System.out::println);<a name="line.187"></a>
 <span class="sourceLineNo">188</span><a name="line.188"></a>
-<span class="sourceLineNo">189</span>    backgroundImplications.forEach(System.out::println);<a name="line.189"></a>
-<span class="sourceLineNo">190</span><a name="line.190"></a>
-<span class="sourceLineNo">191</span>    final MatrixContext&lt;String, String&gt; cxt =<a name="line.191"></a>
-<span class="sourceLineNo">192</span>        CXTImporter.read(new File("../../LaTeX/cla2015-prob-ijgs/example-scaling-2.cxt"));<a name="line.192"></a>
-<span class="sourceLineNo">193</span>    final Pair&lt;Set&lt;Concept&lt;String, String&gt;&gt;, Set&lt;Implication&lt;String, String&gt;&gt;&gt; result2 =<a name="line.193"></a>
-<span class="sourceLineNo">194</span>        NextClosures2.compute(cxt, backgroundImplications);<a name="line.194"></a>
-<span class="sourceLineNo">195</span>    final Set&lt;Implication&lt;String, String&gt;&gt; impls2 = result2.second();<a name="line.195"></a>
-<span class="sourceLineNo">196</span>    impls2<a name="line.196"></a>
-<span class="sourceLineNo">197</span>        .stream()<a name="line.197"></a>
-<span class="sourceLineNo">198</span>        .map(i -&gt; new Implication&lt;String, String&gt;(b(i.getPremise()), b(i.getConclusion())))<a name="line.198"></a>
-<span class="sourceLineNo">199</span>        .sequential()<a name="line.199"></a>
-<span class="sourceLineNo">200</span>        .forEach(System.out::println);<a name="line.200"></a>
-<span class="sourceLineNo">201</span>//    final List&lt;Set&lt;Implication&lt;String, String&gt;&gt;&gt; foos = Lists.newArrayList();<a name="line.201"></a>
-<span class="sourceLineNo">202</span>//    for (int k = 0; k &lt; 100; k++) {<a name="line.202"></a>
-<span class="sourceLineNo">203</span>//      foos.add(Sets.newHashSet());<a name="line.203"></a>
-<span class="sourceLineNo">204</span>//      impls2<a name="line.204"></a>
-<span class="sourceLineNo">205</span>//          .stream()<a name="line.205"></a>
-<span class="sourceLineNo">206</span>//          .map(i -&gt; new Implication&lt;String, String&gt;(b(i.getPremise()), b(i.getConclusion())))<a name="line.206"></a>
-<span class="sourceLineNo">207</span>//          .sequential()<a name="line.207"></a>
-<span class="sourceLineNo">208</span>//          .forEach(foos.get(k)::add);<a name="line.208"></a>
-<span class="sourceLineNo">209</span>//    }<a name="line.209"></a>
-<span class="sourceLineNo">210</span>//    for (int k = 0; k &lt; 100; k++)<a name="line.210"></a>
-<span class="sourceLineNo">211</span>//      for (int l = 0; l &lt; 100; l++)<a name="line.211"></a>
-<span class="sourceLineNo">212</span>//        if (k != l) {<a name="line.212"></a>
-<span class="sourceLineNo">213</span>//          System.out.println(foos.get(k).containsAll(foos.get(l)));<a name="line.213"></a>
-<span class="sourceLineNo">214</span>//          System.out.println(foos.get(l).containsAll(foos.get(k)));<a name="line.214"></a>
-<span class="sourceLineNo">215</span>//          Sets.difference(foos.get(k), foos.get(l)).forEach(System.out::println);<a name="line.215"></a>
-<span class="sourceLineNo">216</span>//          Sets.difference(foos.get(l), foos.get(k)).forEach(System.out::println);<a name="line.216"></a>
-<span class="sourceLineNo">217</span>//          System.out.println();<a name="line.217"></a>
-<span class="sourceLineNo">218</span>//        }<a name="line.218"></a>
-<span class="sourceLineNo">219</span>//<a name="line.219"></a>
-<span class="sourceLineNo">220</span>//    System.out<a name="line.220"></a>
-<span class="sourceLineNo">221</span>//        .println(ClosureOperator.fromImplications(backgroundImplications, false, true).closure(Sets.newHashSet("3")));<a name="line.221"></a>
-<span class="sourceLineNo">222</span>//    System.out.println(<a name="line.222"></a>
-<span class="sourceLineNo">223</span>//        ClosureOperator.fromImplications(backgroundImplications, false, true).closure(Sets.newHashSet("1", "2", "Y")));<a name="line.223"></a>
-<span class="sourceLineNo">224</span>//    final Pair&lt;Set&lt;Concept&lt;String, String&gt;&gt;, Set&lt;Implication&lt;String, String&gt;&gt;&gt; resultC =<a name="line.224"></a>
-<span class="sourceLineNo">225</span>//        NextClosures2C.compute(cxt, ClosureOperator.fromImplications(backgroundImplications, false, false));<a name="line.225"></a>
-<span class="sourceLineNo">226</span>//    System.out.println();<a name="line.226"></a>
-<span class="sourceLineNo">227</span>//    System.out.println(result2.first().containsAll(resultC.first()));<a name="line.227"></a>
-<span class="sourceLineNo">228</span>//    System.out.println(resultC.first().containsAll(result2.first()));<a name="line.228"></a>
-<span class="sourceLineNo">229</span>//    System.out.println(result2.second().containsAll(resultC.second()));<a name="line.229"></a>
-<span class="sourceLineNo">230</span>//    System.out.println(resultC.second().containsAll(result2.second()));<a name="line.230"></a>
+<span class="sourceLineNo">189</span>    final MatrixContext&lt;String, String&gt; cxt =<a name="line.189"></a>
+<span class="sourceLineNo">190</span>        CXTImporter.read(new File("../../LaTeX/cla2015-prob-ijgs/example-scaling-2.cxt"));<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    final Pair&lt;Set&lt;Concept&lt;String, String&gt;&gt;, Set&lt;Implication&lt;String, String&gt;&gt;&gt; result2 =<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        NextClosures2.compute(cxt, backgroundImplications);<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    final Set&lt;Implication&lt;String, String&gt;&gt; impls2 = result2.second();<a name="line.193"></a>
+<span class="sourceLineNo">194</span>    impls2<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        .stream()<a name="line.195"></a>
+<span class="sourceLineNo">196</span>        .map(i -&gt; new Implication&lt;String, String&gt;(b(i.getPremise()), b(i.getConclusion())))<a name="line.196"></a>
+<span class="sourceLineNo">197</span>        .sequential()<a name="line.197"></a>
+<span class="sourceLineNo">198</span>        .forEach(System.out::println);<a name="line.198"></a>
+<span class="sourceLineNo">199</span>//    final List&lt;Set&lt;Implication&lt;String, String&gt;&gt;&gt; foos = Lists.newArrayList();<a name="line.199"></a>
+<span class="sourceLineNo">200</span>//    for (int k = 0; k &lt; 100; k++) {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>//      foos.add(Sets.newHashSet());<a name="line.201"></a>
+<span class="sourceLineNo">202</span>//      impls2<a name="line.202"></a>
+<span class="sourceLineNo">203</span>//          .stream()<a name="line.203"></a>
+<span class="sourceLineNo">204</span>//          .map(i -&gt; new Implication&lt;String, String&gt;(b(i.getPremise()), b(i.getConclusion())))<a name="line.204"></a>
+<span class="sourceLineNo">205</span>//          .sequential()<a name="line.205"></a>
+<span class="sourceLineNo">206</span>//          .forEach(foos.get(k)::add);<a name="line.206"></a>
+<span class="sourceLineNo">207</span>//    }<a name="line.207"></a>
+<span class="sourceLineNo">208</span>//    for (int k = 0; k &lt; 100; k++)<a name="line.208"></a>
+<span class="sourceLineNo">209</span>//      for (int l = 0; l &lt; 100; l++)<a name="line.209"></a>
+<span class="sourceLineNo">210</span>//        if (k != l) {<a name="line.210"></a>
+<span class="sourceLineNo">211</span>//          System.out.println(foos.get(k).containsAll(foos.get(l)));<a name="line.211"></a>
+<span class="sourceLineNo">212</span>//          System.out.println(foos.get(l).containsAll(foos.get(k)));<a name="line.212"></a>
+<span class="sourceLineNo">213</span>//          Sets.difference(foos.get(k), foos.get(l)).forEach(System.out::println);<a name="line.213"></a>
+<span class="sourceLineNo">214</span>//          Sets.difference(foos.get(l), foos.get(k)).forEach(System.out::println);<a name="line.214"></a>
+<span class="sourceLineNo">215</span>//          System.out.println();<a name="line.215"></a>
+<span class="sourceLineNo">216</span>//        }<a name="line.216"></a>
+<span class="sourceLineNo">217</span>//<a name="line.217"></a>
+<span class="sourceLineNo">218</span>//    System.out<a name="line.218"></a>
+<span class="sourceLineNo">219</span>//        .println(ClosureOperator.fromImplications(backgroundImplications, false, true).closure(Sets.newHashSet("3")));<a name="line.219"></a>
+<span class="sourceLineNo">220</span>//    System.out.println(<a name="line.220"></a>
+<span class="sourceLineNo">221</span>//        ClosureOperator.fromImplications(backgroundImplications, false, true).closure(Sets.newHashSet("1", "2", "Y")));<a name="line.221"></a>
+<span class="sourceLineNo">222</span>//    final Pair&lt;Set&lt;Concept&lt;String, String&gt;&gt;, Set&lt;Implication&lt;String, String&gt;&gt;&gt; resultC =<a name="line.222"></a>
+<span class="sourceLineNo">223</span>//        NextClosures2C.compute(cxt, ClosureOperator.fromImplications(backgroundImplications, false, false));<a name="line.223"></a>
+<span class="sourceLineNo">224</span>//    System.out.println();<a name="line.224"></a>
+<span class="sourceLineNo">225</span>//    System.out.println(result2.first().containsAll(resultC.first()));<a name="line.225"></a>
+<span class="sourceLineNo">226</span>//    System.out.println(resultC.first().containsAll(result2.first()));<a name="line.226"></a>
+<span class="sourceLineNo">227</span>//    System.out.println(result2.second().containsAll(resultC.second()));<a name="line.227"></a>
+<span class="sourceLineNo">228</span>//    System.out.println(resultC.second().containsAll(result2.second()));<a name="line.228"></a>
+<span class="sourceLineNo">229</span>//    System.out.println();<a name="line.229"></a>
+<span class="sourceLineNo">230</span>//    Sets.difference(result2.second(), resultC.second()).forEach(System.out::println);<a name="line.230"></a>
 <span class="sourceLineNo">231</span>//    System.out.println();<a name="line.231"></a>
-<span class="sourceLineNo">232</span>//    Sets.difference(result2.second(), resultC.second()).forEach(System.out::println);<a name="line.232"></a>
+<span class="sourceLineNo">232</span>//    Sets.difference(resultC.second(), result2.second()).forEach(System.out::println);<a name="line.232"></a>
 <span class="sourceLineNo">233</span>//    System.out.println();<a name="line.233"></a>
-<span class="sourceLineNo">234</span>//    Sets.difference(resultC.second(), result2.second()).forEach(System.out::println);<a name="line.234"></a>
-<span class="sourceLineNo">235</span>//    System.out.println();<a name="line.235"></a>
-<span class="sourceLineNo">236</span>  }<a name="line.236"></a>
-<span class="sourceLineNo">237</span><a name="line.237"></a>
-<span class="sourceLineNo">238</span>  private static final Set&lt;String&gt; b(final Set&lt;String&gt; s) {<a name="line.238"></a>
-<span class="sourceLineNo">239</span>//    final HashSet&lt;String&gt; result = Sets.newHashSet(s);<a name="line.239"></a>
-<span class="sourceLineNo">240</span>//    final Set&lt;String&gt; r = Sets.newHashSet(s);<a name="line.240"></a>
-<span class="sourceLineNo">241</span>    final ArrayList&lt;String&gt; r = Lists.newArrayList(s);<a name="line.241"></a>
-<span class="sourceLineNo">242</span>    Collections.shuffle(r);<a name="line.242"></a>
-<span class="sourceLineNo">243</span>    String a;<a name="line.243"></a>
-<span class="sourceLineNo">244</span>    do {<a name="line.244"></a>
-<span class="sourceLineNo">245</span>      a = null;<a name="line.245"></a>
-<span class="sourceLineNo">246</span>      for (String x : r) {<a name="line.246"></a>
-<span class="sourceLineNo">247</span>        if (a != null)<a name="line.247"></a>
-<span class="sourceLineNo">248</span>          break;<a name="line.248"></a>
-<span class="sourceLineNo">249</span>        for (String y : r) {<a name="line.249"></a>
-<span class="sourceLineNo">250</span>          if (a != null)<a name="line.250"></a>
-<span class="sourceLineNo">251</span>            break;<a name="line.251"></a>
-<span class="sourceLineNo">252</span>          if (backgroundImplications.contains(new Implication&lt;&gt;(x, y))) {<a name="line.252"></a>
-<span class="sourceLineNo">253</span>            a = y;<a name="line.253"></a>
-<span class="sourceLineNo">254</span>            break;<a name="line.254"></a>
-<span class="sourceLineNo">255</span>          } else<a name="line.255"></a>
-<span class="sourceLineNo">256</span>            for (String z : r)<a name="line.256"></a>
-<span class="sourceLineNo">257</span>              if (backgroundImplications.contains(new Implication&lt;&gt;(Sets.newHashSet(x, y), z))) {<a name="line.257"></a>
-<span class="sourceLineNo">258</span>                a = z;<a name="line.258"></a>
-<span class="sourceLineNo">259</span>                break;<a name="line.259"></a>
-<span class="sourceLineNo">260</span>              }<a name="line.260"></a>
-<span class="sourceLineNo">261</span>        }<a name="line.261"></a>
-<span class="sourceLineNo">262</span>      }<a name="line.262"></a>
-<span class="sourceLineNo">263</span>      r.remove(a);<a name="line.263"></a>
-<span class="sourceLineNo">264</span>    } while (a != null);<a name="line.264"></a>
-<span class="sourceLineNo">265</span>//    result.removeAll(r);<a name="line.265"></a>
-<span class="sourceLineNo">266</span>//    return r;<a name="line.266"></a>
-<span class="sourceLineNo">267</span>    return Sets.newHashSet(r);<a name="line.267"></a>
-<span class="sourceLineNo">268</span>  }<a name="line.268"></a>
-<span class="sourceLineNo">269</span><a name="line.269"></a>
-<span class="sourceLineNo">270</span>}<a name="line.270"></a>
+<span class="sourceLineNo">234</span>  }<a name="line.234"></a>
+<span class="sourceLineNo">235</span><a name="line.235"></a>
+<span class="sourceLineNo">236</span>  private static final Set&lt;String&gt; b(final Set&lt;String&gt; s) {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>//    final HashSet&lt;String&gt; result = Sets.newHashSet(s);<a name="line.237"></a>
+<span class="sourceLineNo">238</span>//    final Set&lt;String&gt; r = Sets.newHashSet(s);<a name="line.238"></a>
+<span class="sourceLineNo">239</span>    final ArrayList&lt;String&gt; r = Lists.newArrayList(s);<a name="line.239"></a>
+<span class="sourceLineNo">240</span>    Collections.shuffle(r);<a name="line.240"></a>
+<span class="sourceLineNo">241</span>    String a;<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    do {<a name="line.242"></a>
+<span class="sourceLineNo">243</span>      a = null;<a name="line.243"></a>
+<span class="sourceLineNo">244</span>      for (String x : r) {<a name="line.244"></a>
+<span class="sourceLineNo">245</span>        if (a != null)<a name="line.245"></a>
+<span class="sourceLineNo">246</span>          break;<a name="line.246"></a>
+<span class="sourceLineNo">247</span>        for (String y : r) {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>          if (a != null)<a name="line.248"></a>
+<span class="sourceLineNo">249</span>            break;<a name="line.249"></a>
+<span class="sourceLineNo">250</span>          if (backgroundImplications.contains(new Implication&lt;&gt;(x, y))) {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>            a = y;<a name="line.251"></a>
+<span class="sourceLineNo">252</span>            break;<a name="line.252"></a>
+<span class="sourceLineNo">253</span>          } else<a name="line.253"></a>
+<span class="sourceLineNo">254</span>            for (String z : r)<a name="line.254"></a>
+<span class="sourceLineNo">255</span>              if (backgroundImplications.contains(new Implication&lt;&gt;(Sets.newHashSet(x, y), z))) {<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                a = z;<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                break;<a name="line.257"></a>
+<span class="sourceLineNo">258</span>              }<a name="line.258"></a>
+<span class="sourceLineNo">259</span>        }<a name="line.259"></a>
+<span class="sourceLineNo">260</span>      }<a name="line.260"></a>
+<span class="sourceLineNo">261</span>      r.remove(a);<a name="line.261"></a>
+<span class="sourceLineNo">262</span>    } while (a != null);<a name="line.262"></a>
+<span class="sourceLineNo">263</span>//    result.removeAll(r);<a name="line.263"></a>
+<span class="sourceLineNo">264</span>//    return r;<a name="line.264"></a>
+<span class="sourceLineNo">265</span>    return Sets.newHashSet(r);<a name="line.265"></a>
+<span class="sourceLineNo">266</span>  }<a name="line.266"></a>
+<span class="sourceLineNo">267</span><a name="line.267"></a>
+<span class="sourceLineNo">268</span>}<a name="line.268"></a>
 
 
 
