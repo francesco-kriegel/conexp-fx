@@ -1,7 +1,6 @@
 #!/bin/bash
 
-alias bibtex2html='/usr/local/bin/bibtex2html'
-alias bibtex='/usr/local/texlive/2017/bin/x86_64-darwin/bibtex'
+source .bash_profile
 
 mkdir -p target/bibtex2html
 bibtex2html -nodoc -nobibsource -o target/bibtex2html/references src/site/bibtex2html/references.bib
