@@ -95,7 +95,7 @@ MathJax.Hub.Config({
     <menu ref="reports" />
     <breadcrumbs>
       <item name="Francesco Kriegel"
-        href="https://lat.inf.tu-dresden.de/~francesco/" />
+        href="https://tu-dresden.de/ing/informatik/thi/lat/die-professur/beschaeftigte/francesco-kriegel/" />
       <item name="Concept Explorer FX" href="${project.url}" />
     </breadcrumbs>
   </body>

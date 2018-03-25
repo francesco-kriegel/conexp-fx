@@ -16,7 +16,7 @@
     <developer>
       <name>Francesco Kriegel</name>
       <email>francesco.kriegel@tu-dresden.de</email>
-      <url>https://lat.inf.tu-dresden.de/~francesco/</url>
+      <url>https://tu-dresden.de/ing/informatik/thi/lat/die-professur/beschaeftigte/francesco-kriegel/</url>
     </developer>
   </developers>
 
@@ -794,7 +794,7 @@
           <reportSet>
             <reports>
               <report>cim</report>
-<!--               <report>dependencies</report> -->
+              <report>dependencies</report>
               <report>dependency-convergence</report>
               <report>dependency-info</report>
               <report>dependency-management</report>
@@ -827,13 +827,13 @@
               <report>test-javadoc</report>
             </reports>
           </reportSet>
-<!--           <reportSet> -->
-<!--             <id>aggregate</id> -->
-<!--             <inherited>false</inherited> -->
-<!--             <reports> -->
-<!--               <report>aggregate</report> -->
-<!--             </reports> -->
-<!--           </reportSet> -->
+          <reportSet>
+            <id>aggregate</id>
+            <inherited>false</inherited>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
         </reportSets>
       </plugin>
       <plugin>
@@ -841,11 +841,8 @@
         <artifactId>maven-changelog-plugin</artifactId>
         <version>2.3</version>
       </plugin>
-<!--       <plugin> -->
-<!--         <groupId>net.alchim31.maven</groupId> -->
-<!--         <artifactId>scala-maven-plugin</artifactId> -->
-<!--         <version>3.3.2</version> -->
-<!--       </plugin> -->
+      <!-- <plugin> <groupId>net.alchim31.maven</groupId> <artifactId>scala-maven-plugin</artifactId> 
+        <version>3.3.2</version> </plugin> -->
     </plugins>
   </reporting>
 
@@ -947,7 +944,7 @@
           <plugin>
             <groupId>com.zenjava</groupId>
             <artifactId>javafx-maven-plugin</artifactId>
-            <version>8.9.0-SNAPSHOT</version>
+            <version>8.8.3</version>
             <executions>
               <execution>
                 <id>generate-keystore</id>
