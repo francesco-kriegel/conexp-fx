@@ -1,6 +1,4 @@
-alias bibtex2html='/usr/local/bin/bibtex2html'
-alias bibtex='/usr/local/texlive/2017/bin/x86_64-darwin/bibtex'
-
+#!/bin/bash
 mkdir -p target/bibtex2html
 bibtex2html -nodoc -nobibsource -o target/bibtex2html/references src/site/bibtex2html/references.bib
 perl -0777 -i'' -pe '1 while s/\&lt\;b\&gt\;/<b>/g' target/bibtex2html/references.html
