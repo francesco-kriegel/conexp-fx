@@ -10,13 +10,13 @@
   <description>Software for Formal Concept Analysis with Description Logics Extensions</description>
   <packaging>jar</packaging>
   <inceptionYear>2010</inceptionYear>
-  <url>https://francesco-kriegel.github.io/conexp-fx</url>
+  <url>https://francesco-kriegel.github.io/conexp-fx/</url>
 
   <developers>
     <developer>
       <name>Francesco Kriegel</name>
       <email>francesco.kriegel@tu-dresden.de</email>
-      <url>https://lat.inf.tu-dresden.de/~francesco</url>
+      <url>https://lat.inf.tu-dresden.de/~francesco/</url>
     </developer>
   </developers>
 
@@ -41,6 +41,7 @@
     <bundles.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/download/</bundles.url>
     <webstart.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/webstart/${project.build.finalName}.html</webstart.url>
     <issues.url>https://github.com/francesco-kriegel/conexp-fx/issues/</issues.url>
+    <badge.style>flat</badge.style>
   </properties>
 
   <scm>
@@ -334,6 +335,15 @@
           <groupId>net.alchim31.maven</groupId>
           <artifactId>scala-maven-plugin</artifactId>
           <version>3.3.2</version>
+          <!-- <configuration> -->
+          <!-- <failOnError>false</failOnError> -->
+          <!-- <fork>false</fork> -->
+          <!-- <linksource>false</linksource> -->
+          <!-- <mainSourceDir>${project.build.sourceDirectory}</mainSourceDir> -->
+          <!-- <sourceDir>${project.build.sourceDirectory}</sourceDir> -->
+          <!-- <verbose>on</verbose> -->
+          <!-- <vscaladocVersion>1.0</vscaladocVersion> -->
+          <!-- </configuration> -->
           <executions>
             <execution>
               <id>scala-compile-first</id>
@@ -390,25 +400,25 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.0.0</version>
+          <configuration>
+            <linksource>true</linksource>
+            <detectLinks>true</detectLinks>
+            <quiet>true</quiet>
+            <additionalOptions>${javadoc.opts}</additionalOptions>
+            <links>
+              <link>http://google.github.io/guava/releases/24.0-jre/api/docs/</link>
+              <link>http://docs.oracle.com/javase/8/javafx/api/</link>
+              <link>http://jfxtras.org/doc/8.0labs/</link>
+              <!-- <link>http://owlapi.sourceforge.net/javadoc/</link> -->
+              <link>http://elk.semanticweb.org/maven/0.4.3/apidocs/</link>
+              <link>http://archive.rdf4j.org/javadoc/sesame-2.9.0/</link>
+              <link>http://nlp.stanford.edu/nlp/javadoc/javanlp/</link>
+            </links>
+          </configuration>
           <executions>
             <execution>
               <id>build-javadoc</id>
               <phase>package</phase>
-              <configuration>
-                <linksource>true</linksource>
-                <detectLinks>true</detectLinks>
-                <quiet>true</quiet>
-                <additionalOptions>${javadoc.opts}</additionalOptions>
-                <links>
-                  <link>http://google.github.io/guava/releases/24.0-jre/api/docs/</link>
-                  <link>http://docs.oracle.com/javase/8/javafx/api/</link>
-                  <link>http://jfxtras.org/doc/8.0labs/</link>
-                  <!-- <link>http://owlapi.sourceforge.net/javadoc/</link> -->
-                  <link>http://elk.semanticweb.org/maven/0.4.3/apidocs/</link>
-                  <link>http://archive.rdf4j.org/javadoc/sesame-2.9.0/</link>
-                  <link>http://nlp.stanford.edu/nlp/javadoc/javanlp/</link>
-                </links>
-              </configuration>
               <goals>
                 <goal>jar</goal>
               </goals>
@@ -784,7 +794,7 @@
           <reportSet>
             <reports>
               <report>cim</report>
-              <report>dependencies</report>
+<!--               <report>dependencies</report> -->
               <report>dependency-convergence</report>
               <report>dependency-info</report>
               <report>dependency-management</report>
@@ -817,13 +827,13 @@
               <report>test-javadoc</report>
             </reports>
           </reportSet>
-          <reportSet>
-            <id>aggregate</id>
-            <inherited>false</inherited>
-            <reports>
-              <report>aggregate</report>
-            </reports>
-          </reportSet>
+<!--           <reportSet> -->
+<!--             <id>aggregate</id> -->
+<!--             <inherited>false</inherited> -->
+<!--             <reports> -->
+<!--               <report>aggregate</report> -->
+<!--             </reports> -->
+<!--           </reportSet> -->
         </reportSets>
       </plugin>
       <plugin>
@@ -831,6 +841,11 @@
         <artifactId>maven-changelog-plugin</artifactId>
         <version>2.3</version>
       </plugin>
+<!--       <plugin> -->
+<!--         <groupId>net.alchim31.maven</groupId> -->
+<!--         <artifactId>scala-maven-plugin</artifactId> -->
+<!--         <version>3.3.2</version> -->
+<!--       </plugin> -->
     </plugins>
   </reporting>
 

@@ -5,26 +5,48 @@
   name="${project.name}">
 
   <skin>
-    <groupId>org.apache.maven.skins</groupId>
-    <artifactId>maven-fluido-skin</artifactId>
-    <version>1.7</version>
+    <groupId>lt.velykis.maven.skins</groupId>
+    <artifactId>reflow-maven-skin</artifactId>
+    <version>1.1.1</version>
   </skin>
 
   <custom>
-    <fluidoSkin>
-      <topBarEnabled>true</topBarEnabled>
-      <topBarContainerStyle>width: 66%;</topBarContainerStyle>
-      <topBarIcon>
-        <name>${project.name}</name>
-        <alt>${project.name}</alt>
-        <src>images/conexp-fx-24.png</src>
-        <href>/index.html</href>
-      </topBarIcon>
-      <navBarStyle>navbar-inverse</navBarStyle>
-      <sideBarEnabled>false</sideBarEnabled>
-      <googleSearch />
-      <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
-    </fluidoSkin>
+    <reflowSkin>
+      <smoothScroll>true</smoothScroll>
+      <theme>default</theme>
+      <brand>
+        <name>My Project</name>
+        <href>http://andriusvelykis.github.io/reflow-maven-skin/</href>
+      </brand>
+      <slogan>Super interesting project doing good things.</slogan>
+      <titleTemplate>%2$s | %1$s</titleTemplate>
+      <toc>top</toc>
+      <topNav>Download|reports</topNav>
+      <bottomNav>
+        <column>Main|Download</column>
+        <column>Documentation</column>
+        <column>reports|modules</column>
+      </bottomNav>
+      <bottomDescription>This is a very good project doing interesting
+        and valuable things.</bottomDescription>
+      <pages>
+        <index project="project-id">
+          <shortTitle>Welcome</shortTitle>
+          <breadcrumbs>false</breadcrumbs>
+          <toc>false</toc>
+          <sections>
+            <carousel />
+            <body />
+            <sidebar />
+            <thumbs>2</thumbs>
+            <columns>3</columns>
+          </sections>
+        </index>
+        <developer-info>
+          <toc>sidebar</toc>
+        </developer-info>
+      </pages>
+    </reflowSkin>
   </custom>
 
   <body>

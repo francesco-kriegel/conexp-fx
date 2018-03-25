@@ -1,4 +1,4 @@
-## Examples
+# Examples
 
 ### SPARQL Query for LinkedLifeData
 

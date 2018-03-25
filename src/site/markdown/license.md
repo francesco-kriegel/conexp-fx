@@ -1,4 +1,5 @@
-## License
+# License
+
 Concept Explorer FX (conexp-fx)
 
 Copyright ⓒ 2010-2018 Francesco Kriegel

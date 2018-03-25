@@ -3,7 +3,7 @@
 #set($h3 = '###')
 #set($h4 = '####')
 
-$h2 Downloads
+$h1 Download Bundles
 
 Packaged JAR files as well as installer bundles for different operating systems can be downloaded at [$context.get("bundles.url")]($context.get("bundles.url")).
 

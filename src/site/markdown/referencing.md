@@ -1,4 +1,4 @@
-## Referencing
+# Referencing
 
 Please cite Concept Explorer FX as follows.
 

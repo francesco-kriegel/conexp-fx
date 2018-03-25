@@ -1,4 +1,4 @@
-## Development
+# Development
 ### Installation of Non-Maven-Dependencies and JavaFX-JavaDoc and JavaFX-Source to Local Maven Repository
 1. Set `javafx.version` property to your installed Java version.
 2. Download JavaFX-JavaDoc package to `lib` folder.

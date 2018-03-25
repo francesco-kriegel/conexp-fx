@@ -1,4 +1,4 @@
-## Usage
+# Usage
 In case you do not want to run the software within your browser, there is also the option of downloading the latest release for your platform,
 either from this GitHub repository, or from the download site at (http://lat.inf.tu-dresden.de/~francesco/conexp-fx/download.html)
 
