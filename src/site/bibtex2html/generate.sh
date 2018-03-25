@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .bash_profile
+source ~/.bash_profile
 
 mkdir -p target/bibtex2html
 bibtex2html -nodoc -nobibsource -o target/bibtex2html/references src/site/bibtex2html/references.bib
