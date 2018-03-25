@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.core.exporter;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.io.File;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.Map;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>import conexp.fx.core.context.MatrixContext;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import conexp.fx.core.layout.AdditiveConceptLayout;<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>public class PDFExporter&lt;G, M&gt; {<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>  public static &lt;G, M&gt; void export(<a name="line.35"></a>
+<span class="sourceLineNo">036</span>      MatrixContext&lt;G, M&gt; context,<a name="line.36"></a>
+<span class="sourceLineNo">037</span>      Map&lt;Integer, Integer&gt; domainPermutation,<a name="line.37"></a>
+<span class="sourceLineNo">038</span>      Map&lt;Integer, Integer&gt; codomainPermutation,<a name="line.38"></a>
+<span class="sourceLineNo">039</span>      AdditiveConceptLayout&lt;G, M&gt; layout,<a name="line.39"></a>
+<span class="sourceLineNo">040</span>      boolean exportArrows,<a name="line.40"></a>
+<span class="sourceLineNo">041</span>      boolean exportLabels,<a name="line.41"></a>
+<span class="sourceLineNo">042</span>      File file) {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>//    try {<a name="line.43"></a>
+<span class="sourceLineNo">044</span>//      if (!file.exists()) {<a name="line.44"></a>
+<span class="sourceLineNo">045</span>//        if (!file.getParentFile().exists())<a name="line.45"></a>
+<span class="sourceLineNo">046</span>//          file.mkdirs();<a name="line.46"></a>
+<span class="sourceLineNo">047</span>//        file.createNewFile();<a name="line.47"></a>
+<span class="sourceLineNo">048</span>//      }<a name="line.48"></a>
+<span class="sourceLineNo">049</span>//      final double width = 100d * layout.getCurrentBoundingBox().getWidth();<a name="line.49"></a>
+<span class="sourceLineNo">050</span>//      final double minX = 100d * layout.getCurrentBoundingBox().getMinX();<a name="line.50"></a>
+<span class="sourceLineNo">051</span>//      final double height = 100d * layout.getCurrentBoundingBox().getHeight();<a name="line.51"></a>
+<span class="sourceLineNo">052</span>//      // final double unit = Math.min(160 / width, 230 / height);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>//      final int border = 100;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>//      final int circleSize = 20;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>//      final int textOffset = 5;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>//      final Document doc = new Document(PageSize.A4);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>//      FileOutputStream outputStream = new FileOutputStream(file);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>//      PdfWriter writer = PdfWriter.getInstance(doc, outputStream);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>//      doc.open();<a name="line.59"></a>
+<span class="sourceLineNo">060</span>//      PdfContentByte content = writer.getDirectContent();<a name="line.60"></a>
+<span class="sourceLineNo">061</span>//      final float dw = doc.getPageSize().getWidth();<a name="line.61"></a>
+<span class="sourceLineNo">062</span>//      final float dh = doc.getPageSize().getHeight();<a name="line.62"></a>
+<span class="sourceLineNo">063</span>//      final float cw = (float) width + border;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>//      final float ch = (float) height + border;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>//      final float wr = dw / cw;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>//      final float hr = dh / ch;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>//      final float f = (wr &gt; hr ? hr : wr);<a name="line.67"></a>
+<span class="sourceLineNo">068</span>//      Graphics2D gfx = content.createGraphics(dw, dh);<a name="line.68"></a>
+<span class="sourceLineNo">069</span>//      gfx.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>//      gfx.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>//      gfx.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>//      gfx.setBackground(Color.WHITE);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>//      gfx.setColor(Color.WHITE);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>//      gfx.fillRect(0, 0, (int) width + border, (int) height + border);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>//      gfx.setColor(Color.BLACK);<a name="line.75"></a>
+<span class="sourceLineNo">076</span>//      for (int i = 0; i &lt; layout.lattice.rowHeads().size(); i++) {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>//        Concept&lt;G, M&gt; conceptNode = layout.lattice.rowHeads().get(i);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>//        final double x = 100d * layout.positions.get(conceptNode).getX();<a name="line.78"></a>
+<span class="sourceLineNo">079</span>//        final double y = 100d * layout.positions.get(conceptNode).getY();<a name="line.79"></a>
+<span class="sourceLineNo">080</span>//        gfx.fillOval((int) (f * ((x - minX) - (3 * circleSize / 4) + (border / 2))), (int) (f * (y<a name="line.80"></a>
+<span class="sourceLineNo">081</span>//            - (3 * circleSize / 4) + (border / 2))), circleSize, circleSize);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>//      }<a name="line.82"></a>
+<span class="sourceLineNo">083</span>//      for (int i = 0; i &lt; layout.lattice.rowHeads().size(); i++) {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>//        for (int j = 0; j &lt; layout.lattice.rowHeads().size(); j++) {<a name="line.84"></a>
+<span class="sourceLineNo">085</span>//          if (layout.lattice._contains(i, j)) {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>//            final int x1 =<a name="line.86"></a>
+<span class="sourceLineNo">087</span>//                (int) (f * (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getX() - minX + (border / 2)));<a name="line.87"></a>
+<span class="sourceLineNo">088</span>//            final int y1 =<a name="line.88"></a>
+<span class="sourceLineNo">089</span>//                (int) (f * (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getY() + (border / 2)));<a name="line.89"></a>
+<span class="sourceLineNo">090</span>//            final int x2 =<a name="line.90"></a>
+<span class="sourceLineNo">091</span>//                (int) (f * (100d * layout.positions.get(layout.lattice.rowHeads().get(j)).getX() - minX + (border / 2)));<a name="line.91"></a>
+<span class="sourceLineNo">092</span>//            final int y2 =<a name="line.92"></a>
+<span class="sourceLineNo">093</span>//                (int) (f * (100d * layout.positions.get(layout.lattice.rowHeads().get(j)).getY() + (border / 2)));<a name="line.93"></a>
+<span class="sourceLineNo">094</span>//            gfx.drawLine(x1, y1, x2, y2);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>//          }<a name="line.95"></a>
+<span class="sourceLineNo">096</span>//        }<a name="line.96"></a>
+<span class="sourceLineNo">097</span>//      }<a name="line.97"></a>
+<span class="sourceLineNo">098</span>//      if (exportLabels)<a name="line.98"></a>
+<span class="sourceLineNo">099</span>//        for (int i = 0; i &lt; layout.lattice.rowHeads().size(); i++) {<a name="line.99"></a>
+<span class="sourceLineNo">100</span>//          Concept&lt;G, M&gt; conceptNode = layout.lattice.rowHeads().get(i);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>//          String objLabels =<a name="line.101"></a>
+<span class="sourceLineNo">102</span>//              layout.lattice<a name="line.102"></a>
+<span class="sourceLineNo">103</span>//                  .objectLabels(conceptNode)<a name="line.103"></a>
+<span class="sourceLineNo">104</span>//                  .toString()<a name="line.104"></a>
+<span class="sourceLineNo">105</span>//                  .substring(1, layout.lattice.objectLabels(conceptNode).toString().length() - 1);<a name="line.105"></a>
+<span class="sourceLineNo">106</span>//          String attLabels =<a name="line.106"></a>
+<span class="sourceLineNo">107</span>//              layout.lattice<a name="line.107"></a>
+<span class="sourceLineNo">108</span>//                  .attributeLabels(conceptNode)<a name="line.108"></a>
+<span class="sourceLineNo">109</span>//                  .toString()<a name="line.109"></a>
+<span class="sourceLineNo">110</span>//                  .substring(1, layout.lattice.attributeLabels(conceptNode).toString().length() - 1);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>//          final int owidth = (int) (f * gfx.getFontMetrics().stringWidth(objLabels));<a name="line.111"></a>
+<span class="sourceLineNo">112</span>//          final int awidth = (int) (f * gfx.getFontMetrics().stringWidth(attLabels));<a name="line.112"></a>
+<span class="sourceLineNo">113</span>//          final int theight = gfx.getFontMetrics().getHeight();<a name="line.113"></a>
+<span class="sourceLineNo">114</span>//          final int x =<a name="line.114"></a>
+<span class="sourceLineNo">115</span>//              (int) (f * (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getX() - minX + (border / 2)));<a name="line.115"></a>
+<span class="sourceLineNo">116</span>//          final int ay =<a name="line.116"></a>
+<span class="sourceLineNo">117</span>//              (int) (f * (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getY()<a name="line.117"></a>
+<span class="sourceLineNo">118</span>//                  - (circleSize + textOffset) + (border / 2)));<a name="line.118"></a>
+<span class="sourceLineNo">119</span>//          final int oy =<a name="line.119"></a>
+<span class="sourceLineNo">120</span>//              (int) (f * (100d * layout.positions.get(layout.lattice.rowHeads().get(i)).getY()<a name="line.120"></a>
+<span class="sourceLineNo">121</span>//                  + (circleSize + textOffset) + (border / 2) + (theight / 2)));<a name="line.121"></a>
+<span class="sourceLineNo">122</span>//          gfx.drawString(objLabels, x - (owidth / 2), oy);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>//          gfx.drawString(attLabels, x - (awidth / 2), ay);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>//        }<a name="line.124"></a>
+<span class="sourceLineNo">125</span>//      gfx.dispose();<a name="line.125"></a>
+<span class="sourceLineNo">126</span>//      doc.close();<a name="line.126"></a>
+<span class="sourceLineNo">127</span>//      outputStream.flush();<a name="line.127"></a>
+<span class="sourceLineNo">128</span>//      outputStream.close();<a name="line.128"></a>
+<span class="sourceLineNo">129</span>//    } catch (IOException | DocumentException e) {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>//      System.err.println("Unable to create or write PDFDocument to file " + file);<a name="line.130"></a>
+<span class="sourceLineNo">131</span>//      e.printStackTrace();<a name="line.131"></a>
+<span class="sourceLineNo">132</span>//    }<a name="line.132"></a>
+<span class="sourceLineNo">133</span>  }<a name="line.133"></a>
+<span class="sourceLineNo">134</span>}<a name="line.134"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,1078 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.gui.context;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import java.util.Collection;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.util.Map;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.Map.Entry;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.Timer;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.TimerTask;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.concurrent.ConcurrentHashMap;<a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.semanticweb.owlapi.model.OWLClassExpression;<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>import com.google.common.base.Function;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import com.google.common.collect.Collections2;<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>import conexp.fx.core.collections.Pair;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import conexp.fx.core.collections.relation.RelationEvent;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import conexp.fx.core.collections.relation.RelationEventHandler;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import conexp.fx.core.context.Concept;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import conexp.fx.core.context.MatrixContext;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.core.context.MatrixContext.Incidence;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import conexp.fx.core.util.Constants;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import conexp.fx.core.util.IdGenerator;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import conexp.fx.core.util.OWLUtil;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import conexp.fx.gui.ConExpFX;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import conexp.fx.gui.cellpane.Cell;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import conexp.fx.gui.cellpane.CellPane;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import conexp.fx.gui.cellpane.InteractionMode;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import conexp.fx.gui.dataset.FCADataset;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import conexp.fx.gui.graph.ConceptGraph;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import conexp.fx.gui.util.ColorScheme;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import conexp.fx.gui.util.LaTeX;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import conexp.fx.gui.util.Platform2;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>import de.tudresden.inf.tcs.fcalib.Implication;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>import javafx.animation.Interpolator;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import javafx.animation.KeyFrame;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import javafx.animation.KeyValue;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import javafx.animation.Timeline;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>import javafx.application.Platform;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>import javafx.beans.binding.DoubleBinding;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>import javafx.beans.binding.IntegerBinding;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>import javafx.beans.binding.StringBinding;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>import javafx.beans.property.BooleanProperty;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>import javafx.beans.property.DoubleProperty;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>import javafx.beans.property.IntegerProperty;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>import javafx.beans.property.SimpleBooleanProperty;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>import javafx.beans.property.SimpleDoubleProperty;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>import javafx.beans.property.SimpleIntegerProperty;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>import javafx.beans.value.ChangeListener;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>import javafx.beans.value.ObservableValue;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>import javafx.collections.MapChangeListener;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>import javafx.event.ActionEvent;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>import javafx.event.EventHandler;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>import javafx.geometry.Bounds;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>import javafx.geometry.Insets;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>import javafx.geometry.Pos;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>import javafx.scene.Node;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>import javafx.scene.control.Button;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>import javafx.scene.control.ButtonBuilder;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>import javafx.scene.control.ContextMenu;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>import javafx.scene.control.MenuItem;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>import javafx.scene.control.ScrollBar;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>import javafx.scene.control.Slider;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>import javafx.scene.control.SliderBuilder;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>import javafx.scene.control.TextField;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>import javafx.scene.control.TextFieldBuilder;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>import javafx.scene.control.ToggleButton;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>import javafx.scene.control.ToolBar;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>import javafx.scene.image.Image;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>import javafx.scene.image.ImageView;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>import javafx.scene.image.ImageViewBuilder;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>import javafx.scene.input.KeyEvent;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>import javafx.scene.input.MouseEvent;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>import javafx.scene.layout.BorderPane;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>import javafx.scene.layout.ColumnConstraints;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>import javafx.scene.layout.GridPane;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>import javafx.scene.layout.HBox;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>import javafx.scene.layout.RowConstraints;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>import javafx.scene.paint.Color;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>import javafx.scene.text.TextAlignment;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>import javafx.util.Duration;<a name="line.101"></a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span>public class MatrixContextWidget&lt;G, M&gt; extends BorderPane {<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>  public final class RowHeaderPane extends CellPane&lt;RowHeaderPane, RowHeaderCell&gt; {<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>    private RowHeaderPane(final boolean interactive) {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>      super("DomainPane", InteractionMode.ROWS, interactive);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>      this.rowHeightDefault.bind(MatrixContextWidget.this.cellSizeDefault);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>      this.columnWidthDefault.bind(MatrixContextWidget.this.rowHeaderSizeDefault);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>      this.zoomFactor.bind(MatrixContextWidget.this.zoomFactor);<a name="line.111"></a>
+<span class="sourceLineNo">112</span>      this.textSizeDefault.bind(MatrixContextWidget.this.textSizeDefault);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>      this.animate.bind(MatrixContextWidget.this.animate);<a name="line.113"></a>
+<span class="sourceLineNo">114</span>      this.autoSizeRows.set(false);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>      this.autoSizeColumns.set(true);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>      this.maxColumns.set(1);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>      this.maxRows.set(context.rowHeads().size());<a name="line.117"></a>
+<span class="sourceLineNo">118</span>//      final RelationEventHandler&lt;G, M&gt; eventHandler = new RelationEventHandler&lt;G, M&gt;() {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>//<a name="line.119"></a>
+<span class="sourceLineNo">120</span>//        public final void handle(final RelationEvent&lt;G, M&gt; event) {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>//          Platform2.runOnFXThread(new Runnable() {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>//<a name="line.122"></a>
+<span class="sourceLineNo">123</span>//            public void run() {<a name="line.123"></a>
+<span class="sourceLineNo">124</span>////              System.out.println("updating rows");<a name="line.124"></a>
+<span class="sourceLineNo">125</span>//              maxRows.set(context.rowHeads().size());<a name="line.125"></a>
+<span class="sourceLineNo">126</span>////              updateContent();<a name="line.126"></a>
+<span class="sourceLineNo">127</span>//            }<a name="line.127"></a>
+<span class="sourceLineNo">128</span>//          });<a name="line.128"></a>
+<span class="sourceLineNo">129</span>//        }<a name="line.129"></a>
+<span class="sourceLineNo">130</span>//      };<a name="line.130"></a>
+<span class="sourceLineNo">131</span>//      context.addEventHandler(eventHandler, RelationEvent.ROWS);<a name="line.131"></a>
+<span class="sourceLineNo">132</span>//      context.addEventHandler(eventHandler, RelationEvent.ROWS_ADDED);<a name="line.132"></a>
+<span class="sourceLineNo">133</span>//      context.addEventHandler(eventHandler, RelationEvent.ROWS_REMOVED);<a name="line.133"></a>
+<span class="sourceLineNo">134</span>      context.addEventHandler(<a name="line.134"></a>
+<span class="sourceLineNo">135</span>          __ -&gt; Platform2.runOnFXThread(() -&gt; maxRows.set(context.rowHeads().size())),<a name="line.135"></a>
+<span class="sourceLineNo">136</span>          RelationEvent.ROWS);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>      if (dataset != null)<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        this.interactionPane.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler&lt;MouseEvent&gt;() {<a name="line.138"></a>
+<span class="sourceLineNo">139</span><a name="line.139"></a>
+<span class="sourceLineNo">140</span>          public final void handle(final MouseEvent event) {<a name="line.140"></a>
+<span class="sourceLineNo">141</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.141"></a>
+<span class="sourceLineNo">142</span>          }<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        });<a name="line.143"></a>
+<span class="sourceLineNo">144</span>      zoomFactor.addListener((__, ___, ____) -&gt; updateContent());<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    }<a name="line.145"></a>
+<span class="sourceLineNo">146</span><a name="line.146"></a>
+<span class="sourceLineNo">147</span>    protected final RowHeaderCell createCell(final int row, final int column) {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>      return new RowHeaderCell(row);<a name="line.148"></a>
+<span class="sourceLineNo">149</span>    }<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>    public final void highlightConcept(final Collection&lt;Integer&gt; domainIndices) {<a name="line.151"></a>
+<span class="sourceLineNo">152</span>      highlight(domainIndices, null);<a name="line.152"></a>
+<span class="sourceLineNo">153</span>    }<a name="line.153"></a>
+<span class="sourceLineNo">154</span><a name="line.154"></a>
+<span class="sourceLineNo">155</span>    protected final Map&lt;G, Node&gt; decorations = new ConcurrentHashMap&lt;&gt;();<a name="line.155"></a>
+<span class="sourceLineNo">156</span><a name="line.156"></a>
+<span class="sourceLineNo">157</span>    public final void addDecoration(final G row, final Node decoration) {<a name="line.157"></a>
+<span class="sourceLineNo">158</span>      decorations.put(row, decoration);<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    }<a name="line.159"></a>
+<span class="sourceLineNo">160</span>  }<a name="line.160"></a>
+<span class="sourceLineNo">161</span><a name="line.161"></a>
+<span class="sourceLineNo">162</span>  public final class ColHeaderPane extends CellPane&lt;ColHeaderPane, ColHeaderCell&gt; {<a name="line.162"></a>
+<span class="sourceLineNo">163</span><a name="line.163"></a>
+<span class="sourceLineNo">164</span>    private ColHeaderPane(final boolean interactive) {<a name="line.164"></a>
+<span class="sourceLineNo">165</span>      super("CodomainPane", InteractionMode.COLUMNS, interactive);<a name="line.165"></a>
+<span class="sourceLineNo">166</span>      this.rowHeightDefault.bind(MatrixContextWidget.this.colHeaderSizeDefault);<a name="line.166"></a>
+<span class="sourceLineNo">167</span>      this.columnWidthDefault.bind(MatrixContextWidget.this.cellSizeDefault);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>      this.zoomFactor.bind(MatrixContextWidget.this.zoomFactor);<a name="line.168"></a>
+<span class="sourceLineNo">169</span>      this.textSizeDefault.bind(MatrixContextWidget.this.textSizeDefault);<a name="line.169"></a>
+<span class="sourceLineNo">170</span>      this.animate.bind(MatrixContextWidget.this.animate);<a name="line.170"></a>
+<span class="sourceLineNo">171</span>      this.autoSizeRows.set(true);<a name="line.171"></a>
+<span class="sourceLineNo">172</span>      this.autoSizeColumns.set(false);<a name="line.172"></a>
+<span class="sourceLineNo">173</span>      this.maxRows.set(1);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>      this.maxColumns.set(context.colHeads().size());<a name="line.174"></a>
+<span class="sourceLineNo">175</span>      final RelationEventHandler&lt;G, M&gt; eventHandler = new RelationEventHandler&lt;G, M&gt;() {<a name="line.175"></a>
+<span class="sourceLineNo">176</span><a name="line.176"></a>
+<span class="sourceLineNo">177</span>        public final void handle(final RelationEvent&lt;G, M&gt; event) {<a name="line.177"></a>
+<span class="sourceLineNo">178</span>          Platform2.runOnFXThread(new Runnable() {<a name="line.178"></a>
+<span class="sourceLineNo">179</span><a name="line.179"></a>
+<span class="sourceLineNo">180</span>            public void run() {<a name="line.180"></a>
+<span class="sourceLineNo">181</span>//              System.out.println("updating columns");<a name="line.181"></a>
+<span class="sourceLineNo">182</span>              maxColumns.set(context.colHeads().size());<a name="line.182"></a>
+<span class="sourceLineNo">183</span>//              updateContent();<a name="line.183"></a>
+<span class="sourceLineNo">184</span>            }<a name="line.184"></a>
+<span class="sourceLineNo">185</span>          });<a name="line.185"></a>
+<span class="sourceLineNo">186</span>        }<a name="line.186"></a>
+<span class="sourceLineNo">187</span>      };<a name="line.187"></a>
+<span class="sourceLineNo">188</span>      context.addEventHandler(eventHandler, RelationEvent.COLUMNS);<a name="line.188"></a>
+<span class="sourceLineNo">189</span>//      context.addEventHandler(eventHandler, RelationEvent.COLUMNS_ADDED);<a name="line.189"></a>
+<span class="sourceLineNo">190</span>//      context.addEventHandler(eventHandler, RelationEvent.COLUMNS_REMOVED);<a name="line.190"></a>
+<span class="sourceLineNo">191</span>      if (dataset != null)<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        this.interactionPane.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler&lt;MouseEvent&gt;() {<a name="line.192"></a>
+<span class="sourceLineNo">193</span><a name="line.193"></a>
+<span class="sourceLineNo">194</span>          public final void handle(final MouseEvent event) {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.195"></a>
+<span class="sourceLineNo">196</span>          }<a name="line.196"></a>
+<span class="sourceLineNo">197</span>        });<a name="line.197"></a>
+<span class="sourceLineNo">198</span>      zoomFactor.addListener((__, ___, ____) -&gt; updateContent());<a name="line.198"></a>
+<span class="sourceLineNo">199</span>    }<a name="line.199"></a>
+<span class="sourceLineNo">200</span><a name="line.200"></a>
+<span class="sourceLineNo">201</span>    protected final ColHeaderCell createCell(final int row, final int column) {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>      return new ColHeaderCell(column);<a name="line.202"></a>
+<span class="sourceLineNo">203</span>    }<a name="line.203"></a>
+<span class="sourceLineNo">204</span><a name="line.204"></a>
+<span class="sourceLineNo">205</span>    public final void highlightConcept(final Collection&lt;Integer&gt; codomainIndices) {<a name="line.205"></a>
+<span class="sourceLineNo">206</span>      highlight(null, codomainIndices);<a name="line.206"></a>
+<span class="sourceLineNo">207</span>    }<a name="line.207"></a>
+<span class="sourceLineNo">208</span>  }<a name="line.208"></a>
+<span class="sourceLineNo">209</span><a name="line.209"></a>
+<span class="sourceLineNo">210</span>  public final class ContextPane extends CellPane&lt;ContextPane, ContextCell&gt; {<a name="line.210"></a>
+<span class="sourceLineNo">211</span><a name="line.211"></a>
+<span class="sourceLineNo">212</span>    private ContextPane(final boolean interactive) {<a name="line.212"></a>
+<span class="sourceLineNo">213</span>      super("FormalContextPane", InteractionMode.ROWS_AND_COLUMNS, interactive);<a name="line.213"></a>
+<span class="sourceLineNo">214</span>      this.textSizeDefault.bind(MatrixContextWidget.this.incidenceSizeDefault);<a name="line.214"></a>
+<span class="sourceLineNo">215</span>      this.zoomFactor.bind(MatrixContextWidget.this.zoomFactor);<a name="line.215"></a>
+<span class="sourceLineNo">216</span>      this.bind(rowHeaderPane, InteractionMode.ROWS);<a name="line.216"></a>
+<span class="sourceLineNo">217</span>      this.bind(colHeaderPane, InteractionMode.COLUMNS);<a name="line.217"></a>
+<span class="sourceLineNo">218</span>      if (dataset != null)<a name="line.218"></a>
+<span class="sourceLineNo">219</span>        this.rowMap.addListener(new MapChangeListener&lt;Integer, Integer&gt;() {<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>          public final void onChanged(<a name="line.221"></a>
+<span class="sourceLineNo">222</span>              final javafx.collections.MapChangeListener.Change&lt;? extends Integer, ? extends Integer&gt; change) {<a name="line.222"></a>
+<span class="sourceLineNo">223</span>            dataset.unsavedChanges.set(true);<a name="line.223"></a>
+<span class="sourceLineNo">224</span>          }<a name="line.224"></a>
+<span class="sourceLineNo">225</span>        });<a name="line.225"></a>
+<span class="sourceLineNo">226</span>      if (dataset != null)<a name="line.226"></a>
+<span class="sourceLineNo">227</span>        this.columnMap.addListener(new MapChangeListener&lt;Integer, Integer&gt;() {<a name="line.227"></a>
+<span class="sourceLineNo">228</span><a name="line.228"></a>
+<span class="sourceLineNo">229</span>          public final void onChanged(<a name="line.229"></a>
+<span class="sourceLineNo">230</span>              final javafx.collections.MapChangeListener.Change&lt;? extends Integer, ? extends Integer&gt; change) {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>            dataset.unsavedChanges.set(true);<a name="line.231"></a>
+<span class="sourceLineNo">232</span>          }<a name="line.232"></a>
+<span class="sourceLineNo">233</span>        });<a name="line.233"></a>
+<span class="sourceLineNo">234</span>      if (dataset != null)<a name="line.234"></a>
+<span class="sourceLineNo">235</span>        this.interactionPane.addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler&lt;MouseEvent&gt;() {<a name="line.235"></a>
+<span class="sourceLineNo">236</span><a name="line.236"></a>
+<span class="sourceLineNo">237</span>          public final void handle(final MouseEvent event) {<a name="line.237"></a>
+<span class="sourceLineNo">238</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.238"></a>
+<span class="sourceLineNo">239</span>          }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        });<a name="line.240"></a>
+<span class="sourceLineNo">241</span>      zoomFactor.addListener((__, ___, ____) -&gt; updateContent());<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    }<a name="line.242"></a>
+<span class="sourceLineNo">243</span><a name="line.243"></a>
+<span class="sourceLineNo">244</span>    protected final ContextCell createCell(final int row, final int column) {<a name="line.244"></a>
+<span class="sourceLineNo">245</span>      return new ContextCell(row, column);<a name="line.245"></a>
+<span class="sourceLineNo">246</span>    }<a name="line.246"></a>
+<span class="sourceLineNo">247</span>  }<a name="line.247"></a>
+<span class="sourceLineNo">248</span><a name="line.248"></a>
+<span class="sourceLineNo">249</span>  private final class RowHeaderCell extends Cell&lt;RowHeaderCell, RowHeaderPane&gt; {<a name="line.249"></a>
+<span class="sourceLineNo">250</span><a name="line.250"></a>
+<span class="sourceLineNo">251</span>    private ImageView view = ImageViewBuilder.create().build();<a name="line.251"></a>
+<span class="sourceLineNo">252</span><a name="line.252"></a>
+<span class="sourceLineNo">253</span>    private RowHeaderCell(final int row) {<a name="line.253"></a>
+<span class="sourceLineNo">254</span>      super(rowHeaderPane, row, 0, Pos.CENTER_RIGHT, TextAlignment.RIGHT, false, null, false);<a name="line.254"></a>
+<span class="sourceLineNo">255</span>      this.contentPane.get().getChildren().add(view);<a name="line.255"></a>
+<span class="sourceLineNo">256</span>      this.contentPane.get().text.setOpacity(0);<a name="line.256"></a>
+<span class="sourceLineNo">257</span>      if (cellPane.interactive) {<a name="line.257"></a>
+<span class="sourceLineNo">258</span>        final ContextMenu contextMenu = new ContextMenu();<a name="line.258"></a>
+<span class="sourceLineNo">259</span>        final MenuItem editItem = new MenuItem("Edit");<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        final MenuItem removeItem = new MenuItem("Remove");<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        final MenuItem selectItem = new MenuItem("Select");<a name="line.261"></a>
+<span class="sourceLineNo">262</span>        final MenuItem insertItem = new MenuItem("Insert");<a name="line.262"></a>
+<span class="sourceLineNo">263</span>        if (dataset != null &amp;&amp; dataset.editable)<a name="line.263"></a>
+<span class="sourceLineNo">264</span>          contextMenu.getItems().addAll(editItem, removeItem, selectItem, insertItem);<a name="line.264"></a>
+<span class="sourceLineNo">265</span>        else<a name="line.265"></a>
+<span class="sourceLineNo">266</span>          contextMenu.getItems().addAll(removeItem, selectItem);<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        insertItem.setOnAction(__ -&gt; {<a name="line.267"></a>
+<span class="sourceLineNo">268</span>          ((FCADataset&lt;String, String&gt;) dataset).addObject(<a name="line.268"></a>
+<span class="sourceLineNo">269</span>              (dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(dataset),<a name="line.269"></a>
+<span class="sourceLineNo">270</span>              contentCoordinates.get().x());<a name="line.270"></a>
+<span class="sourceLineNo">271</span>          rowHeaderPane.rowOpacityMap.keySet().stream().sorted().filter(i -&gt; i &gt;= contentCoordinates.get().x()).forEach(<a name="line.271"></a>
+<span class="sourceLineNo">272</span>              i -&gt; rowHeaderPane.rowOpacityMap.put(i + 1, rowHeaderPane.rowOpacityMap.remove(i)));<a name="line.272"></a>
+<span class="sourceLineNo">273</span>        });<a name="line.273"></a>
+<span class="sourceLineNo">274</span>        editItem.setOnAction(__ -&gt; {<a name="line.274"></a>
+<span class="sourceLineNo">275</span>          if (MatrixContextWidget.this.dataset.editable) {<a name="line.275"></a>
+<span class="sourceLineNo">276</span>            final G object = context.rowHeads().get(contentCoordinates.get().x());<a name="line.276"></a>
+<span class="sourceLineNo">277</span>            final TextField textField = TextFieldBuilder.create().text((String) object).build();<a name="line.277"></a>
+<span class="sourceLineNo">278</span>            textField.addEventHandler(KeyEvent.KEY_RELEASED, event -&gt; {<a name="line.278"></a>
+<span class="sourceLineNo">279</span>              switch (event.getCode()) {<a name="line.279"></a>
+<span class="sourceLineNo">280</span>              case ENTER:<a name="line.280"></a>
+<span class="sourceLineNo">281</span>                dataset.renameObject(object, (G) textField.getText().trim());<a name="line.281"></a>
+<span class="sourceLineNo">282</span>              case ESCAPE:<a name="line.282"></a>
+<span class="sourceLineNo">283</span>                interactionPane.get().getChildren().remove(textField);<a name="line.283"></a>
+<span class="sourceLineNo">284</span>              }<a name="line.284"></a>
+<span class="sourceLineNo">285</span>            });<a name="line.285"></a>
+<span class="sourceLineNo">286</span>            interactionPane.get().getChildren().add(textField);<a name="line.286"></a>
+<span class="sourceLineNo">287</span>            textField.focusedProperty().addListener(<a name="line.287"></a>
+<span class="sourceLineNo">288</span>                (observable, oldValue, newValue) -&gt; new Timer().schedule(new TimerTask() {<a name="line.288"></a>
+<span class="sourceLineNo">289</span><a name="line.289"></a>
+<span class="sourceLineNo">290</span>              public final void run() {<a name="line.290"></a>
+<span class="sourceLineNo">291</span>                Platform.runLater(() -&gt; textField.selectAll());<a name="line.291"></a>
+<span class="sourceLineNo">292</span>              }<a name="line.292"></a>
+<span class="sourceLineNo">293</span>            }, 20));<a name="line.293"></a>
+<span class="sourceLineNo">294</span>            textField.requestFocus();<a name="line.294"></a>
+<span class="sourceLineNo">295</span>          } else {<a name="line.295"></a>
+<span class="sourceLineNo">296</span>            System.out.println("no instance of MatrixContextWidget");<a name="line.296"></a>
+<span class="sourceLineNo">297</span>          }<a name="line.297"></a>
+<span class="sourceLineNo">298</span>        });<a name="line.298"></a>
+<span class="sourceLineNo">299</span>        removeItem.setOnAction(__ -&gt; {<a name="line.299"></a>
+<span class="sourceLineNo">300</span>          dataset.removeObject(context.rowHeads().get(contentCoordinates.get().x()));<a name="line.300"></a>
+<span class="sourceLineNo">301</span>          rowHeaderPane.rowOpacityMap.keySet().stream().sorted().filter(i -&gt; i &gt; contentCoordinates.get().x()).forEach(<a name="line.301"></a>
+<span class="sourceLineNo">302</span>              i -&gt; rowHeaderPane.rowOpacityMap.put(i - 1, rowHeaderPane.rowOpacityMap.remove(i)));<a name="line.302"></a>
+<span class="sourceLineNo">303</span>        });<a name="line.303"></a>
+<span class="sourceLineNo">304</span>        selectItem.setOnAction(__ -&gt; select());<a name="line.304"></a>
+<span class="sourceLineNo">305</span>        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, event -&gt; {<a name="line.305"></a>
+<span class="sourceLineNo">306</span>          switch (event.getButton()) {<a name="line.306"></a>
+<span class="sourceLineNo">307</span>          case PRIMARY:<a name="line.307"></a>
+<span class="sourceLineNo">308</span>            select();<a name="line.308"></a>
+<span class="sourceLineNo">309</span>            break;<a name="line.309"></a>
+<span class="sourceLineNo">310</span>          case SECONDARY:<a name="line.310"></a>
+<span class="sourceLineNo">311</span>            contextMenu.show(interactionPane.getValue(), event.getScreenX(), event.getScreenY());<a name="line.311"></a>
+<span class="sourceLineNo">312</span>          }<a name="line.312"></a>
+<span class="sourceLineNo">313</span>        });<a name="line.313"></a>
+<span class="sourceLineNo">314</span>      }<a name="line.314"></a>
+<span class="sourceLineNo">315</span>      if (dataset != null)<a name="line.315"></a>
+<span class="sourceLineNo">316</span>        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, event -&gt; {<a name="line.316"></a>
+<span class="sourceLineNo">317</span>          if (contextPane.highlight.get())<a name="line.317"></a>
+<span class="sourceLineNo">318</span>            dataset.conceptGraph.highlight(<a name="line.318"></a>
+<span class="sourceLineNo">319</span>                true,<a name="line.319"></a>
+<span class="sourceLineNo">320</span>                dataset.conceptGraph.highlightRequests.object(context.rowHeads().get(contentCoordinates.get().x())));<a name="line.320"></a>
+<span class="sourceLineNo">321</span>        });<a name="line.321"></a>
+<span class="sourceLineNo">322</span>      if (cellPane.autoSizeRows.get() || cellPane.autoSizeColumns.get())<a name="line.322"></a>
+<span class="sourceLineNo">323</span>        view.layoutBoundsProperty().addListener(new ChangeListener&lt;Bounds&gt;() {<a name="line.323"></a>
+<span class="sourceLineNo">324</span><a name="line.324"></a>
+<span class="sourceLineNo">325</span>          @Override<a name="line.325"></a>
+<span class="sourceLineNo">326</span>          public void changed(ObservableValue&lt;? extends Bounds&gt; observable, Bounds oldValue, Bounds newValue) {<a name="line.326"></a>
+<span class="sourceLineNo">327</span>            final double decorationWidth =<a name="line.327"></a>
+<span class="sourceLineNo">328</span>                cellPane.decorations.containsKey(context.rowHeads().get(contentCoordinates.get().x()))<a name="line.328"></a>
+<span class="sourceLineNo">329</span>                    ? cellPane.decorations<a name="line.329"></a>
+<span class="sourceLineNo">330</span>                        .get(context.rowHeads().get(contentCoordinates.get().x()))<a name="line.330"></a>
+<span class="sourceLineNo">331</span>                        .layoutBoundsProperty()<a name="line.331"></a>
+<span class="sourceLineNo">332</span>                        .get()<a name="line.332"></a>
+<span class="sourceLineNo">333</span>                        .getWidth()<a name="line.333"></a>
+<span class="sourceLineNo">334</span>                    : 0d;<a name="line.334"></a>
+<span class="sourceLineNo">335</span>            final double width = newValue.getWidth() + decorationWidth;<a name="line.335"></a>
+<span class="sourceLineNo">336</span>            if (width &gt; cellPane.maximalTextWidth.get())<a name="line.336"></a>
+<span class="sourceLineNo">337</span>              cellPane.maximalTextWidth.set(width);<a name="line.337"></a>
+<span class="sourceLineNo">338</span>          }<a name="line.338"></a>
+<span class="sourceLineNo">339</span>        });<a name="line.339"></a>
+<span class="sourceLineNo">340</span>      context.addEventHandler(event -&gt; Platform2.runOnFXThread(RowHeaderCell.this::updateContent), RelationEvent.ROWS);<a name="line.340"></a>
+<span class="sourceLineNo">341</span>      updateContent();<a name="line.341"></a>
+<span class="sourceLineNo">342</span>    }<a name="line.342"></a>
+<span class="sourceLineNo">343</span><a name="line.343"></a>
+<span class="sourceLineNo">344</span>    private final void select() {<a name="line.344"></a>
+<span class="sourceLineNo">345</span>      synchronized (rowHeaderPane.rowOpacityMap) {<a name="line.345"></a>
+<span class="sourceLineNo">346</span>        if (rowHeaderPane.rowOpacityMap.containsKey(contentCoordinates.get().x())) {<a name="line.346"></a>
+<span class="sourceLineNo">347</span>          if (dataset != null)<a name="line.347"></a>
+<span class="sourceLineNo">348</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.348"></a>
+<span class="sourceLineNo">349</span>          rowHeaderPane.rowOpacityMap.remove(contentCoordinates.get().x());<a name="line.349"></a>
+<span class="sourceLineNo">350</span>          if (dataset != null)<a name="line.350"></a>
+<span class="sourceLineNo">351</span>            dataset.selectObject(context.rowHeads().get(contentCoordinates.get().x()));<a name="line.351"></a>
+<span class="sourceLineNo">352</span>        } else {<a name="line.352"></a>
+<span class="sourceLineNo">353</span>          if (dataset != null)<a name="line.353"></a>
+<span class="sourceLineNo">354</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.354"></a>
+<span class="sourceLineNo">355</span>          rowHeaderPane.rowOpacityMap.put(contentCoordinates.get().x(), Constants.HIDE_OPACITY);<a name="line.355"></a>
+<span class="sourceLineNo">356</span>          if (dataset != null)<a name="line.356"></a>
+<span class="sourceLineNo">357</span>            dataset.ignoreObject(context.rowHeads().get(contentCoordinates.get().x()));<a name="line.357"></a>
+<span class="sourceLineNo">358</span>        }<a name="line.358"></a>
+<span class="sourceLineNo">359</span>      }<a name="line.359"></a>
+<span class="sourceLineNo">360</span>//    if (rowHeaderPane.rowOpacityMap.containsKey(contentCoordinates.get().x())) {<a name="line.360"></a>
+<span class="sourceLineNo">361</span>//    rowHeaderPane.rowOpacityMap.remove(contentCoordinates.get().x());<a name="line.361"></a>
+<span class="sourceLineNo">362</span>////  final G object = context.getDomain().get(contentCoordinates.get().x());<a name="line.362"></a>
+<span class="sourceLineNo">363</span>////  context.selectObject(object);<a name="line.363"></a>
+<span class="sourceLineNo">364</span>//  } else {<a name="line.364"></a>
+<span class="sourceLineNo">365</span>//    rowHeaderPane.rowOpacityMap.put(contentCoordinates.get().x(), Constants.HIDE_OPACITY);<a name="line.365"></a>
+<span class="sourceLineNo">366</span>////  final G object = context.getDomain().get(contentCoordinates.get().x());<a name="line.366"></a>
+<span class="sourceLineNo">367</span>////  context.deselectObject(object);<a name="line.367"></a>
+<span class="sourceLineNo">368</span>//  }<a name="line.368"></a>
+<span class="sourceLineNo">369</span>    }<a name="line.369"></a>
+<span class="sourceLineNo">370</span><a name="line.370"></a>
+<span class="sourceLineNo">371</span>    public final void updateContent() {<a name="line.371"></a>
+<span class="sourceLineNo">372</span>      try {<a name="line.372"></a>
+<span class="sourceLineNo">373</span>        final String string = context.rowHeads().get(contentCoordinates.get().x()).toString();<a name="line.373"></a>
+<span class="sourceLineNo">374</span>        textContent.set(string);<a name="line.374"></a>
+<span class="sourceLineNo">375</span>        view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));<a name="line.375"></a>
+<span class="sourceLineNo">376</span>        if (cellPane.decorations.containsKey(context.rowHeads().get(contentCoordinates.get().x()))) {<a name="line.376"></a>
+<span class="sourceLineNo">377</span>          interactionPane.get().getChildren().removeAll(cellPane.decorations.values());<a name="line.377"></a>
+<span class="sourceLineNo">378</span>          interactionPane<a name="line.378"></a>
+<span class="sourceLineNo">379</span>              .get()<a name="line.379"></a>
+<span class="sourceLineNo">380</span>              .setRight(cellPane.decorations.get(context.rowHeads().get(contentCoordinates.get().x())));<a name="line.380"></a>
+<span class="sourceLineNo">381</span>        }<a name="line.381"></a>
+<span class="sourceLineNo">382</span>      } catch (IndexOutOfBoundsException __) {}<a name="line.382"></a>
+<span class="sourceLineNo">383</span>    }<a name="line.383"></a>
+<span class="sourceLineNo">384</span>  }<a name="line.384"></a>
+<span class="sourceLineNo">385</span><a name="line.385"></a>
+<span class="sourceLineNo">386</span>  private final class ColHeaderCell extends Cell&lt;ColHeaderCell, ColHeaderPane&gt; {<a name="line.386"></a>
+<span class="sourceLineNo">387</span><a name="line.387"></a>
+<span class="sourceLineNo">388</span>    private ImageView view = ImageViewBuilder.create().build();<a name="line.388"></a>
+<span class="sourceLineNo">389</span><a name="line.389"></a>
+<span class="sourceLineNo">390</span>    private ColHeaderCell(final int column) {<a name="line.390"></a>
+<span class="sourceLineNo">391</span>      super(colHeaderPane, 0, column, Pos.CENTER_LEFT, TextAlignment.LEFT, true, null, false);<a name="line.391"></a>
+<span class="sourceLineNo">392</span>      this.contentPane.get().getChildren().add(view);<a name="line.392"></a>
+<span class="sourceLineNo">393</span>      this.contentPane.get().text.setOpacity(0);<a name="line.393"></a>
+<span class="sourceLineNo">394</span>      if (cellPane.interactive) {<a name="line.394"></a>
+<span class="sourceLineNo">395</span>        final ContextMenu contextMenu = new ContextMenu();<a name="line.395"></a>
+<span class="sourceLineNo">396</span>        final MenuItem editItem = new MenuItem("Edit");<a name="line.396"></a>
+<span class="sourceLineNo">397</span>        final MenuItem removeItem = new MenuItem("Remove");<a name="line.397"></a>
+<span class="sourceLineNo">398</span>        final MenuItem selectItem = new MenuItem("Select");<a name="line.398"></a>
+<span class="sourceLineNo">399</span>        final MenuItem insertItem = new MenuItem("Insert");<a name="line.399"></a>
+<span class="sourceLineNo">400</span>        if (dataset != null &amp;&amp; dataset.editable)<a name="line.400"></a>
+<span class="sourceLineNo">401</span>          contextMenu.getItems().addAll(editItem, removeItem, selectItem, insertItem);<a name="line.401"></a>
+<span class="sourceLineNo">402</span>        else<a name="line.402"></a>
+<span class="sourceLineNo">403</span>          contextMenu.getItems().addAll(removeItem, selectItem);<a name="line.403"></a>
+<span class="sourceLineNo">404</span>        insertItem.setOnAction(__ -&gt; {<a name="line.404"></a>
+<span class="sourceLineNo">405</span>          ((FCADataset&lt;String, String&gt;) dataset).addAttribute(<a name="line.405"></a>
+<span class="sourceLineNo">406</span>              (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(dataset),<a name="line.406"></a>
+<span class="sourceLineNo">407</span>              contentCoordinates.get().y());<a name="line.407"></a>
+<span class="sourceLineNo">408</span>          colHeaderPane.columnOpacityMap<a name="line.408"></a>
+<span class="sourceLineNo">409</span>              .keySet()<a name="line.409"></a>
+<span class="sourceLineNo">410</span>              .stream()<a name="line.410"></a>
+<span class="sourceLineNo">411</span>              .sorted()<a name="line.411"></a>
+<span class="sourceLineNo">412</span>              .filter(i -&gt; i &gt;= contentCoordinates.get().y())<a name="line.412"></a>
+<span class="sourceLineNo">413</span>              .forEach(i -&gt; colHeaderPane.columnOpacityMap.put(i + 1, colHeaderPane.columnOpacityMap.remove(i)));<a name="line.413"></a>
+<span class="sourceLineNo">414</span>        });<a name="line.414"></a>
+<span class="sourceLineNo">415</span>        editItem.setOnAction(event -&gt; {<a name="line.415"></a>
+<span class="sourceLineNo">416</span>          if (MatrixContextWidget.this.dataset.editable) {<a name="line.416"></a>
+<span class="sourceLineNo">417</span>            final M attribute = context.colHeads().get(contentCoordinates.get().y());<a name="line.417"></a>
+<span class="sourceLineNo">418</span>            final TextField textField = TextFieldBuilder.create().text((String) attribute).build();<a name="line.418"></a>
+<span class="sourceLineNo">419</span>            textField.addEventHandler(KeyEvent.KEY_RELEASED, keyEvent -&gt; {<a name="line.419"></a>
+<span class="sourceLineNo">420</span>              switch (keyEvent.getCode()) {<a name="line.420"></a>
+<span class="sourceLineNo">421</span>              case ENTER:<a name="line.421"></a>
+<span class="sourceLineNo">422</span>                dataset.renameAttribute(attribute, (M) textField.getText().trim());<a name="line.422"></a>
+<span class="sourceLineNo">423</span>              case ESCAPE:<a name="line.423"></a>
+<span class="sourceLineNo">424</span>                interactionPane.get().getChildren().remove(textField);<a name="line.424"></a>
+<span class="sourceLineNo">425</span>              }<a name="line.425"></a>
+<span class="sourceLineNo">426</span>            });<a name="line.426"></a>
+<span class="sourceLineNo">427</span>            textField.rotateProperty().set(-90);<a name="line.427"></a>
+<span class="sourceLineNo">428</span>            textField.setMinSize(colHeaderPane.rowHeight.get(), cellSize.get());<a name="line.428"></a>
+<span class="sourceLineNo">429</span>            textField.setMaxSize(colHeaderPane.rowHeight.get(), cellSize.get());<a name="line.429"></a>
+<span class="sourceLineNo">430</span>            interactionPane.get().getChildren().add(textField);<a name="line.430"></a>
+<span class="sourceLineNo">431</span>            textField.focusedProperty().addListener(<a name="line.431"></a>
+<span class="sourceLineNo">432</span>                (observable, oldValue, newValue) -&gt; new Timer().schedule(new TimerTask() {<a name="line.432"></a>
+<span class="sourceLineNo">433</span><a name="line.433"></a>
+<span class="sourceLineNo">434</span>              public final void run() {<a name="line.434"></a>
+<span class="sourceLineNo">435</span>                Platform.runLater(() -&gt; textField.selectAll());<a name="line.435"></a>
+<span class="sourceLineNo">436</span>              }<a name="line.436"></a>
+<span class="sourceLineNo">437</span>            }, 20));<a name="line.437"></a>
+<span class="sourceLineNo">438</span>            textField.requestFocus();<a name="line.438"></a>
+<span class="sourceLineNo">439</span>          }<a name="line.439"></a>
+<span class="sourceLineNo">440</span>        });<a name="line.440"></a>
+<span class="sourceLineNo">441</span>        removeItem.setOnAction(event -&gt; {<a name="line.441"></a>
+<span class="sourceLineNo">442</span>          dataset.removeAttribute(context.colHeads().get(contentCoordinates.get().y()));<a name="line.442"></a>
+<span class="sourceLineNo">443</span>          colHeaderPane.columnOpacityMap.remove(contentCoordinates.get().y());<a name="line.443"></a>
+<span class="sourceLineNo">444</span>          colHeaderPane.columnOpacityMap<a name="line.444"></a>
+<span class="sourceLineNo">445</span>              .keySet()<a name="line.445"></a>
+<span class="sourceLineNo">446</span>              .stream()<a name="line.446"></a>
+<span class="sourceLineNo">447</span>              .sorted()<a name="line.447"></a>
+<span class="sourceLineNo">448</span>              .filter(i -&gt; i &gt; contentCoordinates.get().y())<a name="line.448"></a>
+<span class="sourceLineNo">449</span>              .forEach(i -&gt; colHeaderPane.columnOpacityMap.put(i - 1, colHeaderPane.columnOpacityMap.remove(i)));<a name="line.449"></a>
+<span class="sourceLineNo">450</span>        });<a name="line.450"></a>
+<span class="sourceLineNo">451</span>        selectItem.setOnAction(event -&gt; select());<a name="line.451"></a>
+<span class="sourceLineNo">452</span>//      if (!tab.fca.context.selectedAttributes().contains(tab.fca.context.colHeads().get(contentCoordinates.get().y())))<a name="line.452"></a>
+<span class="sourceLineNo">453</span>//        colHeaderPane.columnOpacityMap.put(contentCoordinates.get().y(), Constants.HIDE_OPACITY);<a name="line.453"></a>
+<span class="sourceLineNo">454</span>        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, event -&gt; {<a name="line.454"></a>
+<span class="sourceLineNo">455</span>          switch (event.getButton()) {<a name="line.455"></a>
+<span class="sourceLineNo">456</span>          case PRIMARY:<a name="line.456"></a>
+<span class="sourceLineNo">457</span>            select();<a name="line.457"></a>
+<span class="sourceLineNo">458</span>            break;<a name="line.458"></a>
+<span class="sourceLineNo">459</span>          case SECONDARY:<a name="line.459"></a>
+<span class="sourceLineNo">460</span>            contextMenu.show(interactionPane.getValue(), event.getScreenX(), event.getScreenY());<a name="line.460"></a>
+<span class="sourceLineNo">461</span>          }<a name="line.461"></a>
+<span class="sourceLineNo">462</span>        });<a name="line.462"></a>
+<span class="sourceLineNo">463</span>      }<a name="line.463"></a>
+<span class="sourceLineNo">464</span>      if (dataset != null)<a name="line.464"></a>
+<span class="sourceLineNo">465</span>        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, event -&gt; {<a name="line.465"></a>
+<span class="sourceLineNo">466</span>          if (contextPane.highlight.get()) {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>            final M m = context.colHeads().get(contentCoordinates.get().y());<a name="line.467"></a>
+<span class="sourceLineNo">468</span>            if (context.selectedAttributes().contains(m))<a name="line.468"></a>
+<span class="sourceLineNo">469</span>              dataset.conceptGraph.highlight(true, dataset.conceptGraph.highlightRequests.attribute(m));<a name="line.469"></a>
+<span class="sourceLineNo">470</span>          }<a name="line.470"></a>
+<span class="sourceLineNo">471</span>        });<a name="line.471"></a>
+<span class="sourceLineNo">472</span>      if (cellPane.autoSizeRows.get() || cellPane.autoSizeColumns.get())<a name="line.472"></a>
+<span class="sourceLineNo">473</span>        view.layoutBoundsProperty().addListener(new ChangeListener&lt;Bounds&gt;() {<a name="line.473"></a>
+<span class="sourceLineNo">474</span><a name="line.474"></a>
+<span class="sourceLineNo">475</span>          @Override<a name="line.475"></a>
+<span class="sourceLineNo">476</span>          public void changed(ObservableValue&lt;? extends Bounds&gt; observable, Bounds oldValue, Bounds newValue) {<a name="line.476"></a>
+<span class="sourceLineNo">477</span>            final double width = newValue.getWidth();<a name="line.477"></a>
+<span class="sourceLineNo">478</span>            if (width &gt; cellPane.maximalTextWidth.get())<a name="line.478"></a>
+<span class="sourceLineNo">479</span>              cellPane.maximalTextWidth.set(width);<a name="line.479"></a>
+<span class="sourceLineNo">480</span>          }<a name="line.480"></a>
+<span class="sourceLineNo">481</span>        });<a name="line.481"></a>
+<span class="sourceLineNo">482</span>      context<a name="line.482"></a>
+<span class="sourceLineNo">483</span>          .addEventHandler(event -&gt; Platform2.runOnFXThread(ColHeaderCell.this::updateContent), RelationEvent.COLUMNS);<a name="line.483"></a>
+<span class="sourceLineNo">484</span>      updateContent();<a name="line.484"></a>
+<span class="sourceLineNo">485</span>    }<a name="line.485"></a>
+<span class="sourceLineNo">486</span><a name="line.486"></a>
+<span class="sourceLineNo">487</span>    private void select() {<a name="line.487"></a>
+<span class="sourceLineNo">488</span>      synchronized (colHeaderPane.columnOpacityMap) {<a name="line.488"></a>
+<span class="sourceLineNo">489</span>        if (colHeaderPane.columnOpacityMap.containsKey(contentCoordinates.get().y())) {<a name="line.489"></a>
+<span class="sourceLineNo">490</span>          if (dataset != null)<a name="line.490"></a>
+<span class="sourceLineNo">491</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.491"></a>
+<span class="sourceLineNo">492</span>          colHeaderPane.columnOpacityMap.remove(contentCoordinates.get().y());<a name="line.492"></a>
+<span class="sourceLineNo">493</span>          if (dataset != null)<a name="line.493"></a>
+<span class="sourceLineNo">494</span>            dataset.selectAttribute(context.colHeads().get(contentCoordinates.get().y()));<a name="line.494"></a>
+<span class="sourceLineNo">495</span>        } else {<a name="line.495"></a>
+<span class="sourceLineNo">496</span>          if (dataset != null)<a name="line.496"></a>
+<span class="sourceLineNo">497</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.497"></a>
+<span class="sourceLineNo">498</span>          colHeaderPane.columnOpacityMap.put(contentCoordinates.get().y(), Constants.HIDE_OPACITY);<a name="line.498"></a>
+<span class="sourceLineNo">499</span>          if (dataset != null)<a name="line.499"></a>
+<span class="sourceLineNo">500</span>            dataset.ignoreAttribute(context.colHeads().get(contentCoordinates.get().y()));<a name="line.500"></a>
+<span class="sourceLineNo">501</span>        }<a name="line.501"></a>
+<span class="sourceLineNo">502</span>      }<a name="line.502"></a>
+<span class="sourceLineNo">503</span>    }<a name="line.503"></a>
+<span class="sourceLineNo">504</span><a name="line.504"></a>
+<span class="sourceLineNo">505</span>    public final void updateContent() {<a name="line.505"></a>
+<span class="sourceLineNo">506</span>      try {<a name="line.506"></a>
+<span class="sourceLineNo">507</span>        final M m = context.colHeads().get(contentCoordinates.get().y());<a name="line.507"></a>
+<span class="sourceLineNo">508</span>        final String string =<a name="line.508"></a>
+<span class="sourceLineNo">509</span>            m instanceof OWLClassExpression ? OWLUtil.toString((OWLClassExpression) m) : m.toString();<a name="line.509"></a>
+<span class="sourceLineNo">510</span>        textContent.set(string);<a name="line.510"></a>
+<span class="sourceLineNo">511</span>        view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));<a name="line.511"></a>
+<span class="sourceLineNo">512</span>      } catch (IndexOutOfBoundsException __) {}<a name="line.512"></a>
+<span class="sourceLineNo">513</span>    }<a name="line.513"></a>
+<span class="sourceLineNo">514</span>  }<a name="line.514"></a>
+<span class="sourceLineNo">515</span><a name="line.515"></a>
+<span class="sourceLineNo">516</span>  private final class ContextCell extends Cell&lt;ContextCell, ContextPane&gt; {<a name="line.516"></a>
+<span class="sourceLineNo">517</span><a name="line.517"></a>
+<span class="sourceLineNo">518</span>    private ContextCell(final int row, final int column) {<a name="line.518"></a>
+<span class="sourceLineNo">519</span>      super(contextPane, row, column, Pos.CENTER, TextAlignment.CENTER, false, null, false);<a name="line.519"></a>
+<span class="sourceLineNo">520</span>      if (dataset != null)<a name="line.520"></a>
+<span class="sourceLineNo">521</span>        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler&lt;MouseEvent&gt;() {<a name="line.521"></a>
+<span class="sourceLineNo">522</span><a name="line.522"></a>
+<span class="sourceLineNo">523</span>          public final void handle(final MouseEvent event) {<a name="line.523"></a>
+<span class="sourceLineNo">524</span>            final G g = context.rowHeads().get(contentCoordinates.get().x());<a name="line.524"></a>
+<span class="sourceLineNo">525</span>            final M m = context.colHeads().get(contentCoordinates.get().y());<a name="line.525"></a>
+<span class="sourceLineNo">526</span>            dataset.conceptGraph.highlight(false, dataset.conceptGraph.highlightRequests.dehighlight());<a name="line.526"></a>
+<span class="sourceLineNo">527</span>            dataset.flip(g, m);<a name="line.527"></a>
+<span class="sourceLineNo">528</span>            dataset.unsavedChanges.set(true);<a name="line.528"></a>
+<span class="sourceLineNo">529</span>          }<a name="line.529"></a>
+<span class="sourceLineNo">530</span>        });<a name="line.530"></a>
+<span class="sourceLineNo">531</span>      else<a name="line.531"></a>
+<span class="sourceLineNo">532</span>        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_CLICKED, event -&gt; {<a name="line.532"></a>
+<span class="sourceLineNo">533</span>          final G g = context.rowHeads().get(contentCoordinates.get().x());<a name="line.533"></a>
+<span class="sourceLineNo">534</span>          final M m = context.colHeads().get(contentCoordinates.get().y());<a name="line.534"></a>
+<span class="sourceLineNo">535</span>          if (context.contains(g, m))<a name="line.535"></a>
+<span class="sourceLineNo">536</span>            context.remove(g, m);<a name="line.536"></a>
+<span class="sourceLineNo">537</span>          else<a name="line.537"></a>
+<span class="sourceLineNo">538</span>            context.add(g, m);<a name="line.538"></a>
+<span class="sourceLineNo">539</span>        });<a name="line.539"></a>
+<span class="sourceLineNo">540</span>      if (dataset != null)<a name="line.540"></a>
+<span class="sourceLineNo">541</span>        this.interactionPane.get().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler&lt;MouseEvent&gt;() {<a name="line.541"></a>
+<span class="sourceLineNo">542</span><a name="line.542"></a>
+<span class="sourceLineNo">543</span>          public final void handle(final MouseEvent event) {<a name="line.543"></a>
+<span class="sourceLineNo">544</span>            if (contextPane.highlight.get()) {<a name="line.544"></a>
+<span class="sourceLineNo">545</span>              final G g = context.rowHeads().get(contentCoordinates.get().x());<a name="line.545"></a>
+<span class="sourceLineNo">546</span>              final M m = context.colHeads().get(contentCoordinates.get().y());<a name="line.546"></a>
+<span class="sourceLineNo">547</span>              if (context.selectedAttributes().contains(m))<a name="line.547"></a>
+<span class="sourceLineNo">548</span>                if (textContent.get().equals(Constants.CROSS_CHARACTER))<a name="line.548"></a>
+<span class="sourceLineNo">549</span>                  dataset.conceptGraph.highlight(true, dataset.conceptGraph.highlightRequests.incidence(g, m));<a name="line.549"></a>
+<span class="sourceLineNo">550</span>                else if (textContent.get().equals(Constants.DOWN_ARROW_CHARACTER))<a name="line.550"></a>
+<span class="sourceLineNo">551</span>                  dataset.conceptGraph.highlight(true, dataset.conceptGraph.highlightRequests.downArrow(g, m));<a name="line.551"></a>
+<span class="sourceLineNo">552</span>                else if (textContent.get().equals(Constants.UP_ARROW_CHARACTER))<a name="line.552"></a>
+<span class="sourceLineNo">553</span>                  dataset.conceptGraph.highlight(true, dataset.conceptGraph.highlightRequests.upArrow(g, m));<a name="line.553"></a>
+<span class="sourceLineNo">554</span>                else if (textContent.get().equals(Constants.BOTH_ARROW_CHARACTER))<a name="line.554"></a>
+<span class="sourceLineNo">555</span>                  dataset.conceptGraph.highlight(true, dataset.conceptGraph.highlightRequests.bothArrow(g, m));<a name="line.555"></a>
+<span class="sourceLineNo">556</span>                else if (textContent.get().equals(Constants.NO_CROSS_CHARACTER))<a name="line.556"></a>
+<span class="sourceLineNo">557</span>                  dataset.conceptGraph.highlight(true, dataset.conceptGraph.highlightRequests.nonIncidence(g, m));<a name="line.557"></a>
+<span class="sourceLineNo">558</span>            }<a name="line.558"></a>
+<span class="sourceLineNo">559</span>          }<a name="line.559"></a>
+<span class="sourceLineNo">560</span>        });<a name="line.560"></a>
+<span class="sourceLineNo">561</span>      context.addEventHandler(event -&gt; updateContent(), RelationEvent.ANY);<a name="line.561"></a>
+<span class="sourceLineNo">562</span>//          RelationEvent.ENTRIES_ADDED,<a name="line.562"></a>
+<span class="sourceLineNo">563</span>//          RelationEvent.ENTRIES_REMOVED,<a name="line.563"></a>
+<span class="sourceLineNo">564</span>//          RelationEvent.ALL_CHANGED,<a name="line.564"></a>
+<span class="sourceLineNo">565</span>//          RelationEvent.SELECTION_CHANGED);<a name="line.565"></a>
+<span class="sourceLineNo">566</span>      updateContent();<a name="line.566"></a>
+<span class="sourceLineNo">567</span>    }<a name="line.567"></a>
+<span class="sourceLineNo">568</span><a name="line.568"></a>
+<span class="sourceLineNo">569</span>    @SuppressWarnings("incomplete-switch")<a name="line.569"></a>
+<span class="sourceLineNo">570</span>    public final void updateContent() {<a name="line.570"></a>
+<span class="sourceLineNo">571</span>      try {<a name="line.571"></a>
+<span class="sourceLineNo">572</span>        final G g = context.rowHeads().get(contentCoordinates.get().x());<a name="line.572"></a>
+<span class="sourceLineNo">573</span>        final M m = context.colHeads().get(contentCoordinates.get().y());<a name="line.573"></a>
+<span class="sourceLineNo">574</span>        if (context.selectedAttributes().contains(m) &amp;&amp; context.selectedObjects().contains(g)) {<a name="line.574"></a>
+<span class="sourceLineNo">575</span>          final Pair&lt;Incidence, Incidence&gt; p = context.selection.getValue(g, m, showArrows.get(), showPaths.get());<a name="line.575"></a>
+<span class="sourceLineNo">576</span>          final Incidence first = p.first();<a name="line.576"></a>
+<span class="sourceLineNo">577</span>          final Incidence second = p.second();<a name="line.577"></a>
+<span class="sourceLineNo">578</span>          ContextCell.this.textContent.set(<a name="line.578"></a>
+<span class="sourceLineNo">579</span>              second != null &amp;&amp; first == Incidence.NO_CROSS ? Constants.NO_CROSS_CHARACTER_BOLD : first.toString());<a name="line.579"></a>
+<span class="sourceLineNo">580</span>          switch (first) {<a name="line.580"></a>
+<span class="sourceLineNo">581</span>          case BOTH_ARROW:<a name="line.581"></a>
+<span class="sourceLineNo">582</span>            ContextCell.this.contentPane.get().text.setRotate(-45d);<a name="line.582"></a>
+<span class="sourceLineNo">583</span>            break;<a name="line.583"></a>
+<span class="sourceLineNo">584</span>          case DOWN_ARROW:<a name="line.584"></a>
+<span class="sourceLineNo">585</span>          case UP_ARROW:<a name="line.585"></a>
+<span class="sourceLineNo">586</span>          case CROSS:<a name="line.586"></a>
+<span class="sourceLineNo">587</span>          case NO_CROSS:<a name="line.587"></a>
+<span class="sourceLineNo">588</span>            ContextCell.this.contentPane.get().text.setRotate(0d);<a name="line.588"></a>
+<span class="sourceLineNo">589</span>            break;<a name="line.589"></a>
+<span class="sourceLineNo">590</span>          }<a name="line.590"></a>
+<span class="sourceLineNo">591</span>          if (second == null)<a name="line.591"></a>
+<span class="sourceLineNo">592</span>            ContextCell.this.contentPane.get().text.setFill(Color.BLACK);<a name="line.592"></a>
+<span class="sourceLineNo">593</span>          else<a name="line.593"></a>
+<span class="sourceLineNo">594</span>            switch (second) {<a name="line.594"></a>
+<span class="sourceLineNo">595</span>            case BOTH_PATH:<a name="line.595"></a>
+<span class="sourceLineNo">596</span>              ContextCell.this.contentPane.get().text.setFill(ConceptGraph.COLOR_INTERVAL);<a name="line.596"></a>
+<span class="sourceLineNo">597</span>              break;<a name="line.597"></a>
+<span class="sourceLineNo">598</span>            case DOWN_PATH:<a name="line.598"></a>
+<span class="sourceLineNo">599</span>              ContextCell.this.contentPane.get().text.setFill(ConceptGraph.COLOR_LOWER);<a name="line.599"></a>
+<span class="sourceLineNo">600</span>              break;<a name="line.600"></a>
+<span class="sourceLineNo">601</span>            case UP_PATH:<a name="line.601"></a>
+<span class="sourceLineNo">602</span>              ContextCell.this.contentPane.get().text.setFill(ConceptGraph.COLOR_UPPER);<a name="line.602"></a>
+<span class="sourceLineNo">603</span>              break;<a name="line.603"></a>
+<span class="sourceLineNo">604</span>            }<a name="line.604"></a>
+<span class="sourceLineNo">605</span>        } else {<a name="line.605"></a>
+<span class="sourceLineNo">606</span>          ContextCell.this.textContent.set(context.getValue(g, m, false).first().toString());<a name="line.606"></a>
+<span class="sourceLineNo">607</span>          ContextCell.this.contentPane.get().text.setRotate(0d);<a name="line.607"></a>
+<span class="sourceLineNo">608</span>        }<a name="line.608"></a>
+<span class="sourceLineNo">609</span>      } catch (IndexOutOfBoundsException __) {}<a name="line.609"></a>
+<span class="sourceLineNo">610</span>    }<a name="line.610"></a>
+<span class="sourceLineNo">611</span>  }<a name="line.611"></a>
+<span class="sourceLineNo">612</span><a name="line.612"></a>
+<span class="sourceLineNo">613</span>  protected final FCADataset&lt;G, M&gt;    dataset;<a name="line.613"></a>
+<span class="sourceLineNo">614</span>  protected final MatrixContext&lt;G, M&gt; context;<a name="line.614"></a>
+<span class="sourceLineNo">615</span>  protected final GridPane            centerPane            = new GridPane();<a name="line.615"></a>
+<span class="sourceLineNo">616</span>  public final RowHeaderPane          rowHeaderPane;<a name="line.616"></a>
+<span class="sourceLineNo">617</span>  public final ColHeaderPane          colHeaderPane;<a name="line.617"></a>
+<span class="sourceLineNo">618</span>  public final ContextPane            contextPane;<a name="line.618"></a>
+<span class="sourceLineNo">619</span>  protected final ScrollBar           rowScrollBar;<a name="line.619"></a>
+<span class="sourceLineNo">620</span>  protected final ScrollBar           colScrollBar;<a name="line.620"></a>
+<span class="sourceLineNo">621</span>//  public final ListSpinner&lt;Integer&gt; zoomSpinner =new ListSpinner&lt;Integer&gt;(-4, 4, 1);<a name="line.621"></a>
+<span class="sourceLineNo">622</span>  public final Slider                 zoomSlider            = SliderBuilder<a name="line.622"></a>
+<span class="sourceLineNo">623</span>                                                                .create()<a name="line.623"></a>
+<span class="sourceLineNo">624</span>                                                                .min(-4d)<a name="line.624"></a>
+<span class="sourceLineNo">625</span>                                                                .max(4d)<a name="line.625"></a>
+<span class="sourceLineNo">626</span>                                                                .value(0d)<a name="line.626"></a>
+<span class="sourceLineNo">627</span>                                                                // .showTickMarks(true)<a name="line.627"></a>
+<span class="sourceLineNo">628</span>                                                                // .minorTickCount(17)<a name="line.628"></a>
+<span class="sourceLineNo">629</span>                                                                // .majorTickUnit(1d)<a name="line.629"></a>
+<span class="sourceLineNo">630</span>                                                                // .snapToTicks(true)<a name="line.630"></a>
+<span class="sourceLineNo">631</span>                                                                .blockIncrement(0.25d)<a name="line.631"></a>
+<span class="sourceLineNo">632</span>                                                                .build();<a name="line.632"></a>
+<span class="sourceLineNo">633</span>  public final DoubleProperty         zoomFactor            = new SimpleDoubleProperty(0.01d);<a name="line.633"></a>
+<span class="sourceLineNo">634</span>  public final IntegerProperty        rowHeaderSizeDefault  = new SimpleIntegerProperty(40);<a name="line.634"></a>
+<span class="sourceLineNo">635</span>  public final IntegerProperty        colHeaderSizeDefault  = new SimpleIntegerProperty(40);<a name="line.635"></a>
+<span class="sourceLineNo">636</span>  public final IntegerProperty        cellSizeDefault       = new SimpleIntegerProperty(20);<a name="line.636"></a>
+<span class="sourceLineNo">637</span>  public final IntegerProperty        textSizeDefault       = new SimpleIntegerProperty(16);<a name="line.637"></a>
+<span class="sourceLineNo">638</span>  public final IntegerProperty        incidenceSizeDefault  = new SimpleIntegerProperty(20);<a name="line.638"></a>
+<span class="sourceLineNo">639</span>  public final IntegerBinding         cellSize              = new IntegerBinding() {<a name="line.639"></a>
+<span class="sourceLineNo">640</span><a name="line.640"></a>
+<span class="sourceLineNo">641</span>                                                              {<a name="line.641"></a>
+<span class="sourceLineNo">642</span>                                                                super.bind(zoomFactor, cellSizeDefault);<a name="line.642"></a>
+<span class="sourceLineNo">643</span>                                                              }<a name="line.643"></a>
+<span class="sourceLineNo">644</span><a name="line.644"></a>
+<span class="sourceLineNo">645</span>                                                              protected int computeValue() {<a name="line.645"></a>
+<span class="sourceLineNo">646</span>                                                                return (int) (zoomFactor.get()<a name="line.646"></a>
+<span class="sourceLineNo">647</span>                                                                    * cellSizeDefault.doubleValue());<a name="line.647"></a>
+<span class="sourceLineNo">648</span>                                                              };<a name="line.648"></a>
+<span class="sourceLineNo">649</span>                                                            };<a name="line.649"></a>
+<span class="sourceLineNo">650</span>  public final IntegerBinding         textSize              = new IntegerBinding() {<a name="line.650"></a>
+<span class="sourceLineNo">651</span><a name="line.651"></a>
+<span class="sourceLineNo">652</span>                                                              {<a name="line.652"></a>
+<span class="sourceLineNo">653</span>                                                                super.bind(zoomFactor, textSizeDefault);<a name="line.653"></a>
+<span class="sourceLineNo">654</span>                                                              }<a name="line.654"></a>
+<span class="sourceLineNo">655</span><a name="line.655"></a>
+<span class="sourceLineNo">656</span>                                                              protected int computeValue() {<a name="line.656"></a>
+<span class="sourceLineNo">657</span>                                                                return (int) (zoomFactor.get()<a name="line.657"></a>
+<span class="sourceLineNo">658</span>                                                                    * textSizeDefault.doubleValue());<a name="line.658"></a>
+<span class="sourceLineNo">659</span>                                                              };<a name="line.659"></a>
+<span class="sourceLineNo">660</span>                                                            };<a name="line.660"></a>
+<span class="sourceLineNo">661</span>  public final IntegerBinding         incidenceSize         = new IntegerBinding() {<a name="line.661"></a>
+<span class="sourceLineNo">662</span><a name="line.662"></a>
+<span class="sourceLineNo">663</span>                                                              {<a name="line.663"></a>
+<span class="sourceLineNo">664</span>                                                                super.bind(zoomFactor, textSizeDefault);<a name="line.664"></a>
+<span class="sourceLineNo">665</span>                                                              }<a name="line.665"></a>
+<span class="sourceLineNo">666</span><a name="line.666"></a>
+<span class="sourceLineNo">667</span>                                                              protected int computeValue() {<a name="line.667"></a>
+<span class="sourceLineNo">668</span>                                                                return (int) (zoomFactor.get()<a name="line.668"></a>
+<span class="sourceLineNo">669</span>                                                                    * incidenceSizeDefault.doubleValue());<a name="line.669"></a>
+<span class="sourceLineNo">670</span>                                                              };<a name="line.670"></a>
+<span class="sourceLineNo">671</span>                                                            };<a name="line.671"></a>
+<span class="sourceLineNo">672</span>  public final BooleanProperty        animate               = new SimpleBooleanProperty(false);<a name="line.672"></a>
+<span class="sourceLineNo">673</span>  public final BooleanProperty        showArrows            = new SimpleBooleanProperty();<a name="line.673"></a>
+<span class="sourceLineNo">674</span>  public final BooleanProperty        showPaths             = new SimpleBooleanProperty();<a name="line.674"></a>
+<span class="sourceLineNo">675</span>  public final ToggleButton           highlightToggleButton = new ToggleButton();<a name="line.675"></a>
+<span class="sourceLineNo">676</span>  public final DoubleBinding          height;<a name="line.676"></a>
+<span class="sourceLineNo">677</span><a name="line.677"></a>
+<span class="sourceLineNo">678</span>  public MatrixContextWidget(final FCADataset&lt;G, M&gt; fcaInstance) {<a name="line.678"></a>
+<span class="sourceLineNo">679</span>    this(fcaInstance, true);<a name="line.679"></a>
+<span class="sourceLineNo">680</span>  }<a name="line.680"></a>
+<span class="sourceLineNo">681</span><a name="line.681"></a>
+<span class="sourceLineNo">682</span>  /**<a name="line.682"></a>
+<span class="sourceLineNo">683</span>   * @param dataset<a name="line.683"></a>
+<span class="sourceLineNo">684</span>   * @param withToolbar<a name="line.684"></a>
+<span class="sourceLineNo">685</span>   * @param orContext<a name="line.685"></a>
+<span class="sourceLineNo">686</span>   *          may only be set if fcaInstance is null, otherwise unexpected behaviour may occur.<a name="line.686"></a>
+<span class="sourceLineNo">687</span>   */<a name="line.687"></a>
+<span class="sourceLineNo">688</span>  @SafeVarargs<a name="line.688"></a>
+<span class="sourceLineNo">689</span>  public MatrixContextWidget(<a name="line.689"></a>
+<span class="sourceLineNo">690</span>      final FCADataset&lt;G, M&gt; dataset,<a name="line.690"></a>
+<span class="sourceLineNo">691</span>      final boolean withToolbar,<a name="line.691"></a>
+<span class="sourceLineNo">692</span>      final MatrixContext&lt;G, M&gt;... orContext) {<a name="line.692"></a>
+<span class="sourceLineNo">693</span>    this(dataset, withToolbar, true, orContext);<a name="line.693"></a>
+<span class="sourceLineNo">694</span>  }<a name="line.694"></a>
+<span class="sourceLineNo">695</span><a name="line.695"></a>
+<span class="sourceLineNo">696</span>  @SafeVarargs<a name="line.696"></a>
+<span class="sourceLineNo">697</span>  public MatrixContextWidget(<a name="line.697"></a>
+<span class="sourceLineNo">698</span>      final FCADataset&lt;G, M&gt; dataset,<a name="line.698"></a>
+<span class="sourceLineNo">699</span>      final boolean withToolbar,<a name="line.699"></a>
+<span class="sourceLineNo">700</span>      final boolean interactive,<a name="line.700"></a>
+<span class="sourceLineNo">701</span>      final MatrixContext&lt;G, M&gt;... orContext) {<a name="line.701"></a>
+<span class="sourceLineNo">702</span>    super();<a name="line.702"></a>
+<span class="sourceLineNo">703</span>    this.dataset = dataset;<a name="line.703"></a>
+<span class="sourceLineNo">704</span>    if (dataset == null &amp;&amp; orContext[0] != null)<a name="line.704"></a>
+<span class="sourceLineNo">705</span>      this.context = orContext[0];<a name="line.705"></a>
+<span class="sourceLineNo">706</span>    else<a name="line.706"></a>
+<span class="sourceLineNo">707</span>      this.context = dataset.context;<a name="line.707"></a>
+<span class="sourceLineNo">708</span>    this.rowHeaderPane = new RowHeaderPane(interactive);<a name="line.708"></a>
+<span class="sourceLineNo">709</span>    this.colHeaderPane = new ColHeaderPane(interactive);<a name="line.709"></a>
+<span class="sourceLineNo">710</span>    this.contextPane = new ContextPane(interactive);<a name="line.710"></a>
+<span class="sourceLineNo">711</span>    this.rowScrollBar = contextPane.getRowScrollBar();<a name="line.711"></a>
+<span class="sourceLineNo">712</span>    this.colScrollBar = contextPane.getColumnScrollBar();<a name="line.712"></a>
+<span class="sourceLineNo">713</span>    centerPane.setHgap(4);<a name="line.713"></a>
+<span class="sourceLineNo">714</span>    centerPane.setVgap(4);<a name="line.714"></a>
+<span class="sourceLineNo">715</span>    rowHeaderPane.colorScheme.setValue(ColorScheme.JAVA_FX);<a name="line.715"></a>
+<span class="sourceLineNo">716</span>    colHeaderPane.colorScheme.setValue(ColorScheme.JAVA_FX);<a name="line.716"></a>
+<span class="sourceLineNo">717</span>    contextPane.colorScheme.setValue(ColorScheme.JAVA_FX);<a name="line.717"></a>
+<span class="sourceLineNo">718</span>    final RowConstraints firstRowConstraints = new RowConstraints();<a name="line.718"></a>
+<span class="sourceLineNo">719</span>    firstRowConstraints.minHeightProperty().bind(colHeaderPane.rowHeight);<a name="line.719"></a>
+<span class="sourceLineNo">720</span>    firstRowConstraints.maxHeightProperty().bind(colHeaderPane.rowHeight);<a name="line.720"></a>
+<span class="sourceLineNo">721</span>    final RowConstraints secondRowConstraints = new RowConstraints();<a name="line.721"></a>
+<span class="sourceLineNo">722</span>    secondRowConstraints.minHeightProperty().bind(cellSize);<a name="line.722"></a>
+<span class="sourceLineNo">723</span>    secondRowConstraints.prefHeightProperty().bind(new IntegerBinding() {<a name="line.723"></a>
+<span class="sourceLineNo">724</span><a name="line.724"></a>
+<span class="sourceLineNo">725</span>      {<a name="line.725"></a>
+<span class="sourceLineNo">726</span>        super.bind(rowHeaderPane.maxRows, cellSize);<a name="line.726"></a>
+<span class="sourceLineNo">727</span>      }<a name="line.727"></a>
+<span class="sourceLineNo">728</span><a name="line.728"></a>
+<span class="sourceLineNo">729</span>      protected final int computeValue() {<a name="line.729"></a>
+<span class="sourceLineNo">730</span>        return context.rowHeads().size() * cellSize.get();<a name="line.730"></a>
+<span class="sourceLineNo">731</span>      }<a name="line.731"></a>
+<span class="sourceLineNo">732</span>    });<a name="line.732"></a>
+<span class="sourceLineNo">733</span>    final RowConstraints thirdRowConstraints = new RowConstraints();<a name="line.733"></a>
+<span class="sourceLineNo">734</span>    thirdRowConstraints.minHeightProperty().bind(cellSize);<a name="line.734"></a>
+<span class="sourceLineNo">735</span>    thirdRowConstraints.maxHeightProperty().bind(cellSize);<a name="line.735"></a>
+<span class="sourceLineNo">736</span>    centerPane.getRowConstraints().addAll(firstRowConstraints, secondRowConstraints, thirdRowConstraints);<a name="line.736"></a>
+<span class="sourceLineNo">737</span>    final ColumnConstraints firstColumnConstraints = new ColumnConstraints();<a name="line.737"></a>
+<span class="sourceLineNo">738</span>    firstColumnConstraints.minWidthProperty().bind(rowHeaderPane.columnWidth);<a name="line.738"></a>
+<span class="sourceLineNo">739</span>    firstColumnConstraints.maxWidthProperty().bind(rowHeaderPane.columnWidth);<a name="line.739"></a>
+<span class="sourceLineNo">740</span>    final ColumnConstraints secondColumnConstraints = new ColumnConstraints();<a name="line.740"></a>
+<span class="sourceLineNo">741</span>    secondColumnConstraints.minWidthProperty().bind(cellSize);<a name="line.741"></a>
+<span class="sourceLineNo">742</span>    secondColumnConstraints.maxWidthProperty().bind(new IntegerBinding() {<a name="line.742"></a>
+<span class="sourceLineNo">743</span><a name="line.743"></a>
+<span class="sourceLineNo">744</span>      {<a name="line.744"></a>
+<span class="sourceLineNo">745</span>        super.bind(colHeaderPane.maxColumns, cellSize);<a name="line.745"></a>
+<span class="sourceLineNo">746</span>      }<a name="line.746"></a>
+<span class="sourceLineNo">747</span><a name="line.747"></a>
+<span class="sourceLineNo">748</span>      protected final int computeValue() {<a name="line.748"></a>
+<span class="sourceLineNo">749</span>        return context.colHeads().size() * cellSize.get();<a name="line.749"></a>
+<span class="sourceLineNo">750</span>      }<a name="line.750"></a>
+<span class="sourceLineNo">751</span>    });<a name="line.751"></a>
+<span class="sourceLineNo">752</span>    final ColumnConstraints thirdColumnConstraints = new ColumnConstraints();<a name="line.752"></a>
+<span class="sourceLineNo">753</span>    thirdColumnConstraints.minWidthProperty().bind(cellSize);<a name="line.753"></a>
+<span class="sourceLineNo">754</span>    thirdColumnConstraints.maxWidthProperty().bind(cellSize);<a name="line.754"></a>
+<span class="sourceLineNo">755</span>    centerPane.getColumnConstraints().addAll(firstColumnConstraints, secondColumnConstraints, thirdColumnConstraints);<a name="line.755"></a>
+<span class="sourceLineNo">756</span>    centerPane.add(contextPane.getContentAndInteractionStackPane(), 1, 1);<a name="line.756"></a>
+<span class="sourceLineNo">757</span>    centerPane.add(rowHeaderPane.getContentAndInteractionStackPane(), 0, 1);<a name="line.757"></a>
+<span class="sourceLineNo">758</span>    centerPane.add(colHeaderPane.getContentAndInteractionStackPane(), 1, 0);<a name="line.758"></a>
+<span class="sourceLineNo">759</span>    centerPane.add(rowScrollBar, 2, 1);<a name="line.759"></a>
+<span class="sourceLineNo">760</span>    centerPane.add(colScrollBar, 1, 2);<a name="line.760"></a>
+<span class="sourceLineNo">761</span>    this.setCenter(centerPane);<a name="line.761"></a>
+<span class="sourceLineNo">762</span>    if (withToolbar)<a name="line.762"></a>
+<span class="sourceLineNo">763</span>      createToolBar();<a name="line.763"></a>
+<span class="sourceLineNo">764</span>    else<a name="line.764"></a>
+<span class="sourceLineNo">765</span>      zoomFactor.set(Math.pow(2d, 0));<a name="line.765"></a>
+<span class="sourceLineNo">766</span>    final ChangeListener&lt;Boolean&gt; updateContentListener = new ChangeListener&lt;Boolean&gt;() {<a name="line.766"></a>
+<span class="sourceLineNo">767</span><a name="line.767"></a>
+<span class="sourceLineNo">768</span>      public final void<a name="line.768"></a>
+<span class="sourceLineNo">769</span>          changed(final ObservableValue&lt;? extends Boolean&gt; observable, final Boolean oldValue, final Boolean newValue) {<a name="line.769"></a>
+<span class="sourceLineNo">770</span>        contextPane.updateContent();<a name="line.770"></a>
+<span class="sourceLineNo">771</span>      }<a name="line.771"></a>
+<span class="sourceLineNo">772</span>    };<a name="line.772"></a>
+<span class="sourceLineNo">773</span>    showArrows.addListener(updateContentListener);<a name="line.773"></a>
+<span class="sourceLineNo">774</span>    showPaths.addListener(updateContentListener);<a name="line.774"></a>
+<span class="sourceLineNo">775</span>    height = new DoubleBinding() {<a name="line.775"></a>
+<span class="sourceLineNo">776</span><a name="line.776"></a>
+<span class="sourceLineNo">777</span>      {<a name="line.777"></a>
+<span class="sourceLineNo">778</span>        bind(<a name="line.778"></a>
+<span class="sourceLineNo">779</span>            colHeaderPane.heightProperty(),<a name="line.779"></a>
+<span class="sourceLineNo">780</span>            contextPane.heightProperty(),<a name="line.780"></a>
+<span class="sourceLineNo">781</span>            colHeaderPane.rowHeight,<a name="line.781"></a>
+<span class="sourceLineNo">782</span>            colHeaderPane.visibleRows,<a name="line.782"></a>
+<span class="sourceLineNo">783</span>            contextPane.rowHeight,<a name="line.783"></a>
+<span class="sourceLineNo">784</span>            contextPane.visibleRows);<a name="line.784"></a>
+<span class="sourceLineNo">785</span>      }<a name="line.785"></a>
+<span class="sourceLineNo">786</span><a name="line.786"></a>
+<span class="sourceLineNo">787</span>      @Override<a name="line.787"></a>
+<span class="sourceLineNo">788</span>      protected double computeValue() {<a name="line.788"></a>
+<span class="sourceLineNo">789</span>//        System.out.println(colHeaderPane.rowHeight.get());<a name="line.789"></a>
+<span class="sourceLineNo">790</span>//        System.out.println(colHeaderPane.visibleRows.get());<a name="line.790"></a>
+<span class="sourceLineNo">791</span>//        System.out.println(contextPane.rowHeight.get());<a name="line.791"></a>
+<span class="sourceLineNo">792</span>//        System.out.println(contextPane.visibleRows.get());<a name="line.792"></a>
+<span class="sourceLineNo">793</span>        final int h = colHeaderPane.rowHeight.get() * colHeaderPane.visibleRows.get()<a name="line.793"></a>
+<span class="sourceLineNo">794</span>            + contextPane.rowHeight.get() * contextPane.visibleRows.get();<a name="line.794"></a>
+<span class="sourceLineNo">795</span>//        System.out.println(h);<a name="line.795"></a>
+<span class="sourceLineNo">796</span>        return h;<a name="line.796"></a>
+<span class="sourceLineNo">797</span>      }<a name="line.797"></a>
+<span class="sourceLineNo">798</span>    };<a name="line.798"></a>
+<span class="sourceLineNo">799</span>    rowHeaderPane.toFront();<a name="line.799"></a>
+<span class="sourceLineNo">800</span>    colHeaderPane.toFront();<a name="line.800"></a>
+<span class="sourceLineNo">801</span>    final Timeline t = new Timeline();<a name="line.801"></a>
+<span class="sourceLineNo">802</span>    t.getKeyFrames().add(new KeyFrame(<a name="line.802"></a>
+<span class="sourceLineNo">803</span>        Duration.millis(1000),<a name="line.803"></a>
+<span class="sourceLineNo">804</span>        // new EventHandler&lt;ActionEvent&gt;() {<a name="line.804"></a>
+<span class="sourceLineNo">805</span>        //<a name="line.805"></a>
+<span class="sourceLineNo">806</span>        // public final void handle(final ActionEvent event) {<a name="line.806"></a>
+<span class="sourceLineNo">807</span>        // final Timeline s = new Timeline();<a name="line.807"></a>
+<span class="sourceLineNo">808</span>        // s.getKeyFrames().add(<a name="line.808"></a>
+<span class="sourceLineNo">809</span>        // new KeyFrame(Duration.millis(1000), new KeyValue(zoomSlider.valueProperty(), 0.9d, Interpolator.EASE_OUT)));<a name="line.809"></a>
+<span class="sourceLineNo">810</span>        // Platform.runLater(new Runnable() {<a name="line.810"></a>
+<span class="sourceLineNo">811</span>        //<a name="line.811"></a>
+<span class="sourceLineNo">812</span>        //<a name="line.812"></a>
+<span class="sourceLineNo">813</span>        // public final void run() {<a name="line.813"></a>
+<span class="sourceLineNo">814</span>        // s.play();<a name="line.814"></a>
+<span class="sourceLineNo">815</span>        // }<a name="line.815"></a>
+<span class="sourceLineNo">816</span>        // });<a name="line.816"></a>
+<span class="sourceLineNo">817</span>        // }<a name="line.817"></a>
+<span class="sourceLineNo">818</span>        // },<a name="line.818"></a>
+<span class="sourceLineNo">819</span>        new KeyValue(zoomSlider.valueProperty(), 0d, Interpolator.EASE_IN)));<a name="line.819"></a>
+<span class="sourceLineNo">820</span>    Platform.runLater(new Runnable() {<a name="line.820"></a>
+<span class="sourceLineNo">821</span><a name="line.821"></a>
+<span class="sourceLineNo">822</span>      public void run() {<a name="line.822"></a>
+<span class="sourceLineNo">823</span>        t.play();<a name="line.823"></a>
+<span class="sourceLineNo">824</span>      }<a name="line.824"></a>
+<span class="sourceLineNo">825</span>    });<a name="line.825"></a>
+<span class="sourceLineNo">826</span>    if (dataset != null &amp;&amp; dataset.editable) {<a name="line.826"></a>
+<span class="sourceLineNo">827</span><a name="line.827"></a>
+<span class="sourceLineNo">828</span>      final Button domainButton = ButtonBuilder<a name="line.828"></a>
+<span class="sourceLineNo">829</span>          .create()<a name="line.829"></a>
+<span class="sourceLineNo">830</span>          // .text(conExpTab.fca.context.isHomogen() ? "New Element" : "New Object")<a name="line.830"></a>
+<span class="sourceLineNo">831</span>          .onAction(new EventHandler&lt;ActionEvent&gt;() {<a name="line.831"></a>
+<span class="sourceLineNo">832</span><a name="line.832"></a>
+<span class="sourceLineNo">833</span>            public void handle(ActionEvent event) {<a name="line.833"></a>
+<span class="sourceLineNo">834</span>              ((FCADataset&lt;String, String&gt;) dataset).addObject(<a name="line.834"></a>
+<span class="sourceLineNo">835</span>                  (dataset.context.isHomogen() ? "Element " : "Object ") + IdGenerator.getNextId(dataset),<a name="line.835"></a>
+<span class="sourceLineNo">836</span>                  -1);<a name="line.836"></a>
+<span class="sourceLineNo">837</span>            }<a name="line.837"></a>
+<span class="sourceLineNo">838</span>          })<a name="line.838"></a>
+<span class="sourceLineNo">839</span>          .build();<a name="line.839"></a>
+<span class="sourceLineNo">840</span>      final ImageView view =<a name="line.840"></a>
+<span class="sourceLineNo">841</span>          ImageViewBuilder.create().image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/add.png"))).build();<a name="line.841"></a>
+<span class="sourceLineNo">842</span>      view.scaleXProperty().bind(zoomFactor);<a name="line.842"></a>
+<span class="sourceLineNo">843</span>      view.scaleYProperty().bind(zoomFactor);<a name="line.843"></a>
+<span class="sourceLineNo">844</span>      domainButton.setGraphic(view);<a name="line.844"></a>
+<span class="sourceLineNo">845</span>      domainButton.minWidthProperty().bind(rowHeaderPane.columnWidth);<a name="line.845"></a>
+<span class="sourceLineNo">846</span>      domainButton.maxWidthProperty().bind(rowHeaderPane.columnWidth);<a name="line.846"></a>
+<span class="sourceLineNo">847</span>      domainButton.minHeightProperty().bind(cellSize);<a name="line.847"></a>
+<span class="sourceLineNo">848</span>      domainButton.maxHeightProperty().bind(cellSize);<a name="line.848"></a>
+<span class="sourceLineNo">849</span>      domainButton.styleProperty().bind(new StringBinding() {<a name="line.849"></a>
+<span class="sourceLineNo">850</span><a name="line.850"></a>
+<span class="sourceLineNo">851</span>        {<a name="line.851"></a>
+<span class="sourceLineNo">852</span>          super.bind(textSize);<a name="line.852"></a>
+<span class="sourceLineNo">853</span>        }<a name="line.853"></a>
+<span class="sourceLineNo">854</span><a name="line.854"></a>
+<span class="sourceLineNo">855</span>        @Override<a name="line.855"></a>
+<span class="sourceLineNo">856</span>        protected String computeValue() {<a name="line.856"></a>
+<span class="sourceLineNo">857</span>          return "-fx-padding: 0; -fx-font-size: " + textSize.get() + ";";<a name="line.857"></a>
+<span class="sourceLineNo">858</span>        }<a name="line.858"></a>
+<span class="sourceLineNo">859</span>      });<a name="line.859"></a>
+<span class="sourceLineNo">860</span>      centerPane.add(domainButton, 0, 2);<a name="line.860"></a>
+<span class="sourceLineNo">861</span>      final Button codomainButton = ButtonBuilder<a name="line.861"></a>
+<span class="sourceLineNo">862</span>          .create()<a name="line.862"></a>
+<span class="sourceLineNo">863</span>          // .text(conExpTab.fca.context.isHomogen() ? "New Element" : "New Attribute")<a name="line.863"></a>
+<span class="sourceLineNo">864</span>          .onAction(new EventHandler&lt;ActionEvent&gt;() {<a name="line.864"></a>
+<span class="sourceLineNo">865</span><a name="line.865"></a>
+<span class="sourceLineNo">866</span>            public void handle(ActionEvent event) {<a name="line.866"></a>
+<span class="sourceLineNo">867</span>              ((FCADataset&lt;String, String&gt;) dataset).addAttribute(<a name="line.867"></a>
+<span class="sourceLineNo">868</span>                  (dataset.context.isHomogen() ? "Element " : "Attribute ") + IdGenerator.getNextId(dataset),<a name="line.868"></a>
+<span class="sourceLineNo">869</span>                  -1);<a name="line.869"></a>
+<span class="sourceLineNo">870</span>            }<a name="line.870"></a>
+<span class="sourceLineNo">871</span>          })<a name="line.871"></a>
+<span class="sourceLineNo">872</span>          .build();<a name="line.872"></a>
+<span class="sourceLineNo">873</span>      final ImageView view2 =<a name="line.873"></a>
+<span class="sourceLineNo">874</span>          ImageViewBuilder.create().image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/add.png"))).build();<a name="line.874"></a>
+<span class="sourceLineNo">875</span>      view2.scaleXProperty().bind(zoomFactor);<a name="line.875"></a>
+<span class="sourceLineNo">876</span>      view2.scaleYProperty().bind(zoomFactor);<a name="line.876"></a>
+<span class="sourceLineNo">877</span>      codomainButton.setGraphic(view2);<a name="line.877"></a>
+<span class="sourceLineNo">878</span>      codomainButton.rotateProperty().set(-90);<a name="line.878"></a>
+<span class="sourceLineNo">879</span>      codomainButton.minWidthProperty().bind(colHeaderPane.rowHeight);<a name="line.879"></a>
+<span class="sourceLineNo">880</span>      codomainButton.maxWidthProperty().bind(colHeaderPane.rowHeight);<a name="line.880"></a>
+<span class="sourceLineNo">881</span>      codomainButton.minHeightProperty().bind(cellSize);<a name="line.881"></a>
+<span class="sourceLineNo">882</span>      codomainButton.maxHeightProperty().bind(cellSize);<a name="line.882"></a>
+<span class="sourceLineNo">883</span>      codomainButton.translateXProperty().bind(new DoubleBinding() {<a name="line.883"></a>
+<span class="sourceLineNo">884</span><a name="line.884"></a>
+<span class="sourceLineNo">885</span>        {<a name="line.885"></a>
+<span class="sourceLineNo">886</span>          super.bind(colHeaderPane.rowHeight, cellSize);<a name="line.886"></a>
+<span class="sourceLineNo">887</span>        }<a name="line.887"></a>
+<span class="sourceLineNo">888</span><a name="line.888"></a>
+<span class="sourceLineNo">889</span>        @Override<a name="line.889"></a>
+<span class="sourceLineNo">890</span>        protected double computeValue() {<a name="line.890"></a>
+<span class="sourceLineNo">891</span>          return -(colHeaderPane.rowHeight.get() - cellSize.get()) / 2d;<a name="line.891"></a>
+<span class="sourceLineNo">892</span>        }<a name="line.892"></a>
+<span class="sourceLineNo">893</span>      });<a name="line.893"></a>
+<span class="sourceLineNo">894</span>      codomainButton.styleProperty().bind(new StringBinding() {<a name="line.894"></a>
+<span class="sourceLineNo">895</span><a name="line.895"></a>
+<span class="sourceLineNo">896</span>        {<a name="line.896"></a>
+<span class="sourceLineNo">897</span>          super.bind(textSize);<a name="line.897"></a>
+<span class="sourceLineNo">898</span>        }<a name="line.898"></a>
+<span class="sourceLineNo">899</span><a name="line.899"></a>
+<span class="sourceLineNo">900</span>        @Override<a name="line.900"></a>
+<span class="sourceLineNo">901</span>        protected String computeValue() {<a name="line.901"></a>
+<span class="sourceLineNo">902</span>          return "-fx-padding: 0; -fx-font-size: " + textSize.get() + ";";<a name="line.902"></a>
+<span class="sourceLineNo">903</span>        }<a name="line.903"></a>
+<span class="sourceLineNo">904</span>      });<a name="line.904"></a>
+<span class="sourceLineNo">905</span>      centerPane.add(codomainButton, 2, 0);<a name="line.905"></a>
+<span class="sourceLineNo">906</span>    }<a name="line.906"></a>
+<span class="sourceLineNo">907</span>  }<a name="line.907"></a>
+<span class="sourceLineNo">908</span><a name="line.908"></a>
+<span class="sourceLineNo">909</span>  private final void createToolBar() {<a name="line.909"></a>
+<span class="sourceLineNo">910</span>    zoomFactor.bind(new DoubleBinding() {<a name="line.910"></a>
+<span class="sourceLineNo">911</span><a name="line.911"></a>
+<span class="sourceLineNo">912</span>      {<a name="line.912"></a>
+<span class="sourceLineNo">913</span>        bind(zoomSlider.valueProperty());<a name="line.913"></a>
+<span class="sourceLineNo">914</span>      }<a name="line.914"></a>
+<span class="sourceLineNo">915</span><a name="line.915"></a>
+<span class="sourceLineNo">916</span>      protected double computeValue() {<a name="line.916"></a>
+<span class="sourceLineNo">917</span>        return Math.pow(2d, zoomSlider.valueProperty().get());<a name="line.917"></a>
+<span class="sourceLineNo">918</span>      }<a name="line.918"></a>
+<span class="sourceLineNo">919</span>    });<a name="line.919"></a>
+<span class="sourceLineNo">920</span>    final ToggleButton arrowsToggleButton =<a name="line.920"></a>
+<span class="sourceLineNo">921</span>        new ToggleButton(Constants.DOWN_ARROW_CHARACTER + Constants.UP_ARROW_CHARACTER);<a name="line.921"></a>
+<span class="sourceLineNo">922</span>    arrowsToggleButton.setSelected(false);<a name="line.922"></a>
+<span class="sourceLineNo">923</span>    arrowsToggleButton.setMinHeight(24);<a name="line.923"></a>
+<span class="sourceLineNo">924</span>    showArrows.bind(arrowsToggleButton.selectedProperty());<a name="line.924"></a>
+<span class="sourceLineNo">925</span>    final ToggleButton pathsToggleButton =<a name="line.925"></a>
+<span class="sourceLineNo">926</span>        new ToggleButton(Constants.DOWN_ARROW_CHARACTER + Constants.DOWN_ARROW_CHARACTER);<a name="line.926"></a>
+<span class="sourceLineNo">927</span>    pathsToggleButton.setDisable(true);<a name="line.927"></a>
+<span class="sourceLineNo">928</span>    pathsToggleButton.setSelected(false);<a name="line.928"></a>
+<span class="sourceLineNo">929</span>    pathsToggleButton.setMinHeight(24);<a name="line.929"></a>
+<span class="sourceLineNo">930</span>    showPaths.bind(pathsToggleButton.selectedProperty());<a name="line.930"></a>
+<span class="sourceLineNo">931</span>    arrowsToggleButton.addEventHandler(ActionEvent.ACTION, new EventHandler&lt;ActionEvent&gt;() {<a name="line.931"></a>
+<span class="sourceLineNo">932</span><a name="line.932"></a>
+<span class="sourceLineNo">933</span>      @Override<a name="line.933"></a>
+<span class="sourceLineNo">934</span>      public final void handle(final ActionEvent event) {<a name="line.934"></a>
+<span class="sourceLineNo">935</span>        if (showArrows.get()) {<a name="line.935"></a>
+<span class="sourceLineNo">936</span>          pathsToggleButton.setDisable(false);<a name="line.936"></a>
+<span class="sourceLineNo">937</span>        } else {<a name="line.937"></a>
+<span class="sourceLineNo">938</span>          pathsToggleButton.setSelected(false);<a name="line.938"></a>
+<span class="sourceLineNo">939</span>          pathsToggleButton.setDisable(true);<a name="line.939"></a>
+<span class="sourceLineNo">940</span>        }<a name="line.940"></a>
+<span class="sourceLineNo">941</span>      }<a name="line.941"></a>
+<span class="sourceLineNo">942</span>    });<a name="line.942"></a>
+<span class="sourceLineNo">943</span>    highlightToggleButton.setSelected(false);<a name="line.943"></a>
+<span class="sourceLineNo">944</span>    highlightToggleButton.setMinHeight(24);<a name="line.944"></a>
+<span class="sourceLineNo">945</span>    highlightToggleButton.setGraphic(<a name="line.945"></a>
+<span class="sourceLineNo">946</span>        ImageViewBuilder.create().image(new Image(ConExpFX.class.getResourceAsStream("image/16x16/flag.png"))).build());<a name="line.946"></a>
+<span class="sourceLineNo">947</span>    rowHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());<a name="line.947"></a>
+<span class="sourceLineNo">948</span>    colHeaderPane.highlight.bind(highlightToggleButton.selectedProperty());<a name="line.948"></a>
+<span class="sourceLineNo">949</span>    contextPane.highlight.bind(highlightToggleButton.selectedProperty());<a name="line.949"></a>
+<span class="sourceLineNo">950</span>    arrowsToggleButton.setStyle("-fx-background-radius: 5 0 0 5, 5 0 0 5, 4 0 0 4, 3 0 0 3;");<a name="line.950"></a>
+<span class="sourceLineNo">951</span>    pathsToggleButton.setStyle("-fx-background-radius: 0, 0, 0, 0");<a name="line.951"></a>
+<span class="sourceLineNo">952</span>    highlightToggleButton.setStyle("-fx-background-radius: 0 5 5 0, 0 5 5 0, 0 4 4 0, 0 3 3 0;");<a name="line.952"></a>
+<span class="sourceLineNo">953</span>    HBox showBox = new HBox();<a name="line.953"></a>
+<span class="sourceLineNo">954</span>    showBox.setPadding(new Insets(0d));<a name="line.954"></a>
+<span class="sourceLineNo">955</span>    showBox.getChildren().addAll(arrowsToggleButton, pathsToggleButton, highlightToggleButton);<a name="line.955"></a>
+<span class="sourceLineNo">956</span>    final ToolBar toolBar = new ToolBar();<a name="line.956"></a>
+<span class="sourceLineNo">957</span>    toolBar.getItems().addAll(zoomSlider, showBox);<a name="line.957"></a>
+<span class="sourceLineNo">958</span>    this.setTop(toolBar);<a name="line.958"></a>
+<span class="sourceLineNo">959</span>    toolBar.toFront();<a name="line.959"></a>
+<span class="sourceLineNo">960</span>  }<a name="line.960"></a>
+<span class="sourceLineNo">961</span><a name="line.961"></a>
+<span class="sourceLineNo">962</span>  protected final void update() {<a name="line.962"></a>
+<span class="sourceLineNo">963</span>    rowHeaderPane.updateContent();<a name="line.963"></a>
+<span class="sourceLineNo">964</span>    colHeaderPane.updateContent();<a name="line.964"></a>
+<span class="sourceLineNo">965</span>    contextPane.updateContent();<a name="line.965"></a>
+<span class="sourceLineNo">966</span>  }<a name="line.966"></a>
+<span class="sourceLineNo">967</span><a name="line.967"></a>
+<span class="sourceLineNo">968</span>  public final void dehighlight() {<a name="line.968"></a>
+<span class="sourceLineNo">969</span>    rowHeaderPane.dehighlight();<a name="line.969"></a>
+<span class="sourceLineNo">970</span>    colHeaderPane.dehighlight();<a name="line.970"></a>
+<span class="sourceLineNo">971</span>    contextPane.dehighlight();<a name="line.971"></a>
+<span class="sourceLineNo">972</span>    contextPane.highlightConcept.set(false);<a name="line.972"></a>
+<span class="sourceLineNo">973</span>  }<a name="line.973"></a>
+<span class="sourceLineNo">974</span><a name="line.974"></a>
+<span class="sourceLineNo">975</span>  public final void highlight(final Concept&lt;G, M&gt; concept) {<a name="line.975"></a>
+<span class="sourceLineNo">976</span>    final Collection&lt;Integer&gt; domainIndices = context.rowHeads().indicesOf(concept.extent(), true);<a name="line.976"></a>
+<span class="sourceLineNo">977</span>    final Collection&lt;Integer&gt; codomainIndices = context.colHeads().indicesOf(concept.intent(), true);<a name="line.977"></a>
+<span class="sourceLineNo">978</span>    contextPane.highlightConcept.set(true);<a name="line.978"></a>
+<span class="sourceLineNo">979</span>    rowHeaderPane.highlightConcept(Collections2.transform(domainIndices, new Function&lt;Integer, Integer&gt;() {<a name="line.979"></a>
+<span class="sourceLineNo">980</span><a name="line.980"></a>
+<span class="sourceLineNo">981</span>      public final Integer apply(final Integer index) {<a name="line.981"></a>
+<span class="sourceLineNo">982</span>        for (Entry&lt;Integer, Integer&gt; entry : contextPane.rowMap.get().entrySet())<a name="line.982"></a>
+<span class="sourceLineNo">983</span>          if (entry.getValue().equals(index))<a name="line.983"></a>
+<span class="sourceLineNo">984</span>            return entry.getKey();<a name="line.984"></a>
+<span class="sourceLineNo">985</span>        return index;<a name="line.985"></a>
+<span class="sourceLineNo">986</span>      }<a name="line.986"></a>
+<span class="sourceLineNo">987</span>    }));<a name="line.987"></a>
+<span class="sourceLineNo">988</span>    colHeaderPane.highlightConcept(Collections2.transform(codomainIndices, new Function&lt;Integer, Integer&gt;() {<a name="line.988"></a>
+<span class="sourceLineNo">989</span><a name="line.989"></a>
+<span class="sourceLineNo">990</span>      public final Integer apply(final Integer index) {<a name="line.990"></a>
+<span class="sourceLineNo">991</span>        for (Entry&lt;Integer, Integer&gt; entry : contextPane.columnMap.get().entrySet())<a name="line.991"></a>
+<span class="sourceLineNo">992</span>          if (entry.getValue().equals(index))<a name="line.992"></a>
+<span class="sourceLineNo">993</span>            return entry.getKey();<a name="line.993"></a>
+<span class="sourceLineNo">994</span>        return index;<a name="line.994"></a>
+<span class="sourceLineNo">995</span>      }<a name="line.995"></a>
+<span class="sourceLineNo">996</span>    }));<a name="line.996"></a>
+<span class="sourceLineNo">997</span>  }<a name="line.997"></a>
+<span class="sourceLineNo">998</span><a name="line.998"></a>
+<span class="sourceLineNo">999</span>  public final void highlightImplication(final Implication&lt;M&gt; implication) {<a name="line.999"></a>
+<span class="sourceLineNo">1000</span><a name="line.1000"></a>
+<span class="sourceLineNo">1001</span>  }<a name="line.1001"></a>
+<span class="sourceLineNo">1002</span><a name="line.1002"></a>
+<span class="sourceLineNo">1003</span>  public final void addRowDecoration(final G row, final Node decoration) {<a name="line.1003"></a>
+<span class="sourceLineNo">1004</span>    rowHeaderPane.addDecoration(row, decoration);<a name="line.1004"></a>
+<span class="sourceLineNo">1005</span>  }<a name="line.1005"></a>
+<span class="sourceLineNo">1006</span>}<a name="line.1006"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

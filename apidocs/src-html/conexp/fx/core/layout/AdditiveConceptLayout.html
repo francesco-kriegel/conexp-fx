@@ -1,0 +1,430 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.core.layout;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.util.HashSet;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.Map;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.NoSuchElementException;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.Set;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.concurrent.ConcurrentHashMap;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.stream.Stream;<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.eclipse.jdt.annotation.Nullable;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>import com.google.common.base.Predicate;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import com.google.common.collect.Collections2;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import com.google.common.collect.Iterables;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import com.google.common.collect.Iterators;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import com.google.common.collect.Maps;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import com.google.common.collect.Sets;<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.core.context.Concept;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import conexp.fx.core.context.ConceptLattice;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import conexp.fx.core.math.Points;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import javafx.beans.binding.Binding;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import javafx.beans.binding.ObjectBinding;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import javafx.beans.property.Property;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import javafx.beans.property.SimpleObjectProperty;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import javafx.beans.value.ObservableValue;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import javafx.collections.FXCollections;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import javafx.collections.ObservableMap;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import javafx.geometry.Point3D;<a name="line.51"></a>
+<span class="sourceLineNo">052</span><a name="line.52"></a>
+<span class="sourceLineNo">053</span>public final class AdditiveConceptLayout&lt;G, M&gt; extends ConceptLayout&lt;G, M, Binding&lt;Point3D&gt;&gt; {<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>  public enum Type {<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    ATTRIBUTE("Attribute-Additive"),<a name="line.56"></a>
+<span class="sourceLineNo">057</span>    OBJECT("Object-Additive"),<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    HYBRID("Hybrid-Additive");<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>    private final String title;<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>    private Type(final String title) {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>      this.title = title;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    }<a name="line.64"></a>
+<span class="sourceLineNo">065</span><a name="line.65"></a>
+<span class="sourceLineNo">066</span>    @Override<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    public final String toString() {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>      return title;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    }<a name="line.69"></a>
+<span class="sourceLineNo">070</span>  }<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>  public final ObservableMap&lt;G, Point3D&gt; seedsG       = FXCollections.observableMap(new ConcurrentHashMap&lt;&gt;());<a name="line.72"></a>
+<span class="sourceLineNo">073</span>  public final Map&lt;G, Point3D&gt;           seedHistoryG = new ConcurrentHashMap&lt;G, Point3D&gt;();<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>  public final ObservableMap&lt;M, Point3D&gt; seedsM       = FXCollections.observableMap(new ConcurrentHashMap&lt;&gt;());<a name="line.75"></a>
+<span class="sourceLineNo">076</span>  public final Map&lt;M, Point3D&gt;           seedHistoryM = new ConcurrentHashMap&lt;M, Point3D&gt;();<a name="line.76"></a>
+<span class="sourceLineNo">077</span><a name="line.77"></a>
+<span class="sourceLineNo">078</span>  private final Property&lt;Type&gt;           type;<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>  public AdditiveConceptLayout(<a name="line.80"></a>
+<span class="sourceLineNo">081</span>      final ConceptLattice&lt;G, M&gt; conceptLattice,<a name="line.81"></a>
+<span class="sourceLineNo">082</span>      final @Nullable Map&lt;G, Point3D&gt; initialSeedsG,<a name="line.82"></a>
+<span class="sourceLineNo">083</span>      final @Nullable Map&lt;M, Point3D&gt; initialSeedsM,<a name="line.83"></a>
+<span class="sourceLineNo">084</span>      final Type type) {<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    super(conceptLattice);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    this.type = new SimpleObjectProperty&lt;&gt;(type);<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    initializePositionBindings();<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    if (initialSeedsG != null)<a name="line.88"></a>
+<span class="sourceLineNo">089</span>      seedsG.putAll(initialSeedsG);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    if (initialSeedsM != null)<a name="line.90"></a>
+<span class="sourceLineNo">091</span>      seedsM.putAll(initialSeedsM);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>  }<a name="line.92"></a>
+<span class="sourceLineNo">093</span><a name="line.93"></a>
+<span class="sourceLineNo">094</span>  public final void setType(final Type type) {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    this.type.setValue(type);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>  }<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>  public final void bindType(final ObservableValue&lt;Type&gt; observable) {<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    this.type.bind(observable);<a name="line.99"></a>
+<span class="sourceLineNo">100</span>  }<a name="line.100"></a>
+<span class="sourceLineNo">101</span><a name="line.101"></a>
+<span class="sourceLineNo">102</span>  protected final Binding&lt;Point3D&gt; newPositionBinding(final Concept&lt;G, M&gt; concept) {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>//    synchronized (positionBindings) {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>//      positionBindings.put(concept, <a name="line.104"></a>
+<span class="sourceLineNo">105</span>    return new ObjectBinding&lt;Point3D&gt;() {<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>      {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        if (observe)<a name="line.108"></a>
+<span class="sourceLineNo">109</span>          bind(seedsG, concept.extent(), seedsM, concept.intent(), type);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        else<a name="line.110"></a>
+<span class="sourceLineNo">111</span>          bind(seedsG, seedsM, type);<a name="line.111"></a>
+<span class="sourceLineNo">112</span>      }<a name="line.112"></a>
+<span class="sourceLineNo">113</span><a name="line.113"></a>
+<span class="sourceLineNo">114</span>      public final void dispose() {<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        if (observe)<a name="line.115"></a>
+<span class="sourceLineNo">116</span>          unbind(seedsG, concept.extent(), seedsM, concept.intent(), type);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        else<a name="line.117"></a>
+<span class="sourceLineNo">118</span>          unbind(seedsG, seedsM, type);<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        super.dispose();<a name="line.119"></a>
+<span class="sourceLineNo">120</span>      }<a name="line.120"></a>
+<span class="sourceLineNo">121</span><a name="line.121"></a>
+<span class="sourceLineNo">122</span>      protected final Point3D computeValue() {<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        double x = 0d;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        double y = 0d;<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        double z = 0d;<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.OBJECT))<a name="line.126"></a>
+<span class="sourceLineNo">127</span>          synchronized (concept.extent()) {<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            synchronized (seedsG) {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>              for (G g : Sets.difference(seedsG.keySet(), concept.extent())) {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                final Point3D seed = seedsG.get(g);<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                x += seed.getX();<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                y += seed.getY();<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                z += seed.getZ();<a name="line.133"></a>
+<span class="sourceLineNo">134</span>              }<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>          }<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.ATTRIBUTE))<a name="line.137"></a>
+<span class="sourceLineNo">138</span>          synchronized (concept.intent()) {<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            synchronized (seedsM) {<a name="line.139"></a>
+<span class="sourceLineNo">140</span>              for (M m : Sets.intersection(seedsM.keySet(), concept.intent())) {<a name="line.140"></a>
+<span class="sourceLineNo">141</span>                final Point3D seed = seedsM.get(m);<a name="line.141"></a>
+<span class="sourceLineNo">142</span>                x += seed.getX();<a name="line.142"></a>
+<span class="sourceLineNo">143</span>                y += seed.getY();<a name="line.143"></a>
+<span class="sourceLineNo">144</span>                z += seed.getZ();<a name="line.144"></a>
+<span class="sourceLineNo">145</span>              }<a name="line.145"></a>
+<span class="sourceLineNo">146</span>            }<a name="line.146"></a>
+<span class="sourceLineNo">147</span>          }<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        return new Point3D(x, y, z);<a name="line.148"></a>
+<span class="sourceLineNo">149</span>      }<a name="line.149"></a>
+<span class="sourceLineNo">150</span>//      })<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    };<a name="line.151"></a>
+<span class="sourceLineNo">152</span>  }<a name="line.152"></a>
+<span class="sourceLineNo">153</span><a name="line.153"></a>
+<span class="sourceLineNo">154</span>  public final boolean<a name="line.154"></a>
+<span class="sourceLineNo">155</span>      updateSeeds(final @Nullable Map&lt;G, Point3D&gt; seedUpdatesG, final @Nullable Map&lt;M, Point3D&gt; seedUpdatesM) {<a name="line.155"></a>
+<span class="sourceLineNo">156</span>    boolean ret = false;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    if (!seedsG.equals(seedUpdatesG))<a name="line.157"></a>
+<span class="sourceLineNo">158</span>      synchronized (seedsG) {<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        ret = true;<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        seedsG.clear();<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        if (seedUpdatesG != null)<a name="line.161"></a>
+<span class="sourceLineNo">162</span>          seedsG.putAll(seedUpdatesG);<a name="line.162"></a>
+<span class="sourceLineNo">163</span>      }<a name="line.163"></a>
+<span class="sourceLineNo">164</span>    if (!seedsM.equals(seedUpdatesM))<a name="line.164"></a>
+<span class="sourceLineNo">165</span>      synchronized (seedsM) {<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        ret = true;<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        seedsM.clear();<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        if (seedUpdatesM != null)<a name="line.168"></a>
+<span class="sourceLineNo">169</span>          seedsM.putAll(seedUpdatesM);<a name="line.169"></a>
+<span class="sourceLineNo">170</span>      }<a name="line.170"></a>
+<span class="sourceLineNo">171</span>    invalidate();<a name="line.171"></a>
+<span class="sourceLineNo">172</span>    return ret;<a name="line.172"></a>
+<span class="sourceLineNo">173</span>  }<a name="line.173"></a>
+<span class="sourceLineNo">174</span><a name="line.174"></a>
+<span class="sourceLineNo">175</span>  public final void normalizeSeeds() {<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    final double l = 1d / Stream<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        .concat(seedsG.values().stream(), seedsM.values().stream())<a name="line.177"></a>
+<span class="sourceLineNo">178</span>        .map(Point3D::magnitude)<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        .reduce(Math::min)<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        .orElse(1d);<a name="line.180"></a>
+<span class="sourceLineNo">181</span>    seedsG.replaceAll((g, seed) -&gt; seed.multiply(l));<a name="line.181"></a>
+<span class="sourceLineNo">182</span>    seedsM.replaceAll((m, seed) -&gt; seed.multiply(l));<a name="line.182"></a>
+<span class="sourceLineNo">183</span>  }<a name="line.183"></a>
+<span class="sourceLineNo">184</span><a name="line.184"></a>
+<span class="sourceLineNo">185</span>  public final void rotate(final double angle) {<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    synchronized (seedsG) {<a name="line.186"></a>
+<span class="sourceLineNo">187</span>      seedsG.replaceAll((__, seed) -&gt; Points.rotate(seed, angle));<a name="line.187"></a>
+<span class="sourceLineNo">188</span>//      for (Entry&lt;G, Point3D&gt; seed : seedsG.entrySet())<a name="line.188"></a>
+<span class="sourceLineNo">189</span>//        seedsG.put(seed.getKey(), Points.rotate(seed.getValue(), angle));<a name="line.189"></a>
+<span class="sourceLineNo">190</span>    }<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    synchronized (seedsM) {<a name="line.191"></a>
+<span class="sourceLineNo">192</span>      seedsM.replaceAll((__, seed) -&gt; Points.rotate(seed, angle));<a name="line.192"></a>
+<span class="sourceLineNo">193</span>//      for (Entry&lt;M, Point3D&gt; seed : seedsM.entrySet())<a name="line.193"></a>
+<span class="sourceLineNo">194</span>//        seedsM.put(seed.getKey(), Points.rotate(seed.getValue(), angle));<a name="line.194"></a>
+<span class="sourceLineNo">195</span>    }<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    invalidate();<a name="line.196"></a>
+<span class="sourceLineNo">197</span>  }<a name="line.197"></a>
+<span class="sourceLineNo">198</span><a name="line.198"></a>
+<span class="sourceLineNo">199</span>  @SuppressWarnings("incomplete-switch")<a name="line.199"></a>
+<span class="sourceLineNo">200</span>  public final void move(final Concept&lt;G, M&gt; concept, final ConceptMovement movement, final Point3D delta) {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    synchronized (seedsG) {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>      synchronized (seedsM) {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>        final double dx = delta.getX();<a name="line.203"></a>
+<span class="sourceLineNo">204</span>        final double dy = delta.getY();<a name="line.204"></a>
+<span class="sourceLineNo">205</span>        final double dz = delta.getZ();<a name="line.205"></a>
+<span class="sourceLineNo">206</span>        switch (movement) {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>        case LABEL_SEED:<a name="line.207"></a>
+<span class="sourceLineNo">208</span>          try {<a name="line.208"></a>
+<span class="sourceLineNo">209</span>            final M affectedSeed = Iterators<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                .getOnlyElement(Sets.intersection(lattice.attributeLabels(concept), seedsM.keySet()).iterator());<a name="line.210"></a>
+<span class="sourceLineNo">211</span>            final Point3D seed = seedsM.get(affectedSeed);<a name="line.211"></a>
+<span class="sourceLineNo">212</span>            seedsM<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                .put(affectedSeed, new Point3D(seed.getX() + dx, Math.max(0.001d, seed.getY() + dy), seed.getZ() + dz));<a name="line.213"></a>
+<span class="sourceLineNo">214</span>          } catch (NoSuchElementException | IllegalArgumentException e) {<a name="line.214"></a>
+<span class="sourceLineNo">215</span>            System.err.println(<a name="line.215"></a>
+<span class="sourceLineNo">216</span>                e.getStackTrace()[0] + " Moving only label seeds, but there was none or more than one! Check this.");<a name="line.216"></a>
+<span class="sourceLineNo">217</span>            System.err.println("\t" + Sets.intersection(lattice.attributeLabels(concept), seedsM.keySet()));<a name="line.217"></a>
+<span class="sourceLineNo">218</span>          }<a name="line.218"></a>
+<span class="sourceLineNo">219</span>          break;<a name="line.219"></a>
+<span class="sourceLineNo">220</span>        case LABEL_CHAIN_SEEDS:<a name="line.220"></a>
+<span class="sourceLineNo">221</span>          try {<a name="line.221"></a>
+<span class="sourceLineNo">222</span>            final M m = Iterators<a name="line.222"></a>
+<span class="sourceLineNo">223</span>                .getOnlyElement(Sets.intersection(lattice.attributeLabels(concept), seedsM.keySet()).iterator());<a name="line.223"></a>
+<span class="sourceLineNo">224</span>            final Point3D s = seedsM.get(m);<a name="line.224"></a>
+<span class="sourceLineNo">225</span>            final HashSet&lt;M&gt; eq = new HashSet&lt;M&gt;(Maps.filterValues(seedsM, new Predicate&lt;Point3D&gt;() {<a name="line.225"></a>
+<span class="sourceLineNo">226</span><a name="line.226"></a>
+<span class="sourceLineNo">227</span>              public final boolean apply(final Point3D p) {<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                return s.equals(p);// || s.distance(p) &lt; s.distance(0, 0, 0) / 16d;<a name="line.228"></a>
+<span class="sourceLineNo">229</span>              }<a name="line.229"></a>
+<span class="sourceLineNo">230</span>            }).keySet());<a name="line.230"></a>
+<span class="sourceLineNo">231</span>            final double f = 1d / (double) Sets.intersection(eq, concept.intent()).size();<a name="line.231"></a>
+<span class="sourceLineNo">232</span>            final Point3D t = new Point3D(s.getX() + f * dx, Math.max(0.1d, s.getY() + f * dy), s.getZ() + f * dz);<a name="line.232"></a>
+<span class="sourceLineNo">233</span>            for (M n : eq)<a name="line.233"></a>
+<span class="sourceLineNo">234</span>              seedsM.put(n, t);<a name="line.234"></a>
+<span class="sourceLineNo">235</span>          } catch (NoSuchElementException | IllegalArgumentException e) {<a name="line.235"></a>
+<span class="sourceLineNo">236</span>            System.err.println(<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                e.getStackTrace()[0] + " Moving only label seeds, but there was none or more than one! Check this.");<a name="line.237"></a>
+<span class="sourceLineNo">238</span>            System.err.println("\t" + Sets.intersection(lattice.attributeLabels(concept), seedsM.keySet()));<a name="line.238"></a>
+<span class="sourceLineNo">239</span>          }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>          break;<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        case INTENT_SEEDS:<a name="line.241"></a>
+<span class="sourceLineNo">242</span>        case INTENT_CHAIN_SEEDS:<a name="line.242"></a>
+<span class="sourceLineNo">243</span>          final Set&lt;M&gt; affectedSeedsM = new HashSet&lt;M&gt;(Sets.intersection(seedsM.keySet(), concept.intent()));<a name="line.243"></a>
+<span class="sourceLineNo">244</span>          final Set&lt;G&gt; affectedSeedsG = new HashSet&lt;G&gt;(Sets.difference(seedsG.keySet(), concept.extent()));<a name="line.244"></a>
+<span class="sourceLineNo">245</span>          final Point3D a = Points.absoluteSum(Collections2.transform(affectedSeedsG, seedsG::get)).add(<a name="line.245"></a>
+<span class="sourceLineNo">246</span>              Points.absoluteSum(Collections2.transform(affectedSeedsM, seedsM::get)));<a name="line.246"></a>
+<span class="sourceLineNo">247</span>          switch (movement) {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>          case INTENT_SEEDS:<a name="line.248"></a>
+<span class="sourceLineNo">249</span>            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.OBJECT))<a name="line.249"></a>
+<span class="sourceLineNo">250</span>              for (G g : affectedSeedsG) {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>                final Point3D s = seedsG.get(g);<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                final double fx = a.getX() == 0 ? 1d / (double) affectedSeedsG.size() : Math.abs(s.getX()) / a.getX();<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                final double fy = a.getY() == 0 ? 1d / (double) affectedSeedsG.size() : Math.abs(s.getY()) / a.getY();<a name="line.253"></a>
+<span class="sourceLineNo">254</span>                final double fz = a.getZ() == 0 ? 1d / (double) affectedSeedsG.size() : Math.abs(s.getZ()) / a.getZ();<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                final Point3D t =<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                    new Point3D(s.getX() + fx * dx, Math.max(0.1d, s.getY() + fy * dy), s.getZ() + fz * dz);<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                seedsG.put(g, t);<a name="line.257"></a>
+<span class="sourceLineNo">258</span>              }<a name="line.258"></a>
+<span class="sourceLineNo">259</span>            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.ATTRIBUTE))<a name="line.259"></a>
+<span class="sourceLineNo">260</span>              for (M m : affectedSeedsM) {<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                final Point3D s = seedsM.get(m);<a name="line.261"></a>
+<span class="sourceLineNo">262</span>                final double fx = a.getX() == 0 ? 1d / (double) affectedSeedsM.size() : Math.abs(s.getX()) / a.getX();<a name="line.262"></a>
+<span class="sourceLineNo">263</span>                final double fy = a.getY() == 0 ? 1d / (double) affectedSeedsM.size() : Math.abs(s.getY()) / a.getY();<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                final double fz = a.getZ() == 0 ? 1d / (double) affectedSeedsM.size() : Math.abs(s.getZ()) / a.getZ();<a name="line.264"></a>
+<span class="sourceLineNo">265</span>                final Point3D t =<a name="line.265"></a>
+<span class="sourceLineNo">266</span>                    new Point3D(s.getX() + fx * dx, Math.max(0.1d, s.getY() + fy * dy), s.getZ() + fz * dz);<a name="line.266"></a>
+<span class="sourceLineNo">267</span>                seedsM.put(m, t);<a name="line.267"></a>
+<span class="sourceLineNo">268</span>              }<a name="line.268"></a>
+<span class="sourceLineNo">269</span>            break;<a name="line.269"></a>
+<span class="sourceLineNo">270</span>          case INTENT_CHAIN_SEEDS:<a name="line.270"></a>
+<span class="sourceLineNo">271</span>            final double size;<a name="line.271"></a>
+<span class="sourceLineNo">272</span>            switch (type.getValue()) {<a name="line.272"></a>
+<span class="sourceLineNo">273</span>            case HYBRID:<a name="line.273"></a>
+<span class="sourceLineNo">274</span>              size = affectedSeedsG.size() + affectedSeedsM.size();<a name="line.274"></a>
+<span class="sourceLineNo">275</span>              break;<a name="line.275"></a>
+<span class="sourceLineNo">276</span>            case OBJECT:<a name="line.276"></a>
+<span class="sourceLineNo">277</span>              size = affectedSeedsG.size();<a name="line.277"></a>
+<span class="sourceLineNo">278</span>              break;<a name="line.278"></a>
+<span class="sourceLineNo">279</span>            case ATTRIBUTE:<a name="line.279"></a>
+<span class="sourceLineNo">280</span>              size = affectedSeedsM.size();<a name="line.280"></a>
+<span class="sourceLineNo">281</span>              break;<a name="line.281"></a>
+<span class="sourceLineNo">282</span>            default:<a name="line.282"></a>
+<span class="sourceLineNo">283</span>              size = 1d;<a name="line.283"></a>
+<span class="sourceLineNo">284</span>              break;<a name="line.284"></a>
+<span class="sourceLineNo">285</span>            }<a name="line.285"></a>
+<span class="sourceLineNo">286</span><a name="line.286"></a>
+<span class="sourceLineNo">287</span>            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.OBJECT))<a name="line.287"></a>
+<span class="sourceLineNo">288</span>              while (!affectedSeedsG.isEmpty()) {<a name="line.288"></a>
+<span class="sourceLineNo">289</span>                final G g = Iterables.getFirst(affectedSeedsG, null);<a name="line.289"></a>
+<span class="sourceLineNo">290</span>                final Point3D s = seedsG.get(g);<a name="line.290"></a>
+<span class="sourceLineNo">291</span>                final HashSet&lt;G&gt; eq = new HashSet&lt;G&gt;(Maps.filterValues(seedsG, new Predicate&lt;Point3D&gt;() {<a name="line.291"></a>
+<span class="sourceLineNo">292</span><a name="line.292"></a>
+<span class="sourceLineNo">293</span>                  public final boolean apply(final Point3D p) {<a name="line.293"></a>
+<span class="sourceLineNo">294</span>                    return s.equals(p);// || s.distance(p) &lt; s.distance(0, 0, 0) / 16d;<a name="line.294"></a>
+<span class="sourceLineNo">295</span>                  }<a name="line.295"></a>
+<span class="sourceLineNo">296</span>                }).keySet());<a name="line.296"></a>
+<span class="sourceLineNo">297</span>                affectedSeedsG.removeAll(eq);<a name="line.297"></a>
+<span class="sourceLineNo">298</span>                final double fx = a.getX() == 0 ? 1d / size : Math.abs(s.getX()) / a.getX();<a name="line.298"></a>
+<span class="sourceLineNo">299</span>                final double fy = a.getY() == 0 ? 1d / size : Math.abs(s.getY()) / a.getY();<a name="line.299"></a>
+<span class="sourceLineNo">300</span>                final double fz = a.getZ() == 0 ? 1d / size : Math.abs(s.getZ()) / a.getZ();<a name="line.300"></a>
+<span class="sourceLineNo">301</span>                final Point3D t =<a name="line.301"></a>
+<span class="sourceLineNo">302</span>                    new Point3D(s.getX() + fx * dx, Math.max(0.1d, s.getY() + fy * dy), s.getZ() + fz * dz);<a name="line.302"></a>
+<span class="sourceLineNo">303</span>                for (G h : eq)<a name="line.303"></a>
+<span class="sourceLineNo">304</span>                  seedsG.put(h, t);<a name="line.304"></a>
+<span class="sourceLineNo">305</span>              }<a name="line.305"></a>
+<span class="sourceLineNo">306</span>            if (type.getValue().equals(Type.HYBRID) || type.getValue().equals(Type.ATTRIBUTE))<a name="line.306"></a>
+<span class="sourceLineNo">307</span>              while (!affectedSeedsM.isEmpty()) {<a name="line.307"></a>
+<span class="sourceLineNo">308</span>                final M m = Iterables.getFirst(affectedSeedsM, null);<a name="line.308"></a>
+<span class="sourceLineNo">309</span>                final Point3D s = seedsM.get(m);<a name="line.309"></a>
+<span class="sourceLineNo">310</span>                final HashSet&lt;M&gt; eq = new HashSet&lt;M&gt;(Maps.filterValues(seedsM, new Predicate&lt;Point3D&gt;() {<a name="line.310"></a>
+<span class="sourceLineNo">311</span><a name="line.311"></a>
+<span class="sourceLineNo">312</span>                  public final boolean apply(final Point3D p) {<a name="line.312"></a>
+<span class="sourceLineNo">313</span>                    return s.equals(p);// || s.distance(p) &lt; s.distance(0, 0, 0) / 16d;<a name="line.313"></a>
+<span class="sourceLineNo">314</span>                  }<a name="line.314"></a>
+<span class="sourceLineNo">315</span>                }).keySet());<a name="line.315"></a>
+<span class="sourceLineNo">316</span>                affectedSeedsM.removeAll(eq);<a name="line.316"></a>
+<span class="sourceLineNo">317</span>                final double fx = a.getX() == 0 ? 1d / size : Math.abs(s.getX()) / a.getX();<a name="line.317"></a>
+<span class="sourceLineNo">318</span>                final double fy = a.getY() == 0 ? 1d / size : Math.abs(s.getY()) / a.getY();<a name="line.318"></a>
+<span class="sourceLineNo">319</span>                final double fz = a.getZ() == 0 ? 1d / size : Math.abs(s.getZ()) / a.getZ();<a name="line.319"></a>
+<span class="sourceLineNo">320</span>                final Point3D t =<a name="line.320"></a>
+<span class="sourceLineNo">321</span>                    new Point3D(s.getX() + fx * dx, Math.max(0.1d, s.getY() + fy * dy), s.getZ() + fz * dz);<a name="line.321"></a>
+<span class="sourceLineNo">322</span>                for (M n : eq)<a name="line.322"></a>
+<span class="sourceLineNo">323</span>                  seedsM.put(n, t);<a name="line.323"></a>
+<span class="sourceLineNo">324</span>              }<a name="line.324"></a>
+<span class="sourceLineNo">325</span>            break;<a name="line.325"></a>
+<span class="sourceLineNo">326</span>          }<a name="line.326"></a>
+<span class="sourceLineNo">327</span>          break;<a name="line.327"></a>
+<span class="sourceLineNo">328</span>        }<a name="line.328"></a>
+<span class="sourceLineNo">329</span>      }<a name="line.329"></a>
+<span class="sourceLineNo">330</span>    }<a name="line.330"></a>
+<span class="sourceLineNo">331</span>    invalidate();<a name="line.331"></a>
+<span class="sourceLineNo">332</span>  }<a name="line.332"></a>
+<span class="sourceLineNo">333</span><a name="line.333"></a>
+<span class="sourceLineNo">334</span>  public final void deleteZ() {<a name="line.334"></a>
+<span class="sourceLineNo">335</span>    synchronized (seedsG) {<a name="line.335"></a>
+<span class="sourceLineNo">336</span>      seedsG.replaceAll((g, seed) -&gt; seed.subtract(0, 0, seed.getZ()));<a name="line.336"></a>
+<span class="sourceLineNo">337</span>    }<a name="line.337"></a>
+<span class="sourceLineNo">338</span>    synchronized (seedsM) {<a name="line.338"></a>
+<span class="sourceLineNo">339</span>//      seedsM.putAll(new HashMap&lt;M, Point3D&gt;(Maps.transformValues(seedsM, Points.XY_PROJECTION)));<a name="line.339"></a>
+<span class="sourceLineNo">340</span>      seedsM.replaceAll((m, seed) -&gt; seed.subtract(0, 0, seed.getZ()));<a name="line.340"></a>
+<span class="sourceLineNo">341</span>    }<a name="line.341"></a>
+<span class="sourceLineNo">342</span>    invalidate();<a name="line.342"></a>
+<span class="sourceLineNo">343</span>  }<a name="line.343"></a>
+<span class="sourceLineNo">344</span><a name="line.344"></a>
+<span class="sourceLineNo">345</span>  public final AdditiveConceptLayout&lt;G, M&gt; clone() {<a name="line.345"></a>
+<span class="sourceLineNo">346</span>    return new AdditiveConceptLayout&lt;G, M&gt;(lattice, seedsG, seedsM, type.getValue());<a name="line.346"></a>
+<span class="sourceLineNo">347</span>  }<a name="line.347"></a>
+<span class="sourceLineNo">348</span><a name="line.348"></a>
+<span class="sourceLineNo">349</span>  public final boolean equals(final Object o) {<a name="line.349"></a>
+<span class="sourceLineNo">350</span>    return o != null &amp;&amp; o instanceof AdditiveConceptLayout &amp;&amp; ((AdditiveConceptLayout&lt;?, ?&gt;) o).lattice.equals(lattice)<a name="line.350"></a>
+<span class="sourceLineNo">351</span>        &amp;&amp; ((AdditiveConceptLayout&lt;?, ?&gt;) o).seedsG.equals(seedsG)<a name="line.351"></a>
+<span class="sourceLineNo">352</span>        &amp;&amp; ((AdditiveConceptLayout&lt;?, ?&gt;) o).seedsM.equals(seedsM);<a name="line.352"></a>
+<span class="sourceLineNo">353</span>  }<a name="line.353"></a>
+<span class="sourceLineNo">354</span><a name="line.354"></a>
+<span class="sourceLineNo">355</span>  public final int hashCode() {<a name="line.355"></a>
+<span class="sourceLineNo">356</span>    return 7 * lattice.hashCode() + 13 * seedsG.hashCode() + 23 * seedsM.hashCode();<a name="line.356"></a>
+<span class="sourceLineNo">357</span>  }<a name="line.357"></a>
+<span class="sourceLineNo">358</span>}<a name="line.358"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

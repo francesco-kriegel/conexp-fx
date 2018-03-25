@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.core.algorithm.nextclosures;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*-<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.io.File;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.ArrayList;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.Collections;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.Set;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.stream.Collectors;<a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30"></a>
+<span class="sourceLineNo">031</span>import com.google.common.collect.Lists;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import com.google.common.collect.Sets;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>import conexp.fx.core.collections.Collections3;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import conexp.fx.core.context.Concept;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import conexp.fx.core.context.Implication;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import conexp.fx.core.context.MatrixContext;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import conexp.fx.core.importer.CXTImporter;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import conexp.fx.core.math.ClosureOperator;<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>public final class ProbDLExample {<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>  private static Set&lt;Implication&lt;String, String&gt;&gt; bimp;<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>  public static final void main(final String[] args) throws Exception {<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    final File file = new File("../../LaTeX/cla2015-prob-ijgs/example-pdl-induced.cxt");<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    final MatrixContext&lt;String, String&gt; cxt = CXTImporter.read(file);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    bimp = Sets.newHashSet(<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        new Implication&lt;&gt;("$\\bot$", "$A_1$"),<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        new Implication&lt;&gt;("$\\bot$", "$A_2$"),<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        new Implication&lt;&gt;("$\\bot$", "$A_3$"),<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        new Implication&lt;&gt;("$\\bot$", "$r_1:C_1$"),<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        new Implication&lt;&gt;("$\\bot$", "$r_1:C_7$"),<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        new Implication&lt;&gt;("$\\bot$", "$r_2:C_1$"),<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        new Implication&lt;&gt;("$\\bot$", "$r_2:C_7$"),<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        new Implication&lt;&gt;("$r_1:C_1$", "$r_1:C_3$"),<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        new Implication&lt;&gt;("$r_1:C_3$", "$r_1:C_5$"),<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        new Implication&lt;&gt;("$r_1:C_5$", "$r_1:C_2$"),<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        new Implication&lt;&gt;("$r_1:C_7$", "$r_1:C_6$"),<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        new Implication&lt;&gt;("$r_1:C_6$", "$r_1:C_4$"),<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        new Implication&lt;&gt;("$r_1:C_6$", "$r_1:C_5$"),<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        new Implication&lt;&gt;("$r_1:C_4$", "$r_1:C_2$"),<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        new Implication&lt;&gt;("$r_2:C_1$", "$r_2:C_3$"),<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        new Implication&lt;&gt;("$r_2:C_3$", "$r_2:C_5$"),<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        new Implication&lt;&gt;("$r_2:C_5$", "$r_2:C_2$"),<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        new Implication&lt;&gt;("$r_2:C_7$", "$r_2:C_6$"),<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        new Implication&lt;&gt;("$r_2:C_6$", "$r_2:C_4$"),<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        new Implication&lt;&gt;("$r_2:C_6$", "$r_2:C_5$"),<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        new Implication&lt;&gt;("$r_2:C_4$", "$r_2:C_2$"));<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    final Set&lt;Double&gt; probs =<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        Sets.powerSet(Sets.newHashSet(1d / 2d, 1d / 3d, 1d / 6d)).stream().map(Collections3::sum).collect(<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            Collectors.toSet());<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    probs.remove(0d);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    probs.forEach(System.out::println);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    final Set&lt;Implication&lt;String, String&gt;&gt; i = NextClosures2.compute(cxt, bimp).second();<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    i.stream().map(ProbDLExample::minimize).forEach(System.out::println);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    NextClosures2.compute(cxt).first().stream().map(Concept::getIntent).forEach(System.out::println);<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>    final Set&lt;Implication&lt;String, String&gt;&gt; j =<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        NextClosures2C.compute(cxt, ClosureOperator.fromImplications(bimp)).second();<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    System.out.println(i.size() == j.size());<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    System.out.println(i.equals(j));<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    System.out.println(Implication.equivalent(i, j));<a name="line.83"></a>
+<span class="sourceLineNo">084</span>  }<a name="line.84"></a>
+<span class="sourceLineNo">085</span><a name="line.85"></a>
+<span class="sourceLineNo">086</span>  private static final Implication&lt;String, String&gt; minimize(final Implication&lt;String, String&gt; impl) {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    return new Implication&lt;&gt;(b(impl.getPremise()), b(impl.getConclusion()));<a name="line.87"></a>
+<span class="sourceLineNo">088</span>  }<a name="line.88"></a>
+<span class="sourceLineNo">089</span><a name="line.89"></a>
+<span class="sourceLineNo">090</span>  private static final Set&lt;String&gt; b(final Set&lt;String&gt; s) {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>//  final HashSet&lt;String&gt; result = Sets.newHashSet(s);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>//  final Set&lt;String&gt; r = Sets.newHashSet(s);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    final ArrayList&lt;String&gt; r = Lists.newArrayList(s);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    Collections.shuffle(r);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    String a;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    do {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>      a = null;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>      for (String x : r)<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        if (ClosureOperator<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            .fromImplications(bimp, false, true)<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            .closure(Sets.difference(Sets.newHashSet(r), Collections.singleton(x)))<a name="line.101"></a>
+<span class="sourceLineNo">102</span>            .contains(x)) {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>          a = x;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>          break;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        }<a name="line.105"></a>
+<span class="sourceLineNo">106</span>      r.remove(a);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    } while (a != null);<a name="line.107"></a>
+<span class="sourceLineNo">108</span>//  result.removeAll(r);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>//  return r;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>    return Sets.newHashSet(r);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>  }<a name="line.111"></a>
+<span class="sourceLineNo">112</span><a name="line.112"></a>
+<span class="sourceLineNo">113</span>}<a name="line.113"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

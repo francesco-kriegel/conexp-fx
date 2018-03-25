@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/**<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * @author Francesco.Kriegel@gmx.de<a name="line.2"></a>
+<span class="sourceLineNo">003</span> */<a name="line.3"></a>
+<span class="sourceLineNo">004</span>package conexp.fx.core.algorithm.lattice;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>/*<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * #%L<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * Concept Explorer FX<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * %%<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * %%<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * This program is free software: you can redistribute it and/or modify<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * it under the terms of the GNU General Public License as<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * published by the Free Software Foundation, either version 3 of the<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * License, or (at your option) any later version.<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * <a name="line.16"></a>
+<span class="sourceLineNo">017</span> * This program is distributed in the hope that it will be useful,<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * GNU General Public License for more details.<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * <a name="line.21"></a>
+<span class="sourceLineNo">022</span> * You should have received a copy of the GNU General Public<a name="line.22"></a>
+<span class="sourceLineNo">023</span> * License along with this program.  If not, see<a name="line.23"></a>
+<span class="sourceLineNo">024</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.24"></a>
+<span class="sourceLineNo">025</span> * #L%<a name="line.25"></a>
+<span class="sourceLineNo">026</span> */<a name="line.26"></a>
+<span class="sourceLineNo">027</span><a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.ArrayList;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.HashMap;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.Iterator;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.util.List;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.Map;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import java.util.Set;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import java.util.function.Consumer;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import java.util.function.Supplier;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import java.util.stream.Collectors;<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>import com.google.common.base.Function;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import com.google.common.collect.Lists;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import com.google.common.util.concurrent.AtomicDouble;<a name="line.40"></a>
+<span class="sourceLineNo">041</span><a name="line.41"></a>
+<span class="sourceLineNo">042</span>import conexp.fx.core.collections.BitSetFX;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import conexp.fx.core.collections.Collections3;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import conexp.fx.core.context.Concept;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import conexp.fx.core.context.ConceptLattice;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import conexp.fx.core.context.MatrixContext;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import conexp.fx.gui.dataset.FCADataset;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import conexp.fx.gui.task.TimeTask;<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>public final class IPred&lt;G, M&gt; {<a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>  public static final &lt;G, M&gt; TimeTask&lt;Void&gt; neighborhood(final String id, final ConceptLattice&lt;G, M&gt; lattice) {<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    return new TimeTask&lt;Void&gt;(id + " - iPred") {<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>      protected final Void call() {<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        updateProgress(0d, 1d);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        if (isCancelled())<a name="line.57"></a>
+<span class="sourceLineNo">058</span>          return null;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        updateMessage("Computing Concept Neighborhood...");<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        lattice.empty();<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        final int bits = lattice.context.colHeads().size();<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        final List&lt;BitSetFX&gt; intents =<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            new ArrayList&lt;BitSetFX&gt;(Lists.transform(lattice.rowHeads(), new Function&lt;Concept&lt;G, M&gt;, BitSetFX&gt;() {<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>          public final BitSetFX apply(final Concept&lt;G, M&gt; concept) {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            return lattice.context.colHeads().subBitSet(concept.intent());<a name="line.66"></a>
+<span class="sourceLineNo">067</span>          }<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        }));<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        updateProgress(0.2d, 1d);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        final Iterator&lt;BitSetFX&gt; intentIterator = intents.iterator();<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        final List&lt;BitSetFX&gt; borderIntents = new ArrayList&lt;BitSetFX&gt;(intents.size());<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        final Map&lt;BitSetFX, BitSetFX&gt; faceAccumulation = new HashMap&lt;BitSetFX, BitSetFX&gt;(intents.size(), 1f);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        for (BitSetFX intent : intents)<a name="line.73"></a>
+<span class="sourceLineNo">074</span>          faceAccumulation.put(intent, new BitSetFX(bits));<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        if (intentIterator.hasNext())<a name="line.75"></a>
+<span class="sourceLineNo">076</span>          borderIntents.add(intentIterator.next());<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        final double total = intents.size();<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        double actual = 0d;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        while (intentIterator.hasNext()) {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>          actual++;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>          updateProgress(0.3d + 0.7d * (actual / total), 1d);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>          updateMessage("Computing Neighborhood: " + (int) actual + " of " + (int) total + " Concepts...");<a name="line.82"></a>
+<span class="sourceLineNo">083</span>          final BitSetFX intent = intentIterator.next();<a name="line.83"></a>
+<span class="sourceLineNo">084</span>          final List&lt;BitSetFX&gt; candidateIntents = new ArrayList&lt;BitSetFX&gt;(borderIntents.size());<a name="line.84"></a>
+<span class="sourceLineNo">085</span>          for (BitSetFX borderIntent : borderIntents) {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            final BitSetFX candidateIntent = ((BitSetFX) intent.clone());<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            candidateIntent.and(borderIntent);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            candidateIntents.add(candidateIntent);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>          }<a name="line.89"></a>
+<span class="sourceLineNo">090</span>          for (BitSetFX candidateIntent : candidateIntents) {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            final BitSetFX candidateFace = faceAccumulation.get(candidateIntent);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            final BitSetFX intentFace = ((BitSetFX) intent.clone());<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            try {<a name="line.93"></a>
+<span class="sourceLineNo">094</span>              intentFace.and(candidateFace);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            } catch (Exception e) {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>              System.err.println("intentFace: " + intentFace);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>              System.err.println("candidateFace: " + candidateFace);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>              e.printStackTrace();<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            }<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            if (intentFace.isEmpty()) {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>              lattice._add((int) actual, intents.indexOf(candidateIntent));<a name="line.101"></a>
+<span class="sourceLineNo">102</span>              final BitSetFX face = ((BitSetFX) intent.clone());<a name="line.102"></a>
+<span class="sourceLineNo">103</span>              face.andNot(candidateIntent);<a name="line.103"></a>
+<span class="sourceLineNo">104</span>              candidateFace.or(face);<a name="line.104"></a>
+<span class="sourceLineNo">105</span>              borderIntents.remove(candidateIntent);<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            }<a name="line.106"></a>
+<span class="sourceLineNo">107</span>          }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>          borderIntents.add(intent);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        }<a name="line.109"></a>
+<span class="sourceLineNo">110</span>//        updateMessage(<a name="line.110"></a>
+<span class="sourceLineNo">111</span>//            "Pushing Changes...");<a name="line.111"></a>
+<span class="sourceLineNo">112</span>//        lattice.pushAllChangedEvent();<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        updateProgress(1d, 1d);<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        return null;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>      }<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    };<a name="line.116"></a>
+<span class="sourceLineNo">117</span>  }<a name="line.117"></a>
+<span class="sourceLineNo">118</span><a name="line.118"></a>
+<span class="sourceLineNo">119</span>  public static final &lt;G, M&gt; ConceptLattice&lt;G, M&gt;<a name="line.119"></a>
+<span class="sourceLineNo">120</span>      getConceptLattice(final MatrixContext&lt;G, M&gt; cxt, final Set&lt;Concept&lt;G, M&gt;&gt; concepts) {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    final ConceptLattice&lt;G, M&gt; lattice = new ConceptLattice&lt;G, M&gt;(cxt);<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    lattice.rowHeads().addAll(<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        concepts<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            .parallelStream()<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            .sorted((c1, c2) -&gt; (int) Math.signum(c1.extent().size() - c2.extent().size()))<a name="line.125"></a>
+<span class="sourceLineNo">126</span>            .collect(Collectors.toList()));<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    populateConceptLattice(lattice, __ -&gt; {} , __ -&gt; {} , () -&gt; false);<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    return lattice;<a name="line.128"></a>
+<span class="sourceLineNo">129</span>  }<a name="line.129"></a>
+<span class="sourceLineNo">130</span><a name="line.130"></a>
+<span class="sourceLineNo">131</span>  public static final &lt;G, M&gt; void populateConceptLattice(<a name="line.131"></a>
+<span class="sourceLineNo">132</span>      final ConceptLattice&lt;G, M&gt; lattice,<a name="line.132"></a>
+<span class="sourceLineNo">133</span>      final Consumer&lt;String&gt; messageConsumer,<a name="line.133"></a>
+<span class="sourceLineNo">134</span>      final Consumer&lt;Double&gt; statusConsumer,<a name="line.134"></a>
+<span class="sourceLineNo">135</span>      final Supplier&lt;Boolean&gt; isCancelled) {<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    statusConsumer.accept(0d);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    if (isCancelled.get())<a name="line.137"></a>
+<span class="sourceLineNo">138</span>      return;<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    messageConsumer.accept("Computing Concept Neighborhood...");<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    lattice.empty();<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    final int bits = lattice.context.colHeads().size();<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    final List&lt;BitSetFX&gt; intents = lattice<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        .rowHeads()<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        .parallelStream()<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        .map(concept -&gt; lattice.context.colHeads().subBitSet(concept.intent()))<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        .collect(Collectors.toList());<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    statusConsumer.accept(0.2d);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    final Iterator&lt;BitSetFX&gt; intentIterator = intents.iterator();<a name="line.148"></a>
+<span class="sourceLineNo">149</span>    final List&lt;BitSetFX&gt; borderIntents = new ArrayList&lt;BitSetFX&gt;(intents.size());<a name="line.149"></a>
+<span class="sourceLineNo">150</span>    final Map&lt;BitSetFX, BitSetFX&gt; faceAccumulation =<a name="line.150"></a>
+<span class="sourceLineNo">151</span>        intents.parallelStream().collect(Collectors.toMap(intent -&gt; intent, intent -&gt; new BitSetFX(bits)));<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    if (intentIterator.hasNext())<a name="line.152"></a>
+<span class="sourceLineNo">153</span>      borderIntents.add(intentIterator.next());<a name="line.153"></a>
+<span class="sourceLineNo">154</span>    final double total = intents.size();<a name="line.154"></a>
+<span class="sourceLineNo">155</span>    final AtomicDouble actual = new AtomicDouble(0d);<a name="line.155"></a>
+<span class="sourceLineNo">156</span>    while (intentIterator.hasNext()) {<a name="line.156"></a>
+<span class="sourceLineNo">157</span>      if (isCancelled.get())<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        break;<a name="line.158"></a>
+<span class="sourceLineNo">159</span>      actual.set(actual.get() + 1d);<a name="line.159"></a>
+<span class="sourceLineNo">160</span>      statusConsumer.accept(0.3d + 0.7d * (actual.get() / total));<a name="line.160"></a>
+<span class="sourceLineNo">161</span>      messageConsumer.accept("Computing Neighborhood: " + (int) actual.get() + " of " + (int) total + " Concepts...");<a name="line.161"></a>
+<span class="sourceLineNo">162</span>      final BitSetFX intent = intentIterator.next();<a name="line.162"></a>
+<span class="sourceLineNo">163</span>      Set&lt;BitSetFX&gt; toBeRemoved = Collections3.newConcurrentHashSet();<a name="line.163"></a>
+<span class="sourceLineNo">164</span>      borderIntents.parallelStream().map(borderIntent -&gt; {<a name="line.164"></a>
+<span class="sourceLineNo">165</span>        final BitSetFX candidateIntent = ((BitSetFX) intent.clone());<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        candidateIntent.and(borderIntent);<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        return candidateIntent;<a name="line.167"></a>
+<span class="sourceLineNo">168</span>      }).forEach(candidateIntent -&gt; {<a name="line.168"></a>
+<span class="sourceLineNo">169</span>        final BitSetFX candidateFace = faceAccumulation.get(candidateIntent);<a name="line.169"></a>
+<span class="sourceLineNo">170</span>        final BitSetFX intentFace = ((BitSetFX) intent.clone());<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        intentFace.and(candidateFace);<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        if (intentFace.isEmpty()) {<a name="line.172"></a>
+<span class="sourceLineNo">173</span>          final int index = intents.indexOf(candidateIntent);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>          synchronized (lattice) {<a name="line.174"></a>
+<span class="sourceLineNo">175</span>            lattice._add((int) actual.get(), index);<a name="line.175"></a>
+<span class="sourceLineNo">176</span>          }<a name="line.176"></a>
+<span class="sourceLineNo">177</span>          final BitSetFX face = ((BitSetFX) intent.clone());<a name="line.177"></a>
+<span class="sourceLineNo">178</span>          face.andNot(candidateIntent);<a name="line.178"></a>
+<span class="sourceLineNo">179</span>          candidateFace.or(face);<a name="line.179"></a>
+<span class="sourceLineNo">180</span>          toBeRemoved.add(candidateIntent);<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        }<a name="line.181"></a>
+<span class="sourceLineNo">182</span>      });<a name="line.182"></a>
+<span class="sourceLineNo">183</span>      borderIntents.removeAll(toBeRemoved);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>      borderIntents.add(intent);<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    }<a name="line.185"></a>
+<span class="sourceLineNo">186</span>//    messageConsumer.accept(<a name="line.186"></a>
+<span class="sourceLineNo">187</span>//        "Pushing Changes...");<a name="line.187"></a>
+<span class="sourceLineNo">188</span>//    lattice.pushAllChangedEvent();<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    statusConsumer.accept(1d);<a name="line.189"></a>
+<span class="sourceLineNo">190</span>  }<a name="line.190"></a>
+<span class="sourceLineNo">191</span><a name="line.191"></a>
+<span class="sourceLineNo">192</span>  public static final &lt;G, M&gt; TimeTask&lt;Void&gt; neighborhoodP(final FCADataset&lt;G, M&gt; dataset) {<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    return new TimeTask&lt;Void&gt;(dataset, "iPred (parallel)") {<a name="line.193"></a>
+<span class="sourceLineNo">194</span><a name="line.194"></a>
+<span class="sourceLineNo">195</span>      protected final Void call() {<a name="line.195"></a>
+<span class="sourceLineNo">196</span>        populateConceptLattice(dataset.lattice, m -&gt; updateMessage(m), p -&gt; updateProgress(p, 1d), this::isCancelled);<a name="line.196"></a>
+<span class="sourceLineNo">197</span>        return null;<a name="line.197"></a>
+<span class="sourceLineNo">198</span>//        updateProgress(0d, 1d);<a name="line.198"></a>
+<span class="sourceLineNo">199</span>//        if (isCancelled())<a name="line.199"></a>
+<span class="sourceLineNo">200</span>//          return null;<a name="line.200"></a>
+<span class="sourceLineNo">201</span>//        updateMessage("Computing Concept Neighborhood...");<a name="line.201"></a>
+<span class="sourceLineNo">202</span>//        dataset.lattice.empty();<a name="line.202"></a>
+<span class="sourceLineNo">203</span>//        final int bits = dataset.lattice.context.colHeads().size();<a name="line.203"></a>
+<span class="sourceLineNo">204</span>//        final List&lt;BitSet&gt; intents = dataset.lattice<a name="line.204"></a>
+<span class="sourceLineNo">205</span>//            .rowHeads()<a name="line.205"></a>
+<span class="sourceLineNo">206</span>//            .parallelStream()<a name="line.206"></a>
+<span class="sourceLineNo">207</span>//            .map(concept -&gt; dataset.lattice.context.colHeads().subBitSet(concept.intent()))<a name="line.207"></a>
+<span class="sourceLineNo">208</span>//            .collect(Collectors.toList());<a name="line.208"></a>
+<span class="sourceLineNo">209</span>//        updateProgress(0.2d, 1d);<a name="line.209"></a>
+<span class="sourceLineNo">210</span>//        final Iterator&lt;BitSet&gt; intentIterator = intents.iterator();<a name="line.210"></a>
+<span class="sourceLineNo">211</span>//        final List&lt;BitSet&gt; borderIntents = new ArrayList&lt;BitSet&gt;(intents.size());<a name="line.211"></a>
+<span class="sourceLineNo">212</span>//        final Map&lt;BitSet, BitSet&gt; faceAccumulation =<a name="line.212"></a>
+<span class="sourceLineNo">213</span>//            intents.parallelStream().collect(Collectors.toMap(intent -&gt; intent, intent -&gt; new BitSet(bits)));<a name="line.213"></a>
+<span class="sourceLineNo">214</span>//        if (intentIterator.hasNext())<a name="line.214"></a>
+<span class="sourceLineNo">215</span>//          borderIntents.add(intentIterator.next());<a name="line.215"></a>
+<span class="sourceLineNo">216</span>//        final double total = intents.size();<a name="line.216"></a>
+<span class="sourceLineNo">217</span>//        final AtomicDouble actual = new AtomicDouble(0d);<a name="line.217"></a>
+<span class="sourceLineNo">218</span>//        while (intentIterator.hasNext()) {<a name="line.218"></a>
+<span class="sourceLineNo">219</span>//          if (this.isCancelled())<a name="line.219"></a>
+<span class="sourceLineNo">220</span>//            break;<a name="line.220"></a>
+<span class="sourceLineNo">221</span>//          actual.set(actual.get() + 1d);<a name="line.221"></a>
+<span class="sourceLineNo">222</span>//          updateProgress(0.3d + 0.7d * (actual.get() / total), 1d);<a name="line.222"></a>
+<span class="sourceLineNo">223</span>//          updateMessage("Computing Neighborhood: " + (int) actual.get() + " of " + (int) total + " Concepts...");<a name="line.223"></a>
+<span class="sourceLineNo">224</span>//          final BitSet intent = intentIterator.next();<a name="line.224"></a>
+<span class="sourceLineNo">225</span>//          Set&lt;BitSet&gt; toBeRemoved = Collections3.newConcurrentHashSet();<a name="line.225"></a>
+<span class="sourceLineNo">226</span>//          borderIntents.parallelStream().map(borderIntent -&gt; {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>//            final BitSet candidateIntent = ((BitSet) intent.clone());<a name="line.227"></a>
+<span class="sourceLineNo">228</span>//            candidateIntent.and(borderIntent);<a name="line.228"></a>
+<span class="sourceLineNo">229</span>//            return candidateIntent;<a name="line.229"></a>
+<span class="sourceLineNo">230</span>//          }).forEach(candidateIntent -&gt; {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>//            final BitSet candidateFace = faceAccumulation.get(candidateIntent);<a name="line.231"></a>
+<span class="sourceLineNo">232</span>//            final BitSet intentFace = ((BitSet) intent.clone());<a name="line.232"></a>
+<span class="sourceLineNo">233</span>//            intentFace.and(candidateFace);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>//            if (intentFace.isEmpty()) {<a name="line.234"></a>
+<span class="sourceLineNo">235</span>//              final int index = intents.indexOf(candidateIntent);<a name="line.235"></a>
+<span class="sourceLineNo">236</span>//              synchronized (dataset.lattice) {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>//                dataset.lattice._add((int) actual.get(), index);<a name="line.237"></a>
+<span class="sourceLineNo">238</span>//              }<a name="line.238"></a>
+<span class="sourceLineNo">239</span>//              final BitSet face = ((BitSet) intent.clone());<a name="line.239"></a>
+<span class="sourceLineNo">240</span>//              face.andNot(candidateIntent);<a name="line.240"></a>
+<span class="sourceLineNo">241</span>//              candidateFace.or(face);<a name="line.241"></a>
+<span class="sourceLineNo">242</span>//              toBeRemoved.add(candidateIntent);<a name="line.242"></a>
+<span class="sourceLineNo">243</span>//            }<a name="line.243"></a>
+<span class="sourceLineNo">244</span>//          });<a name="line.244"></a>
+<span class="sourceLineNo">245</span>//          borderIntents.removeAll(toBeRemoved);<a name="line.245"></a>
+<span class="sourceLineNo">246</span>//          borderIntents.add(intent);<a name="line.246"></a>
+<span class="sourceLineNo">247</span>//        }<a name="line.247"></a>
+<span class="sourceLineNo">248</span>////        updateMessage(<a name="line.248"></a>
+<span class="sourceLineNo">249</span>////            "Pushing Changes...");<a name="line.249"></a>
+<span class="sourceLineNo">250</span>////        lattice.pushAllChangedEvent();<a name="line.250"></a>
+<span class="sourceLineNo">251</span>//        updateProgress(1d, 1d);<a name="line.251"></a>
+<span class="sourceLineNo">252</span>//        return null;<a name="line.252"></a>
+<span class="sourceLineNo">253</span>      }<a name="line.253"></a>
+<span class="sourceLineNo">254</span>    };<a name="line.254"></a>
+<span class="sourceLineNo">255</span>  }<a name="line.255"></a>
+<span class="sourceLineNo">256</span>}<a name="line.256"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

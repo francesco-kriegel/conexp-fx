@@ -1,0 +1,375 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.core.math;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.util.Collection;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.NoSuchElementException;<a name="line.26"></a>
+<span class="sourceLineNo">027</span><a name="line.27"></a>
+<span class="sourceLineNo">028</span>import com.sun.javafx.geom.Line2D;<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>import javafx.geometry.Point2D;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import javafx.geometry.Point3D;<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>public final class Points {<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>//  public static final Point3D ZERO  = new Point3D(0, 0, 0);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>//  public static final Point3D ONE_X = new Point3D(1, 0, 0);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>//  public static final Point3D ONE_Y = new Point3D(0, 1, 0);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>//  public static final Point3D ONE_Z = new Point3D(0, 0, 1);<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>  public static final Point2D<a name="line.40"></a>
+<span class="sourceLineNo">041</span>      projectOnCircle(final double cx, final double cy, final double r, final double px, final double py) {<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    final double dx = px - cx;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    final double dy = py - cy;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    final double l = Math.sqrt(dx * dx + dy * dy);<a name="line.44"></a>
+<span class="sourceLineNo">045</span>    final double f = r / l;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    final double x = cx + f * dx;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    final double y = cx + f * dy;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    return new Point2D(x, y);<a name="line.48"></a>
+<span class="sourceLineNo">049</span>  }<a name="line.49"></a>
+<span class="sourceLineNo">050</span><a name="line.50"></a>
+<span class="sourceLineNo">051</span>  public static final Point3D absoluteSum(final Collection&lt;Point3D&gt; c) {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    double x = 0d;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    double y = 0d;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    double z = 0d;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    for (Point3D p : c) {<a name="line.55"></a>
+<span class="sourceLineNo">056</span>      x += Math.abs(p.getX());<a name="line.56"></a>
+<span class="sourceLineNo">057</span>      y += Math.abs(p.getY());<a name="line.57"></a>
+<span class="sourceLineNo">058</span>      z += Math.abs(p.getZ());<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    }<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    return new Point3D(x, y, z);<a name="line.60"></a>
+<span class="sourceLineNo">061</span>  }<a name="line.61"></a>
+<span class="sourceLineNo">062</span><a name="line.62"></a>
+<span class="sourceLineNo">063</span>  public static final Point3D rotate(final Point3D point, final double angle) {<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    final double x = point.getX() * Math.cos(angle) + point.getZ() * Math.sin(angle);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    final double y = point.getY();<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    final double z = -point.getX() * Math.sin(angle) + point.getZ() * Math.cos(angle);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    return new Point3D(x, y, z);<a name="line.67"></a>
+<span class="sourceLineNo">068</span>  }<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>//  public static final Point3D plus(final Point3D p, final Point3D q) {<a name="line.70"></a>
+<span class="sourceLineNo">071</span>//    return Point3DBuilder.create().x(p.getX() + q.getX()).y(p.getY() + q.getY()).z(p.getZ() + q.getZ()).build();<a name="line.71"></a>
+<span class="sourceLineNo">072</span>//  }<a name="line.72"></a>
+<span class="sourceLineNo">073</span>//<a name="line.73"></a>
+<span class="sourceLineNo">074</span>//  public static final Point3D plus(final Point3D p, final double dx, final double dy) {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>//    if (dy == 0d &amp;&amp; dy == 0d)<a name="line.75"></a>
+<span class="sourceLineNo">076</span>//      return p;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>//    else<a name="line.77"></a>
+<span class="sourceLineNo">078</span>//      return new Point3D(p.getX() + dx, p.getY() + dy, p.getZ());<a name="line.78"></a>
+<span class="sourceLineNo">079</span>//  }<a name="line.79"></a>
+<span class="sourceLineNo">080</span>//<a name="line.80"></a>
+<span class="sourceLineNo">081</span>//  public static final Point2D plus(final Point2D p, final double dx, final double dy) {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>//    if (dy == 0d &amp;&amp; dy == 0d)<a name="line.82"></a>
+<span class="sourceLineNo">083</span>//      return p;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>//    else<a name="line.84"></a>
+<span class="sourceLineNo">085</span>//      return new Point2D(p.getX() + dx, p.getY() + dy);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>//  }<a name="line.86"></a>
+<span class="sourceLineNo">087</span>//<a name="line.87"></a>
+<span class="sourceLineNo">088</span>//  public static final Point3D plus(final Point3D p, final double dx, final double dy, final double dz) {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>//    if (dy == 0d &amp;&amp; dy == 0d &amp;&amp; dz == 0d)<a name="line.89"></a>
+<span class="sourceLineNo">090</span>//      return p;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>//    else<a name="line.91"></a>
+<span class="sourceLineNo">092</span>//      return new Point3D(p.getX() + dx, p.getY() + dy, p.getZ() + dz);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>//  }<a name="line.93"></a>
+<span class="sourceLineNo">094</span>//<a name="line.94"></a>
+<span class="sourceLineNo">095</span>//  public static final Point3D minus(final Point3D p, final Point3D q) {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>//    return Point3DBuilder.create().x(p.getX() - q.getX()).y(p.getY() - q.getY()).z(p.getZ() - q.getZ()).build();<a name="line.96"></a>
+<span class="sourceLineNo">097</span>//  }<a name="line.97"></a>
+<span class="sourceLineNo">098</span>//<a name="line.98"></a>
+<span class="sourceLineNo">099</span>//  public static final Point3D multiply(final double f, final Point3D p) {<a name="line.99"></a>
+<span class="sourceLineNo">100</span>//    return Point3DBuilder.create().x(p.getX() * f).y(p.getY() * f).z(p.getZ() * f).build();<a name="line.100"></a>
+<span class="sourceLineNo">101</span>//  }<a name="line.101"></a>
+<span class="sourceLineNo">102</span>//<a name="line.102"></a>
+<span class="sourceLineNo">103</span>//  public static final Point3D divide(final Point3D p, final double f) {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>//    return Point3DBuilder.create().x(p.getX() / f).y(p.getY() / f).z(p.getZ() / f).build();<a name="line.104"></a>
+<span class="sourceLineNo">105</span>//  }<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>//  public static final double scalarProduct(final Point3D p, final Point3D q) {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>//    return p.getX() * q.getX() + p.getY() * q.getY() + p.getZ() * q.getZ();<a name="line.108"></a>
+<span class="sourceLineNo">109</span>//  }<a name="line.109"></a>
+<span class="sourceLineNo">110</span><a name="line.110"></a>
+<span class="sourceLineNo">111</span>//  public static final Point3D crossProduct(final Point3D p, final Point3D q) {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>//    return Point3DBuilder<a name="line.112"></a>
+<span class="sourceLineNo">113</span>//        .create()<a name="line.113"></a>
+<span class="sourceLineNo">114</span>//        .x(p.getY() * q.getZ() - p.getZ() * q.getY())<a name="line.114"></a>
+<span class="sourceLineNo">115</span>//        .y(p.getZ() * q.getX() - p.getX() * q.getZ())<a name="line.115"></a>
+<span class="sourceLineNo">116</span>//        .z(p.getX() * q.getY() - p.getY() * q.getX())<a name="line.116"></a>
+<span class="sourceLineNo">117</span>//        .build();<a name="line.117"></a>
+<span class="sourceLineNo">118</span>//  }<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>//  public static final double length(final Point3D p) {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>//    return Math.sqrt(scalarProduct(p, p));<a name="line.121"></a>
+<span class="sourceLineNo">122</span>//  }<a name="line.122"></a>
+<span class="sourceLineNo">123</span><a name="line.123"></a>
+<span class="sourceLineNo">124</span>  public static final double pointSegmentDistance(final Point3D p, final Point3D q1, final Point3D q2) {<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    if (p.equals(q1) || p.equals(q2))<a name="line.125"></a>
+<span class="sourceLineNo">126</span>      return 0;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    if (q1.equals(q2))<a name="line.127"></a>
+<span class="sourceLineNo">128</span>      return p.distance(q1);<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    // line segment: g = q1 + t * (q2 - q1), 0 &lt;= t &lt;= 1<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    final Point3D q = q2.subtract(q1);<a name="line.130"></a>
+<span class="sourceLineNo">131</span>    // projection on line: P(p,g) = q1 + t * q<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    final double t = p.subtract(q1).dotProduct(q) / q.dotProduct(q);<a name="line.132"></a>
+<span class="sourceLineNo">133</span>    if (t &lt; 0)<a name="line.133"></a>
+<span class="sourceLineNo">134</span>      return p.distance(q1);<a name="line.134"></a>
+<span class="sourceLineNo">135</span>    else if (t &gt; 1)<a name="line.135"></a>
+<span class="sourceLineNo">136</span>      return p.distance(q2);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    else<a name="line.137"></a>
+<span class="sourceLineNo">138</span>      return p.distance(q1.add(q.multiply(t)));<a name="line.138"></a>
+<span class="sourceLineNo">139</span>  }<a name="line.139"></a>
+<span class="sourceLineNo">140</span><a name="line.140"></a>
+<span class="sourceLineNo">141</span>  public static final boolean intersectX(final Point3D p1, final Point3D p2, final Point3D q1, final Point3D q2) {<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    return Math.max(p1.getX(), p2.getX()) &gt;= Math.min(q1.getX(), q2.getX())<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        &amp;&amp; Math.max(q1.getX(), q2.getX()) &gt;= Math.min(p1.getX(), p2.getX());<a name="line.143"></a>
+<span class="sourceLineNo">144</span>  }<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>  public static final boolean intersectY(final Point3D p1, final Point3D p2, final Point3D q1, final Point3D q2) {<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    return Math.max(p1.getY(), p2.getY()) &gt;= Math.min(q1.getY(), q2.getY())<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        &amp;&amp; Math.max(q1.getY(), q2.getY()) &gt;= Math.min(p1.getY(), p2.getY());<a name="line.148"></a>
+<span class="sourceLineNo">149</span>  }<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>  public static final boolean intersectXY(Point3D p1, Point3D p2, Point3D q1, Point3D q2) {<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    return new Line2D((float) p1.getX(), (float) p1.getY(), (float) p2.getX(), (float) p2.getY())<a name="line.152"></a>
+<span class="sourceLineNo">153</span>        .intersectsLine(new Line2D((float) q1.getX(), (float) q1.getY(), (float) q2.getX(), (float) q2.getY()));<a name="line.153"></a>
+<span class="sourceLineNo">154</span>  }<a name="line.154"></a>
+<span class="sourceLineNo">155</span><a name="line.155"></a>
+<span class="sourceLineNo">156</span>  public static final Point2D projectXY(final Point3D p) {<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    return new Point2D(p.getX(), p.getY());<a name="line.157"></a>
+<span class="sourceLineNo">158</span>  }<a name="line.158"></a>
+<span class="sourceLineNo">159</span><a name="line.159"></a>
+<span class="sourceLineNo">160</span>  public static final boolean<a name="line.160"></a>
+<span class="sourceLineNo">161</span>      intersectingLineSegments(final Point3D p1, final Point3D p2, final Point3D q1, final Point3D q2) {<a name="line.161"></a>
+<span class="sourceLineNo">162</span>    // line segment: g = p1 + s * (p2 - p1), 0 &lt;= s &lt;= 1<a name="line.162"></a>
+<span class="sourceLineNo">163</span>    // line segment: h = q1 + t * (q2 - q1), 0 &lt;= t &lt;= 1<a name="line.163"></a>
+<span class="sourceLineNo">164</span>    final Point3D p = p2.subtract(p1);<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    final Point3D q = q2.subtract(q1);<a name="line.165"></a>
+<span class="sourceLineNo">166</span>    // equation: p1 + s * p = q1 + t * q<a name="line.166"></a>
+<span class="sourceLineNo">167</span>    // ==&gt; s * p = (q1 - p1) + t * q<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    // ==&gt; t * q = (p1 - q1) + s * p<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    // ==&gt; s * (p X q) = (q1 - p1) X q<a name="line.169"></a>
+<span class="sourceLineNo">170</span>    // ==&gt; t * (q X p) = (p1 - q1) X p<a name="line.170"></a>
+<span class="sourceLineNo">171</span>    // g intersects h iff there is a solution (s,t) in [0,1]x[0,1]<a name="line.171"></a>
+<span class="sourceLineNo">172</span>    final Point3D c1 = p.crossProduct(q);<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    final Point3D c2 = q1.subtract(p1).crossProduct(q);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    final Point3D d1 = q.crossProduct(p);<a name="line.174"></a>
+<span class="sourceLineNo">175</span>    final Point3D d2 = p1.subtract(q1).crossProduct(p);<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    // ==&gt; s * c1 = c2<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    // ==&gt; t * d1 = d2<a name="line.177"></a>
+<span class="sourceLineNo">178</span>    try {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>      final double s = solve(c1, c2);<a name="line.179"></a>
+<span class="sourceLineNo">180</span>      if (s &lt; 0 || s &gt; 1)<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        return false;<a name="line.181"></a>
+<span class="sourceLineNo">182</span>      final double t = solve(d1, d2);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>      if (t &gt;= 0 &amp;&amp; t &lt;= 1)<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        return true;<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    } catch (NoSuchElementException e) {}<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    return false;<a name="line.186"></a>
+<span class="sourceLineNo">187</span>  }<a name="line.187"></a>
+<span class="sourceLineNo">188</span><a name="line.188"></a>
+<span class="sourceLineNo">189</span>  /**<a name="line.189"></a>
+<span class="sourceLineNo">190</span>   * @param p<a name="line.190"></a>
+<span class="sourceLineNo">191</span>   * @param q<a name="line.191"></a>
+<span class="sourceLineNo">192</span>   * @return double value t such that t * p == q<a name="line.192"></a>
+<span class="sourceLineNo">193</span>   * @throws NoSuchElementException<a name="line.193"></a>
+<span class="sourceLineNo">194</span>   */<a name="line.194"></a>
+<span class="sourceLineNo">195</span>  public static final double solve(final Point3D p, final Point3D q) throws NoSuchElementException {<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    if (p.normalize().equals(q.normalize())) {<a name="line.196"></a>
+<span class="sourceLineNo">197</span>      if (p.equals(Point3D.ZERO))<a name="line.197"></a>
+<span class="sourceLineNo">198</span>        return 1;<a name="line.198"></a>
+<span class="sourceLineNo">199</span>      return q.magnitude() / p.magnitude();<a name="line.199"></a>
+<span class="sourceLineNo">200</span>    }<a name="line.200"></a>
+<span class="sourceLineNo">201</span>//    if (p.getX() == 0 &amp;&amp; q.getX() != 0)<a name="line.201"></a>
+<span class="sourceLineNo">202</span>//      throw new NoSuchElementException();<a name="line.202"></a>
+<span class="sourceLineNo">203</span>//    if (p.getY() == 0 &amp;&amp; q.getY() != 0)<a name="line.203"></a>
+<span class="sourceLineNo">204</span>//      throw new NoSuchElementException();<a name="line.204"></a>
+<span class="sourceLineNo">205</span>//    if (p.getZ() == 0 &amp;&amp; q.getZ() != 0)<a name="line.205"></a>
+<span class="sourceLineNo">206</span>//      throw new NoSuchElementException();<a name="line.206"></a>
+<span class="sourceLineNo">207</span>//    if (q.getX() == 0 &amp;&amp; q.getY() == 0 &amp;&amp; q.getZ() == 0)<a name="line.207"></a>
+<span class="sourceLineNo">208</span>//      return 1d;<a name="line.208"></a>
+<span class="sourceLineNo">209</span>//    if (p.getX() != 0 &amp;&amp; q.getX() != 0) {<a name="line.209"></a>
+<span class="sourceLineNo">210</span>//      final double t = q.getX() / p.getX();<a name="line.210"></a>
+<span class="sourceLineNo">211</span>//      if (t * p.getY() == q.getY() &amp;&amp; t * p.getZ() == q.getZ())<a name="line.211"></a>
+<span class="sourceLineNo">212</span>//        return t;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>//    } else if (p.getY() != 0 &amp;&amp; q.getY() != 0) {<a name="line.213"></a>
+<span class="sourceLineNo">214</span>//      final double t = q.getY() / p.getY();<a name="line.214"></a>
+<span class="sourceLineNo">215</span>//      if (t * p.getX() == q.getX() &amp;&amp; t * p.getZ() == q.getZ())<a name="line.215"></a>
+<span class="sourceLineNo">216</span>//        return t;<a name="line.216"></a>
+<span class="sourceLineNo">217</span>//    } else if (p.getZ() != 0 &amp;&amp; q.getZ() != 0) {<a name="line.217"></a>
+<span class="sourceLineNo">218</span>//      final double t = q.getZ() / p.getZ();<a name="line.218"></a>
+<span class="sourceLineNo">219</span>//      if (t * p.getX() == q.getX() &amp;&amp; t * p.getY() == q.getY())<a name="line.219"></a>
+<span class="sourceLineNo">220</span>//        return t;<a name="line.220"></a>
+<span class="sourceLineNo">221</span>//    }<a name="line.221"></a>
+<span class="sourceLineNo">222</span>    throw new NoSuchElementException();<a name="line.222"></a>
+<span class="sourceLineNo">223</span>  }<a name="line.223"></a>
+<span class="sourceLineNo">224</span><a name="line.224"></a>
+<span class="sourceLineNo">225</span>  public static final boolean<a name="line.225"></a>
+<span class="sourceLineNo">226</span>      parallelLineSegments(final Point3D p1, final Point3D p2, final Point3D q1, final Point3D q2) {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    final Point3D p = p2.subtract(p1);<a name="line.227"></a>
+<span class="sourceLineNo">228</span>    final Point3D q = q2.subtract(q1);<a name="line.228"></a>
+<span class="sourceLineNo">229</span>    // length(minus(divide(p, length(p)), divide(q, length(q))))<a name="line.229"></a>
+<span class="sourceLineNo">230</span>    if (p.normalize().crossProduct(q.normalize()).magnitude() &lt; 0.01d)<a name="line.230"></a>
+<span class="sourceLineNo">231</span>      return true;<a name="line.231"></a>
+<span class="sourceLineNo">232</span>    return false;<a name="line.232"></a>
+<span class="sourceLineNo">233</span>  }<a name="line.233"></a>
+<span class="sourceLineNo">234</span><a name="line.234"></a>
+<span class="sourceLineNo">235</span>  public static final double cosAngle(final Point3D p1, final Point3D p2, final Point3D q1, final Point3D q2) {<a name="line.235"></a>
+<span class="sourceLineNo">236</span>    final Point3D p = p2.subtract(p1);<a name="line.236"></a>
+<span class="sourceLineNo">237</span>    final Point3D q = q2.subtract(q1);<a name="line.237"></a>
+<span class="sourceLineNo">238</span>    return p.normalize().dotProduct(q.normalize());<a name="line.238"></a>
+<span class="sourceLineNo">239</span>  }<a name="line.239"></a>
+<span class="sourceLineNo">240</span><a name="line.240"></a>
+<span class="sourceLineNo">241</span>//  public static final Function&lt;Point3D, Double&gt;  X_PROJECTION  = new Function&lt;Point3D, Double&gt;() {<a name="line.241"></a>
+<span class="sourceLineNo">242</span>//<a name="line.242"></a>
+<span class="sourceLineNo">243</span>//                                                                 @Override<a name="line.243"></a>
+<span class="sourceLineNo">244</span>//                                                                 public final Double apply(final Point3D point) {<a name="line.244"></a>
+<span class="sourceLineNo">245</span>//                                                                   return point.getX();<a name="line.245"></a>
+<span class="sourceLineNo">246</span>//                                                                 }<a name="line.246"></a>
+<span class="sourceLineNo">247</span>//                                                               };<a name="line.247"></a>
+<span class="sourceLineNo">248</span>//  public static final Function&lt;Point3D, Double&gt;  Y_PROJECTION  = new Function&lt;Point3D, Double&gt;() {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>//<a name="line.249"></a>
+<span class="sourceLineNo">250</span>//                                                                 @Override<a name="line.250"></a>
+<span class="sourceLineNo">251</span>//                                                                 public final Double apply(final Point3D point) {<a name="line.251"></a>
+<span class="sourceLineNo">252</span>//                                                                   return point.getY();<a name="line.252"></a>
+<span class="sourceLineNo">253</span>//                                                                 }<a name="line.253"></a>
+<span class="sourceLineNo">254</span>//                                                               };<a name="line.254"></a>
+<span class="sourceLineNo">255</span>//  public static final Function&lt;Point3D, Double&gt;  Z_PROJECTION  = new Function&lt;Point3D, Double&gt;() {<a name="line.255"></a>
+<span class="sourceLineNo">256</span>//<a name="line.256"></a>
+<span class="sourceLineNo">257</span>//                                                                 @Override<a name="line.257"></a>
+<span class="sourceLineNo">258</span>//                                                                 public final Double apply(final Point3D point) {<a name="line.258"></a>
+<span class="sourceLineNo">259</span>//                                                                   return point.getZ();<a name="line.259"></a>
+<span class="sourceLineNo">260</span>//                                                                 }<a name="line.260"></a>
+<span class="sourceLineNo">261</span>//                                                               };<a name="line.261"></a>
+<span class="sourceLineNo">262</span>//  public static final Function&lt;Point3D, Point3D&gt; XY_PROJECTION = new Function&lt;Point3D, Point3D&gt;() {<a name="line.262"></a>
+<span class="sourceLineNo">263</span>//<a name="line.263"></a>
+<span class="sourceLineNo">264</span>//                                                                 @Override<a name="line.264"></a>
+<span class="sourceLineNo">265</span>//                                                                 public final Point3D apply(final Point3D point) {<a name="line.265"></a>
+<span class="sourceLineNo">266</span>//                                                                   return Point3DBuilder<a name="line.266"></a>
+<span class="sourceLineNo">267</span>//                                                                       .create()<a name="line.267"></a>
+<span class="sourceLineNo">268</span>//                                                                       .x(point.getX())<a name="line.268"></a>
+<span class="sourceLineNo">269</span>//                                                                       .y(point.getY())<a name="line.269"></a>
+<span class="sourceLineNo">270</span>//                                                                       .z(0)<a name="line.270"></a>
+<span class="sourceLineNo">271</span>//                                                                       .build();<a name="line.271"></a>
+<span class="sourceLineNo">272</span>//                                                                 }<a name="line.272"></a>
+<span class="sourceLineNo">273</span>//                                                               };<a name="line.273"></a>
+<span class="sourceLineNo">274</span><a name="line.274"></a>
+<span class="sourceLineNo">275</span>  /**<a name="line.275"></a>
+<span class="sourceLineNo">276</span>   * Returns t such that p = q1 + t * (q2 - q1)<a name="line.276"></a>
+<span class="sourceLineNo">277</span>   * <a name="line.277"></a>
+<span class="sourceLineNo">278</span>   * @param p<a name="line.278"></a>
+<span class="sourceLineNo">279</span>   * @param q1<a name="line.279"></a>
+<span class="sourceLineNo">280</span>   * @param q2<a name="line.280"></a>
+<span class="sourceLineNo">281</span>   * @return<a name="line.281"></a>
+<span class="sourceLineNo">282</span>   */<a name="line.282"></a>
+<span class="sourceLineNo">283</span>  public static final double solve(final Point3D p, final Point3D q1, final Point3D q2) {<a name="line.283"></a>
+<span class="sourceLineNo">284</span>    final Point3D q = q2.subtract(q1);<a name="line.284"></a>
+<span class="sourceLineNo">285</span>    final Point3D x = p.subtract(q1);<a name="line.285"></a>
+<span class="sourceLineNo">286</span>    return x.dotProduct(q) / q.dotProduct(q);<a name="line.286"></a>
+<span class="sourceLineNo">287</span>  }<a name="line.287"></a>
+<span class="sourceLineNo">288</span><a name="line.288"></a>
+<span class="sourceLineNo">289</span>  public static final Point3D projectToLine(final Point3D p, final Point3D q1, final Point3D q2) {<a name="line.289"></a>
+<span class="sourceLineNo">290</span>    final double t = solve(p, q1, q2);<a name="line.290"></a>
+<span class="sourceLineNo">291</span>    return q1.add(q2.subtract(q1).multiply(t));<a name="line.291"></a>
+<span class="sourceLineNo">292</span>  }<a name="line.292"></a>
+<span class="sourceLineNo">293</span><a name="line.293"></a>
+<span class="sourceLineNo">294</span>  public static final Point3D projectToLineSegment(final Point3D p, final Point3D q1, final Point3D q2) {<a name="line.294"></a>
+<span class="sourceLineNo">295</span>    final double t = Math.min(Math.max(solve(p, q1, q2), 0), 1);<a name="line.295"></a>
+<span class="sourceLineNo">296</span>    return q1.add(q2.subtract(q1).multiply(t));<a name="line.296"></a>
+<span class="sourceLineNo">297</span>  }<a name="line.297"></a>
+<span class="sourceLineNo">298</span><a name="line.298"></a>
+<span class="sourceLineNo">299</span>  public static final Point3D shortestVectorFromLineSegment(final Point3D p, final Point3D q1, final Point3D q2) {<a name="line.299"></a>
+<span class="sourceLineNo">300</span>    return p.subtract(projectToLineSegment(p, q1, q2));<a name="line.300"></a>
+<span class="sourceLineNo">301</span>  }<a name="line.301"></a>
+<span class="sourceLineNo">302</span><a name="line.302"></a>
+<span class="sourceLineNo">303</span>}<a name="line.303"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

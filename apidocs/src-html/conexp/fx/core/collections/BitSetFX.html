@@ -1,0 +1,1518 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * Copyright (c) 1995, 2014, Oracle and/or its affiliates. All rights reserved.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.<a name="line.3"></a>
+<span class="sourceLineNo">004</span> *<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> *<a name="line.6"></a>
+<span class="sourceLineNo">007</span> *<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *<a name="line.8"></a>
+<span class="sourceLineNo">009</span> *<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> *<a name="line.11"></a>
+<span class="sourceLineNo">012</span> *<a name="line.12"></a>
+<span class="sourceLineNo">013</span> *<a name="line.13"></a>
+<span class="sourceLineNo">014</span> *<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> *<a name="line.16"></a>
+<span class="sourceLineNo">017</span> *<a name="line.17"></a>
+<span class="sourceLineNo">018</span> *<a name="line.18"></a>
+<span class="sourceLineNo">019</span> *<a name="line.19"></a>
+<span class="sourceLineNo">020</span> *<a name="line.20"></a>
+<span class="sourceLineNo">021</span> *<a name="line.21"></a>
+<span class="sourceLineNo">022</span> *<a name="line.22"></a>
+<span class="sourceLineNo">023</span> *<a name="line.23"></a>
+<span class="sourceLineNo">024</span> */<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>package conexp.fx.core.collections;<a name="line.26"></a>
+<span class="sourceLineNo">027</span><a name="line.27"></a>
+<span class="sourceLineNo">028</span>/*-<a name="line.28"></a>
+<span class="sourceLineNo">029</span> * #%L<a name="line.29"></a>
+<span class="sourceLineNo">030</span> * Concept Explorer FX<a name="line.30"></a>
+<span class="sourceLineNo">031</span> * %%<a name="line.31"></a>
+<span class="sourceLineNo">032</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.32"></a>
+<span class="sourceLineNo">033</span> * %%<a name="line.33"></a>
+<span class="sourceLineNo">034</span> * This program is free software: you can redistribute it and/or modify<a name="line.34"></a>
+<span class="sourceLineNo">035</span> * it under the terms of the GNU General Public License as<a name="line.35"></a>
+<span class="sourceLineNo">036</span> * published by the Free Software Foundation, either version 3 of the<a name="line.36"></a>
+<span class="sourceLineNo">037</span> * License, or (at your option) any later version.<a name="line.37"></a>
+<span class="sourceLineNo">038</span> * <a name="line.38"></a>
+<span class="sourceLineNo">039</span> * This program is distributed in the hope that it will be useful,<a name="line.39"></a>
+<span class="sourceLineNo">040</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.40"></a>
+<span class="sourceLineNo">041</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.41"></a>
+<span class="sourceLineNo">042</span> * GNU General Public License for more details.<a name="line.42"></a>
+<span class="sourceLineNo">043</span> * <a name="line.43"></a>
+<span class="sourceLineNo">044</span> * You should have received a copy of the GNU General Public<a name="line.44"></a>
+<span class="sourceLineNo">045</span> * License along with this program.  If not, see<a name="line.45"></a>
+<span class="sourceLineNo">046</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.46"></a>
+<span class="sourceLineNo">047</span> * #L%<a name="line.47"></a>
+<span class="sourceLineNo">048</span> */<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>import java.io.IOException;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import java.io.ObjectInputStream;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import java.io.ObjectOutputStream;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import java.io.ObjectStreamField;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>import java.nio.ByteBuffer;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>import java.nio.ByteOrder;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import java.nio.LongBuffer;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import java.util.AbstractSet;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import java.util.Arrays;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>import java.util.Collection;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>import java.util.Comparator;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>import java.util.Iterator;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>import java.util.NoSuchElementException;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>import java.util.PrimitiveIterator;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>import java.util.SortedSet;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>import java.util.Spliterator;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>import java.util.Spliterators;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>import java.util.stream.Stream;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>import java.util.stream.StreamSupport;<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>/**<a name="line.70"></a>
+<span class="sourceLineNo">071</span> * This class implements a vector of bits that grows as needed. Each component of the bit set has a {@code boolean}<a name="line.71"></a>
+<span class="sourceLineNo">072</span> * value. The bits of a {@code BitSet} are indexed by nonnegative integers. Individual indexed bits can be examined,<a name="line.72"></a>
+<span class="sourceLineNo">073</span> * set, or cleared. One {@code BitSet} may be used to modify the contents of another {@code BitSet} through logical AND,<a name="line.73"></a>
+<span class="sourceLineNo">074</span> * logical inclusive OR, and logical exclusive OR operations.<a name="line.74"></a>
+<span class="sourceLineNo">075</span> *<a name="line.75"></a>
+<span class="sourceLineNo">076</span> * &lt;p&gt;<a name="line.76"></a>
+<span class="sourceLineNo">077</span> * By default, all bits in the set initially have the value {@code false}.<a name="line.77"></a>
+<span class="sourceLineNo">078</span> *<a name="line.78"></a>
+<span class="sourceLineNo">079</span> * &lt;p&gt;<a name="line.79"></a>
+<span class="sourceLineNo">080</span> * Every bit set has a current size, which is the number of bits of space currently in use by the bit set. Note that the<a name="line.80"></a>
+<span class="sourceLineNo">081</span> * size is related to the implementation of a bit set, so it may change with implementation. The length of a bit set<a name="line.81"></a>
+<span class="sourceLineNo">082</span> * relates to logical length of a bit set and is defined independently of implementation.<a name="line.82"></a>
+<span class="sourceLineNo">083</span> *<a name="line.83"></a>
+<span class="sourceLineNo">084</span> * &lt;p&gt;<a name="line.84"></a>
+<span class="sourceLineNo">085</span> * Unless otherwise noted, passing a null parameter to any of the methods in a {@code BitSet} will result in a<a name="line.85"></a>
+<span class="sourceLineNo">086</span> * {@code NullPointerException}.<a name="line.86"></a>
+<span class="sourceLineNo">087</span> *<a name="line.87"></a>
+<span class="sourceLineNo">088</span> * &lt;p&gt;<a name="line.88"></a>
+<span class="sourceLineNo">089</span> * A {@code BitSet} is not safe for multithreaded use without external synchronization.<a name="line.89"></a>
+<span class="sourceLineNo">090</span> *<a name="line.90"></a>
+<span class="sourceLineNo">091</span> * @author Arthur van Hoff<a name="line.91"></a>
+<span class="sourceLineNo">092</span> * @author Michael McCloskey<a name="line.92"></a>
+<span class="sourceLineNo">093</span> * @author Martin Buchholz<a name="line.93"></a>
+<span class="sourceLineNo">094</span> * @since JDK1.0<a name="line.94"></a>
+<span class="sourceLineNo">095</span> */<a name="line.95"></a>
+<span class="sourceLineNo">096</span>public class BitSetFX extends AbstractSet&lt;Integer&gt; implements SortedSet&lt;Integer&gt;, Cloneable, java.io.Serializable {<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>  /*<a name="line.98"></a>
+<span class="sourceLineNo">099</span>   * BitSets are packed into arrays of "words." Currently a word is a long, which consists of 64 bits, requiring 6<a name="line.99"></a>
+<span class="sourceLineNo">100</span>   * address bits. The choice of word size is determined purely by performance concerns.<a name="line.100"></a>
+<span class="sourceLineNo">101</span>   */<a name="line.101"></a>
+<span class="sourceLineNo">102</span>  private final static int                 ADDRESS_BITS_PER_WORD  = 6;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>  private final static int                 BITS_PER_WORD          = 1 &lt;&lt; ADDRESS_BITS_PER_WORD;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>  private final static int                 BIT_INDEX_MASK         = BITS_PER_WORD - 1;<a name="line.104"></a>
+<span class="sourceLineNo">105</span><a name="line.105"></a>
+<span class="sourceLineNo">106</span>  /* Used to shift left or right for a partial word mask */<a name="line.106"></a>
+<span class="sourceLineNo">107</span>  private static final long                WORD_MASK              = 0xffffffffffffffffL;<a name="line.107"></a>
+<span class="sourceLineNo">108</span><a name="line.108"></a>
+<span class="sourceLineNo">109</span>  /**<a name="line.109"></a>
+<span class="sourceLineNo">110</span>   * @serialField bits<a name="line.110"></a>
+<span class="sourceLineNo">111</span>   *                long[]<a name="line.111"></a>
+<span class="sourceLineNo">112</span>   *<a name="line.112"></a>
+<span class="sourceLineNo">113</span>   *                The bits in this BitSet. The ith bit is stored in bits[i/64] at bit position i % 64 (where bit<a name="line.113"></a>
+<span class="sourceLineNo">114</span>   *                position 0 refers to the least significant bit and 63 refers to the most significant bit).<a name="line.114"></a>
+<span class="sourceLineNo">115</span>   */<a name="line.115"></a>
+<span class="sourceLineNo">116</span>  private static final ObjectStreamField[] serialPersistentFields = {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>      new ObjectStreamField("bits", long[].class),<a name="line.117"></a>
+<span class="sourceLineNo">118</span>  };<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>  /**<a name="line.120"></a>
+<span class="sourceLineNo">121</span>   * The internal field corresponding to the serialField "bits".<a name="line.121"></a>
+<span class="sourceLineNo">122</span>   */<a name="line.122"></a>
+<span class="sourceLineNo">123</span>  private long[]                           words;<a name="line.123"></a>
+<span class="sourceLineNo">124</span><a name="line.124"></a>
+<span class="sourceLineNo">125</span>  /**<a name="line.125"></a>
+<span class="sourceLineNo">126</span>   * The number of words in the logical size of this BitSet.<a name="line.126"></a>
+<span class="sourceLineNo">127</span>   */<a name="line.127"></a>
+<span class="sourceLineNo">128</span>  private transient int                    wordsInUse             = 0;<a name="line.128"></a>
+<span class="sourceLineNo">129</span><a name="line.129"></a>
+<span class="sourceLineNo">130</span>  /**<a name="line.130"></a>
+<span class="sourceLineNo">131</span>   * Whether the size of "words" is user-specified. If so, we assume the user knows what he's doing and try harder to<a name="line.131"></a>
+<span class="sourceLineNo">132</span>   * preserve it.<a name="line.132"></a>
+<span class="sourceLineNo">133</span>   */<a name="line.133"></a>
+<span class="sourceLineNo">134</span>  private transient boolean                sizeIsSticky           = false;<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>  /* use serialVersionUID from JDK 1.0.2 for interoperability */<a name="line.136"></a>
+<span class="sourceLineNo">137</span>  private static final long                serialVersionUID       = 7997698588986878753L;<a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138"></a>
+<span class="sourceLineNo">139</span>  /**<a name="line.139"></a>
+<span class="sourceLineNo">140</span>   * Given a bit index, return word index containing it.<a name="line.140"></a>
+<span class="sourceLineNo">141</span>   */<a name="line.141"></a>
+<span class="sourceLineNo">142</span>  private static int wordIndex(int bitIndex) {<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    return bitIndex &gt;&gt; ADDRESS_BITS_PER_WORD;<a name="line.143"></a>
+<span class="sourceLineNo">144</span>  }<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>  /**<a name="line.146"></a>
+<span class="sourceLineNo">147</span>   * Every public method must preserve these invariants.<a name="line.147"></a>
+<span class="sourceLineNo">148</span>   */<a name="line.148"></a>
+<span class="sourceLineNo">149</span>  private void checkInvariants() {<a name="line.149"></a>
+<span class="sourceLineNo">150</span>    assert (wordsInUse == 0 || words[wordsInUse - 1] != 0);<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    assert (wordsInUse &gt;= 0 &amp;&amp; wordsInUse &lt;= words.length);<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    assert (wordsInUse == words.length || words[wordsInUse] == 0);<a name="line.152"></a>
+<span class="sourceLineNo">153</span>  }<a name="line.153"></a>
+<span class="sourceLineNo">154</span><a name="line.154"></a>
+<span class="sourceLineNo">155</span>  /**<a name="line.155"></a>
+<span class="sourceLineNo">156</span>   * Sets the field wordsInUse to the logical size in words of the bit set. WARNING:This method assumes that the number<a name="line.156"></a>
+<span class="sourceLineNo">157</span>   * of words actually in use is less than or equal to the current value of wordsInUse!<a name="line.157"></a>
+<span class="sourceLineNo">158</span>   */<a name="line.158"></a>
+<span class="sourceLineNo">159</span>  private void recalculateWordsInUse() {<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    // Traverse the bitset until a used word is found<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    int i;<a name="line.161"></a>
+<span class="sourceLineNo">162</span>    for (i = wordsInUse - 1; i &gt;= 0; i--)<a name="line.162"></a>
+<span class="sourceLineNo">163</span>      if (words[i] != 0)<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        break;<a name="line.164"></a>
+<span class="sourceLineNo">165</span><a name="line.165"></a>
+<span class="sourceLineNo">166</span>    wordsInUse = i + 1; // The new logical size<a name="line.166"></a>
+<span class="sourceLineNo">167</span>  }<a name="line.167"></a>
+<span class="sourceLineNo">168</span><a name="line.168"></a>
+<span class="sourceLineNo">169</span>  /**<a name="line.169"></a>
+<span class="sourceLineNo">170</span>   * Creates a new bit set. All bits are initially {@code false}.<a name="line.170"></a>
+<span class="sourceLineNo">171</span>   */<a name="line.171"></a>
+<span class="sourceLineNo">172</span>  public BitSetFX() {<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    initWords(BITS_PER_WORD);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    sizeIsSticky = false;<a name="line.174"></a>
+<span class="sourceLineNo">175</span>  }<a name="line.175"></a>
+<span class="sourceLineNo">176</span><a name="line.176"></a>
+<span class="sourceLineNo">177</span>  /**<a name="line.177"></a>
+<span class="sourceLineNo">178</span>   * Creates a bit set whose initial size is large enough to explicitly represent bits with indices in the range<a name="line.178"></a>
+<span class="sourceLineNo">179</span>   * {@code 0} through {@code nbits-1}. All bits are initially {@code false}.<a name="line.179"></a>
+<span class="sourceLineNo">180</span>   *<a name="line.180"></a>
+<span class="sourceLineNo">181</span>   * @param nbits<a name="line.181"></a>
+<span class="sourceLineNo">182</span>   *          the initial size of the bit set<a name="line.182"></a>
+<span class="sourceLineNo">183</span>   * @throws NegativeArraySizeException<a name="line.183"></a>
+<span class="sourceLineNo">184</span>   *           if the specified initial size is negative<a name="line.184"></a>
+<span class="sourceLineNo">185</span>   */<a name="line.185"></a>
+<span class="sourceLineNo">186</span>  public BitSetFX(int nbits) {<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    // nbits can't be negative; size 0 is OK<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    if (nbits &lt; 0)<a name="line.188"></a>
+<span class="sourceLineNo">189</span>      throw new NegativeArraySizeException("nbits &lt; 0: " + nbits);<a name="line.189"></a>
+<span class="sourceLineNo">190</span><a name="line.190"></a>
+<span class="sourceLineNo">191</span>    initWords(nbits);<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    sizeIsSticky = true;<a name="line.192"></a>
+<span class="sourceLineNo">193</span>  }<a name="line.193"></a>
+<span class="sourceLineNo">194</span><a name="line.194"></a>
+<span class="sourceLineNo">195</span>  private void initWords(int nbits) {<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    words = new long[wordIndex(nbits - 1) + 1];<a name="line.196"></a>
+<span class="sourceLineNo">197</span>  }<a name="line.197"></a>
+<span class="sourceLineNo">198</span><a name="line.198"></a>
+<span class="sourceLineNo">199</span>  /**<a name="line.199"></a>
+<span class="sourceLineNo">200</span>   * Creates a bit set using words as the internal representation. The last word (if there is one) must be non-zero.<a name="line.200"></a>
+<span class="sourceLineNo">201</span>   */<a name="line.201"></a>
+<span class="sourceLineNo">202</span>  private BitSetFX(long[] words) {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>    this.words = words;<a name="line.203"></a>
+<span class="sourceLineNo">204</span>    this.wordsInUse = words.length;<a name="line.204"></a>
+<span class="sourceLineNo">205</span>    checkInvariants();<a name="line.205"></a>
+<span class="sourceLineNo">206</span>  }<a name="line.206"></a>
+<span class="sourceLineNo">207</span><a name="line.207"></a>
+<span class="sourceLineNo">208</span>  /**<a name="line.208"></a>
+<span class="sourceLineNo">209</span>   * Returns a new bit set containing all the bits in the given long array.<a name="line.209"></a>
+<span class="sourceLineNo">210</span>   *<a name="line.210"></a>
+<span class="sourceLineNo">211</span>   * &lt;p&gt;<a name="line.211"></a>
+<span class="sourceLineNo">212</span>   * More precisely, &lt;br&gt;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>   * {@code BitSet.valueOf(longs).get(n) == ((longs[n/64] &amp; (1L&lt;&lt;(n%64))) != 0)} &lt;br&gt;<a name="line.213"></a>
+<span class="sourceLineNo">214</span>   * for all {@code n &lt; 64 * longs.length}.<a name="line.214"></a>
+<span class="sourceLineNo">215</span>   *<a name="line.215"></a>
+<span class="sourceLineNo">216</span>   * &lt;p&gt;<a name="line.216"></a>
+<span class="sourceLineNo">217</span>   * This method is equivalent to {@code BitSet.valueOf(LongBuffer.wrap(longs))}.<a name="line.217"></a>
+<span class="sourceLineNo">218</span>   *<a name="line.218"></a>
+<span class="sourceLineNo">219</span>   * @param longs<a name="line.219"></a>
+<span class="sourceLineNo">220</span>   *          a long array containing a little-endian representation of a sequence of bits to be used as the initial<a name="line.220"></a>
+<span class="sourceLineNo">221</span>   *          bits of the new bit set<a name="line.221"></a>
+<span class="sourceLineNo">222</span>   * @return a {@code BitSet} containing all the bits in the long array<a name="line.222"></a>
+<span class="sourceLineNo">223</span>   * @since 1.7<a name="line.223"></a>
+<span class="sourceLineNo">224</span>   */<a name="line.224"></a>
+<span class="sourceLineNo">225</span>  public static BitSetFX valueOf(long[] longs) {<a name="line.225"></a>
+<span class="sourceLineNo">226</span>    int n;<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    for (n = longs.length; n &gt; 0 &amp;&amp; longs[n - 1] == 0; n--);<a name="line.227"></a>
+<span class="sourceLineNo">228</span>    return new BitSetFX(Arrays.copyOf(longs, n));<a name="line.228"></a>
+<span class="sourceLineNo">229</span>  }<a name="line.229"></a>
+<span class="sourceLineNo">230</span><a name="line.230"></a>
+<span class="sourceLineNo">231</span>  /**<a name="line.231"></a>
+<span class="sourceLineNo">232</span>   * Returns a new bit set containing all the bits in the given long buffer between its position and limit.<a name="line.232"></a>
+<span class="sourceLineNo">233</span>   *<a name="line.233"></a>
+<span class="sourceLineNo">234</span>   * &lt;p&gt;<a name="line.234"></a>
+<span class="sourceLineNo">235</span>   * More precisely, &lt;br&gt;<a name="line.235"></a>
+<span class="sourceLineNo">236</span>   * {@code BitSet.valueOf(lb).get(n) == ((lb.get(lb.position()+n/64) &amp; (1L&lt;&lt;(n%64))) != 0)} &lt;br&gt;<a name="line.236"></a>
+<span class="sourceLineNo">237</span>   * for all {@code n &lt; 64 * lb.remaining()}.<a name="line.237"></a>
+<span class="sourceLineNo">238</span>   *<a name="line.238"></a>
+<span class="sourceLineNo">239</span>   * &lt;p&gt;<a name="line.239"></a>
+<span class="sourceLineNo">240</span>   * The long buffer is not modified by this method, and no reference to the buffer is retained by the bit set.<a name="line.240"></a>
+<span class="sourceLineNo">241</span>   *<a name="line.241"></a>
+<span class="sourceLineNo">242</span>   * @param lb<a name="line.242"></a>
+<span class="sourceLineNo">243</span>   *          a long buffer containing a little-endian representation of a sequence of bits between its position and<a name="line.243"></a>
+<span class="sourceLineNo">244</span>   *          limit, to be used as the initial bits of the new bit set<a name="line.244"></a>
+<span class="sourceLineNo">245</span>   * @return a {@code BitSet} containing all the bits in the buffer in the specified range<a name="line.245"></a>
+<span class="sourceLineNo">246</span>   * @since 1.7<a name="line.246"></a>
+<span class="sourceLineNo">247</span>   */<a name="line.247"></a>
+<span class="sourceLineNo">248</span>  public static BitSetFX valueOf(LongBuffer lb) {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>    lb = lb.slice();<a name="line.249"></a>
+<span class="sourceLineNo">250</span>    int n;<a name="line.250"></a>
+<span class="sourceLineNo">251</span>    for (n = lb.remaining(); n &gt; 0 &amp;&amp; lb.get(n - 1) == 0; n--);<a name="line.251"></a>
+<span class="sourceLineNo">252</span>    long[] words = new long[n];<a name="line.252"></a>
+<span class="sourceLineNo">253</span>    lb.get(words);<a name="line.253"></a>
+<span class="sourceLineNo">254</span>    return new BitSetFX(words);<a name="line.254"></a>
+<span class="sourceLineNo">255</span>  }<a name="line.255"></a>
+<span class="sourceLineNo">256</span><a name="line.256"></a>
+<span class="sourceLineNo">257</span>  /**<a name="line.257"></a>
+<span class="sourceLineNo">258</span>   * Returns a new bit set containing all the bits in the given byte array.<a name="line.258"></a>
+<span class="sourceLineNo">259</span>   *<a name="line.259"></a>
+<span class="sourceLineNo">260</span>   * &lt;p&gt;<a name="line.260"></a>
+<span class="sourceLineNo">261</span>   * More precisely, &lt;br&gt;<a name="line.261"></a>
+<span class="sourceLineNo">262</span>   * {@code BitSet.valueOf(bytes).get(n) == ((bytes[n/8] &amp; (1&lt;&lt;(n%8))) != 0)} &lt;br&gt;<a name="line.262"></a>
+<span class="sourceLineNo">263</span>   * for all {@code n &lt;  8 * bytes.length}.<a name="line.263"></a>
+<span class="sourceLineNo">264</span>   *<a name="line.264"></a>
+<span class="sourceLineNo">265</span>   * &lt;p&gt;<a name="line.265"></a>
+<span class="sourceLineNo">266</span>   * This method is equivalent to {@code BitSet.valueOf(ByteBuffer.wrap(bytes))}.<a name="line.266"></a>
+<span class="sourceLineNo">267</span>   *<a name="line.267"></a>
+<span class="sourceLineNo">268</span>   * @param bytes<a name="line.268"></a>
+<span class="sourceLineNo">269</span>   *          a byte array containing a little-endian representation of a sequence of bits to be used as the initial<a name="line.269"></a>
+<span class="sourceLineNo">270</span>   *          bits of the new bit set<a name="line.270"></a>
+<span class="sourceLineNo">271</span>   * @return a {@code BitSet} containing all the bits in the byte array<a name="line.271"></a>
+<span class="sourceLineNo">272</span>   * @since 1.7<a name="line.272"></a>
+<span class="sourceLineNo">273</span>   */<a name="line.273"></a>
+<span class="sourceLineNo">274</span>  public static BitSetFX valueOf(byte[] bytes) {<a name="line.274"></a>
+<span class="sourceLineNo">275</span>    return BitSetFX.valueOf(ByteBuffer.wrap(bytes));<a name="line.275"></a>
+<span class="sourceLineNo">276</span>  }<a name="line.276"></a>
+<span class="sourceLineNo">277</span><a name="line.277"></a>
+<span class="sourceLineNo">278</span>  /**<a name="line.278"></a>
+<span class="sourceLineNo">279</span>   * Returns a new bit set containing all the bits in the given byte buffer between its position and limit.<a name="line.279"></a>
+<span class="sourceLineNo">280</span>   *<a name="line.280"></a>
+<span class="sourceLineNo">281</span>   * &lt;p&gt;<a name="line.281"></a>
+<span class="sourceLineNo">282</span>   * More precisely, &lt;br&gt;<a name="line.282"></a>
+<span class="sourceLineNo">283</span>   * {@code BitSet.valueOf(bb).get(n) == ((bb.get(bb.position()+n/8) &amp; (1&lt;&lt;(n%8))) != 0)} &lt;br&gt;<a name="line.283"></a>
+<span class="sourceLineNo">284</span>   * for all {@code n &lt; 8 * bb.remaining()}.<a name="line.284"></a>
+<span class="sourceLineNo">285</span>   *<a name="line.285"></a>
+<span class="sourceLineNo">286</span>   * &lt;p&gt;<a name="line.286"></a>
+<span class="sourceLineNo">287</span>   * The byte buffer is not modified by this method, and no reference to the buffer is retained by the bit set.<a name="line.287"></a>
+<span class="sourceLineNo">288</span>   *<a name="line.288"></a>
+<span class="sourceLineNo">289</span>   * @param bb<a name="line.289"></a>
+<span class="sourceLineNo">290</span>   *          a byte buffer containing a little-endian representation of a sequence of bits between its position and<a name="line.290"></a>
+<span class="sourceLineNo">291</span>   *          limit, to be used as the initial bits of the new bit set<a name="line.291"></a>
+<span class="sourceLineNo">292</span>   * @return a {@code BitSet} containing all the bits in the buffer in the specified range<a name="line.292"></a>
+<span class="sourceLineNo">293</span>   * @since 1.7<a name="line.293"></a>
+<span class="sourceLineNo">294</span>   */<a name="line.294"></a>
+<span class="sourceLineNo">295</span>  public static BitSetFX valueOf(ByteBuffer bb) {<a name="line.295"></a>
+<span class="sourceLineNo">296</span>    bb = bb.slice().order(ByteOrder.LITTLE_ENDIAN);<a name="line.296"></a>
+<span class="sourceLineNo">297</span>    int n;<a name="line.297"></a>
+<span class="sourceLineNo">298</span>    for (n = bb.remaining(); n &gt; 0 &amp;&amp; bb.get(n - 1) == 0; n--);<a name="line.298"></a>
+<span class="sourceLineNo">299</span>    long[] words = new long[(n + 7) / 8];<a name="line.299"></a>
+<span class="sourceLineNo">300</span>    bb.limit(n);<a name="line.300"></a>
+<span class="sourceLineNo">301</span>    int i = 0;<a name="line.301"></a>
+<span class="sourceLineNo">302</span>    while (bb.remaining() &gt;= 8)<a name="line.302"></a>
+<span class="sourceLineNo">303</span>      words[i++] = bb.getLong();<a name="line.303"></a>
+<span class="sourceLineNo">304</span>    for (int remaining = bb.remaining(), j = 0; j &lt; remaining; j++)<a name="line.304"></a>
+<span class="sourceLineNo">305</span>      words[i] |= (bb.get() &amp; 0xffL) &lt;&lt; (8 * j);<a name="line.305"></a>
+<span class="sourceLineNo">306</span>    return new BitSetFX(words);<a name="line.306"></a>
+<span class="sourceLineNo">307</span>  }<a name="line.307"></a>
+<span class="sourceLineNo">308</span><a name="line.308"></a>
+<span class="sourceLineNo">309</span>  /**<a name="line.309"></a>
+<span class="sourceLineNo">310</span>   * Returns a new byte array containing all the bits in this bit set.<a name="line.310"></a>
+<span class="sourceLineNo">311</span>   *<a name="line.311"></a>
+<span class="sourceLineNo">312</span>   * &lt;p&gt;<a name="line.312"></a>
+<span class="sourceLineNo">313</span>   * More precisely, if &lt;br&gt;<a name="line.313"></a>
+<span class="sourceLineNo">314</span>   * {@code byte[] bytes = s.toByteArray();} &lt;br&gt;<a name="line.314"></a>
+<span class="sourceLineNo">315</span>   * then {@code bytes.length == (s.length()+7)/8} and &lt;br&gt;<a name="line.315"></a>
+<span class="sourceLineNo">316</span>   * {@code s.get(n) == ((bytes[n/8] &amp; (1&lt;&lt;(n%8))) != 0)} &lt;br&gt;<a name="line.316"></a>
+<span class="sourceLineNo">317</span>   * for all {@code n &lt; 8 * bytes.length}.<a name="line.317"></a>
+<span class="sourceLineNo">318</span>   *<a name="line.318"></a>
+<span class="sourceLineNo">319</span>   * @return a byte array containing a little-endian representation of all the bits in this bit set<a name="line.319"></a>
+<span class="sourceLineNo">320</span>   * @since 1.7<a name="line.320"></a>
+<span class="sourceLineNo">321</span>   */<a name="line.321"></a>
+<span class="sourceLineNo">322</span>  public byte[] toByteArray() {<a name="line.322"></a>
+<span class="sourceLineNo">323</span>    int n = wordsInUse;<a name="line.323"></a>
+<span class="sourceLineNo">324</span>    if (n == 0)<a name="line.324"></a>
+<span class="sourceLineNo">325</span>      return new byte[0];<a name="line.325"></a>
+<span class="sourceLineNo">326</span>    int len = 8 * (n - 1);<a name="line.326"></a>
+<span class="sourceLineNo">327</span>    for (long x = words[n - 1]; x != 0; x &gt;&gt;&gt;= 8)<a name="line.327"></a>
+<span class="sourceLineNo">328</span>      len++;<a name="line.328"></a>
+<span class="sourceLineNo">329</span>    byte[] bytes = new byte[len];<a name="line.329"></a>
+<span class="sourceLineNo">330</span>    ByteBuffer bb = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);<a name="line.330"></a>
+<span class="sourceLineNo">331</span>    for (int i = 0; i &lt; n - 1; i++)<a name="line.331"></a>
+<span class="sourceLineNo">332</span>      bb.putLong(words[i]);<a name="line.332"></a>
+<span class="sourceLineNo">333</span>    for (long x = words[n - 1]; x != 0; x &gt;&gt;&gt;= 8)<a name="line.333"></a>
+<span class="sourceLineNo">334</span>      bb.put((byte) (x &amp; 0xff));<a name="line.334"></a>
+<span class="sourceLineNo">335</span>    return bytes;<a name="line.335"></a>
+<span class="sourceLineNo">336</span>  }<a name="line.336"></a>
+<span class="sourceLineNo">337</span><a name="line.337"></a>
+<span class="sourceLineNo">338</span>  /**<a name="line.338"></a>
+<span class="sourceLineNo">339</span>   * Returns a new long array containing all the bits in this bit set.<a name="line.339"></a>
+<span class="sourceLineNo">340</span>   *<a name="line.340"></a>
+<span class="sourceLineNo">341</span>   * &lt;p&gt;<a name="line.341"></a>
+<span class="sourceLineNo">342</span>   * More precisely, if &lt;br&gt;<a name="line.342"></a>
+<span class="sourceLineNo">343</span>   * {@code long[] longs = s.toLongArray();} &lt;br&gt;<a name="line.343"></a>
+<span class="sourceLineNo">344</span>   * then {@code longs.length == (s.length()+63)/64} and &lt;br&gt;<a name="line.344"></a>
+<span class="sourceLineNo">345</span>   * {@code s.get(n) == ((longs[n/64] &amp; (1L&lt;&lt;(n%64))) != 0)} &lt;br&gt;<a name="line.345"></a>
+<span class="sourceLineNo">346</span>   * for all {@code n &lt; 64 * longs.length}.<a name="line.346"></a>
+<span class="sourceLineNo">347</span>   *<a name="line.347"></a>
+<span class="sourceLineNo">348</span>   * @return a long array containing a little-endian representation of all the bits in this bit set<a name="line.348"></a>
+<span class="sourceLineNo">349</span>   * @since 1.7<a name="line.349"></a>
+<span class="sourceLineNo">350</span>   */<a name="line.350"></a>
+<span class="sourceLineNo">351</span>  public long[] toLongArray() {<a name="line.351"></a>
+<span class="sourceLineNo">352</span>    return Arrays.copyOf(words, wordsInUse);<a name="line.352"></a>
+<span class="sourceLineNo">353</span>  }<a name="line.353"></a>
+<span class="sourceLineNo">354</span><a name="line.354"></a>
+<span class="sourceLineNo">355</span>  /**<a name="line.355"></a>
+<span class="sourceLineNo">356</span>   * Ensures that the BitSet can hold enough words.<a name="line.356"></a>
+<span class="sourceLineNo">357</span>   * <a name="line.357"></a>
+<span class="sourceLineNo">358</span>   * @param wordsRequired<a name="line.358"></a>
+<span class="sourceLineNo">359</span>   *          the minimum acceptable number of words.<a name="line.359"></a>
+<span class="sourceLineNo">360</span>   */<a name="line.360"></a>
+<span class="sourceLineNo">361</span>  private void ensureCapacity(int wordsRequired) {<a name="line.361"></a>
+<span class="sourceLineNo">362</span>    if (words.length &lt; wordsRequired) {<a name="line.362"></a>
+<span class="sourceLineNo">363</span>      // Allocate larger of doubled size or required size<a name="line.363"></a>
+<span class="sourceLineNo">364</span>      int request = Math.max(2 * words.length, wordsRequired);<a name="line.364"></a>
+<span class="sourceLineNo">365</span>      words = Arrays.copyOf(words, request);<a name="line.365"></a>
+<span class="sourceLineNo">366</span>      sizeIsSticky = false;<a name="line.366"></a>
+<span class="sourceLineNo">367</span>    }<a name="line.367"></a>
+<span class="sourceLineNo">368</span>  }<a name="line.368"></a>
+<span class="sourceLineNo">369</span><a name="line.369"></a>
+<span class="sourceLineNo">370</span>  /**<a name="line.370"></a>
+<span class="sourceLineNo">371</span>   * Ensures that the BitSet can accommodate a given wordIndex, temporarily violating the invariants. The caller must<a name="line.371"></a>
+<span class="sourceLineNo">372</span>   * restore the invariants before returning to the user, possibly using recalculateWordsInUse().<a name="line.372"></a>
+<span class="sourceLineNo">373</span>   * <a name="line.373"></a>
+<span class="sourceLineNo">374</span>   * @param wordIndex<a name="line.374"></a>
+<span class="sourceLineNo">375</span>   *          the index to be accommodated.<a name="line.375"></a>
+<span class="sourceLineNo">376</span>   */<a name="line.376"></a>
+<span class="sourceLineNo">377</span>  private void expandTo(int wordIndex) {<a name="line.377"></a>
+<span class="sourceLineNo">378</span>    int wordsRequired = wordIndex + 1;<a name="line.378"></a>
+<span class="sourceLineNo">379</span>    if (wordsInUse &lt; wordsRequired) {<a name="line.379"></a>
+<span class="sourceLineNo">380</span>      ensureCapacity(wordsRequired);<a name="line.380"></a>
+<span class="sourceLineNo">381</span>      wordsInUse = wordsRequired;<a name="line.381"></a>
+<span class="sourceLineNo">382</span>    }<a name="line.382"></a>
+<span class="sourceLineNo">383</span>  }<a name="line.383"></a>
+<span class="sourceLineNo">384</span><a name="line.384"></a>
+<span class="sourceLineNo">385</span>  /**<a name="line.385"></a>
+<span class="sourceLineNo">386</span>   * Checks that fromIndex ... toIndex is a valid range of bit indices.<a name="line.386"></a>
+<span class="sourceLineNo">387</span>   */<a name="line.387"></a>
+<span class="sourceLineNo">388</span>  private static void checkRange(int fromIndex, int toIndex) {<a name="line.388"></a>
+<span class="sourceLineNo">389</span>    if (fromIndex &lt; 0)<a name="line.389"></a>
+<span class="sourceLineNo">390</span>      throw new IndexOutOfBoundsException("fromIndex &lt; 0: " + fromIndex);<a name="line.390"></a>
+<span class="sourceLineNo">391</span>    if (toIndex &lt; 0)<a name="line.391"></a>
+<span class="sourceLineNo">392</span>      throw new IndexOutOfBoundsException("toIndex &lt; 0: " + toIndex);<a name="line.392"></a>
+<span class="sourceLineNo">393</span>    if (fromIndex &gt; toIndex)<a name="line.393"></a>
+<span class="sourceLineNo">394</span>      throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " &gt; toIndex: " + toIndex);<a name="line.394"></a>
+<span class="sourceLineNo">395</span>  }<a name="line.395"></a>
+<span class="sourceLineNo">396</span><a name="line.396"></a>
+<span class="sourceLineNo">397</span>  /**<a name="line.397"></a>
+<span class="sourceLineNo">398</span>   * Sets the bit at the specified index to the complement of its current value.<a name="line.398"></a>
+<span class="sourceLineNo">399</span>   *<a name="line.399"></a>
+<span class="sourceLineNo">400</span>   * @param bitIndex<a name="line.400"></a>
+<span class="sourceLineNo">401</span>   *          the index of the bit to flip<a name="line.401"></a>
+<span class="sourceLineNo">402</span>   * @throws IndexOutOfBoundsException<a name="line.402"></a>
+<span class="sourceLineNo">403</span>   *           if the specified index is negative<a name="line.403"></a>
+<span class="sourceLineNo">404</span>   * @since 1.4<a name="line.404"></a>
+<span class="sourceLineNo">405</span>   */<a name="line.405"></a>
+<span class="sourceLineNo">406</span>  public void flip(int bitIndex) {<a name="line.406"></a>
+<span class="sourceLineNo">407</span>    if (bitIndex &lt; 0)<a name="line.407"></a>
+<span class="sourceLineNo">408</span>      throw new IndexOutOfBoundsException("bitIndex &lt; 0: " + bitIndex);<a name="line.408"></a>
+<span class="sourceLineNo">409</span><a name="line.409"></a>
+<span class="sourceLineNo">410</span>    int wordIndex = wordIndex(bitIndex);<a name="line.410"></a>
+<span class="sourceLineNo">411</span>    expandTo(wordIndex);<a name="line.411"></a>
+<span class="sourceLineNo">412</span><a name="line.412"></a>
+<span class="sourceLineNo">413</span>    words[wordIndex] ^= (1L &lt;&lt; bitIndex);<a name="line.413"></a>
+<span class="sourceLineNo">414</span><a name="line.414"></a>
+<span class="sourceLineNo">415</span>    recalculateWordsInUse();<a name="line.415"></a>
+<span class="sourceLineNo">416</span>    checkInvariants();<a name="line.416"></a>
+<span class="sourceLineNo">417</span>  }<a name="line.417"></a>
+<span class="sourceLineNo">418</span><a name="line.418"></a>
+<span class="sourceLineNo">419</span>  /**<a name="line.419"></a>
+<span class="sourceLineNo">420</span>   * Sets each bit from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the<a name="line.420"></a>
+<span class="sourceLineNo">421</span>   * complement of its current value.<a name="line.421"></a>
+<span class="sourceLineNo">422</span>   *<a name="line.422"></a>
+<span class="sourceLineNo">423</span>   * @param fromIndex<a name="line.423"></a>
+<span class="sourceLineNo">424</span>   *          index of the first bit to flip<a name="line.424"></a>
+<span class="sourceLineNo">425</span>   * @param toIndex<a name="line.425"></a>
+<span class="sourceLineNo">426</span>   *          index after the last bit to flip<a name="line.426"></a>
+<span class="sourceLineNo">427</span>   * @throws IndexOutOfBoundsException<a name="line.427"></a>
+<span class="sourceLineNo">428</span>   *           if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than<a name="line.428"></a>
+<span class="sourceLineNo">429</span>   *           {@code toIndex}<a name="line.429"></a>
+<span class="sourceLineNo">430</span>   * @since 1.4<a name="line.430"></a>
+<span class="sourceLineNo">431</span>   */<a name="line.431"></a>
+<span class="sourceLineNo">432</span>  public void flip(int fromIndex, int toIndex) {<a name="line.432"></a>
+<span class="sourceLineNo">433</span>    checkRange(fromIndex, toIndex);<a name="line.433"></a>
+<span class="sourceLineNo">434</span><a name="line.434"></a>
+<span class="sourceLineNo">435</span>    if (fromIndex == toIndex)<a name="line.435"></a>
+<span class="sourceLineNo">436</span>      return;<a name="line.436"></a>
+<span class="sourceLineNo">437</span><a name="line.437"></a>
+<span class="sourceLineNo">438</span>    int startWordIndex = wordIndex(fromIndex);<a name="line.438"></a>
+<span class="sourceLineNo">439</span>    int endWordIndex = wordIndex(toIndex - 1);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>    expandTo(endWordIndex);<a name="line.440"></a>
+<span class="sourceLineNo">441</span><a name="line.441"></a>
+<span class="sourceLineNo">442</span>    long firstWordMask = WORD_MASK &lt;&lt; fromIndex;<a name="line.442"></a>
+<span class="sourceLineNo">443</span>    long lastWordMask = WORD_MASK &gt;&gt;&gt; -toIndex;<a name="line.443"></a>
+<span class="sourceLineNo">444</span>    if (startWordIndex == endWordIndex) {<a name="line.444"></a>
+<span class="sourceLineNo">445</span>      // Case 1: One word<a name="line.445"></a>
+<span class="sourceLineNo">446</span>      words[startWordIndex] ^= (firstWordMask &amp; lastWordMask);<a name="line.446"></a>
+<span class="sourceLineNo">447</span>    } else {<a name="line.447"></a>
+<span class="sourceLineNo">448</span>      // Case 2: Multiple words<a name="line.448"></a>
+<span class="sourceLineNo">449</span>      // Handle first word<a name="line.449"></a>
+<span class="sourceLineNo">450</span>      words[startWordIndex] ^= firstWordMask;<a name="line.450"></a>
+<span class="sourceLineNo">451</span><a name="line.451"></a>
+<span class="sourceLineNo">452</span>      // Handle intermediate words, if any<a name="line.452"></a>
+<span class="sourceLineNo">453</span>      for (int i = startWordIndex + 1; i &lt; endWordIndex; i++)<a name="line.453"></a>
+<span class="sourceLineNo">454</span>        words[i] ^= WORD_MASK;<a name="line.454"></a>
+<span class="sourceLineNo">455</span><a name="line.455"></a>
+<span class="sourceLineNo">456</span>      // Handle last word<a name="line.456"></a>
+<span class="sourceLineNo">457</span>      words[endWordIndex] ^= lastWordMask;<a name="line.457"></a>
+<span class="sourceLineNo">458</span>    }<a name="line.458"></a>
+<span class="sourceLineNo">459</span><a name="line.459"></a>
+<span class="sourceLineNo">460</span>    recalculateWordsInUse();<a name="line.460"></a>
+<span class="sourceLineNo">461</span>    checkInvariants();<a name="line.461"></a>
+<span class="sourceLineNo">462</span>  }<a name="line.462"></a>
+<span class="sourceLineNo">463</span><a name="line.463"></a>
+<span class="sourceLineNo">464</span>  /**<a name="line.464"></a>
+<span class="sourceLineNo">465</span>   * Sets the bit at the specified index to {@code true}.<a name="line.465"></a>
+<span class="sourceLineNo">466</span>   *<a name="line.466"></a>
+<span class="sourceLineNo">467</span>   * @param bitIndex<a name="line.467"></a>
+<span class="sourceLineNo">468</span>   *          a bit index<a name="line.468"></a>
+<span class="sourceLineNo">469</span>   * @throws IndexOutOfBoundsException<a name="line.469"></a>
+<span class="sourceLineNo">470</span>   *           if the specified index is negative<a name="line.470"></a>
+<span class="sourceLineNo">471</span>   * @since JDK1.0<a name="line.471"></a>
+<span class="sourceLineNo">472</span>   */<a name="line.472"></a>
+<span class="sourceLineNo">473</span>  public void set(int bitIndex) {<a name="line.473"></a>
+<span class="sourceLineNo">474</span>    if (bitIndex &lt; 0)<a name="line.474"></a>
+<span class="sourceLineNo">475</span>      throw new IndexOutOfBoundsException("bitIndex &lt; 0: " + bitIndex);<a name="line.475"></a>
+<span class="sourceLineNo">476</span><a name="line.476"></a>
+<span class="sourceLineNo">477</span>    int wordIndex = wordIndex(bitIndex);<a name="line.477"></a>
+<span class="sourceLineNo">478</span>    expandTo(wordIndex);<a name="line.478"></a>
+<span class="sourceLineNo">479</span><a name="line.479"></a>
+<span class="sourceLineNo">480</span>    words[wordIndex] |= (1L &lt;&lt; bitIndex); // Restores invariants<a name="line.480"></a>
+<span class="sourceLineNo">481</span><a name="line.481"></a>
+<span class="sourceLineNo">482</span>    checkInvariants();<a name="line.482"></a>
+<span class="sourceLineNo">483</span>  }<a name="line.483"></a>
+<span class="sourceLineNo">484</span><a name="line.484"></a>
+<span class="sourceLineNo">485</span>  /**<a name="line.485"></a>
+<span class="sourceLineNo">486</span>   * Sets the bit at the specified index to the specified value.<a name="line.486"></a>
+<span class="sourceLineNo">487</span>   *<a name="line.487"></a>
+<span class="sourceLineNo">488</span>   * @param bitIndex<a name="line.488"></a>
+<span class="sourceLineNo">489</span>   *          a bit index<a name="line.489"></a>
+<span class="sourceLineNo">490</span>   * @param value<a name="line.490"></a>
+<span class="sourceLineNo">491</span>   *          a boolean value to set<a name="line.491"></a>
+<span class="sourceLineNo">492</span>   * @throws IndexOutOfBoundsException<a name="line.492"></a>
+<span class="sourceLineNo">493</span>   *           if the specified index is negative<a name="line.493"></a>
+<span class="sourceLineNo">494</span>   * @since 1.4<a name="line.494"></a>
+<span class="sourceLineNo">495</span>   */<a name="line.495"></a>
+<span class="sourceLineNo">496</span>  public void set(int bitIndex, boolean value) {<a name="line.496"></a>
+<span class="sourceLineNo">497</span>    if (value)<a name="line.497"></a>
+<span class="sourceLineNo">498</span>      set(bitIndex);<a name="line.498"></a>
+<span class="sourceLineNo">499</span>    else<a name="line.499"></a>
+<span class="sourceLineNo">500</span>      clear(bitIndex);<a name="line.500"></a>
+<span class="sourceLineNo">501</span>  }<a name="line.501"></a>
+<span class="sourceLineNo">502</span><a name="line.502"></a>
+<span class="sourceLineNo">503</span>  /**<a name="line.503"></a>
+<span class="sourceLineNo">504</span>   * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to<a name="line.504"></a>
+<span class="sourceLineNo">505</span>   * {@code true}.<a name="line.505"></a>
+<span class="sourceLineNo">506</span>   *<a name="line.506"></a>
+<span class="sourceLineNo">507</span>   * @param fromIndex<a name="line.507"></a>
+<span class="sourceLineNo">508</span>   *          index of the first bit to be set<a name="line.508"></a>
+<span class="sourceLineNo">509</span>   * @param toIndex<a name="line.509"></a>
+<span class="sourceLineNo">510</span>   *          index after the last bit to be set<a name="line.510"></a>
+<span class="sourceLineNo">511</span>   * @throws IndexOutOfBoundsException<a name="line.511"></a>
+<span class="sourceLineNo">512</span>   *           if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than<a name="line.512"></a>
+<span class="sourceLineNo">513</span>   *           {@code toIndex}<a name="line.513"></a>
+<span class="sourceLineNo">514</span>   * @since 1.4<a name="line.514"></a>
+<span class="sourceLineNo">515</span>   */<a name="line.515"></a>
+<span class="sourceLineNo">516</span>  public void set(int fromIndex, int toIndex) {<a name="line.516"></a>
+<span class="sourceLineNo">517</span>    checkRange(fromIndex, toIndex);<a name="line.517"></a>
+<span class="sourceLineNo">518</span><a name="line.518"></a>
+<span class="sourceLineNo">519</span>    if (fromIndex == toIndex)<a name="line.519"></a>
+<span class="sourceLineNo">520</span>      return;<a name="line.520"></a>
+<span class="sourceLineNo">521</span><a name="line.521"></a>
+<span class="sourceLineNo">522</span>    // Increase capacity if necessary<a name="line.522"></a>
+<span class="sourceLineNo">523</span>    int startWordIndex = wordIndex(fromIndex);<a name="line.523"></a>
+<span class="sourceLineNo">524</span>    int endWordIndex = wordIndex(toIndex - 1);<a name="line.524"></a>
+<span class="sourceLineNo">525</span>    expandTo(endWordIndex);<a name="line.525"></a>
+<span class="sourceLineNo">526</span><a name="line.526"></a>
+<span class="sourceLineNo">527</span>    long firstWordMask = WORD_MASK &lt;&lt; fromIndex;<a name="line.527"></a>
+<span class="sourceLineNo">528</span>    long lastWordMask = WORD_MASK &gt;&gt;&gt; -toIndex;<a name="line.528"></a>
+<span class="sourceLineNo">529</span>    if (startWordIndex == endWordIndex) {<a name="line.529"></a>
+<span class="sourceLineNo">530</span>      // Case 1: One word<a name="line.530"></a>
+<span class="sourceLineNo">531</span>      words[startWordIndex] |= (firstWordMask &amp; lastWordMask);<a name="line.531"></a>
+<span class="sourceLineNo">532</span>    } else {<a name="line.532"></a>
+<span class="sourceLineNo">533</span>      // Case 2: Multiple words<a name="line.533"></a>
+<span class="sourceLineNo">534</span>      // Handle first word<a name="line.534"></a>
+<span class="sourceLineNo">535</span>      words[startWordIndex] |= firstWordMask;<a name="line.535"></a>
+<span class="sourceLineNo">536</span><a name="line.536"></a>
+<span class="sourceLineNo">537</span>      // Handle intermediate words, if any<a name="line.537"></a>
+<span class="sourceLineNo">538</span>      for (int i = startWordIndex + 1; i &lt; endWordIndex; i++)<a name="line.538"></a>
+<span class="sourceLineNo">539</span>        words[i] = WORD_MASK;<a name="line.539"></a>
+<span class="sourceLineNo">540</span><a name="line.540"></a>
+<span class="sourceLineNo">541</span>      // Handle last word (restores invariants)<a name="line.541"></a>
+<span class="sourceLineNo">542</span>      words[endWordIndex] |= lastWordMask;<a name="line.542"></a>
+<span class="sourceLineNo">543</span>    }<a name="line.543"></a>
+<span class="sourceLineNo">544</span><a name="line.544"></a>
+<span class="sourceLineNo">545</span>    checkInvariants();<a name="line.545"></a>
+<span class="sourceLineNo">546</span>  }<a name="line.546"></a>
+<span class="sourceLineNo">547</span><a name="line.547"></a>
+<span class="sourceLineNo">548</span>  /**<a name="line.548"></a>
+<span class="sourceLineNo">549</span>   * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to the<a name="line.549"></a>
+<span class="sourceLineNo">550</span>   * specified value.<a name="line.550"></a>
+<span class="sourceLineNo">551</span>   *<a name="line.551"></a>
+<span class="sourceLineNo">552</span>   * @param fromIndex<a name="line.552"></a>
+<span class="sourceLineNo">553</span>   *          index of the first bit to be set<a name="line.553"></a>
+<span class="sourceLineNo">554</span>   * @param toIndex<a name="line.554"></a>
+<span class="sourceLineNo">555</span>   *          index after the last bit to be set<a name="line.555"></a>
+<span class="sourceLineNo">556</span>   * @param value<a name="line.556"></a>
+<span class="sourceLineNo">557</span>   *          value to set the selected bits to<a name="line.557"></a>
+<span class="sourceLineNo">558</span>   * @throws IndexOutOfBoundsException<a name="line.558"></a>
+<span class="sourceLineNo">559</span>   *           if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than<a name="line.559"></a>
+<span class="sourceLineNo">560</span>   *           {@code toIndex}<a name="line.560"></a>
+<span class="sourceLineNo">561</span>   * @since 1.4<a name="line.561"></a>
+<span class="sourceLineNo">562</span>   */<a name="line.562"></a>
+<span class="sourceLineNo">563</span>  public void set(int fromIndex, int toIndex, boolean value) {<a name="line.563"></a>
+<span class="sourceLineNo">564</span>    if (value)<a name="line.564"></a>
+<span class="sourceLineNo">565</span>      set(fromIndex, toIndex);<a name="line.565"></a>
+<span class="sourceLineNo">566</span>    else<a name="line.566"></a>
+<span class="sourceLineNo">567</span>      clear(fromIndex, toIndex);<a name="line.567"></a>
+<span class="sourceLineNo">568</span>  }<a name="line.568"></a>
+<span class="sourceLineNo">569</span><a name="line.569"></a>
+<span class="sourceLineNo">570</span>  /**<a name="line.570"></a>
+<span class="sourceLineNo">571</span>   * Sets the bit specified by the index to {@code false}.<a name="line.571"></a>
+<span class="sourceLineNo">572</span>   *<a name="line.572"></a>
+<span class="sourceLineNo">573</span>   * @param bitIndex<a name="line.573"></a>
+<span class="sourceLineNo">574</span>   *          the index of the bit to be cleared<a name="line.574"></a>
+<span class="sourceLineNo">575</span>   * @throws IndexOutOfBoundsException<a name="line.575"></a>
+<span class="sourceLineNo">576</span>   *           if the specified index is negative<a name="line.576"></a>
+<span class="sourceLineNo">577</span>   * @since JDK1.0<a name="line.577"></a>
+<span class="sourceLineNo">578</span>   */<a name="line.578"></a>
+<span class="sourceLineNo">579</span>  public void clear(int bitIndex) {<a name="line.579"></a>
+<span class="sourceLineNo">580</span>    if (bitIndex &lt; 0)<a name="line.580"></a>
+<span class="sourceLineNo">581</span>      throw new IndexOutOfBoundsException("bitIndex &lt; 0: " + bitIndex);<a name="line.581"></a>
+<span class="sourceLineNo">582</span><a name="line.582"></a>
+<span class="sourceLineNo">583</span>    int wordIndex = wordIndex(bitIndex);<a name="line.583"></a>
+<span class="sourceLineNo">584</span>    if (wordIndex &gt;= wordsInUse)<a name="line.584"></a>
+<span class="sourceLineNo">585</span>      return;<a name="line.585"></a>
+<span class="sourceLineNo">586</span><a name="line.586"></a>
+<span class="sourceLineNo">587</span>    words[wordIndex] &amp;= ~(1L &lt;&lt; bitIndex);<a name="line.587"></a>
+<span class="sourceLineNo">588</span><a name="line.588"></a>
+<span class="sourceLineNo">589</span>    recalculateWordsInUse();<a name="line.589"></a>
+<span class="sourceLineNo">590</span>    checkInvariants();<a name="line.590"></a>
+<span class="sourceLineNo">591</span>  }<a name="line.591"></a>
+<span class="sourceLineNo">592</span><a name="line.592"></a>
+<span class="sourceLineNo">593</span>  /**<a name="line.593"></a>
+<span class="sourceLineNo">594</span>   * Sets the bits from the specified {@code fromIndex} (inclusive) to the specified {@code toIndex} (exclusive) to<a name="line.594"></a>
+<span class="sourceLineNo">595</span>   * {@code false}.<a name="line.595"></a>
+<span class="sourceLineNo">596</span>   *<a name="line.596"></a>
+<span class="sourceLineNo">597</span>   * @param fromIndex<a name="line.597"></a>
+<span class="sourceLineNo">598</span>   *          index of the first bit to be cleared<a name="line.598"></a>
+<span class="sourceLineNo">599</span>   * @param toIndex<a name="line.599"></a>
+<span class="sourceLineNo">600</span>   *          index after the last bit to be cleared<a name="line.600"></a>
+<span class="sourceLineNo">601</span>   * @throws IndexOutOfBoundsException<a name="line.601"></a>
+<span class="sourceLineNo">602</span>   *           if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than<a name="line.602"></a>
+<span class="sourceLineNo">603</span>   *           {@code toIndex}<a name="line.603"></a>
+<span class="sourceLineNo">604</span>   * @since 1.4<a name="line.604"></a>
+<span class="sourceLineNo">605</span>   */<a name="line.605"></a>
+<span class="sourceLineNo">606</span>  public void clear(int fromIndex, int toIndex) {<a name="line.606"></a>
+<span class="sourceLineNo">607</span>    checkRange(fromIndex, toIndex);<a name="line.607"></a>
+<span class="sourceLineNo">608</span><a name="line.608"></a>
+<span class="sourceLineNo">609</span>    if (fromIndex == toIndex)<a name="line.609"></a>
+<span class="sourceLineNo">610</span>      return;<a name="line.610"></a>
+<span class="sourceLineNo">611</span><a name="line.611"></a>
+<span class="sourceLineNo">612</span>    int startWordIndex = wordIndex(fromIndex);<a name="line.612"></a>
+<span class="sourceLineNo">613</span>    if (startWordIndex &gt;= wordsInUse)<a name="line.613"></a>
+<span class="sourceLineNo">614</span>      return;<a name="line.614"></a>
+<span class="sourceLineNo">615</span><a name="line.615"></a>
+<span class="sourceLineNo">616</span>    int endWordIndex = wordIndex(toIndex - 1);<a name="line.616"></a>
+<span class="sourceLineNo">617</span>    if (endWordIndex &gt;= wordsInUse) {<a name="line.617"></a>
+<span class="sourceLineNo">618</span>      toIndex = length();<a name="line.618"></a>
+<span class="sourceLineNo">619</span>      endWordIndex = wordsInUse - 1;<a name="line.619"></a>
+<span class="sourceLineNo">620</span>    }<a name="line.620"></a>
+<span class="sourceLineNo">621</span><a name="line.621"></a>
+<span class="sourceLineNo">622</span>    long firstWordMask = WORD_MASK &lt;&lt; fromIndex;<a name="line.622"></a>
+<span class="sourceLineNo">623</span>    long lastWordMask = WORD_MASK &gt;&gt;&gt; -toIndex;<a name="line.623"></a>
+<span class="sourceLineNo">624</span>    if (startWordIndex == endWordIndex) {<a name="line.624"></a>
+<span class="sourceLineNo">625</span>      // Case 1: One word<a name="line.625"></a>
+<span class="sourceLineNo">626</span>      words[startWordIndex] &amp;= ~(firstWordMask &amp; lastWordMask);<a name="line.626"></a>
+<span class="sourceLineNo">627</span>    } else {<a name="line.627"></a>
+<span class="sourceLineNo">628</span>      // Case 2: Multiple words<a name="line.628"></a>
+<span class="sourceLineNo">629</span>      // Handle first word<a name="line.629"></a>
+<span class="sourceLineNo">630</span>      words[startWordIndex] &amp;= ~firstWordMask;<a name="line.630"></a>
+<span class="sourceLineNo">631</span><a name="line.631"></a>
+<span class="sourceLineNo">632</span>      // Handle intermediate words, if any<a name="line.632"></a>
+<span class="sourceLineNo">633</span>      for (int i = startWordIndex + 1; i &lt; endWordIndex; i++)<a name="line.633"></a>
+<span class="sourceLineNo">634</span>        words[i] = 0;<a name="line.634"></a>
+<span class="sourceLineNo">635</span><a name="line.635"></a>
+<span class="sourceLineNo">636</span>      // Handle last word<a name="line.636"></a>
+<span class="sourceLineNo">637</span>      words[endWordIndex] &amp;= ~lastWordMask;<a name="line.637"></a>
+<span class="sourceLineNo">638</span>    }<a name="line.638"></a>
+<span class="sourceLineNo">639</span><a name="line.639"></a>
+<span class="sourceLineNo">640</span>    recalculateWordsInUse();<a name="line.640"></a>
+<span class="sourceLineNo">641</span>    checkInvariants();<a name="line.641"></a>
+<span class="sourceLineNo">642</span>  }<a name="line.642"></a>
+<span class="sourceLineNo">643</span><a name="line.643"></a>
+<span class="sourceLineNo">644</span>  /**<a name="line.644"></a>
+<span class="sourceLineNo">645</span>   * Sets all of the bits in this BitSet to {@code false}.<a name="line.645"></a>
+<span class="sourceLineNo">646</span>   *<a name="line.646"></a>
+<span class="sourceLineNo">647</span>   * @since 1.4<a name="line.647"></a>
+<span class="sourceLineNo">648</span>   */<a name="line.648"></a>
+<span class="sourceLineNo">649</span>  public void clear() {<a name="line.649"></a>
+<span class="sourceLineNo">650</span>    while (wordsInUse &gt; 0)<a name="line.650"></a>
+<span class="sourceLineNo">651</span>      words[--wordsInUse] = 0;<a name="line.651"></a>
+<span class="sourceLineNo">652</span>  }<a name="line.652"></a>
+<span class="sourceLineNo">653</span><a name="line.653"></a>
+<span class="sourceLineNo">654</span>  /**<a name="line.654"></a>
+<span class="sourceLineNo">655</span>   * Returns the value of the bit with the specified index. The value is {@code true} if the bit with the index<a name="line.655"></a>
+<span class="sourceLineNo">656</span>   * {@code bitIndex} is currently set in this {@code BitSet}; otherwise, the result is {@code false}.<a name="line.656"></a>
+<span class="sourceLineNo">657</span>   *<a name="line.657"></a>
+<span class="sourceLineNo">658</span>   * @param bitIndex<a name="line.658"></a>
+<span class="sourceLineNo">659</span>   *          the bit index<a name="line.659"></a>
+<span class="sourceLineNo">660</span>   * @return the value of the bit with the specified index<a name="line.660"></a>
+<span class="sourceLineNo">661</span>   * @throws IndexOutOfBoundsException<a name="line.661"></a>
+<span class="sourceLineNo">662</span>   *           if the specified index is negative<a name="line.662"></a>
+<span class="sourceLineNo">663</span>   */<a name="line.663"></a>
+<span class="sourceLineNo">664</span>  public boolean get(int bitIndex) {<a name="line.664"></a>
+<span class="sourceLineNo">665</span>    if (bitIndex &lt; 0)<a name="line.665"></a>
+<span class="sourceLineNo">666</span>      throw new IndexOutOfBoundsException("bitIndex &lt; 0: " + bitIndex);<a name="line.666"></a>
+<span class="sourceLineNo">667</span><a name="line.667"></a>
+<span class="sourceLineNo">668</span>    checkInvariants();<a name="line.668"></a>
+<span class="sourceLineNo">669</span><a name="line.669"></a>
+<span class="sourceLineNo">670</span>    int wordIndex = wordIndex(bitIndex);<a name="line.670"></a>
+<span class="sourceLineNo">671</span>    return (wordIndex &lt; wordsInUse) &amp;&amp; ((words[wordIndex] &amp; (1L &lt;&lt; bitIndex)) != 0);<a name="line.671"></a>
+<span class="sourceLineNo">672</span>  }<a name="line.672"></a>
+<span class="sourceLineNo">673</span><a name="line.673"></a>
+<span class="sourceLineNo">674</span>  /**<a name="line.674"></a>
+<span class="sourceLineNo">675</span>   * Returns a new {@code BitSet} composed of bits from this {@code BitSet} from {@code fromIndex} (inclusive) to<a name="line.675"></a>
+<span class="sourceLineNo">676</span>   * {@code toIndex} (exclusive).<a name="line.676"></a>
+<span class="sourceLineNo">677</span>   *<a name="line.677"></a>
+<span class="sourceLineNo">678</span>   * @param fromIndex<a name="line.678"></a>
+<span class="sourceLineNo">679</span>   *          index of the first bit to include<a name="line.679"></a>
+<span class="sourceLineNo">680</span>   * @param toIndex<a name="line.680"></a>
+<span class="sourceLineNo">681</span>   *          index after the last bit to include<a name="line.681"></a>
+<span class="sourceLineNo">682</span>   * @return a new {@code BitSet} from a range of this {@code BitSet}<a name="line.682"></a>
+<span class="sourceLineNo">683</span>   * @throws IndexOutOfBoundsException<a name="line.683"></a>
+<span class="sourceLineNo">684</span>   *           if {@code fromIndex} is negative, or {@code toIndex} is negative, or {@code fromIndex} is larger than<a name="line.684"></a>
+<span class="sourceLineNo">685</span>   *           {@code toIndex}<a name="line.685"></a>
+<span class="sourceLineNo">686</span>   * @since 1.4<a name="line.686"></a>
+<span class="sourceLineNo">687</span>   */<a name="line.687"></a>
+<span class="sourceLineNo">688</span>  public BitSetFX get(int fromIndex, int toIndex) {<a name="line.688"></a>
+<span class="sourceLineNo">689</span>    checkRange(fromIndex, toIndex);<a name="line.689"></a>
+<span class="sourceLineNo">690</span><a name="line.690"></a>
+<span class="sourceLineNo">691</span>    checkInvariants();<a name="line.691"></a>
+<span class="sourceLineNo">692</span><a name="line.692"></a>
+<span class="sourceLineNo">693</span>    int len = length();<a name="line.693"></a>
+<span class="sourceLineNo">694</span><a name="line.694"></a>
+<span class="sourceLineNo">695</span>    // If no set bits in range return empty bitset<a name="line.695"></a>
+<span class="sourceLineNo">696</span>    if (len &lt;= fromIndex || fromIndex == toIndex)<a name="line.696"></a>
+<span class="sourceLineNo">697</span>      return new BitSetFX(0);<a name="line.697"></a>
+<span class="sourceLineNo">698</span><a name="line.698"></a>
+<span class="sourceLineNo">699</span>    // An optimization<a name="line.699"></a>
+<span class="sourceLineNo">700</span>    if (toIndex &gt; len)<a name="line.700"></a>
+<span class="sourceLineNo">701</span>      toIndex = len;<a name="line.701"></a>
+<span class="sourceLineNo">702</span><a name="line.702"></a>
+<span class="sourceLineNo">703</span>    BitSetFX result = new BitSetFX(toIndex - fromIndex);<a name="line.703"></a>
+<span class="sourceLineNo">704</span>    int targetWords = wordIndex(toIndex - fromIndex - 1) + 1;<a name="line.704"></a>
+<span class="sourceLineNo">705</span>    int sourceIndex = wordIndex(fromIndex);<a name="line.705"></a>
+<span class="sourceLineNo">706</span>    boolean wordAligned = ((fromIndex &amp; BIT_INDEX_MASK) == 0);<a name="line.706"></a>
+<span class="sourceLineNo">707</span><a name="line.707"></a>
+<span class="sourceLineNo">708</span>    // Process all words but the last word<a name="line.708"></a>
+<span class="sourceLineNo">709</span>    for (int i = 0; i &lt; targetWords - 1; i++, sourceIndex++)<a name="line.709"></a>
+<span class="sourceLineNo">710</span>      result.words[i] = wordAligned ? words[sourceIndex]<a name="line.710"></a>
+<span class="sourceLineNo">711</span>          : (words[sourceIndex] &gt;&gt;&gt; fromIndex) | (words[sourceIndex + 1] &lt;&lt; -fromIndex);<a name="line.711"></a>
+<span class="sourceLineNo">712</span><a name="line.712"></a>
+<span class="sourceLineNo">713</span>    // Process the last word<a name="line.713"></a>
+<span class="sourceLineNo">714</span>    long lastWordMask = WORD_MASK &gt;&gt;&gt; -toIndex;<a name="line.714"></a>
+<span class="sourceLineNo">715</span>    result.words[targetWords - 1] =<a name="line.715"></a>
+<span class="sourceLineNo">716</span>        ((toIndex - 1) &amp; BIT_INDEX_MASK) &lt; (fromIndex &amp; BIT_INDEX_MASK) ? /* straddles source words */<a name="line.716"></a>
+<span class="sourceLineNo">717</span>            ((words[sourceIndex] &gt;&gt;&gt; fromIndex) | (words[sourceIndex + 1] &amp; lastWordMask) &lt;&lt; -fromIndex)<a name="line.717"></a>
+<span class="sourceLineNo">718</span>            : ((words[sourceIndex] &amp; lastWordMask) &gt;&gt;&gt; fromIndex);<a name="line.718"></a>
+<span class="sourceLineNo">719</span><a name="line.719"></a>
+<span class="sourceLineNo">720</span>    // Set wordsInUse correctly<a name="line.720"></a>
+<span class="sourceLineNo">721</span>    result.wordsInUse = targetWords;<a name="line.721"></a>
+<span class="sourceLineNo">722</span>    result.recalculateWordsInUse();<a name="line.722"></a>
+<span class="sourceLineNo">723</span>    result.checkInvariants();<a name="line.723"></a>
+<span class="sourceLineNo">724</span><a name="line.724"></a>
+<span class="sourceLineNo">725</span>    return result;<a name="line.725"></a>
+<span class="sourceLineNo">726</span>  }<a name="line.726"></a>
+<span class="sourceLineNo">727</span><a name="line.727"></a>
+<span class="sourceLineNo">728</span>  /**<a name="line.728"></a>
+<span class="sourceLineNo">729</span>   * Returns the index of the first bit that is set to {@code true} that occurs on or after the specified starting<a name="line.729"></a>
+<span class="sourceLineNo">730</span>   * index. If no such bit exists then {@code -1} is returned.<a name="line.730"></a>
+<span class="sourceLineNo">731</span>   *<a name="line.731"></a>
+<span class="sourceLineNo">732</span>   * &lt;p&gt;<a name="line.732"></a>
+<span class="sourceLineNo">733</span>   * To iterate over the {@code true} bits in a {@code BitSet}, use the following loop:<a name="line.733"></a>
+<span class="sourceLineNo">734</span>   *<a name="line.734"></a>
+<span class="sourceLineNo">735</span>   * &lt;pre&gt;<a name="line.735"></a>
+<span class="sourceLineNo">736</span>   *  {@code<a name="line.736"></a>
+<span class="sourceLineNo">737</span>   * for (int i = bs.nextSetBit(0); i &gt;= 0; i = bs.nextSetBit(i+1)) {<a name="line.737"></a>
+<span class="sourceLineNo">738</span>   *     // operate on index i here<a name="line.738"></a>
+<span class="sourceLineNo">739</span>   *     if (i == Integer.MAX_VALUE) {<a name="line.739"></a>
+<span class="sourceLineNo">740</span>   *         break; // or (i+1) would overflow<a name="line.740"></a>
+<span class="sourceLineNo">741</span>   *     }<a name="line.741"></a>
+<span class="sourceLineNo">742</span>   * }}<a name="line.742"></a>
+<span class="sourceLineNo">743</span>   * &lt;/pre&gt;<a name="line.743"></a>
+<span class="sourceLineNo">744</span>   *<a name="line.744"></a>
+<span class="sourceLineNo">745</span>   * @param fromIndex<a name="line.745"></a>
+<span class="sourceLineNo">746</span>   *          the index to start checking from (inclusive)<a name="line.746"></a>
+<span class="sourceLineNo">747</span>   * @return the index of the next set bit, or {@code -1} if there is no such bit<a name="line.747"></a>
+<span class="sourceLineNo">748</span>   * @throws IndexOutOfBoundsException<a name="line.748"></a>
+<span class="sourceLineNo">749</span>   *           if the specified index is negative<a name="line.749"></a>
+<span class="sourceLineNo">750</span>   * @since 1.4<a name="line.750"></a>
+<span class="sourceLineNo">751</span>   */<a name="line.751"></a>
+<span class="sourceLineNo">752</span>  public int nextSetBit(int fromIndex) {<a name="line.752"></a>
+<span class="sourceLineNo">753</span>    if (fromIndex &lt; 0)<a name="line.753"></a>
+<span class="sourceLineNo">754</span>      throw new IndexOutOfBoundsException("fromIndex &lt; 0: " + fromIndex);<a name="line.754"></a>
+<span class="sourceLineNo">755</span><a name="line.755"></a>
+<span class="sourceLineNo">756</span>    checkInvariants();<a name="line.756"></a>
+<span class="sourceLineNo">757</span><a name="line.757"></a>
+<span class="sourceLineNo">758</span>    int u = wordIndex(fromIndex);<a name="line.758"></a>
+<span class="sourceLineNo">759</span>    if (u &gt;= wordsInUse)<a name="line.759"></a>
+<span class="sourceLineNo">760</span>      return -1;<a name="line.760"></a>
+<span class="sourceLineNo">761</span><a name="line.761"></a>
+<span class="sourceLineNo">762</span>    long word = words[u] &amp; (WORD_MASK &lt;&lt; fromIndex);<a name="line.762"></a>
+<span class="sourceLineNo">763</span><a name="line.763"></a>
+<span class="sourceLineNo">764</span>    while (true) {<a name="line.764"></a>
+<span class="sourceLineNo">765</span>      if (word != 0)<a name="line.765"></a>
+<span class="sourceLineNo">766</span>        return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);<a name="line.766"></a>
+<span class="sourceLineNo">767</span>      if (++u == wordsInUse)<a name="line.767"></a>
+<span class="sourceLineNo">768</span>        return -1;<a name="line.768"></a>
+<span class="sourceLineNo">769</span>      word = words[u];<a name="line.769"></a>
+<span class="sourceLineNo">770</span>    }<a name="line.770"></a>
+<span class="sourceLineNo">771</span>  }<a name="line.771"></a>
+<span class="sourceLineNo">772</span><a name="line.772"></a>
+<span class="sourceLineNo">773</span>  /**<a name="line.773"></a>
+<span class="sourceLineNo">774</span>   * Returns the index of the first bit that is set to {@code false} that occurs on or after the specified starting<a name="line.774"></a>
+<span class="sourceLineNo">775</span>   * index.<a name="line.775"></a>
+<span class="sourceLineNo">776</span>   *<a name="line.776"></a>
+<span class="sourceLineNo">777</span>   * @param fromIndex<a name="line.777"></a>
+<span class="sourceLineNo">778</span>   *          the index to start checking from (inclusive)<a name="line.778"></a>
+<span class="sourceLineNo">779</span>   * @return the index of the next clear bit<a name="line.779"></a>
+<span class="sourceLineNo">780</span>   * @throws IndexOutOfBoundsException<a name="line.780"></a>
+<span class="sourceLineNo">781</span>   *           if the specified index is negative<a name="line.781"></a>
+<span class="sourceLineNo">782</span>   * @since 1.4<a name="line.782"></a>
+<span class="sourceLineNo">783</span>   */<a name="line.783"></a>
+<span class="sourceLineNo">784</span>  public int nextClearBit(int fromIndex) {<a name="line.784"></a>
+<span class="sourceLineNo">785</span>    // Neither spec nor implementation handle bitsets of maximal length.<a name="line.785"></a>
+<span class="sourceLineNo">786</span>    // See 4816253.<a name="line.786"></a>
+<span class="sourceLineNo">787</span>    if (fromIndex &lt; 0)<a name="line.787"></a>
+<span class="sourceLineNo">788</span>      throw new IndexOutOfBoundsException("fromIndex &lt; 0: " + fromIndex);<a name="line.788"></a>
+<span class="sourceLineNo">789</span><a name="line.789"></a>
+<span class="sourceLineNo">790</span>    checkInvariants();<a name="line.790"></a>
+<span class="sourceLineNo">791</span><a name="line.791"></a>
+<span class="sourceLineNo">792</span>    int u = wordIndex(fromIndex);<a name="line.792"></a>
+<span class="sourceLineNo">793</span>    if (u &gt;= wordsInUse)<a name="line.793"></a>
+<span class="sourceLineNo">794</span>      return fromIndex;<a name="line.794"></a>
+<span class="sourceLineNo">795</span><a name="line.795"></a>
+<span class="sourceLineNo">796</span>    long word = ~words[u] &amp; (WORD_MASK &lt;&lt; fromIndex);<a name="line.796"></a>
+<span class="sourceLineNo">797</span><a name="line.797"></a>
+<span class="sourceLineNo">798</span>    while (true) {<a name="line.798"></a>
+<span class="sourceLineNo">799</span>      if (word != 0)<a name="line.799"></a>
+<span class="sourceLineNo">800</span>        return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);<a name="line.800"></a>
+<span class="sourceLineNo">801</span>      if (++u == wordsInUse)<a name="line.801"></a>
+<span class="sourceLineNo">802</span>        return wordsInUse * BITS_PER_WORD;<a name="line.802"></a>
+<span class="sourceLineNo">803</span>      word = ~words[u];<a name="line.803"></a>
+<span class="sourceLineNo">804</span>    }<a name="line.804"></a>
+<span class="sourceLineNo">805</span>  }<a name="line.805"></a>
+<span class="sourceLineNo">806</span><a name="line.806"></a>
+<span class="sourceLineNo">807</span>  /**<a name="line.807"></a>
+<span class="sourceLineNo">808</span>   * Returns the index of the nearest bit that is set to {@code true} that occurs on or before the specified starting<a name="line.808"></a>
+<span class="sourceLineNo">809</span>   * index. If no such bit exists, or if {@code -1} is given as the starting index, then {@code -1} is returned.<a name="line.809"></a>
+<span class="sourceLineNo">810</span>   *<a name="line.810"></a>
+<span class="sourceLineNo">811</span>   * &lt;p&gt;<a name="line.811"></a>
+<span class="sourceLineNo">812</span>   * To iterate over the {@code true} bits in a {@code BitSet}, use the following loop:<a name="line.812"></a>
+<span class="sourceLineNo">813</span>   *<a name="line.813"></a>
+<span class="sourceLineNo">814</span>   * &lt;pre&gt;<a name="line.814"></a>
+<span class="sourceLineNo">815</span>   *  {@code<a name="line.815"></a>
+<span class="sourceLineNo">816</span>   * for (int i = bs.length(); (i = bs.previousSetBit(i-1)) &gt;= 0; ) {<a name="line.816"></a>
+<span class="sourceLineNo">817</span>   *     // operate on index i here<a name="line.817"></a>
+<span class="sourceLineNo">818</span>   * }}<a name="line.818"></a>
+<span class="sourceLineNo">819</span>   * &lt;/pre&gt;<a name="line.819"></a>
+<span class="sourceLineNo">820</span>   *<a name="line.820"></a>
+<span class="sourceLineNo">821</span>   * @param fromIndex<a name="line.821"></a>
+<span class="sourceLineNo">822</span>   *          the index to start checking from (inclusive)<a name="line.822"></a>
+<span class="sourceLineNo">823</span>   * @return the index of the previous set bit, or {@code -1} if there is no such bit<a name="line.823"></a>
+<span class="sourceLineNo">824</span>   * @throws IndexOutOfBoundsException<a name="line.824"></a>
+<span class="sourceLineNo">825</span>   *           if the specified index is less than {@code -1}<a name="line.825"></a>
+<span class="sourceLineNo">826</span>   * @since 1.7<a name="line.826"></a>
+<span class="sourceLineNo">827</span>   */<a name="line.827"></a>
+<span class="sourceLineNo">828</span>  public int previousSetBit(int fromIndex) {<a name="line.828"></a>
+<span class="sourceLineNo">829</span>    if (fromIndex &lt; 0) {<a name="line.829"></a>
+<span class="sourceLineNo">830</span>      if (fromIndex == -1)<a name="line.830"></a>
+<span class="sourceLineNo">831</span>        return -1;<a name="line.831"></a>
+<span class="sourceLineNo">832</span>      throw new IndexOutOfBoundsException("fromIndex &lt; -1: " + fromIndex);<a name="line.832"></a>
+<span class="sourceLineNo">833</span>    }<a name="line.833"></a>
+<span class="sourceLineNo">834</span><a name="line.834"></a>
+<span class="sourceLineNo">835</span>    checkInvariants();<a name="line.835"></a>
+<span class="sourceLineNo">836</span><a name="line.836"></a>
+<span class="sourceLineNo">837</span>    int u = wordIndex(fromIndex);<a name="line.837"></a>
+<span class="sourceLineNo">838</span>    if (u &gt;= wordsInUse)<a name="line.838"></a>
+<span class="sourceLineNo">839</span>      return length() - 1;<a name="line.839"></a>
+<span class="sourceLineNo">840</span><a name="line.840"></a>
+<span class="sourceLineNo">841</span>    long word = words[u] &amp; (WORD_MASK &gt;&gt;&gt; -(fromIndex + 1));<a name="line.841"></a>
+<span class="sourceLineNo">842</span><a name="line.842"></a>
+<span class="sourceLineNo">843</span>    while (true) {<a name="line.843"></a>
+<span class="sourceLineNo">844</span>      if (word != 0)<a name="line.844"></a>
+<span class="sourceLineNo">845</span>        return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);<a name="line.845"></a>
+<span class="sourceLineNo">846</span>      if (u-- == 0)<a name="line.846"></a>
+<span class="sourceLineNo">847</span>        return -1;<a name="line.847"></a>
+<span class="sourceLineNo">848</span>      word = words[u];<a name="line.848"></a>
+<span class="sourceLineNo">849</span>    }<a name="line.849"></a>
+<span class="sourceLineNo">850</span>  }<a name="line.850"></a>
+<span class="sourceLineNo">851</span><a name="line.851"></a>
+<span class="sourceLineNo">852</span>  /**<a name="line.852"></a>
+<span class="sourceLineNo">853</span>   * Returns the index of the nearest bit that is set to {@code false} that occurs on or before the specified starting<a name="line.853"></a>
+<span class="sourceLineNo">854</span>   * index. If no such bit exists, or if {@code -1} is given as the starting index, then {@code -1} is returned.<a name="line.854"></a>
+<span class="sourceLineNo">855</span>   *<a name="line.855"></a>
+<span class="sourceLineNo">856</span>   * @param fromIndex<a name="line.856"></a>
+<span class="sourceLineNo">857</span>   *          the index to start checking from (inclusive)<a name="line.857"></a>
+<span class="sourceLineNo">858</span>   * @return the index of the previous clear bit, or {@code -1} if there is no such bit<a name="line.858"></a>
+<span class="sourceLineNo">859</span>   * @throws IndexOutOfBoundsException<a name="line.859"></a>
+<span class="sourceLineNo">860</span>   *           if the specified index is less than {@code -1}<a name="line.860"></a>
+<span class="sourceLineNo">861</span>   * @since 1.7<a name="line.861"></a>
+<span class="sourceLineNo">862</span>   */<a name="line.862"></a>
+<span class="sourceLineNo">863</span>  public int previousClearBit(int fromIndex) {<a name="line.863"></a>
+<span class="sourceLineNo">864</span>    if (fromIndex &lt; 0) {<a name="line.864"></a>
+<span class="sourceLineNo">865</span>      if (fromIndex == -1)<a name="line.865"></a>
+<span class="sourceLineNo">866</span>        return -1;<a name="line.866"></a>
+<span class="sourceLineNo">867</span>      throw new IndexOutOfBoundsException("fromIndex &lt; -1: " + fromIndex);<a name="line.867"></a>
+<span class="sourceLineNo">868</span>    }<a name="line.868"></a>
+<span class="sourceLineNo">869</span><a name="line.869"></a>
+<span class="sourceLineNo">870</span>    checkInvariants();<a name="line.870"></a>
+<span class="sourceLineNo">871</span><a name="line.871"></a>
+<span class="sourceLineNo">872</span>    int u = wordIndex(fromIndex);<a name="line.872"></a>
+<span class="sourceLineNo">873</span>    if (u &gt;= wordsInUse)<a name="line.873"></a>
+<span class="sourceLineNo">874</span>      return fromIndex;<a name="line.874"></a>
+<span class="sourceLineNo">875</span><a name="line.875"></a>
+<span class="sourceLineNo">876</span>    long word = ~words[u] &amp; (WORD_MASK &gt;&gt;&gt; -(fromIndex + 1));<a name="line.876"></a>
+<span class="sourceLineNo">877</span><a name="line.877"></a>
+<span class="sourceLineNo">878</span>    while (true) {<a name="line.878"></a>
+<span class="sourceLineNo">879</span>      if (word != 0)<a name="line.879"></a>
+<span class="sourceLineNo">880</span>        return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);<a name="line.880"></a>
+<span class="sourceLineNo">881</span>      if (u-- == 0)<a name="line.881"></a>
+<span class="sourceLineNo">882</span>        return -1;<a name="line.882"></a>
+<span class="sourceLineNo">883</span>      word = ~words[u];<a name="line.883"></a>
+<span class="sourceLineNo">884</span>    }<a name="line.884"></a>
+<span class="sourceLineNo">885</span>  }<a name="line.885"></a>
+<span class="sourceLineNo">886</span><a name="line.886"></a>
+<span class="sourceLineNo">887</span>  /**<a name="line.887"></a>
+<span class="sourceLineNo">888</span>   * Returns the "logical size" of this {@code BitSet}: the index of the highest set bit in the {@code BitSet} plus one.<a name="line.888"></a>
+<span class="sourceLineNo">889</span>   * Returns zero if the {@code BitSet} contains no set bits.<a name="line.889"></a>
+<span class="sourceLineNo">890</span>   *<a name="line.890"></a>
+<span class="sourceLineNo">891</span>   * @return the logical size of this {@code BitSet}<a name="line.891"></a>
+<span class="sourceLineNo">892</span>   * @since 1.2<a name="line.892"></a>
+<span class="sourceLineNo">893</span>   */<a name="line.893"></a>
+<span class="sourceLineNo">894</span>  public int length() {<a name="line.894"></a>
+<span class="sourceLineNo">895</span>    if (wordsInUse == 0)<a name="line.895"></a>
+<span class="sourceLineNo">896</span>      return 0;<a name="line.896"></a>
+<span class="sourceLineNo">897</span><a name="line.897"></a>
+<span class="sourceLineNo">898</span>    return BITS_PER_WORD * (wordsInUse - 1) + (BITS_PER_WORD - Long.numberOfLeadingZeros(words[wordsInUse - 1]));<a name="line.898"></a>
+<span class="sourceLineNo">899</span>  }<a name="line.899"></a>
+<span class="sourceLineNo">900</span><a name="line.900"></a>
+<span class="sourceLineNo">901</span>  /**<a name="line.901"></a>
+<span class="sourceLineNo">902</span>   * Returns true if this {@code BitSet} contains no bits that are set to {@code true}.<a name="line.902"></a>
+<span class="sourceLineNo">903</span>   *<a name="line.903"></a>
+<span class="sourceLineNo">904</span>   * @return boolean indicating whether this {@code BitSet} is empty<a name="line.904"></a>
+<span class="sourceLineNo">905</span>   * @since 1.4<a name="line.905"></a>
+<span class="sourceLineNo">906</span>   */<a name="line.906"></a>
+<span class="sourceLineNo">907</span>  public boolean isEmpty() {<a name="line.907"></a>
+<span class="sourceLineNo">908</span>    return wordsInUse == 0;<a name="line.908"></a>
+<span class="sourceLineNo">909</span>  }<a name="line.909"></a>
+<span class="sourceLineNo">910</span><a name="line.910"></a>
+<span class="sourceLineNo">911</span>  /**<a name="line.911"></a>
+<span class="sourceLineNo">912</span>   * Returns true if the specified {@code BitSet} has any bits set to {@code true} that are also set to {@code true} in<a name="line.912"></a>
+<span class="sourceLineNo">913</span>   * this {@code BitSet}.<a name="line.913"></a>
+<span class="sourceLineNo">914</span>   *<a name="line.914"></a>
+<span class="sourceLineNo">915</span>   * @param set<a name="line.915"></a>
+<span class="sourceLineNo">916</span>   *          {@code BitSet} to intersect with<a name="line.916"></a>
+<span class="sourceLineNo">917</span>   * @return boolean indicating whether this {@code BitSet} intersects the specified {@code BitSet}<a name="line.917"></a>
+<span class="sourceLineNo">918</span>   * @since 1.4<a name="line.918"></a>
+<span class="sourceLineNo">919</span>   */<a name="line.919"></a>
+<span class="sourceLineNo">920</span>  public boolean intersects(BitSetFX set) {<a name="line.920"></a>
+<span class="sourceLineNo">921</span>    for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i &gt;= 0; i--)<a name="line.921"></a>
+<span class="sourceLineNo">922</span>      if ((words[i] &amp; set.words[i]) != 0)<a name="line.922"></a>
+<span class="sourceLineNo">923</span>        return true;<a name="line.923"></a>
+<span class="sourceLineNo">924</span>    return false;<a name="line.924"></a>
+<span class="sourceLineNo">925</span>  }<a name="line.925"></a>
+<span class="sourceLineNo">926</span><a name="line.926"></a>
+<span class="sourceLineNo">927</span>  /**<a name="line.927"></a>
+<span class="sourceLineNo">928</span>   * Returns the number of bits set to {@code true} in this {@code BitSet}.<a name="line.928"></a>
+<span class="sourceLineNo">929</span>   *<a name="line.929"></a>
+<span class="sourceLineNo">930</span>   * @return the number of bits set to {@code true} in this {@code BitSet}<a name="line.930"></a>
+<span class="sourceLineNo">931</span>   * @since 1.4<a name="line.931"></a>
+<span class="sourceLineNo">932</span>   */<a name="line.932"></a>
+<span class="sourceLineNo">933</span>  public int cardinality() {<a name="line.933"></a>
+<span class="sourceLineNo">934</span>    int sum = 0;<a name="line.934"></a>
+<span class="sourceLineNo">935</span>    for (int i = 0; i &lt; wordsInUse; i++)<a name="line.935"></a>
+<span class="sourceLineNo">936</span>      sum += Long.bitCount(words[i]);<a name="line.936"></a>
+<span class="sourceLineNo">937</span>    return sum;<a name="line.937"></a>
+<span class="sourceLineNo">938</span>  }<a name="line.938"></a>
+<span class="sourceLineNo">939</span><a name="line.939"></a>
+<span class="sourceLineNo">940</span>  /**<a name="line.940"></a>
+<span class="sourceLineNo">941</span>   * Performs a logical &lt;b&gt;AND&lt;/b&gt; of this target bit set with the argument bit set. This bit set is modified so that<a name="line.941"></a>
+<span class="sourceLineNo">942</span>   * each bit in it has the value {@code true} if and only if it both initially had the value {@code true} and the<a name="line.942"></a>
+<span class="sourceLineNo">943</span>   * corresponding bit in the bit set argument also had the value {@code true}.<a name="line.943"></a>
+<span class="sourceLineNo">944</span>   *<a name="line.944"></a>
+<span class="sourceLineNo">945</span>   * @param set<a name="line.945"></a>
+<span class="sourceLineNo">946</span>   *          a bit set<a name="line.946"></a>
+<span class="sourceLineNo">947</span>   */<a name="line.947"></a>
+<span class="sourceLineNo">948</span>  public void and(BitSetFX set) {<a name="line.948"></a>
+<span class="sourceLineNo">949</span>    if (this == set)<a name="line.949"></a>
+<span class="sourceLineNo">950</span>      return;<a name="line.950"></a>
+<span class="sourceLineNo">951</span><a name="line.951"></a>
+<span class="sourceLineNo">952</span>    while (wordsInUse &gt; set.wordsInUse)<a name="line.952"></a>
+<span class="sourceLineNo">953</span>      words[--wordsInUse] = 0;<a name="line.953"></a>
+<span class="sourceLineNo">954</span><a name="line.954"></a>
+<span class="sourceLineNo">955</span>    // Perform logical AND on words in common<a name="line.955"></a>
+<span class="sourceLineNo">956</span>    for (int i = 0; i &lt; wordsInUse; i++)<a name="line.956"></a>
+<span class="sourceLineNo">957</span>      words[i] &amp;= set.words[i];<a name="line.957"></a>
+<span class="sourceLineNo">958</span><a name="line.958"></a>
+<span class="sourceLineNo">959</span>    recalculateWordsInUse();<a name="line.959"></a>
+<span class="sourceLineNo">960</span>    checkInvariants();<a name="line.960"></a>
+<span class="sourceLineNo">961</span>  }<a name="line.961"></a>
+<span class="sourceLineNo">962</span><a name="line.962"></a>
+<span class="sourceLineNo">963</span>  /**<a name="line.963"></a>
+<span class="sourceLineNo">964</span>   * Performs a logical &lt;b&gt;OR&lt;/b&gt; of this bit set with the bit set argument. This bit set is modified so that a bit in<a name="line.964"></a>
+<span class="sourceLineNo">965</span>   * it has the value {@code true} if and only if it either already had the value {@code true} or the corresponding bit<a name="line.965"></a>
+<span class="sourceLineNo">966</span>   * in the bit set argument has the value {@code true}.<a name="line.966"></a>
+<span class="sourceLineNo">967</span>   *<a name="line.967"></a>
+<span class="sourceLineNo">968</span>   * @param set<a name="line.968"></a>
+<span class="sourceLineNo">969</span>   *          a bit set<a name="line.969"></a>
+<span class="sourceLineNo">970</span>   */<a name="line.970"></a>
+<span class="sourceLineNo">971</span>  public void or(BitSetFX set) {<a name="line.971"></a>
+<span class="sourceLineNo">972</span>    if (this == set)<a name="line.972"></a>
+<span class="sourceLineNo">973</span>      return;<a name="line.973"></a>
+<span class="sourceLineNo">974</span><a name="line.974"></a>
+<span class="sourceLineNo">975</span>    int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);<a name="line.975"></a>
+<span class="sourceLineNo">976</span><a name="line.976"></a>
+<span class="sourceLineNo">977</span>    if (wordsInUse &lt; set.wordsInUse) {<a name="line.977"></a>
+<span class="sourceLineNo">978</span>      ensureCapacity(set.wordsInUse);<a name="line.978"></a>
+<span class="sourceLineNo">979</span>      wordsInUse = set.wordsInUse;<a name="line.979"></a>
+<span class="sourceLineNo">980</span>    }<a name="line.980"></a>
+<span class="sourceLineNo">981</span><a name="line.981"></a>
+<span class="sourceLineNo">982</span>    // Perform logical OR on words in common<a name="line.982"></a>
+<span class="sourceLineNo">983</span>    for (int i = 0; i &lt; wordsInCommon; i++)<a name="line.983"></a>
+<span class="sourceLineNo">984</span>      words[i] |= set.words[i];<a name="line.984"></a>
+<span class="sourceLineNo">985</span><a name="line.985"></a>
+<span class="sourceLineNo">986</span>    // Copy any remaining words<a name="line.986"></a>
+<span class="sourceLineNo">987</span>    if (wordsInCommon &lt; set.wordsInUse)<a name="line.987"></a>
+<span class="sourceLineNo">988</span>      System.arraycopy(set.words, wordsInCommon, words, wordsInCommon, wordsInUse - wordsInCommon);<a name="line.988"></a>
+<span class="sourceLineNo">989</span><a name="line.989"></a>
+<span class="sourceLineNo">990</span>    // recalculateWordsInUse() is unnecessary<a name="line.990"></a>
+<span class="sourceLineNo">991</span>    checkInvariants();<a name="line.991"></a>
+<span class="sourceLineNo">992</span>  }<a name="line.992"></a>
+<span class="sourceLineNo">993</span><a name="line.993"></a>
+<span class="sourceLineNo">994</span>  /**<a name="line.994"></a>
+<span class="sourceLineNo">995</span>   * Performs a logical &lt;b&gt;XOR&lt;/b&gt; of this bit set with the bit set argument. This bit set is modified so that a bit in<a name="line.995"></a>
+<span class="sourceLineNo">996</span>   * it has the value {@code true} if and only if one of the following statements holds:<a name="line.996"></a>
+<span class="sourceLineNo">997</span>   * &lt;ul&gt;<a name="line.997"></a>
+<span class="sourceLineNo">998</span>   * &lt;li&gt;The bit initially has the value {@code true}, and the corresponding bit in the argument has the value<a name="line.998"></a>
+<span class="sourceLineNo">999</span>   * {@code false}.<a name="line.999"></a>
+<span class="sourceLineNo">1000</span>   * &lt;li&gt;The bit initially has the value {@code false}, and the corresponding bit in the argument has the value<a name="line.1000"></a>
+<span class="sourceLineNo">1001</span>   * {@code true}.<a name="line.1001"></a>
+<span class="sourceLineNo">1002</span>   * &lt;/ul&gt;<a name="line.1002"></a>
+<span class="sourceLineNo">1003</span>   *<a name="line.1003"></a>
+<span class="sourceLineNo">1004</span>   * @param set<a name="line.1004"></a>
+<span class="sourceLineNo">1005</span>   *          a bit set<a name="line.1005"></a>
+<span class="sourceLineNo">1006</span>   */<a name="line.1006"></a>
+<span class="sourceLineNo">1007</span>  public void xor(BitSetFX set) {<a name="line.1007"></a>
+<span class="sourceLineNo">1008</span>    int wordsInCommon = Math.min(wordsInUse, set.wordsInUse);<a name="line.1008"></a>
+<span class="sourceLineNo">1009</span><a name="line.1009"></a>
+<span class="sourceLineNo">1010</span>    if (wordsInUse &lt; set.wordsInUse) {<a name="line.1010"></a>
+<span class="sourceLineNo">1011</span>      ensureCapacity(set.wordsInUse);<a name="line.1011"></a>
+<span class="sourceLineNo">1012</span>      wordsInUse = set.wordsInUse;<a name="line.1012"></a>
+<span class="sourceLineNo">1013</span>    }<a name="line.1013"></a>
+<span class="sourceLineNo">1014</span><a name="line.1014"></a>
+<span class="sourceLineNo">1015</span>    // Perform logical XOR on words in common<a name="line.1015"></a>
+<span class="sourceLineNo">1016</span>    for (int i = 0; i &lt; wordsInCommon; i++)<a name="line.1016"></a>
+<span class="sourceLineNo">1017</span>      words[i] ^= set.words[i];<a name="line.1017"></a>
+<span class="sourceLineNo">1018</span><a name="line.1018"></a>
+<span class="sourceLineNo">1019</span>    // Copy any remaining words<a name="line.1019"></a>
+<span class="sourceLineNo">1020</span>    if (wordsInCommon &lt; set.wordsInUse)<a name="line.1020"></a>
+<span class="sourceLineNo">1021</span>      System.arraycopy(set.words, wordsInCommon, words, wordsInCommon, set.wordsInUse - wordsInCommon);<a name="line.1021"></a>
+<span class="sourceLineNo">1022</span><a name="line.1022"></a>
+<span class="sourceLineNo">1023</span>    recalculateWordsInUse();<a name="line.1023"></a>
+<span class="sourceLineNo">1024</span>    checkInvariants();<a name="line.1024"></a>
+<span class="sourceLineNo">1025</span>  }<a name="line.1025"></a>
+<span class="sourceLineNo">1026</span><a name="line.1026"></a>
+<span class="sourceLineNo">1027</span>  /**<a name="line.1027"></a>
+<span class="sourceLineNo">1028</span>   * Clears all of the bits in this {@code BitSet} whose corresponding bit is set in the specified {@code BitSet}.<a name="line.1028"></a>
+<span class="sourceLineNo">1029</span>   *<a name="line.1029"></a>
+<span class="sourceLineNo">1030</span>   * @param set<a name="line.1030"></a>
+<span class="sourceLineNo">1031</span>   *          the {@code BitSet} with which to mask this {@code BitSet}<a name="line.1031"></a>
+<span class="sourceLineNo">1032</span>   * @since 1.2<a name="line.1032"></a>
+<span class="sourceLineNo">1033</span>   */<a name="line.1033"></a>
+<span class="sourceLineNo">1034</span>  public void andNot(BitSetFX set) {<a name="line.1034"></a>
+<span class="sourceLineNo">1035</span>    // Perform logical (a &amp; !b) on words in common<a name="line.1035"></a>
+<span class="sourceLineNo">1036</span>    for (int i = Math.min(wordsInUse, set.wordsInUse) - 1; i &gt;= 0; i--)<a name="line.1036"></a>
+<span class="sourceLineNo">1037</span>      words[i] &amp;= ~set.words[i];<a name="line.1037"></a>
+<span class="sourceLineNo">1038</span><a name="line.1038"></a>
+<span class="sourceLineNo">1039</span>    recalculateWordsInUse();<a name="line.1039"></a>
+<span class="sourceLineNo">1040</span>    checkInvariants();<a name="line.1040"></a>
+<span class="sourceLineNo">1041</span>  }<a name="line.1041"></a>
+<span class="sourceLineNo">1042</span><a name="line.1042"></a>
+<span class="sourceLineNo">1043</span>  /**<a name="line.1043"></a>
+<span class="sourceLineNo">1044</span>   * Returns the hash code value for this bit set. The hash code depends only on which bits are set within this<a name="line.1044"></a>
+<span class="sourceLineNo">1045</span>   * {@code BitSet}.<a name="line.1045"></a>
+<span class="sourceLineNo">1046</span>   *<a name="line.1046"></a>
+<span class="sourceLineNo">1047</span>   * &lt;p&gt;<a name="line.1047"></a>
+<span class="sourceLineNo">1048</span>   * The hash code is defined to be the result of the following calculation:<a name="line.1048"></a>
+<span class="sourceLineNo">1049</span>   * <a name="line.1049"></a>
+<span class="sourceLineNo">1050</span>   * &lt;pre&gt;<a name="line.1050"></a>
+<span class="sourceLineNo">1051</span>   *  {@code<a name="line.1051"></a>
+<span class="sourceLineNo">1052</span>   * public int hashCode() {<a name="line.1052"></a>
+<span class="sourceLineNo">1053</span>   *     long h = 1234;<a name="line.1053"></a>
+<span class="sourceLineNo">1054</span>   *     long[] words = toLongArray();<a name="line.1054"></a>
+<span class="sourceLineNo">1055</span>   *     for (int i = words.length; --i &gt;= 0; )<a name="line.1055"></a>
+<span class="sourceLineNo">1056</span>   *         h ^= words[i] * (i + 1);<a name="line.1056"></a>
+<span class="sourceLineNo">1057</span>   *     return (int)((h &gt;&gt; 32) ^ h);<a name="line.1057"></a>
+<span class="sourceLineNo">1058</span>   * }}<a name="line.1058"></a>
+<span class="sourceLineNo">1059</span>   * &lt;/pre&gt;<a name="line.1059"></a>
+<span class="sourceLineNo">1060</span>   * <a name="line.1060"></a>
+<span class="sourceLineNo">1061</span>   * Note that the hash code changes if the set of bits is altered.<a name="line.1061"></a>
+<span class="sourceLineNo">1062</span>   *<a name="line.1062"></a>
+<span class="sourceLineNo">1063</span>   * @return the hash code value for this bit set<a name="line.1063"></a>
+<span class="sourceLineNo">1064</span>   */<a name="line.1064"></a>
+<span class="sourceLineNo">1065</span>  public int hashCode() {<a name="line.1065"></a>
+<span class="sourceLineNo">1066</span>    long h = 1234;<a name="line.1066"></a>
+<span class="sourceLineNo">1067</span>    for (int i = wordsInUse; --i &gt;= 0;)<a name="line.1067"></a>
+<span class="sourceLineNo">1068</span>      h ^= words[i] * (i + 1);<a name="line.1068"></a>
+<span class="sourceLineNo">1069</span><a name="line.1069"></a>
+<span class="sourceLineNo">1070</span>    return (int) ((h &gt;&gt; 32) ^ h);<a name="line.1070"></a>
+<span class="sourceLineNo">1071</span>  }<a name="line.1071"></a>
+<span class="sourceLineNo">1072</span><a name="line.1072"></a>
+<span class="sourceLineNo">1073</span>  /**<a name="line.1073"></a>
+<span class="sourceLineNo">1074</span>   * Returns the number of bits of space actually in use by this {@code BitSet} to represent bit values. The maximum<a name="line.1074"></a>
+<span class="sourceLineNo">1075</span>   * element in the set is the size - 1st element.<a name="line.1075"></a>
+<span class="sourceLineNo">1076</span>   *<a name="line.1076"></a>
+<span class="sourceLineNo">1077</span>   * @return the number of bits currently in this bit set<a name="line.1077"></a>
+<span class="sourceLineNo">1078</span>   */<a name="line.1078"></a>
+<span class="sourceLineNo">1079</span>  public int space() {<a name="line.1079"></a>
+<span class="sourceLineNo">1080</span>    return words.length * BITS_PER_WORD;<a name="line.1080"></a>
+<span class="sourceLineNo">1081</span>  }<a name="line.1081"></a>
+<span class="sourceLineNo">1082</span><a name="line.1082"></a>
+<span class="sourceLineNo">1083</span>  public int size() {<a name="line.1083"></a>
+<span class="sourceLineNo">1084</span>    return cardinality();<a name="line.1084"></a>
+<span class="sourceLineNo">1085</span>  }<a name="line.1085"></a>
+<span class="sourceLineNo">1086</span><a name="line.1086"></a>
+<span class="sourceLineNo">1087</span>  /**<a name="line.1087"></a>
+<span class="sourceLineNo">1088</span>   * Compares this object against the specified object. The result is {@code true} if and only if the argument is not<a name="line.1088"></a>
+<span class="sourceLineNo">1089</span>   * {@code null} and is a {@code Bitset} object that has exactly the same set of bits set to {@code true} as this bit<a name="line.1089"></a>
+<span class="sourceLineNo">1090</span>   * set. That is, for every nonnegative {@code int} index {@code k},<a name="line.1090"></a>
+<span class="sourceLineNo">1091</span>   * <a name="line.1091"></a>
+<span class="sourceLineNo">1092</span>   * &lt;pre&gt;<a name="line.1092"></a>
+<span class="sourceLineNo">1093</span>   * ((BitSet) obj).get(k) == this.get(k)<a name="line.1093"></a>
+<span class="sourceLineNo">1094</span>   * &lt;/pre&gt;<a name="line.1094"></a>
+<span class="sourceLineNo">1095</span>   * <a name="line.1095"></a>
+<span class="sourceLineNo">1096</span>   * must be true. The current sizes of the two bit sets are not compared.<a name="line.1096"></a>
+<span class="sourceLineNo">1097</span>   *<a name="line.1097"></a>
+<span class="sourceLineNo">1098</span>   * @param obj<a name="line.1098"></a>
+<span class="sourceLineNo">1099</span>   *          the object to compare with<a name="line.1099"></a>
+<span class="sourceLineNo">1100</span>   * @return {@code true} if the objects are the same; {@code false} otherwise<a name="line.1100"></a>
+<span class="sourceLineNo">1101</span>   * @see #space()<a name="line.1101"></a>
+<span class="sourceLineNo">1102</span>   */<a name="line.1102"></a>
+<span class="sourceLineNo">1103</span>  public boolean equals(Object obj) {<a name="line.1103"></a>
+<span class="sourceLineNo">1104</span>    if (!(obj instanceof BitSetFX))<a name="line.1104"></a>
+<span class="sourceLineNo">1105</span>      return false;<a name="line.1105"></a>
+<span class="sourceLineNo">1106</span>    if (this == obj)<a name="line.1106"></a>
+<span class="sourceLineNo">1107</span>      return true;<a name="line.1107"></a>
+<span class="sourceLineNo">1108</span><a name="line.1108"></a>
+<span class="sourceLineNo">1109</span>    BitSetFX set = (BitSetFX) obj;<a name="line.1109"></a>
+<span class="sourceLineNo">1110</span><a name="line.1110"></a>
+<span class="sourceLineNo">1111</span>    trimToSize();<a name="line.1111"></a>
+<span class="sourceLineNo">1112</span>    set.trimToSize();<a name="line.1112"></a>
+<span class="sourceLineNo">1113</span><a name="line.1113"></a>
+<span class="sourceLineNo">1114</span>    checkInvariants();<a name="line.1114"></a>
+<span class="sourceLineNo">1115</span>    set.checkInvariants();<a name="line.1115"></a>
+<span class="sourceLineNo">1116</span><a name="line.1116"></a>
+<span class="sourceLineNo">1117</span>    if (wordsInUse != set.wordsInUse)<a name="line.1117"></a>
+<span class="sourceLineNo">1118</span>      return false;<a name="line.1118"></a>
+<span class="sourceLineNo">1119</span><a name="line.1119"></a>
+<span class="sourceLineNo">1120</span>    // Check words in use by both BitSets<a name="line.1120"></a>
+<span class="sourceLineNo">1121</span>    for (int i = 0; i &lt; wordsInUse; i++)<a name="line.1121"></a>
+<span class="sourceLineNo">1122</span>      if (words[i] != set.words[i])<a name="line.1122"></a>
+<span class="sourceLineNo">1123</span>        return false;<a name="line.1123"></a>
+<span class="sourceLineNo">1124</span><a name="line.1124"></a>
+<span class="sourceLineNo">1125</span>    return true;<a name="line.1125"></a>
+<span class="sourceLineNo">1126</span>  }<a name="line.1126"></a>
+<span class="sourceLineNo">1127</span><a name="line.1127"></a>
+<span class="sourceLineNo">1128</span>  /**<a name="line.1128"></a>
+<span class="sourceLineNo">1129</span>   * Cloning this {@code BitSet} produces a new {@code BitSet} that is equal to it. The clone of the bit set is another<a name="line.1129"></a>
+<span class="sourceLineNo">1130</span>   * bit set that has exactly the same bits set to {@code true} as this bit set.<a name="line.1130"></a>
+<span class="sourceLineNo">1131</span>   *<a name="line.1131"></a>
+<span class="sourceLineNo">1132</span>   * @return a clone of this bit set<a name="line.1132"></a>
+<span class="sourceLineNo">1133</span>   * @see #space()<a name="line.1133"></a>
+<span class="sourceLineNo">1134</span>   */<a name="line.1134"></a>
+<span class="sourceLineNo">1135</span>  public Object clone() {<a name="line.1135"></a>
+<span class="sourceLineNo">1136</span>    if (!sizeIsSticky)<a name="line.1136"></a>
+<span class="sourceLineNo">1137</span>      trimToSize();<a name="line.1137"></a>
+<span class="sourceLineNo">1138</span><a name="line.1138"></a>
+<span class="sourceLineNo">1139</span>    try {<a name="line.1139"></a>
+<span class="sourceLineNo">1140</span>      BitSetFX result = (BitSetFX) super.clone();<a name="line.1140"></a>
+<span class="sourceLineNo">1141</span>      result.words = words.clone();<a name="line.1141"></a>
+<span class="sourceLineNo">1142</span>      result.checkInvariants();<a name="line.1142"></a>
+<span class="sourceLineNo">1143</span>      return result;<a name="line.1143"></a>
+<span class="sourceLineNo">1144</span>    } catch (CloneNotSupportedException e) {<a name="line.1144"></a>
+<span class="sourceLineNo">1145</span>      throw new InternalError(e);<a name="line.1145"></a>
+<span class="sourceLineNo">1146</span>    }<a name="line.1146"></a>
+<span class="sourceLineNo">1147</span>  }<a name="line.1147"></a>
+<span class="sourceLineNo">1148</span><a name="line.1148"></a>
+<span class="sourceLineNo">1149</span>  /**<a name="line.1149"></a>
+<span class="sourceLineNo">1150</span>   * Attempts to reduce internal storage used for the bits in this bit set. Calling this method may, but is not required<a name="line.1150"></a>
+<span class="sourceLineNo">1151</span>   * to, affect the value returned by a subsequent call to the {@link #space()} method.<a name="line.1151"></a>
+<span class="sourceLineNo">1152</span>   */<a name="line.1152"></a>
+<span class="sourceLineNo">1153</span>  private void trimToSize() {<a name="line.1153"></a>
+<span class="sourceLineNo">1154</span>    if (wordsInUse != words.length) {<a name="line.1154"></a>
+<span class="sourceLineNo">1155</span>      words = Arrays.copyOf(words, wordsInUse);<a name="line.1155"></a>
+<span class="sourceLineNo">1156</span>      checkInvariants();<a name="line.1156"></a>
+<span class="sourceLineNo">1157</span>    }<a name="line.1157"></a>
+<span class="sourceLineNo">1158</span>  }<a name="line.1158"></a>
+<span class="sourceLineNo">1159</span><a name="line.1159"></a>
+<span class="sourceLineNo">1160</span>  /**<a name="line.1160"></a>
+<span class="sourceLineNo">1161</span>   * Save the state of the {@code BitSet} instance to a stream (i.e., serialize it).<a name="line.1161"></a>
+<span class="sourceLineNo">1162</span>   */<a name="line.1162"></a>
+<span class="sourceLineNo">1163</span>  private void writeObject(ObjectOutputStream s) throws IOException {<a name="line.1163"></a>
+<span class="sourceLineNo">1164</span><a name="line.1164"></a>
+<span class="sourceLineNo">1165</span>    checkInvariants();<a name="line.1165"></a>
+<span class="sourceLineNo">1166</span><a name="line.1166"></a>
+<span class="sourceLineNo">1167</span>    if (!sizeIsSticky)<a name="line.1167"></a>
+<span class="sourceLineNo">1168</span>      trimToSize();<a name="line.1168"></a>
+<span class="sourceLineNo">1169</span><a name="line.1169"></a>
+<span class="sourceLineNo">1170</span>    ObjectOutputStream.PutField fields = s.putFields();<a name="line.1170"></a>
+<span class="sourceLineNo">1171</span>    fields.put("bits", words);<a name="line.1171"></a>
+<span class="sourceLineNo">1172</span>    s.writeFields();<a name="line.1172"></a>
+<span class="sourceLineNo">1173</span>  }<a name="line.1173"></a>
+<span class="sourceLineNo">1174</span><a name="line.1174"></a>
+<span class="sourceLineNo">1175</span>  /**<a name="line.1175"></a>
+<span class="sourceLineNo">1176</span>   * Reconstitute the {@code BitSet} instance from a stream (i.e., deserialize it).<a name="line.1176"></a>
+<span class="sourceLineNo">1177</span>   */<a name="line.1177"></a>
+<span class="sourceLineNo">1178</span>  private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {<a name="line.1178"></a>
+<span class="sourceLineNo">1179</span><a name="line.1179"></a>
+<span class="sourceLineNo">1180</span>    ObjectInputStream.GetField fields = s.readFields();<a name="line.1180"></a>
+<span class="sourceLineNo">1181</span>    words = (long[]) fields.get("bits", null);<a name="line.1181"></a>
+<span class="sourceLineNo">1182</span><a name="line.1182"></a>
+<span class="sourceLineNo">1183</span>    // Assume maximum length then find real length<a name="line.1183"></a>
+<span class="sourceLineNo">1184</span>    // because recalculateWordsInUse assumes maintenance<a name="line.1184"></a>
+<span class="sourceLineNo">1185</span>    // or reduction in logical size<a name="line.1185"></a>
+<span class="sourceLineNo">1186</span>    wordsInUse = words.length;<a name="line.1186"></a>
+<span class="sourceLineNo">1187</span>    recalculateWordsInUse();<a name="line.1187"></a>
+<span class="sourceLineNo">1188</span>    sizeIsSticky = (words.length &gt; 0 &amp;&amp; words[words.length - 1] == 0L); // heuristic<a name="line.1188"></a>
+<span class="sourceLineNo">1189</span>    checkInvariants();<a name="line.1189"></a>
+<span class="sourceLineNo">1190</span>  }<a name="line.1190"></a>
+<span class="sourceLineNo">1191</span><a name="line.1191"></a>
+<span class="sourceLineNo">1192</span>  /**<a name="line.1192"></a>
+<span class="sourceLineNo">1193</span>   * Returns a string representation of this bit set. For every index for which this {@code BitSet} contains a bit in<a name="line.1193"></a>
+<span class="sourceLineNo">1194</span>   * the set state, the decimal representation of that index is included in the result. Such indices are listed in order<a name="line.1194"></a>
+<span class="sourceLineNo">1195</span>   * from lowest to highest, separated by ",&amp;nbsp;" (a comma and a space) and surrounded by braces, resulting in the<a name="line.1195"></a>
+<span class="sourceLineNo">1196</span>   * usual mathematical notation for a set of integers.<a name="line.1196"></a>
+<span class="sourceLineNo">1197</span>   *<a name="line.1197"></a>
+<span class="sourceLineNo">1198</span>   * &lt;p&gt;<a name="line.1198"></a>
+<span class="sourceLineNo">1199</span>   * Example:<a name="line.1199"></a>
+<span class="sourceLineNo">1200</span>   * <a name="line.1200"></a>
+<span class="sourceLineNo">1201</span>   * &lt;pre&gt;<a name="line.1201"></a>
+<span class="sourceLineNo">1202</span>   * <a name="line.1202"></a>
+<span class="sourceLineNo">1203</span>   * BitSet drPepper = new BitSet();<a name="line.1203"></a>
+<span class="sourceLineNo">1204</span>   * &lt;/pre&gt;<a name="line.1204"></a>
+<span class="sourceLineNo">1205</span>   * <a name="line.1205"></a>
+<span class="sourceLineNo">1206</span>   * Now {@code drPepper.toString()} returns "{@code {}}".<a name="line.1206"></a>
+<span class="sourceLineNo">1207</span>   * <a name="line.1207"></a>
+<span class="sourceLineNo">1208</span>   * &lt;pre&gt;<a name="line.1208"></a>
+<span class="sourceLineNo">1209</span>   * drPepper.set(2);<a name="line.1209"></a>
+<span class="sourceLineNo">1210</span>   * &lt;/pre&gt;<a name="line.1210"></a>
+<span class="sourceLineNo">1211</span>   * <a name="line.1211"></a>
+<span class="sourceLineNo">1212</span>   * Now {@code drPepper.toString()} returns "{@code {2}}".<a name="line.1212"></a>
+<span class="sourceLineNo">1213</span>   * <a name="line.1213"></a>
+<span class="sourceLineNo">1214</span>   * &lt;pre&gt;<a name="line.1214"></a>
+<span class="sourceLineNo">1215</span>   * drPepper.set(4);<a name="line.1215"></a>
+<span class="sourceLineNo">1216</span>   * drPepper.set(10);<a name="line.1216"></a>
+<span class="sourceLineNo">1217</span>   * &lt;/pre&gt;<a name="line.1217"></a>
+<span class="sourceLineNo">1218</span>   * <a name="line.1218"></a>
+<span class="sourceLineNo">1219</span>   * Now {@code drPepper.toString()} returns "{@code {2, 4, 10}}".<a name="line.1219"></a>
+<span class="sourceLineNo">1220</span>   *<a name="line.1220"></a>
+<span class="sourceLineNo">1221</span>   * @return a string representation of this bit set<a name="line.1221"></a>
+<span class="sourceLineNo">1222</span>   */<a name="line.1222"></a>
+<span class="sourceLineNo">1223</span>  public String toString() {<a name="line.1223"></a>
+<span class="sourceLineNo">1224</span>    checkInvariants();<a name="line.1224"></a>
+<span class="sourceLineNo">1225</span><a name="line.1225"></a>
+<span class="sourceLineNo">1226</span>    int numBits = (wordsInUse &gt; 128) ? cardinality() : wordsInUse * BITS_PER_WORD;<a name="line.1226"></a>
+<span class="sourceLineNo">1227</span>    StringBuilder b = new StringBuilder(6 * numBits + 2);<a name="line.1227"></a>
+<span class="sourceLineNo">1228</span>    b.append('{');<a name="line.1228"></a>
+<span class="sourceLineNo">1229</span><a name="line.1229"></a>
+<span class="sourceLineNo">1230</span>    int i = nextSetBit(0);<a name="line.1230"></a>
+<span class="sourceLineNo">1231</span>    if (i != -1) {<a name="line.1231"></a>
+<span class="sourceLineNo">1232</span>      b.append(i);<a name="line.1232"></a>
+<span class="sourceLineNo">1233</span>      while (true) {<a name="line.1233"></a>
+<span class="sourceLineNo">1234</span>        if (++i &lt; 0)<a name="line.1234"></a>
+<span class="sourceLineNo">1235</span>          break;<a name="line.1235"></a>
+<span class="sourceLineNo">1236</span>        if ((i = nextSetBit(i)) &lt; 0)<a name="line.1236"></a>
+<span class="sourceLineNo">1237</span>          break;<a name="line.1237"></a>
+<span class="sourceLineNo">1238</span>        int endOfRun = nextClearBit(i);<a name="line.1238"></a>
+<span class="sourceLineNo">1239</span>        do {<a name="line.1239"></a>
+<span class="sourceLineNo">1240</span>          b.append(", ").append(i);<a name="line.1240"></a>
+<span class="sourceLineNo">1241</span>        } while (++i != endOfRun);<a name="line.1241"></a>
+<span class="sourceLineNo">1242</span>      }<a name="line.1242"></a>
+<span class="sourceLineNo">1243</span>    }<a name="line.1243"></a>
+<span class="sourceLineNo">1244</span><a name="line.1244"></a>
+<span class="sourceLineNo">1245</span>    b.append('}');<a name="line.1245"></a>
+<span class="sourceLineNo">1246</span>    return b.toString();<a name="line.1246"></a>
+<span class="sourceLineNo">1247</span>  }<a name="line.1247"></a>
+<span class="sourceLineNo">1248</span><a name="line.1248"></a>
+<span class="sourceLineNo">1249</span>  /**<a name="line.1249"></a>
+<span class="sourceLineNo">1250</span>   * Returns a stream of indices for which this {@code BitSet} contains a bit in the set state. The indices are returned<a name="line.1250"></a>
+<span class="sourceLineNo">1251</span>   * in order, from lowest to highest. The size of the stream is the number of bits in the set state, equal to the value<a name="line.1251"></a>
+<span class="sourceLineNo">1252</span>   * returned by the {@link #cardinality()} method.<a name="line.1252"></a>
+<span class="sourceLineNo">1253</span>   *<a name="line.1253"></a>
+<span class="sourceLineNo">1254</span>   * &lt;p&gt;<a name="line.1254"></a>
+<span class="sourceLineNo">1255</span>   * The bit set must remain constant during the execution of the terminal stream operation. Otherwise, the result of<a name="line.1255"></a>
+<span class="sourceLineNo">1256</span>   * the terminal stream operation is undefined.<a name="line.1256"></a>
+<span class="sourceLineNo">1257</span>   *<a name="line.1257"></a>
+<span class="sourceLineNo">1258</span>   * @return a stream of integers representing set indices<a name="line.1258"></a>
+<span class="sourceLineNo">1259</span>   * @since 1.8<a name="line.1259"></a>
+<span class="sourceLineNo">1260</span>   */<a name="line.1260"></a>
+<span class="sourceLineNo">1261</span>  public Stream&lt;Integer&gt; stream() {<a name="line.1261"></a>
+<span class="sourceLineNo">1262</span>    return StreamSupport.stream(<a name="line.1262"></a>
+<span class="sourceLineNo">1263</span>        () -&gt; Spliterators<a name="line.1263"></a>
+<span class="sourceLineNo">1264</span>            .spliterator(iterator(), cardinality(), Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED),<a name="line.1264"></a>
+<span class="sourceLineNo">1265</span>        Spliterator.SIZED | Spliterator.SUBSIZED | Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED,<a name="line.1265"></a>
+<span class="sourceLineNo">1266</span>        false);<a name="line.1266"></a>
+<span class="sourceLineNo">1267</span>  }<a name="line.1267"></a>
+<span class="sourceLineNo">1268</span><a name="line.1268"></a>
+<span class="sourceLineNo">1269</span>  public Iterator&lt;Integer&gt; iterator() {<a name="line.1269"></a>
+<span class="sourceLineNo">1270</span>    class BitSetIterator implements PrimitiveIterator.OfInt {<a name="line.1270"></a>
+<span class="sourceLineNo">1271</span><a name="line.1271"></a>
+<span class="sourceLineNo">1272</span>      int next = nextSetBit(0);<a name="line.1272"></a>
+<span class="sourceLineNo">1273</span><a name="line.1273"></a>
+<span class="sourceLineNo">1274</span>      @Override<a name="line.1274"></a>
+<span class="sourceLineNo">1275</span>      public boolean hasNext() {<a name="line.1275"></a>
+<span class="sourceLineNo">1276</span>        return next != -1;<a name="line.1276"></a>
+<span class="sourceLineNo">1277</span>      }<a name="line.1277"></a>
+<span class="sourceLineNo">1278</span><a name="line.1278"></a>
+<span class="sourceLineNo">1279</span>      @Override<a name="line.1279"></a>
+<span class="sourceLineNo">1280</span>      public int nextInt() {<a name="line.1280"></a>
+<span class="sourceLineNo">1281</span>        if (next != -1) {<a name="line.1281"></a>
+<span class="sourceLineNo">1282</span>          int ret = next;<a name="line.1282"></a>
+<span class="sourceLineNo">1283</span>          next = nextSetBit(next + 1);<a name="line.1283"></a>
+<span class="sourceLineNo">1284</span>          return ret;<a name="line.1284"></a>
+<span class="sourceLineNo">1285</span>        } else {<a name="line.1285"></a>
+<span class="sourceLineNo">1286</span>          throw new NoSuchElementException();<a name="line.1286"></a>
+<span class="sourceLineNo">1287</span>        }<a name="line.1287"></a>
+<span class="sourceLineNo">1288</span>      }<a name="line.1288"></a>
+<span class="sourceLineNo">1289</span>    }<a name="line.1289"></a>
+<span class="sourceLineNo">1290</span>    return new BitSetIterator();<a name="line.1290"></a>
+<span class="sourceLineNo">1291</span>  }<a name="line.1291"></a>
+<span class="sourceLineNo">1292</span><a name="line.1292"></a>
+<span class="sourceLineNo">1293</span>  public void and(final BitSetFX... sets) {<a name="line.1293"></a>
+<span class="sourceLineNo">1294</span>    and(Arrays.asList(sets));<a name="line.1294"></a>
+<span class="sourceLineNo">1295</span>  }<a name="line.1295"></a>
+<span class="sourceLineNo">1296</span><a name="line.1296"></a>
+<span class="sourceLineNo">1297</span>  public void and(final Collection&lt;BitSetFX&gt; sets) {<a name="line.1297"></a>
+<span class="sourceLineNo">1298</span>    if (sets.isEmpty())<a name="line.1298"></a>
+<span class="sourceLineNo">1299</span>      return;<a name="line.1299"></a>
+<span class="sourceLineNo">1300</span><a name="line.1300"></a>
+<span class="sourceLineNo">1301</span>    final Integer minWordsInUse = sets.stream().map(set -&gt; set.wordsInUse).min(Integer::compare).get();<a name="line.1301"></a>
+<span class="sourceLineNo">1302</span>    while (wordsInUse &gt; minWordsInUse)<a name="line.1302"></a>
+<span class="sourceLineNo">1303</span>      words[--wordsInUse] = 0;<a name="line.1303"></a>
+<span class="sourceLineNo">1304</span><a name="line.1304"></a>
+<span class="sourceLineNo">1305</span>    // Perform logical AND on words in common<a name="line.1305"></a>
+<span class="sourceLineNo">1306</span>    for (int i = 0; i &lt; wordsInUse; i++)<a name="line.1306"></a>
+<span class="sourceLineNo">1307</span>      for (BitSetFX set : sets)<a name="line.1307"></a>
+<span class="sourceLineNo">1308</span>        words[i] &amp;= set.words[i];<a name="line.1308"></a>
+<span class="sourceLineNo">1309</span><a name="line.1309"></a>
+<span class="sourceLineNo">1310</span>    recalculateWordsInUse();<a name="line.1310"></a>
+<span class="sourceLineNo">1311</span>    checkInvariants();<a name="line.1311"></a>
+<span class="sourceLineNo">1312</span>  }<a name="line.1312"></a>
+<span class="sourceLineNo">1313</span><a name="line.1313"></a>
+<span class="sourceLineNo">1314</span>  public BitSetFX(final BitSetFX b) {<a name="line.1314"></a>
+<span class="sourceLineNo">1315</span>    this();<a name="line.1315"></a>
+<span class="sourceLineNo">1316</span>    or(b);<a name="line.1316"></a>
+<span class="sourceLineNo">1317</span>  }<a name="line.1317"></a>
+<span class="sourceLineNo">1318</span><a name="line.1318"></a>
+<span class="sourceLineNo">1319</span>  public BitSetFX(final Collection&lt;? extends Integer&gt; c) {<a name="line.1319"></a>
+<span class="sourceLineNo">1320</span>    this();<a name="line.1320"></a>
+<span class="sourceLineNo">1321</span>    addAll(c);<a name="line.1321"></a>
+<span class="sourceLineNo">1322</span>  }<a name="line.1322"></a>
+<span class="sourceLineNo">1323</span><a name="line.1323"></a>
+<span class="sourceLineNo">1324</span>  public boolean geq(final BitSetFX set) {<a name="line.1324"></a>
+<span class="sourceLineNo">1325</span>    trimToSize();<a name="line.1325"></a>
+<span class="sourceLineNo">1326</span>    set.trimToSize();<a name="line.1326"></a>
+<span class="sourceLineNo">1327</span><a name="line.1327"></a>
+<span class="sourceLineNo">1328</span>    checkInvariants();<a name="line.1328"></a>
+<span class="sourceLineNo">1329</span>    set.checkInvariants();<a name="line.1329"></a>
+<span class="sourceLineNo">1330</span><a name="line.1330"></a>
+<span class="sourceLineNo">1331</span>    if (set.wordsInUse == 0)<a name="line.1331"></a>
+<span class="sourceLineNo">1332</span>      return true;<a name="line.1332"></a>
+<span class="sourceLineNo">1333</span>    if (set.wordsInUse &gt; wordsInUse)<a name="line.1333"></a>
+<span class="sourceLineNo">1334</span>      return false;<a name="line.1334"></a>
+<span class="sourceLineNo">1335</span>    for (int i = set.wordsInUse - 1; i &gt;= 0; i--)<a name="line.1335"></a>
+<span class="sourceLineNo">1336</span>      if ((set.words[i] &amp; words[i]) != set.words[i])<a name="line.1336"></a>
+<span class="sourceLineNo">1337</span>        return false;<a name="line.1337"></a>
+<span class="sourceLineNo">1338</span>    return true;<a name="line.1338"></a>
+<span class="sourceLineNo">1339</span>  }<a name="line.1339"></a>
+<span class="sourceLineNo">1340</span><a name="line.1340"></a>
+<span class="sourceLineNo">1341</span>  public boolean contains(Object o) {<a name="line.1341"></a>
+<span class="sourceLineNo">1342</span>    return get((Integer) o);<a name="line.1342"></a>
+<span class="sourceLineNo">1343</span>  }<a name="line.1343"></a>
+<span class="sourceLineNo">1344</span><a name="line.1344"></a>
+<span class="sourceLineNo">1345</span>  public boolean containsAll(Collection&lt;?&gt; c) {<a name="line.1345"></a>
+<span class="sourceLineNo">1346</span>    if (c instanceof BitSetFX) {<a name="line.1346"></a>
+<span class="sourceLineNo">1347</span>      final BitSetFX other = (BitSetFX) c;<a name="line.1347"></a>
+<span class="sourceLineNo">1348</span>      return this.geq(other);<a name="line.1348"></a>
+<span class="sourceLineNo">1349</span>    } else {<a name="line.1349"></a>
+<span class="sourceLineNo">1350</span>      for (Object o : c)<a name="line.1350"></a>
+<span class="sourceLineNo">1351</span>        if (!get((Integer) o))<a name="line.1351"></a>
+<span class="sourceLineNo">1352</span>          return false;<a name="line.1352"></a>
+<span class="sourceLineNo">1353</span>      return true;<a name="line.1353"></a>
+<span class="sourceLineNo">1354</span>    }<a name="line.1354"></a>
+<span class="sourceLineNo">1355</span>  }<a name="line.1355"></a>
+<span class="sourceLineNo">1356</span><a name="line.1356"></a>
+<span class="sourceLineNo">1357</span>  public boolean add(final Integer e) {<a name="line.1357"></a>
+<span class="sourceLineNo">1358</span>    if (get(e))<a name="line.1358"></a>
+<span class="sourceLineNo">1359</span>      return false;<a name="line.1359"></a>
+<span class="sourceLineNo">1360</span>    set(e);<a name="line.1360"></a>
+<span class="sourceLineNo">1361</span>    return true;<a name="line.1361"></a>
+<span class="sourceLineNo">1362</span>  }<a name="line.1362"></a>
+<span class="sourceLineNo">1363</span><a name="line.1363"></a>
+<span class="sourceLineNo">1364</span>  public boolean addAll(final Collection&lt;? extends Integer&gt; c) {<a name="line.1364"></a>
+<span class="sourceLineNo">1365</span>    if (c instanceof BitSetFX) {<a name="line.1365"></a>
+<span class="sourceLineNo">1366</span>      final int cardinality = cardinality();<a name="line.1366"></a>
+<span class="sourceLineNo">1367</span>      or((BitSetFX) c);<a name="line.1367"></a>
+<span class="sourceLineNo">1368</span>      return cardinality != cardinality();<a name="line.1368"></a>
+<span class="sourceLineNo">1369</span>    } else {<a name="line.1369"></a>
+<span class="sourceLineNo">1370</span>      boolean changed = false;<a name="line.1370"></a>
+<span class="sourceLineNo">1371</span>      for (int e : c)<a name="line.1371"></a>
+<span class="sourceLineNo">1372</span>        changed |= add(e);<a name="line.1372"></a>
+<span class="sourceLineNo">1373</span>      return changed;<a name="line.1373"></a>
+<span class="sourceLineNo">1374</span>    }<a name="line.1374"></a>
+<span class="sourceLineNo">1375</span>  }<a name="line.1375"></a>
+<span class="sourceLineNo">1376</span><a name="line.1376"></a>
+<span class="sourceLineNo">1377</span>  public void addRange(int start, int end) {<a name="line.1377"></a>
+<span class="sourceLineNo">1378</span>    set(start, end);<a name="line.1378"></a>
+<span class="sourceLineNo">1379</span>  }<a name="line.1379"></a>
+<span class="sourceLineNo">1380</span><a name="line.1380"></a>
+<span class="sourceLineNo">1381</span>  public boolean remove(Object o) {<a name="line.1381"></a>
+<span class="sourceLineNo">1382</span>    if (o instanceof Integer) {<a name="line.1382"></a>
+<span class="sourceLineNo">1383</span>      final int e = (Integer) o;<a name="line.1383"></a>
+<span class="sourceLineNo">1384</span>      if (get(e)) {<a name="line.1384"></a>
+<span class="sourceLineNo">1385</span>        clear(e);<a name="line.1385"></a>
+<span class="sourceLineNo">1386</span>        return true;<a name="line.1386"></a>
+<span class="sourceLineNo">1387</span>      }<a name="line.1387"></a>
+<span class="sourceLineNo">1388</span>    }<a name="line.1388"></a>
+<span class="sourceLineNo">1389</span>    return false;<a name="line.1389"></a>
+<span class="sourceLineNo">1390</span>  }<a name="line.1390"></a>
+<span class="sourceLineNo">1391</span><a name="line.1391"></a>
+<span class="sourceLineNo">1392</span>  public boolean removeAll(Collection&lt;?&gt; c) {<a name="line.1392"></a>
+<span class="sourceLineNo">1393</span>    if (c instanceof BitSetFX) {<a name="line.1393"></a>
+<span class="sourceLineNo">1394</span>      final int cardinality = cardinality();<a name="line.1394"></a>
+<span class="sourceLineNo">1395</span>      andNot((BitSetFX) c);<a name="line.1395"></a>
+<span class="sourceLineNo">1396</span>      return cardinality != cardinality();<a name="line.1396"></a>
+<span class="sourceLineNo">1397</span>    } else {<a name="line.1397"></a>
+<span class="sourceLineNo">1398</span>      boolean changed = false;<a name="line.1398"></a>
+<span class="sourceLineNo">1399</span>      for (Object e : c)<a name="line.1399"></a>
+<span class="sourceLineNo">1400</span>        changed |= remove(e);<a name="line.1400"></a>
+<span class="sourceLineNo">1401</span>      return changed;<a name="line.1401"></a>
+<span class="sourceLineNo">1402</span>    }<a name="line.1402"></a>
+<span class="sourceLineNo">1403</span>  }<a name="line.1403"></a>
+<span class="sourceLineNo">1404</span><a name="line.1404"></a>
+<span class="sourceLineNo">1405</span>  @Override<a name="line.1405"></a>
+<span class="sourceLineNo">1406</span>  public boolean retainAll(Collection&lt;?&gt; c) {<a name="line.1406"></a>
+<span class="sourceLineNo">1407</span>    if (c instanceof BitSetFX) {<a name="line.1407"></a>
+<span class="sourceLineNo">1408</span>      final int cardinality = cardinality();<a name="line.1408"></a>
+<span class="sourceLineNo">1409</span>      and((BitSetFX) c);<a name="line.1409"></a>
+<span class="sourceLineNo">1410</span>      return cardinality != cardinality();<a name="line.1410"></a>
+<span class="sourceLineNo">1411</span>    } else {<a name="line.1411"></a>
+<span class="sourceLineNo">1412</span>      boolean changed = false;<a name="line.1412"></a>
+<span class="sourceLineNo">1413</span>      for (int i = nextSetBit(0); i != -1; i = nextSetBit(i))<a name="line.1413"></a>
+<span class="sourceLineNo">1414</span>        if (!c.contains(i)) {<a name="line.1414"></a>
+<span class="sourceLineNo">1415</span>          clear(i);<a name="line.1415"></a>
+<span class="sourceLineNo">1416</span>          changed = true;<a name="line.1416"></a>
+<span class="sourceLineNo">1417</span>        }<a name="line.1417"></a>
+<span class="sourceLineNo">1418</span>      return changed;<a name="line.1418"></a>
+<span class="sourceLineNo">1419</span>    }<a name="line.1419"></a>
+<span class="sourceLineNo">1420</span>  }<a name="line.1420"></a>
+<span class="sourceLineNo">1421</span><a name="line.1421"></a>
+<span class="sourceLineNo">1422</span>  public Comparator&lt;? super Integer&gt; comparator() {<a name="line.1422"></a>
+<span class="sourceLineNo">1423</span>    return Integer::compare;<a name="line.1423"></a>
+<span class="sourceLineNo">1424</span>  }<a name="line.1424"></a>
+<span class="sourceLineNo">1425</span><a name="line.1425"></a>
+<span class="sourceLineNo">1426</span>  public SortedSet&lt;Integer&gt; subSet(Integer fromElement, Integer toElement) {<a name="line.1426"></a>
+<span class="sourceLineNo">1427</span>    return get(fromElement, toElement);<a name="line.1427"></a>
+<span class="sourceLineNo">1428</span>  }<a name="line.1428"></a>
+<span class="sourceLineNo">1429</span><a name="line.1429"></a>
+<span class="sourceLineNo">1430</span>  public SortedSet&lt;Integer&gt; headSet(Integer toElement) {<a name="line.1430"></a>
+<span class="sourceLineNo">1431</span>    return get(0, toElement);<a name="line.1431"></a>
+<span class="sourceLineNo">1432</span>  }<a name="line.1432"></a>
+<span class="sourceLineNo">1433</span><a name="line.1433"></a>
+<span class="sourceLineNo">1434</span>  public SortedSet&lt;Integer&gt; tailSet(Integer fromElement) {<a name="line.1434"></a>
+<span class="sourceLineNo">1435</span>    return get(fromElement, length());<a name="line.1435"></a>
+<span class="sourceLineNo">1436</span>  }<a name="line.1436"></a>
+<span class="sourceLineNo">1437</span><a name="line.1437"></a>
+<span class="sourceLineNo">1438</span>  public Integer first() {<a name="line.1438"></a>
+<span class="sourceLineNo">1439</span>    return nextSetBit(0);<a name="line.1439"></a>
+<span class="sourceLineNo">1440</span>  }<a name="line.1440"></a>
+<span class="sourceLineNo">1441</span><a name="line.1441"></a>
+<span class="sourceLineNo">1442</span>  public Integer last() {<a name="line.1442"></a>
+<span class="sourceLineNo">1443</span>    return length() - 1;<a name="line.1443"></a>
+<span class="sourceLineNo">1444</span>  }<a name="line.1444"></a>
+<span class="sourceLineNo">1445</span><a name="line.1445"></a>
+<span class="sourceLineNo">1446</span>}<a name="line.1446"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

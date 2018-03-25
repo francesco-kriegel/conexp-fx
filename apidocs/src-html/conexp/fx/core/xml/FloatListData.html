@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.core.xml;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.Arrays;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.Collection;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.Iterator;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.List;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.ListIterator;<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>import com.google.common.base.Function;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import com.google.common.collect.Lists;<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>public class FloatListData extends ListData&lt;Float&gt; {<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>        public FloatListData(final String key, final String subkey,<a name="line.37"></a>
+<span class="sourceLineNo">038</span>                        final List&lt;Float&gt; value) throws NullPointerException,<a name="line.38"></a>
+<span class="sourceLineNo">039</span>                        IndexOutOfBoundsException {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>                super(Datatype.FLOAT_LIST, key, subkey, value);<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        }<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>        public FloatListData(final String key, final String subkey,<a name="line.43"></a>
+<span class="sourceLineNo">044</span>                        final Float... values) throws NullPointerException,<a name="line.44"></a>
+<span class="sourceLineNo">045</span>                        IndexOutOfBoundsException {<a name="line.45"></a>
+<span class="sourceLineNo">046</span>                this(key, subkey, Arrays.asList(values));<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        }<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>        public FloatListData(final String key, final String subkey, final Void v,<a name="line.49"></a>
+<span class="sourceLineNo">050</span>                        final List&lt;String&gt; value) throws NullPointerException,<a name="line.50"></a>
+<span class="sourceLineNo">051</span>                        IndexOutOfBoundsException {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>                this(key, subkey, Lists.transform(value, STRING_TO_FLOAT_FUNCTION));<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        }<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>        public FloatListData(final String key, final String subkey, final Void v,<a name="line.55"></a>
+<span class="sourceLineNo">056</span>                        final String... values) throws NullPointerException,<a name="line.56"></a>
+<span class="sourceLineNo">057</span>                        IndexOutOfBoundsException {<a name="line.57"></a>
+<span class="sourceLineNo">058</span>                this(key, subkey, Lists.transform(Arrays.asList(values),<a name="line.58"></a>
+<span class="sourceLineNo">059</span>                                STRING_TO_FLOAT_FUNCTION));<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        }<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>        private static final Function&lt;String, Float&gt; STRING_TO_FLOAT_FUNCTION = new Function&lt;String, Float&gt;() {<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>                @Override<a name="line.64"></a>
+<span class="sourceLineNo">065</span>                public final Float apply(final String value) {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>                        return Float.valueOf(value);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>                }<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        };<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>        @Override<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        public final boolean add(Float value) {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                return this.value.add(value);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>        @Override<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        public final void add(int index, Float value) {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>                this.value.add(index, value);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        }<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>        @Override<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        public final Float set(int index, Float value) {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>                return this.value.set(index, value);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        }<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>        @Override<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        public final Float get(int index) {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>                return value.get(index);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        }<a name="line.88"></a>
+<span class="sourceLineNo">089</span><a name="line.89"></a>
+<span class="sourceLineNo">090</span>        @Override<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        public final Float remove(int index) {<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                return value.remove(index);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        }<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>        @Override<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        public final boolean remove(Object object) {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>                return value.remove(object);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        }<a name="line.98"></a>
+<span class="sourceLineNo">099</span><a name="line.99"></a>
+<span class="sourceLineNo">100</span>        @Override<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        public final boolean contains(Object object) {<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                return this.value.contains(object);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        }<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>        @Override<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        public final int indexOf(Object object) {<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                return this.value.indexOf(object);<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        }<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>        @Override<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        public final int lastIndexOf(Object object) {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                return value.lastIndexOf(object);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        }<a name="line.113"></a>
+<span class="sourceLineNo">114</span><a name="line.114"></a>
+<span class="sourceLineNo">115</span>        @Override<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        public final boolean addAll(Collection&lt;? extends Float&gt; collection) {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                return value.addAll(collection);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        }<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>        @Override<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        public final boolean addAll(int index,<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                        Collection&lt;? extends Float&gt; collection) {<a name="line.122"></a>
+<span class="sourceLineNo">123</span>                return value.addAll(index, collection);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        }<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>        @Override<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        public final boolean removeAll(Collection&lt;?&gt; collection) {<a name="line.127"></a>
+<span class="sourceLineNo">128</span>                return value.removeAll(collection);<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        }<a name="line.129"></a>
+<span class="sourceLineNo">130</span><a name="line.130"></a>
+<span class="sourceLineNo">131</span>        @Override<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        public final boolean retainAll(Collection&lt;?&gt; collection) {<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                return value.retainAll(collection);<a name="line.133"></a>
+<span class="sourceLineNo">134</span>        }<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>        @Override<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        public final boolean containsAll(Collection&lt;?&gt; collection) {<a name="line.137"></a>
+<span class="sourceLineNo">138</span>                return value.containsAll(collection);<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        }<a name="line.139"></a>
+<span class="sourceLineNo">140</span><a name="line.140"></a>
+<span class="sourceLineNo">141</span>        @Override<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        public final void clear() {<a name="line.142"></a>
+<span class="sourceLineNo">143</span>                value.clear();<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        }<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>        @Override<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        public final boolean isEmpty() {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>                return value.isEmpty();<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        }<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>        @Override<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        public final int size() {<a name="line.152"></a>
+<span class="sourceLineNo">153</span>                return value.size();<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        }<a name="line.154"></a>
+<span class="sourceLineNo">155</span><a name="line.155"></a>
+<span class="sourceLineNo">156</span>        @Override<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        public final Iterator&lt;Float&gt; iterator() {<a name="line.157"></a>
+<span class="sourceLineNo">158</span>                return value.iterator();<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        }<a name="line.159"></a>
+<span class="sourceLineNo">160</span><a name="line.160"></a>
+<span class="sourceLineNo">161</span>        @Override<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        public final ListIterator&lt;Float&gt; listIterator() {<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                return value.listIterator();<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        }<a name="line.164"></a>
+<span class="sourceLineNo">165</span><a name="line.165"></a>
+<span class="sourceLineNo">166</span>        @Override<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        public final ListIterator&lt;Float&gt; listIterator(int index) {<a name="line.167"></a>
+<span class="sourceLineNo">168</span>                return value.listIterator(index);<a name="line.168"></a>
+<span class="sourceLineNo">169</span>        }<a name="line.169"></a>
+<span class="sourceLineNo">170</span><a name="line.170"></a>
+<span class="sourceLineNo">171</span>        @Override<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        public final List&lt;Float&gt; subList(int fromIndex, int toIndex) {<a name="line.172"></a>
+<span class="sourceLineNo">173</span>                return value.subList(fromIndex, toIndex);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>        }<a name="line.174"></a>
+<span class="sourceLineNo">175</span><a name="line.175"></a>
+<span class="sourceLineNo">176</span>        @Override<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        public final Object[] toArray() {<a name="line.177"></a>
+<span class="sourceLineNo">178</span>                return value.toArray();<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        }<a name="line.179"></a>
+<span class="sourceLineNo">180</span><a name="line.180"></a>
+<span class="sourceLineNo">181</span>        @Override<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        public final &lt;T&gt; T[] toArray(T[] array) {<a name="line.182"></a>
+<span class="sourceLineNo">183</span>                return value.&lt;T&gt; toArray(array);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        }<a name="line.184"></a>
+<span class="sourceLineNo">185</span><a name="line.185"></a>
+<span class="sourceLineNo">186</span>}<a name="line.186"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

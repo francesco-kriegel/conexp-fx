@@ -1,0 +1,389 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.core.layout;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.HashMap;<a name="line.3"></a>
+<span class="sourceLineNo">004</span><a name="line.4"></a>
+<span class="sourceLineNo">005</span>/*<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * #%L<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Concept Explorer FX<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * %%<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * This program is free software: you can redistribute it and/or modify<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * it under the terms of the GNU General Public License as<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * published by the Free Software Foundation, either version 3 of the<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * License, or (at your option) any later version.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * <a name="line.15"></a>
+<span class="sourceLineNo">016</span> * This program is distributed in the hope that it will be useful,<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * GNU General Public License for more details.<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * <a name="line.20"></a>
+<span class="sourceLineNo">021</span> * You should have received a copy of the GNU General Public<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * License along with this program.  If not, see<a name="line.22"></a>
+<span class="sourceLineNo">023</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.23"></a>
+<span class="sourceLineNo">024</span> * #L%<a name="line.24"></a>
+<span class="sourceLineNo">025</span> */<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.HashSet;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.Map;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.Random;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.Set;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.util.concurrent.ExecutionException;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.concurrent.Future;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.ujmp.core.util.RandomSimple;<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>import com.google.common.collect.Collections2;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import com.google.common.collect.Iterables;<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>import conexp.fx.core.collections.BitSetFX;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import conexp.fx.core.collections.Collections3;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.core.context.Concept;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import conexp.fx.core.context.MatrixContext;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import conexp.fx.core.layout.AdditiveConceptLayout.Type;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import conexp.fx.gui.ConExpFX;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import conexp.fx.gui.dataset.FCADataset;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import conexp.fx.gui.task.TimeTask;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import javafx.beans.property.DoubleProperty;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import javafx.beans.property.SimpleDoubleProperty;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import javafx.geometry.Point3D;<a name="line.49"></a>
+<span class="sourceLineNo">050</span><a name="line.50"></a>
+<span class="sourceLineNo">051</span>public final class GeneticLayouter&lt;G, M&gt; {<a name="line.51"></a>
+<span class="sourceLineNo">052</span><a name="line.52"></a>
+<span class="sourceLineNo">053</span>  public static final &lt;G, M&gt; TimeTask&lt;Void&gt; initialSeeds(final FCADataset&lt;G, M&gt; dataset) {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    return new TimeTask&lt;Void&gt;(dataset, "Initial Seeds and Labels") {<a name="line.54"></a>
+<span class="sourceLineNo">055</span><a name="line.55"></a>
+<span class="sourceLineNo">056</span>      protected final Void call() {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        updateProgress(0d, 1d);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        if (isCancelled())<a name="line.58"></a>
+<span class="sourceLineNo">059</span>          return null;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        final Random rng = new RandomSimple();<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        updateMessage("Computing Infimum Irreducibles...");<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        final Set&lt;G&gt; supremumIrreducibles = dataset.layout.lattice.context.selection.supremumIrreducibles();<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        final Set&lt;M&gt; infimumIrreducibles = dataset.layout.lattice.context.selection.infimumIrreducibles();<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        updateProgress(0.2d, 1d);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        updateProgress(0.3d, 1d);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        updateMessage("Generating Layered Random Seeds...");<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        final Map&lt;G, Point3D&gt; randomSeedsG = new HashMap&lt;G, Point3D&gt;();<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        final Map&lt;M, Point3D&gt; randomSeedsM = new HashMap&lt;M, Point3D&gt;();<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        for (G g : supremumIrreducibles)<a name="line.69"></a>
+<span class="sourceLineNo">070</span>          randomSeedsG.put(g, new Point3D(2d * rng.nextDouble() - 1d, 1, 0));<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        for (M m : infimumIrreducibles)<a name="line.71"></a>
+<span class="sourceLineNo">072</span>          randomSeedsM.put(m, new Point3D(2d * rng.nextDouble() - 1d, 1, 0));<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        updateProgress(0.4d, 1d);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        dataset.layout.updateSeeds(randomSeedsG, randomSeedsM);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        updateProgress(0.5d, 1d);<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        updateMessage("Computing Attribute Labels...");<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        for (Concept&lt;G, M&gt; c : dataset.layout.lattice.rowHeads()) {<a name="line.77"></a>
+<span class="sourceLineNo">078</span>          final Set&lt;M&gt; attributeLabels =<a name="line.78"></a>
+<span class="sourceLineNo">079</span>              new HashSet&lt;M&gt;(dataset.layout.lattice.context.selection.attributeLabels(c.extent(), c.intent()));<a name="line.79"></a>
+<span class="sourceLineNo">080</span>          synchronized (dataset.layout.lattice.attributeConcepts) {<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            for (M m : attributeLabels)<a name="line.81"></a>
+<span class="sourceLineNo">082</span>              dataset.layout.lattice.attributeConcepts.put(m, c);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>          }<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        }<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        updateProgress(0.75d, 1d);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        updateMessage("Computing Object Labels...");<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        for (Concept&lt;G, M&gt; c : dataset.layout.lattice.rowHeads()) {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>          final Set&lt;G&gt; objectLabels =<a name="line.88"></a>
+<span class="sourceLineNo">089</span>              new HashSet&lt;G&gt;(dataset.layout.lattice.context.selection.objectLabels(c.extent(), c.intent()));<a name="line.89"></a>
+<span class="sourceLineNo">090</span>          synchronized (dataset.layout.lattice.objectConcepts) {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            for (G g : objectLabels)<a name="line.91"></a>
+<span class="sourceLineNo">092</span>              dataset.layout.lattice.objectConcepts.put(g, c);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>          }<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        }<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        updateProgress(1d, 1d);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        return null;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>      }<a name="line.97"></a>
+<span class="sourceLineNo">098</span>    };<a name="line.98"></a>
+<span class="sourceLineNo">099</span>  }<a name="line.99"></a>
+<span class="sourceLineNo">100</span><a name="line.100"></a>
+<span class="sourceLineNo">101</span>  public static final &lt;G, M&gt; TimeTask&lt;Void&gt; seeds(<a name="line.101"></a>
+<span class="sourceLineNo">102</span>      final FCADataset&lt;G, M&gt; dataset,<a name="line.102"></a>
+<span class="sourceLineNo">103</span>      final boolean includingLayout,<a name="line.103"></a>
+<span class="sourceLineNo">104</span>      final int generationCount,<a name="line.104"></a>
+<span class="sourceLineNo">105</span>      final int populationSize) {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    return new TimeTask&lt;Void&gt;(dataset, "Genetic Layouter") {<a name="line.106"></a>
+<span class="sourceLineNo">107</span><a name="line.107"></a>
+<span class="sourceLineNo">108</span>      private final DoubleProperty                   evolutionaryProgressProperty = new SimpleDoubleProperty(0d);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>      private final Set&lt;AdditiveConceptLayout&lt;G, M&gt;&gt; layouts                      =<a name="line.109"></a>
+<span class="sourceLineNo">110</span>          new HashSet&lt;AdditiveConceptLayout&lt;G, M&gt;&gt;(populationSize);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>      private double                                 currentQuality               = -1d;<a name="line.111"></a>
+<span class="sourceLineNo">112</span>      private AdditiveConceptLayout&lt;G, M&gt;            currentBest;<a name="line.112"></a>
+<span class="sourceLineNo">113</span>      private ChainDecomposer&lt;Set&lt;Integer&gt;&gt;          chainDecomposerG;<a name="line.113"></a>
+<span class="sourceLineNo">114</span>      private ChainDecomposer&lt;Set&lt;Integer&gt;&gt;          chainDecomposerM;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>      private Random                                 rng                          = new RandomSimple();<a name="line.115"></a>
+<span class="sourceLineNo">116</span><a name="line.116"></a>
+<span class="sourceLineNo">117</span>      @Override<a name="line.117"></a>
+<span class="sourceLineNo">118</span>      protected final void updateProgress(double workDone, double max) {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        super.updateProgress(workDone, max);<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        evolutionaryProgressProperty.set(workDone / max);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>      };<a name="line.121"></a>
+<span class="sourceLineNo">122</span><a name="line.122"></a>
+<span class="sourceLineNo">123</span>      @Override<a name="line.123"></a>
+<span class="sourceLineNo">124</span>      protected final Void call() {<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        updateProgress(0d, 1d);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        if (isCancelled())<a name="line.126"></a>
+<span class="sourceLineNo">127</span>          return null;<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        updateProgress(0.1d, 1d);<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        updateMessage("Decomposing Concept Lattice...");<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        final MatrixContext&lt;Set&lt;Integer&gt;, Set&lt;Integer&gt;&gt; cxt = dataset.layout.lattice.context.selection._reduced.clone();<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        chainDecomposerG = new ChainDecomposer&lt;Set&lt;Integer&gt;&gt;(cxt.objectQuasiOrder().neighborhood());<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        chainDecomposerM = new ChainDecomposer&lt;Set&lt;Integer&gt;&gt;(cxt.attributeQuasiOrder().neighborhood());<a name="line.132"></a>
+<span class="sourceLineNo">133</span>        if (includingLayout) {<a name="line.133"></a>
+<span class="sourceLineNo">134</span>          layouts.add(dataset.layout.clone());<a name="line.134"></a>
+<span class="sourceLineNo">135</span>          currentBest = dataset.layout;<a name="line.135"></a>
+<span class="sourceLineNo">136</span>        }<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        updateProgress(0.2d, 1d);<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        updateMessage("Setting up Evolution Engine...");<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        initPopulation();<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        updateProgress(0.3d, 1d);<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        updateMessage("Evolving Layout...");<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        evolvePopulation();<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        updateProgress(1d, 1d);<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        return null;<a name="line.144"></a>
+<span class="sourceLineNo">145</span>      }<a name="line.145"></a>
+<span class="sourceLineNo">146</span><a name="line.146"></a>
+<span class="sourceLineNo">147</span>      private final void initPopulation() {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        final Set&lt;Future&lt;?&gt;&gt; futures = new HashSet&lt;Future&lt;?&gt;&gt;();<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        for (int i = includingLayout ? 1 : 0; i &lt; populationSize; i++)<a name="line.149"></a>
+<span class="sourceLineNo">150</span>          futures.add(ConExpFX.instance.executor.tpe.submit(generate()));<a name="line.150"></a>
+<span class="sourceLineNo">151</span>        for (Future&lt;?&gt; f : futures)<a name="line.151"></a>
+<span class="sourceLineNo">152</span>          try {<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            f.get();<a name="line.153"></a>
+<span class="sourceLineNo">154</span>          } catch (InterruptedException | ExecutionException e) {<a name="line.154"></a>
+<span class="sourceLineNo">155</span>            e.printStackTrace();<a name="line.155"></a>
+<span class="sourceLineNo">156</span>          }<a name="line.156"></a>
+<span class="sourceLineNo">157</span>      }<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>      private final Runnable generate() {<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        return new Runnable() {<a name="line.160"></a>
+<span class="sourceLineNo">161</span><a name="line.161"></a>
+<span class="sourceLineNo">162</span>          @Override<a name="line.162"></a>
+<span class="sourceLineNo">163</span>          public void run() {<a name="line.163"></a>
+<span class="sourceLineNo">164</span>            if (dataset.conceptGraph.polar()) {} else {<a name="line.164"></a>
+<span class="sourceLineNo">165</span>              final AdditiveConceptLayout&lt;G, M&gt; candidate =<a name="line.165"></a>
+<span class="sourceLineNo">166</span>                  new AdditiveConceptLayout&lt;G, M&gt;(dataset.layout.lattice, null, null, Type.HYBRID);<a name="line.166"></a>
+<span class="sourceLineNo">167</span>              final Set&lt;Set&lt;Set&lt;Integer&gt;&gt;&gt; chainsG = chainDecomposerG.randomChainDecomposition();<a name="line.167"></a>
+<span class="sourceLineNo">168</span>              final Set&lt;Set&lt;Set&lt;Integer&gt;&gt;&gt; chainsM = chainDecomposerM.randomChainDecomposition();<a name="line.168"></a>
+<span class="sourceLineNo">169</span>              final int v = chainsG.size();<a name="line.169"></a>
+<span class="sourceLineNo">170</span>              if (v == 1) {<a name="line.170"></a>
+<span class="sourceLineNo">171</span>                final Point3D seed = new Point3D(0d, 1d, 0d);<a name="line.171"></a>
+<span class="sourceLineNo">172</span>                for (G g : Collections2<a name="line.172"></a>
+<span class="sourceLineNo">173</span>                    .transform(Iterables.getOnlyElement(chainsG), candidate.lattice.context.selection._firstObject))<a name="line.173"></a>
+<span class="sourceLineNo">174</span>                  candidate.seedsG.put(g, seed);<a name="line.174"></a>
+<span class="sourceLineNo">175</span>              } else {<a name="line.175"></a>
+<span class="sourceLineNo">176</span>                final int vv = v * v;<a name="line.176"></a>
+<span class="sourceLineNo">177</span>                final BitSetFX usedX = new BitSetFX();<a name="line.177"></a>
+<span class="sourceLineNo">178</span>                for (Set&lt;Set&lt;Integer&gt;&gt; chain : chainsG) {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>                  int _x;<a name="line.179"></a>
+<span class="sourceLineNo">180</span>                  for (_x = rng.nextInt(vv + 1); usedX.contains(_x) || usedX.contains(_x + 1)<a name="line.180"></a>
+<span class="sourceLineNo">181</span>                      || (_x != 0 &amp;&amp; usedX.contains(_x - 1)); _x = rng.nextInt(vv + 1));<a name="line.181"></a>
+<span class="sourceLineNo">182</span>                  usedX.add(_x);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>                  final int __x = _x - vv / 2;<a name="line.183"></a>
+<span class="sourceLineNo">184</span>                  final Point3D seed = new Point3D(<a name="line.184"></a>
+<span class="sourceLineNo">185</span>                      (double) __x,<a name="line.185"></a>
+<span class="sourceLineNo">186</span>                      (double) (rng.nextInt(Math.abs(__x + 1) + 1) + 1),<a name="line.186"></a>
+<span class="sourceLineNo">187</span>                      dataset.conceptGraph.threeDimensions() ? (double) (rng.nextInt(Math.abs(__x + 1) + 1) - __x / 2)<a name="line.187"></a>
+<span class="sourceLineNo">188</span>                          : 0d);<a name="line.188"></a>
+<span class="sourceLineNo">189</span>                  for (G g : Collections2.transform(chain, candidate.lattice.context.selection._firstObject))<a name="line.189"></a>
+<span class="sourceLineNo">190</span>                    candidate.seedsG.put(g, seed);<a name="line.190"></a>
+<span class="sourceLineNo">191</span>                }<a name="line.191"></a>
+<span class="sourceLineNo">192</span>              }<a name="line.192"></a>
+<span class="sourceLineNo">193</span>              final int w = chainsM.size();<a name="line.193"></a>
+<span class="sourceLineNo">194</span>              if (w == 1) {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>                final Point3D seed = new Point3D(0d, 1d, 0d);<a name="line.195"></a>
+<span class="sourceLineNo">196</span>                for (M m : Collections2<a name="line.196"></a>
+<span class="sourceLineNo">197</span>                    .transform(Iterables.getOnlyElement(chainsM), candidate.lattice.context.selection._firstAttribute))<a name="line.197"></a>
+<span class="sourceLineNo">198</span>                  candidate.seedsM.put(m, seed);<a name="line.198"></a>
+<span class="sourceLineNo">199</span>              } else {<a name="line.199"></a>
+<span class="sourceLineNo">200</span>                final int ww = w * w;<a name="line.200"></a>
+<span class="sourceLineNo">201</span>                final BitSetFX usedX = new BitSetFX();<a name="line.201"></a>
+<span class="sourceLineNo">202</span>                for (Set&lt;Set&lt;Integer&gt;&gt; chain : chainsM) {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                  int _x;<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                  for (_x = rng.nextInt(ww + 1); usedX.contains(_x) || usedX.contains(_x + 1)<a name="line.204"></a>
+<span class="sourceLineNo">205</span>                      || (_x != 0 &amp;&amp; usedX.contains(_x - 1)); _x = rng.nextInt(ww + 1));<a name="line.205"></a>
+<span class="sourceLineNo">206</span>                  usedX.add(_x);<a name="line.206"></a>
+<span class="sourceLineNo">207</span>                  final int __x = _x - ww / 2;<a name="line.207"></a>
+<span class="sourceLineNo">208</span>                  final Point3D seed = new Point3D(<a name="line.208"></a>
+<span class="sourceLineNo">209</span>                      (double) __x,<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                      (double) (rng.nextInt(Math.abs(__x + 1) + 1) + 1),<a name="line.210"></a>
+<span class="sourceLineNo">211</span>                      dataset.conceptGraph.threeDimensions() ? (double) (rng.nextInt(Math.abs(__x + 1) + 1) - __x / 2)<a name="line.211"></a>
+<span class="sourceLineNo">212</span>                          : 0d);<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                  for (M m : Collections2.transform(chain, candidate.lattice.context.selection._firstAttribute))<a name="line.213"></a>
+<span class="sourceLineNo">214</span>                    candidate.seedsM.put(m, seed);<a name="line.214"></a>
+<span class="sourceLineNo">215</span>                }<a name="line.215"></a>
+<span class="sourceLineNo">216</span>              }<a name="line.216"></a>
+<span class="sourceLineNo">217</span>              synchronized (layouts) {<a name="line.217"></a>
+<span class="sourceLineNo">218</span>                layouts.add(candidate);<a name="line.218"></a>
+<span class="sourceLineNo">219</span>              }<a name="line.219"></a>
+<span class="sourceLineNo">220</span>              final double result = dataset.conflictDistance.apply(candidate).second();<a name="line.220"></a>
+<span class="sourceLineNo">221</span>              if (result &gt; currentQuality || currentBest == null) {<a name="line.221"></a>
+<span class="sourceLineNo">222</span>                currentQuality = result;<a name="line.222"></a>
+<span class="sourceLineNo">223</span>                currentBest = candidate;<a name="line.223"></a>
+<span class="sourceLineNo">224</span>              }<a name="line.224"></a>
+<span class="sourceLineNo">225</span>            }<a name="line.225"></a>
+<span class="sourceLineNo">226</span>          }<a name="line.226"></a>
+<span class="sourceLineNo">227</span>        };<a name="line.227"></a>
+<span class="sourceLineNo">228</span>      }<a name="line.228"></a>
+<span class="sourceLineNo">229</span><a name="line.229"></a>
+<span class="sourceLineNo">230</span>      private final AdditiveConceptLayout&lt;G, M&gt;<a name="line.230"></a>
+<span class="sourceLineNo">231</span>          crossover(final AdditiveConceptLayout&lt;G, M&gt; l1, final AdditiveConceptLayout&lt;G, M&gt; l2) {<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        final AdditiveConceptLayout&lt;G, M&gt; l = l1.clone();<a name="line.232"></a>
+<span class="sourceLineNo">233</span>        return null;<a name="line.233"></a>
+<span class="sourceLineNo">234</span>      }<a name="line.234"></a>
+<span class="sourceLineNo">235</span><a name="line.235"></a>
+<span class="sourceLineNo">236</span>      private final void evolvePopulation() {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>        if (dataset.conceptGraph.polar()) {} else {<a name="line.237"></a>
+<span class="sourceLineNo">238</span>          for (int i = 0; i &lt; generationCount; i++) {<a name="line.238"></a>
+<span class="sourceLineNo">239</span>//            if (currentBest != dataset.layout)<a name="line.239"></a>
+<span class="sourceLineNo">240</span>            dataset.layout.updateSeeds(currentBest.seedsG, currentBest.seedsM);<a name="line.240"></a>
+<span class="sourceLineNo">241</span>            updateProgress(0.3d + 0.7d * ((double) i) / (double) generationCount, 1d);<a name="line.241"></a>
+<span class="sourceLineNo">242</span>            updateMessage("Evolving Seeds: " + i + " of " + generationCount + " Generations...");<a name="line.242"></a>
+<span class="sourceLineNo">243</span>            evolveGeneration();<a name="line.243"></a>
+<span class="sourceLineNo">244</span>          }<a name="line.244"></a>
+<span class="sourceLineNo">245</span>//          try {<a name="line.245"></a>
+<span class="sourceLineNo">246</span>//            if (currentBest != dataset.layout)<a name="line.246"></a>
+<span class="sourceLineNo">247</span>          dataset.layout.updateSeeds(currentBest.seedsG, currentBest.seedsM);<a name="line.247"></a>
+<span class="sourceLineNo">248</span>//          } catch (Exception e) {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>//            System.err.println(currentBest);<a name="line.249"></a>
+<span class="sourceLineNo">250</span>//            System.err.println(dataset.layout);<a name="line.250"></a>
+<span class="sourceLineNo">251</span>//            e.printStackTrace();<a name="line.251"></a>
+<span class="sourceLineNo">252</span>//          }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        }<a name="line.253"></a>
+<span class="sourceLineNo">254</span>      }<a name="line.254"></a>
+<span class="sourceLineNo">255</span><a name="line.255"></a>
+<span class="sourceLineNo">256</span>      private final void evolveGeneration() {<a name="line.256"></a>
+<span class="sourceLineNo">257</span>        if (dataset.conceptGraph.polar()) {} else {<a name="line.257"></a>
+<span class="sourceLineNo">258</span>          currentQuality = -1d;<a name="line.258"></a>
+<span class="sourceLineNo">259</span>          for (AdditiveConceptLayout&lt;G, M&gt; candidate : layouts) {<a name="line.259"></a>
+<span class="sourceLineNo">260</span>            LayoutEvolution&lt;G, M&gt;.Value v = new LayoutEvolution&lt;G, M&gt;(<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                candidate,<a name="line.261"></a>
+<span class="sourceLineNo">262</span>                dataset.conflictDistance.apply(candidate).first(),<a name="line.262"></a>
+<span class="sourceLineNo">263</span>                ConceptMovement.INTENT_CHAIN_SEEDS,<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                4d,<a name="line.264"></a>
+<span class="sourceLineNo">265</span>                4d,<a name="line.265"></a>
+<span class="sourceLineNo">266</span>                2,<a name="line.266"></a>
+<span class="sourceLineNo">267</span>                2,<a name="line.267"></a>
+<span class="sourceLineNo">268</span>                1,<a name="line.268"></a>
+<span class="sourceLineNo">269</span>                dataset.conflictDistance,<a name="line.269"></a>
+<span class="sourceLineNo">270</span>                ConExpFX.instance.executor.tpe).calculate();<a name="line.270"></a>
+<span class="sourceLineNo">271</span>            if (!candidate.updateSeeds(v.seedsG, v.seedsM)) {<a name="line.271"></a>
+<span class="sourceLineNo">272</span>//              if (rng.nextBoolean()) {<a name="line.272"></a>
+<span class="sourceLineNo">273</span>//                final Concept&lt;G, M&gt; c = candidate.seedsM<a name="line.273"></a>
+<span class="sourceLineNo">274</span>//                    .keySet()<a name="line.274"></a>
+<span class="sourceLineNo">275</span>//                    .parallelStream()<a name="line.275"></a>
+<span class="sourceLineNo">276</span>//                    .map(candidate.lattice.attributeConcepts::get)<a name="line.276"></a>
+<span class="sourceLineNo">277</span>//                    .filter(cn -&gt; cn != null)<a name="line.277"></a>
+<span class="sourceLineNo">278</span>//                    .findAny()<a name="line.278"></a>
+<span class="sourceLineNo">279</span>//                    .get();<a name="line.279"></a>
+<span class="sourceLineNo">280</span>////                    candidate.lattice.attributeConcepts.get(Collections3.random(candidate.seeds.keySet(), rng));<a name="line.280"></a>
+<span class="sourceLineNo">281</span>//                v = new LayoutEvolution&lt;G, M&gt;(<a name="line.281"></a>
+<span class="sourceLineNo">282</span>//                    candidate,<a name="line.282"></a>
+<span class="sourceLineNo">283</span>//                    c,<a name="line.283"></a>
+<span class="sourceLineNo">284</span>//                    // TODO<a name="line.284"></a>
+<span class="sourceLineNo">285</span>//                    //                    ConceptMovement.LABEL_CHAIN_SEEDS,<a name="line.285"></a>
+<span class="sourceLineNo">286</span>//                    ConceptMovement.INTENT_CHAIN_SEEDS,<a name="line.286"></a>
+<span class="sourceLineNo">287</span>//                    4d,<a name="line.287"></a>
+<span class="sourceLineNo">288</span>//                    4d,<a name="line.288"></a>
+<span class="sourceLineNo">289</span>//                    2,<a name="line.289"></a>
+<span class="sourceLineNo">290</span>//                    2,<a name="line.290"></a>
+<span class="sourceLineNo">291</span>//                    1,<a name="line.291"></a>
+<span class="sourceLineNo">292</span>//                    dataset.conflictDistance,<a name="line.292"></a>
+<span class="sourceLineNo">293</span>//                    ConExpFX.instance.executor.tpe).calculate();<a name="line.293"></a>
+<span class="sourceLineNo">294</span>//              } else<a name="line.294"></a>
+<span class="sourceLineNo">295</span>              v = new LayoutEvolution&lt;G, M&gt;(<a name="line.295"></a>
+<span class="sourceLineNo">296</span>                  candidate,<a name="line.296"></a>
+<span class="sourceLineNo">297</span>                  Collections3.random(candidate.lattice.rowHeads(), rng),<a name="line.297"></a>
+<span class="sourceLineNo">298</span>                  ConceptMovement.INTENT_CHAIN_SEEDS,<a name="line.298"></a>
+<span class="sourceLineNo">299</span>                  4d,<a name="line.299"></a>
+<span class="sourceLineNo">300</span>                  4d,<a name="line.300"></a>
+<span class="sourceLineNo">301</span>                  2,<a name="line.301"></a>
+<span class="sourceLineNo">302</span>                  2,<a name="line.302"></a>
+<span class="sourceLineNo">303</span>                  1,<a name="line.303"></a>
+<span class="sourceLineNo">304</span>                  dataset.conflictDistance,<a name="line.304"></a>
+<span class="sourceLineNo">305</span>                  ConExpFX.instance.executor.tpe).calculate();<a name="line.305"></a>
+<span class="sourceLineNo">306</span>              candidate.updateSeeds(v.seedsG, v.seedsM);<a name="line.306"></a>
+<span class="sourceLineNo">307</span>            }<a name="line.307"></a>
+<span class="sourceLineNo">308</span>            if (v.result &gt; currentQuality) {<a name="line.308"></a>
+<span class="sourceLineNo">309</span>              currentQuality = v.result;<a name="line.309"></a>
+<span class="sourceLineNo">310</span>              currentBest = candidate;<a name="line.310"></a>
+<span class="sourceLineNo">311</span>            }<a name="line.311"></a>
+<span class="sourceLineNo">312</span>          }<a name="line.312"></a>
+<span class="sourceLineNo">313</span>        }<a name="line.313"></a>
+<span class="sourceLineNo">314</span>      }<a name="line.314"></a>
+<span class="sourceLineNo">315</span>    };<a name="line.315"></a>
+<span class="sourceLineNo">316</span>  }<a name="line.316"></a>
+<span class="sourceLineNo">317</span>}<a name="line.317"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

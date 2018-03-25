@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.gui.exploration;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>import javafx.beans.binding.Bindings;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import javafx.beans.value.ObservableValue;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import javafx.collections.FXCollections;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import javafx.collections.ObservableList;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import javafx.scene.Node;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import javafx.scene.control.CheckBox;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import javafx.scene.control.Label;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import javafx.scene.control.TextField;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import javafx.scene.layout.BorderPane;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import javafx.scene.layout.HBox;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import javafx.scene.layout.VBox;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import conexp.fx.core.algorithm.exploration.CounterExample;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import conexp.fx.core.context.Implication;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import conexp.fx.core.context.MatrixContext;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import conexp.fx.core.util.IdGenerator;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import conexp.fx.gui.ConExpFX;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.gui.dialog.ErrorDialog;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import conexp.fx.gui.dialog.FXDialog;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>public class CounterExampleDialog extends FXDialog&lt;CounterExample&lt;String, String&gt;&gt; {<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>  private final MatrixContext&lt;String, String&gt; context;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>  private final Implication&lt;String, String&gt;   implication;<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>//  private final MatrixContext&lt;String, String&gt; counterExampleContext;<a name="line.49"></a>
+<span class="sourceLineNo">050</span><a name="line.50"></a>
+<span class="sourceLineNo">051</span>  public CounterExampleDialog(<a name="line.51"></a>
+<span class="sourceLineNo">052</span>      final MatrixContext&lt;String, String&gt; context,<a name="line.52"></a>
+<span class="sourceLineNo">053</span>      final Implication&lt;String, String&gt; implication) {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    super(<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        ConExpFX.instance.primaryStage,<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        Style.QUESTION,<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        "Attribute Exploration",<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        "Is the formal implication " + implication + " correct? If no, then please provide a counterexample.",<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        null);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    this.context = context;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    this.implication = implication;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>//    this.counterExampleContext =<a name="line.62"></a>
+<span class="sourceLineNo">063</span>//        new MatrixContext&lt;String, String&gt;(<a name="line.63"></a>
+<span class="sourceLineNo">064</span>//            SetLists.create("Counterexample" + IdGenerator.getNextId()),<a name="line.64"></a>
+<span class="sourceLineNo">065</span>//            context.colHeads(),<a name="line.65"></a>
+<span class="sourceLineNo">066</span>//            false);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    this.setCenterNode(createCenterNode());<a name="line.67"></a>
+<span class="sourceLineNo">068</span>  }<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>  private final Node createCenterNode() {<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    final BorderPane pane = new BorderPane();<a name="line.71"></a>
+<span class="sourceLineNo">072</span>//    final Text implicationText = new Text(implication.toString());<a name="line.72"></a>
+<span class="sourceLineNo">073</span>//    implicationText.setWrappingWidth(300);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>//    implicationText.setFont(Font.font(12));<a name="line.74"></a>
+<span class="sourceLineNo">075</span>//    pane.setTop(implicationText);<a name="line.75"></a>
+<span class="sourceLineNo">076</span><a name="line.76"></a>
+<span class="sourceLineNo">077</span>    final Label objectLabel = new Label("Counterexample-Name: ");<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    final TextField objectTextField = new TextField("Counterexample" + IdGenerator.getNextId(context));<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    final HBox objectBox = new HBox(objectLabel, objectTextField);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    final ObservableList&lt;String&gt; selectedAttributes = FXCollections.observableArrayList();<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    final ObservableValue&lt;CounterExample&lt;String, String&gt;&gt; counterExample = Bindings.createObjectBinding(<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        () -&gt; new CounterExample&lt;String, String&gt;(objectTextField.getText(), selectedAttributes),<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        objectTextField.textProperty(),<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        selectedAttributes);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    counterExample.addListener((__, ___, newValue) -&gt; CounterExampleDialog.this.value = newValue);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    selectedAttributes.addAll(implication.getPremise());<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    final VBox checkBoxes = new VBox();<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    for (String m : context.colHeads()) {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>      final CheckBox checkBox = new CheckBox(m);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>      if (implication.getPremise().contains(m)) {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        checkBox.setSelected(true);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        checkBox.setDisable(true);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>      } else {<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        checkBox.selectedProperty().addListener((__, ___, isSelected) -&gt; {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>          if (isSelected)<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            selectedAttributes.add(checkBox.getText());<a name="line.96"></a>
+<span class="sourceLineNo">097</span>          else<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            selectedAttributes.remove(checkBox.getText());<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        });<a name="line.99"></a>
+<span class="sourceLineNo">100</span>      }<a name="line.100"></a>
+<span class="sourceLineNo">101</span>      checkBoxes.getChildren().add(checkBox);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    }<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    counterExample.addListener((__, ___, newValue) -&gt; {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>      final boolean illegal = selectedAttributes.containsAll(implication.getPremise())<a name="line.104"></a>
+<span class="sourceLineNo">105</span>          &amp;&amp; selectedAttributes.containsAll(implication.getConclusion());<a name="line.105"></a>
+<span class="sourceLineNo">106</span>      if (illegal) {<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        checkBoxes.getChildren().stream().map(child -&gt; (CheckBox) child).forEach(<a name="line.107"></a>
+<span class="sourceLineNo">108</span>            checkBox -&gt; checkBox.setSelected(implication.getPremise().contains(checkBox.getText())));<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        new ErrorDialog(<a name="line.109"></a>
+<span class="sourceLineNo">110</span>            ConExpFX.instance.primaryStage,<a name="line.110"></a>
+<span class="sourceLineNo">111</span>            new IllegalArgumentException(<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                "An illegal counterexample was entered. The counterexample must not have all attributes in the implication's conclusion."))<a name="line.112"></a>
+<span class="sourceLineNo">113</span>                    .showAndWait();<a name="line.113"></a>
+<span class="sourceLineNo">114</span>      }<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    });<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    pane.setCenter(checkBoxes);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    pane.setTop(objectBox);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    return pane;<a name="line.118"></a>
+<span class="sourceLineNo">119</span>//  pane.setMinWidth(600);<a name="line.119"></a>
+<span class="sourceLineNo">120</span>//    final MatrixContextWidget&lt;String, String&gt; matrixContextWidget =<a name="line.120"></a>
+<span class="sourceLineNo">121</span>//        new MatrixContextWidget&lt;String, String&gt;(null, false, counterExampleContext);<a name="line.121"></a>
+<span class="sourceLineNo">122</span>//    matrixContextWidget.highlightToggleButton.setSelected(true);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>//    pane.setCenter(matrixContextWidget);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>//    pane.setMinHeight(500);<a name="line.124"></a>
+<span class="sourceLineNo">125</span>//    pane.minHeightProperty().bind(<a name="line.125"></a>
+<span class="sourceLineNo">126</span>//        new DoubleBinding() {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>//<a name="line.127"></a>
+<span class="sourceLineNo">128</span>//          {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>//            bind(matrixContextWidget.height);<a name="line.129"></a>
+<span class="sourceLineNo">130</span>//          }<a name="line.130"></a>
+<span class="sourceLineNo">131</span>//<a name="line.131"></a>
+<span class="sourceLineNo">132</span>//          @Override<a name="line.132"></a>
+<span class="sourceLineNo">133</span>//          protected double computeValue() {<a name="line.133"></a>
+<span class="sourceLineNo">134</span>////            System.out.println(matrixContextWidget.height.intValue());<a name="line.134"></a>
+<span class="sourceLineNo">135</span>//            return matrixContextWidget.height.doubleValue() + implicationText.getBoundsInLocal().getHeight();<a name="line.135"></a>
+<span class="sourceLineNo">136</span>//          }<a name="line.136"></a>
+<span class="sourceLineNo">137</span>//        });<a name="line.137"></a>
+<span class="sourceLineNo">138</span>//    counterExampleContext.addEventHandler(<a name="line.138"></a>
+<span class="sourceLineNo">139</span>//        event -&gt; {<a name="line.139"></a>
+<span class="sourceLineNo">140</span>//          CounterExampleDialog.this.value = getCounterExample();<a name="line.140"></a>
+<span class="sourceLineNo">141</span>//        },<a name="line.141"></a>
+<span class="sourceLineNo">142</span>//        RelationEvent.ANY);<a name="line.142"></a>
+<span class="sourceLineNo">143</span>  }<a name="line.143"></a>
+<span class="sourceLineNo">144</span><a name="line.144"></a>
+<span class="sourceLineNo">145</span>//  private final CounterExample&lt;String, String&gt; getCounterExample() {<a name="line.145"></a>
+<span class="sourceLineNo">146</span>//    final String object = counterExampleContext.rowHeads().get(<a name="line.146"></a>
+<span class="sourceLineNo">147</span>//        0);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>//    final Set&lt;String&gt; attributes = counterExampleContext.row(object);<a name="line.148"></a>
+<span class="sourceLineNo">149</span>//    return new CounterExample&lt;String, String&gt;(object, attributes);<a name="line.149"></a>
+<span class="sourceLineNo">150</span>//  }<a name="line.150"></a>
+<span class="sourceLineNo">151</span><a name="line.151"></a>
+<span class="sourceLineNo">152</span>}<a name="line.152"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

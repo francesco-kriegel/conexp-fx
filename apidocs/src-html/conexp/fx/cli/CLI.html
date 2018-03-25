@@ -1,0 +1,332 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.cli;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.io.File;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.Set;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.concurrent.Executors;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.function.Consumer;<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.apache.commons.cli.CommandLine;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.apache.commons.cli.DefaultParser;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.apache.commons.cli.HelpFormatter;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.apache.commons.cli.Option;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.apache.commons.cli.OptionBuilder;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.apache.commons.cli.Options;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.apache.commons.cli.ParseException;<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>import conexp.fx.core.algorithm.nextclosures.NextClosures2Bit;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import conexp.fx.core.collections.Collections3;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import conexp.fx.core.collections.Pair;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.core.context.Concept;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import conexp.fx.core.context.ConceptLattice;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import conexp.fx.core.context.Implication;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import conexp.fx.core.context.MatrixContext;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import conexp.fx.core.exporter.CXTExporter;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import conexp.fx.core.importer.CXTImporter;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import conexp.fx.gui.ConExpFX;<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>public final class CLI {<a name="line.49"></a>
+<span class="sourceLineNo">050</span><a name="line.50"></a>
+<span class="sourceLineNo">051</span>  public static void main(final String[] args) throws Exception {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    new CLI(args);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>  }<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>  private final CommandLine                commandLine;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>  private MatrixContext&lt;String, String&gt;    cxt;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>  private Set&lt;Concept&lt;String, String&gt;&gt;     concepts;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>  private Set&lt;Implication&lt;String, String&gt;&gt; implications;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>  private ConceptLattice&lt;String, String&gt;   lattice;<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>  private CLI(final String[] args) throws Exception {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    super();<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    try {<a name="line.63"></a>
+<span class="sourceLineNo">064</span>      commandLine = new DefaultParser().parse(OPTIONS, args);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    } catch (ParseException e) {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>      printHelp();<a name="line.66"></a>
+<span class="sourceLineNo">067</span>      throw new RuntimeException("Unable to parse command line arguments. Please check supplied arguments!", e);<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    }<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    if (!commandLine.getArgList().isEmpty()) {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>      printHelp();<a name="line.70"></a>
+<span class="sourceLineNo">071</span>      throw new RuntimeException("Unrecognized Arguments: " + commandLine.getArgList());<a name="line.71"></a>
+<span class="sourceLineNo">072</span>    }<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    execute();<a name="line.73"></a>
+<span class="sourceLineNo">074</span>  }<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>  private final void printHelp() {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    new HelpFormatter().printHelp(<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        120,<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        "java -jar conexp-fx-VERSION-jar-with_dependencies.jar [OPTIONS]",<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        "Available command line options for Concept Explorer FX",<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        OPTIONS,<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        "");<a name="line.82"></a>
+<span class="sourceLineNo">083</span>  }<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>  private final void execute() throws Exception {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    if (commandLine.getOptions().length == 0 || commandLine.hasOption(GUI.getLongOpt()))<a name="line.86"></a>
+<span class="sourceLineNo">087</span>      ConExpFX.main(new String[] {});<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    else if (commandLine.hasOption(HELP.getLongOpt()))<a name="line.88"></a>
+<span class="sourceLineNo">089</span>      printHelp();<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    else {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>      final Consumer&lt;Concept&lt;String, String&gt;&gt; c1;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>      final Consumer&lt;Implication&lt;String, String&gt;&gt; c2;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>      final Consumer&lt;String&gt; c3;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>      final Consumer&lt;Double&gt; c4;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>      if (commandLine.hasOption(PRINT_TO_CONSOLE.getLongOpt())) {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        c1 = System.out::println;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        c2 = System.out::println;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        c3 = System.out::println;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        c4 = System.out::println;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>      } else {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        c1 = __ -&gt; {};<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        c2 = __ -&gt; {};<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        c3 = __ -&gt; {};<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        c4 = __ -&gt; {};<a name="line.104"></a>
+<span class="sourceLineNo">105</span>      }<a name="line.105"></a>
+<span class="sourceLineNo">106</span>      if (!commandLine.hasOption(IMPORT_CXT.getLongOpt()))<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        throw new IllegalArgumentException(<a name="line.107"></a>
+<span class="sourceLineNo">108</span>            "Unable to instanciate FCA service without formal context. Please specify a file in Burmeister formatting by adding a command line prefix\r\n\t--importContextFromCXT &lt;path_to_file&gt;");<a name="line.108"></a>
+<span class="sourceLineNo">109</span>      final File input = new File(commandLine.getOptionValue(IMPORT_CXT.getLongOpt()));<a name="line.109"></a>
+<span class="sourceLineNo">110</span>      cxt = CXTImporter.read(input);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>      if (commandLine.hasOption(CALC_CONCEPTS.getLongOpt()) || commandLine.hasOption(CALC_IMPLICATIONS.getLongOpt())<a name="line.111"></a>
+<span class="sourceLineNo">112</span>          || commandLine.hasOption(CALC_NEIGHBORHOOD.getLongOpt())) {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        final Pair&lt;Set&lt;Concept&lt;String, String&gt;&gt;, Set&lt;Implication&lt;String, String&gt;&gt;&gt; result =<a name="line.113"></a>
+<span class="sourceLineNo">114</span>            NextClosures2Bit.bitCompute(cxt, Executors.newWorkStealingPool(), c1, c2, c3, c4, () -&gt; false);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        concepts = result.first();<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        implications = result.second();<a name="line.116"></a>
+<span class="sourceLineNo">117</span>      }<a name="line.117"></a>
+<span class="sourceLineNo">118</span>      if (commandLine.hasOption(CALC_NEIGHBORHOOD.getLongOpt())) {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>//        IPred.<a name="line.119"></a>
+<span class="sourceLineNo">120</span>      }<a name="line.120"></a>
+<span class="sourceLineNo">121</span>      if (commandLine.hasOption(WRITE_TO_FILE.getLongOpt())) {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>        final String filename = input.getName().substring(0, input.getName().lastIndexOf("."));<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        if (concepts != null)<a name="line.123"></a>
+<span class="sourceLineNo">124</span>          Collections3.writeToFile(<a name="line.124"></a>
+<span class="sourceLineNo">125</span>              new File(input.getParentFile(), filename + ".concepts"),<a name="line.125"></a>
+<span class="sourceLineNo">126</span>              concepts,<a name="line.126"></a>
+<span class="sourceLineNo">127</span>              "Formal Concepts of " + input.getAbsolutePath());<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        if (implications != null)<a name="line.128"></a>
+<span class="sourceLineNo">129</span>          Collections3.writeToFile(<a name="line.129"></a>
+<span class="sourceLineNo">130</span>              new File(input.getParentFile(), filename + ".implications"),<a name="line.130"></a>
+<span class="sourceLineNo">131</span>              implications,<a name="line.131"></a>
+<span class="sourceLineNo">132</span>              "Implications of " + input.getAbsolutePath());<a name="line.132"></a>
+<span class="sourceLineNo">133</span>        if (lattice != null)<a name="line.133"></a>
+<span class="sourceLineNo">134</span>          CXTExporter.export(lattice, new File(input.getParentFile(), filename + ".lattice"));<a name="line.134"></a>
+<span class="sourceLineNo">135</span>      }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    }<a name="line.136"></a>
+<span class="sourceLineNo">137</span>  }<a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138"></a>
+<span class="sourceLineNo">139</span>//  private final void test(final CommandLine commandLine) {<a name="line.139"></a>
+<span class="sourceLineNo">140</span>//    final String path = commandLine.getOptionValue(CLI.TEST.getLongOpt());<a name="line.140"></a>
+<span class="sourceLineNo">141</span>//    NextClosuresTest.run(path);<a name="line.141"></a>
+<span class="sourceLineNo">142</span>//    TestSuite.main(new String[] {});<a name="line.142"></a>
+<span class="sourceLineNo">143</span>////    -Xms256m<a name="line.143"></a>
+<span class="sourceLineNo">144</span>////    -Xmx2048m<a name="line.144"></a>
+<span class="sourceLineNo">145</span>////    -Djub.customkey=oracle-1.7.0_45<a name="line.145"></a>
+<span class="sourceLineNo">146</span>////    -Djub.consumers=CONSOLE,H2,XML<a name="line.146"></a>
+<span class="sourceLineNo">147</span>////    -Djub.db.file=benchmarks/.benchmarks<a name="line.147"></a>
+<span class="sourceLineNo">148</span>////    -Djub.xml.file=benchmarks/latest.xml    <a name="line.148"></a>
+<span class="sourceLineNo">149</span>//  }<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>  private final Options OPTIONS           = new Options();<a name="line.151"></a>
+<span class="sourceLineNo">152</span>  @SuppressWarnings("static-access")<a name="line.152"></a>
+<span class="sourceLineNo">153</span>  private final Option  HELP              = OptionBuilder<a name="line.153"></a>
+<span class="sourceLineNo">154</span>      .isRequired(false)<a name="line.154"></a>
+<span class="sourceLineNo">155</span>      .withLongOpt("showHelp")<a name="line.155"></a>
+<span class="sourceLineNo">156</span>      .hasArg(false)<a name="line.156"></a>
+<span class="sourceLineNo">157</span>      .withDescription("shows available command line options and their arguments.")<a name="line.157"></a>
+<span class="sourceLineNo">158</span>      .create("help");<a name="line.158"></a>
+<span class="sourceLineNo">159</span>  @SuppressWarnings("static-access")<a name="line.159"></a>
+<span class="sourceLineNo">160</span>  private final Option  IMPORT_CXT        = OptionBuilder<a name="line.160"></a>
+<span class="sourceLineNo">161</span>      .isRequired(false)<a name="line.161"></a>
+<span class="sourceLineNo">162</span>      .withLongOpt("importContextFromCXT")<a name="line.162"></a>
+<span class="sourceLineNo">163</span>      .hasArg(true)<a name="line.163"></a>
+<span class="sourceLineNo">164</span>      .withArgName("file")<a name="line.164"></a>
+<span class="sourceLineNo">165</span>      .withDescription("imports formal context file in Burmeister formatting (*.cxt)")<a name="line.165"></a>
+<span class="sourceLineNo">166</span>      .create("import");<a name="line.166"></a>
+<span class="sourceLineNo">167</span>  @SuppressWarnings("static-access")<a name="line.167"></a>
+<span class="sourceLineNo">168</span>  private final Option  CALC_CONCEPTS     = OptionBuilder<a name="line.168"></a>
+<span class="sourceLineNo">169</span>      .isRequired(false)<a name="line.169"></a>
+<span class="sourceLineNo">170</span>      .withLongOpt("calculateConcepts")<a name="line.170"></a>
+<span class="sourceLineNo">171</span>      .hasArg(false)<a name="line.171"></a>
+<span class="sourceLineNo">172</span>      .withDescription("computes all formal concepts")<a name="line.172"></a>
+<span class="sourceLineNo">173</span>      .create("concepts");<a name="line.173"></a>
+<span class="sourceLineNo">174</span>  @SuppressWarnings("static-access")<a name="line.174"></a>
+<span class="sourceLineNo">175</span>  private final Option  CALC_NEIGHBORHOOD = OptionBuilder<a name="line.175"></a>
+<span class="sourceLineNo">176</span>      .isRequired(false)<a name="line.176"></a>
+<span class="sourceLineNo">177</span>      .withLongOpt("calculateNeighborhood")<a name="line.177"></a>
+<span class="sourceLineNo">178</span>      .hasArg(false)<a name="line.178"></a>
+<span class="sourceLineNo">179</span>      .withDescription("computes the neighborhood relation")<a name="line.179"></a>
+<span class="sourceLineNo">180</span>      .create("lattice");<a name="line.180"></a>
+<span class="sourceLineNo">181</span>//  @SuppressWarnings("static-access")<a name="line.181"></a>
+<span class="sourceLineNo">182</span>//  private final Option  CALC_LAYOUT       = OptionBuilder<a name="line.182"></a>
+<span class="sourceLineNo">183</span>//                                              .isRequired(false)<a name="line.183"></a>
+<span class="sourceLineNo">184</span>//                                              .withLongOpt("calculateLayout")<a name="line.184"></a>
+<span class="sourceLineNo">185</span>//                                              .hasArg(false)<a name="line.185"></a>
+<span class="sourceLineNo">186</span>//                                              .withDescription("computes a concept layout")<a name="line.186"></a>
+<span class="sourceLineNo">187</span>//                                              .create("layout");<a name="line.187"></a>
+<span class="sourceLineNo">188</span>  @SuppressWarnings("static-access")<a name="line.188"></a>
+<span class="sourceLineNo">189</span>  private final Option  CALC_IMPLICATIONS = OptionBuilder<a name="line.189"></a>
+<span class="sourceLineNo">190</span>      .isRequired(false)<a name="line.190"></a>
+<span class="sourceLineNo">191</span>      .withLongOpt("calculateImplications")<a name="line.191"></a>
+<span class="sourceLineNo">192</span>      .hasArg(false)<a name="line.192"></a>
+<span class="sourceLineNo">193</span>      .withDescription("computes implicational base")<a name="line.193"></a>
+<span class="sourceLineNo">194</span>      .create("implications");<a name="line.194"></a>
+<span class="sourceLineNo">195</span>//  @SuppressWarnings("static-access")<a name="line.195"></a>
+<span class="sourceLineNo">196</span>//  private final Option  CALC_ASSOCIATIONS = OptionBuilder<a name="line.196"></a>
+<span class="sourceLineNo">197</span>//                                              .isRequired(false)<a name="line.197"></a>
+<span class="sourceLineNo">198</span>//                                              .withLongOpt("calculateAssociations")<a name="line.198"></a>
+<span class="sourceLineNo">199</span>//                                              .hasArg(true)<a name="line.199"></a>
+<span class="sourceLineNo">200</span>//                                              .withArgName("supp")<a name="line.200"></a>
+<span class="sourceLineNo">201</span>//                                              .withArgName("conf")<a name="line.201"></a>
+<span class="sourceLineNo">202</span>//                                              .withDescription("computes all association rules")<a name="line.202"></a>
+<span class="sourceLineNo">203</span>//                                              .create("associationrules");<a name="line.203"></a>
+<span class="sourceLineNo">204</span>  @SuppressWarnings("static-access")<a name="line.204"></a>
+<span class="sourceLineNo">205</span>  private final Option  PRINT_TO_CONSOLE  = OptionBuilder<a name="line.205"></a>
+<span class="sourceLineNo">206</span>      .isRequired(false)<a name="line.206"></a>
+<span class="sourceLineNo">207</span>      .withLongOpt("printToConsole")<a name="line.207"></a>
+<span class="sourceLineNo">208</span>      .hasArg(false)<a name="line.208"></a>
+<span class="sourceLineNo">209</span>      .withDescription("prints all results to console")<a name="line.209"></a>
+<span class="sourceLineNo">210</span>      .create("print");<a name="line.210"></a>
+<span class="sourceLineNo">211</span>  @SuppressWarnings("static-access")<a name="line.211"></a>
+<span class="sourceLineNo">212</span>  private final Option  WRITE_TO_FILE     = OptionBuilder<a name="line.212"></a>
+<span class="sourceLineNo">213</span>      .isRequired(false)<a name="line.213"></a>
+<span class="sourceLineNo">214</span>      .withLongOpt("writeToFile")<a name="line.214"></a>
+<span class="sourceLineNo">215</span>      .hasArg(false)<a name="line.215"></a>
+<span class="sourceLineNo">216</span>      // .hasArgs(2)<a name="line.216"></a>
+<span class="sourceLineNo">217</span>      // .withValueSeparator(' ')<a name="line.217"></a>
+<span class="sourceLineNo">218</span>      // .withArgName("format")<a name="line.218"></a>
+<span class="sourceLineNo">219</span>      // .withArgName("file")<a name="line.219"></a>
+<span class="sourceLineNo">220</span>      .withDescription("writes all results to files")<a name="line.220"></a>
+<span class="sourceLineNo">221</span>      .create("write");<a name="line.221"></a>
+<span class="sourceLineNo">222</span>  @SuppressWarnings("static-access")<a name="line.222"></a>
+<span class="sourceLineNo">223</span>  private final Option  GUI               = OptionBuilder<a name="line.223"></a>
+<span class="sourceLineNo">224</span>      .isRequired(false)<a name="line.224"></a>
+<span class="sourceLineNo">225</span>      .hasArg(false)<a name="line.225"></a>
+<span class="sourceLineNo">226</span>      .withDescription("starts the JavaFX gui")<a name="line.226"></a>
+<span class="sourceLineNo">227</span>      .withLongOpt("startGUI")<a name="line.227"></a>
+<span class="sourceLineNo">228</span>      .create("gui");<a name="line.228"></a>
+<span class="sourceLineNo">229</span>//  @SuppressWarnings("static-access")<a name="line.229"></a>
+<span class="sourceLineNo">230</span>//  private final Option  TEST              = OptionBuilder<a name="line.230"></a>
+<span class="sourceLineNo">231</span>//                                                       .isRequired(false)<a name="line.231"></a>
+<span class="sourceLineNo">232</span>//                                                       .hasArg(true)<a name="line.232"></a>
+<span class="sourceLineNo">233</span>//                                                       .withArgName("path")<a name="line.233"></a>
+<span class="sourceLineNo">234</span>//                                                       .withDescription("runs the test suite")<a name="line.234"></a>
+<span class="sourceLineNo">235</span>//                                                       .withLongOpt("runTestSuite")<a name="line.235"></a>
+<span class="sourceLineNo">236</span>//                                                       .create("test");<a name="line.236"></a>
+<span class="sourceLineNo">237</span>//  @SuppressWarnings("static-access")<a name="line.237"></a>
+<span class="sourceLineNo">238</span>//  private final Option  BENCHMARK         = OptionBuilder<a name="line.238"></a>
+<span class="sourceLineNo">239</span>//                                                       .isRequired(false)<a name="line.239"></a>
+<span class="sourceLineNo">240</span>//                                                       .hasArg(true)<a name="line.240"></a>
+<span class="sourceLineNo">241</span>//                                                       .withArgName("path")<a name="line.241"></a>
+<span class="sourceLineNo">242</span>//                                                       .withDescription("runs the benchmark suite")<a name="line.242"></a>
+<span class="sourceLineNo">243</span>//                                                       .withLongOpt("runBenchmarkSuite")<a name="line.243"></a>
+<span class="sourceLineNo">244</span>//                                                       .create("bench");<a name="line.244"></a>
+<span class="sourceLineNo">245</span><a name="line.245"></a>
+<span class="sourceLineNo">246</span>  {<a name="line.246"></a>
+<span class="sourceLineNo">247</span>    OPTIONS.addOption(GUI);<a name="line.247"></a>
+<span class="sourceLineNo">248</span>    OPTIONS.addOption(HELP);<a name="line.248"></a>
+<span class="sourceLineNo">249</span>    OPTIONS.addOption(IMPORT_CXT);<a name="line.249"></a>
+<span class="sourceLineNo">250</span>    OPTIONS.addOption(CALC_CONCEPTS);<a name="line.250"></a>
+<span class="sourceLineNo">251</span>    OPTIONS.addOption(CALC_NEIGHBORHOOD);<a name="line.251"></a>
+<span class="sourceLineNo">252</span>//    OPTIONS.addOption(CALC_LAYOUT);<a name="line.252"></a>
+<span class="sourceLineNo">253</span>    OPTIONS.addOption(CALC_IMPLICATIONS);<a name="line.253"></a>
+<span class="sourceLineNo">254</span>//    OPTIONS.addOption(CALC_ASSOCIATIONS);<a name="line.254"></a>
+<span class="sourceLineNo">255</span>    OPTIONS.addOption(PRINT_TO_CONSOLE);<a name="line.255"></a>
+<span class="sourceLineNo">256</span>    OPTIONS.addOption(WRITE_TO_FILE);<a name="line.256"></a>
+<span class="sourceLineNo">257</span>//    OPTIONS.addOption(TEST);<a name="line.257"></a>
+<span class="sourceLineNo">258</span>//    OPTIONS.addOption(BENCHMARK);<a name="line.258"></a>
+<span class="sourceLineNo">259</span>  }<a name="line.259"></a>
+<span class="sourceLineNo">260</span>}<a name="line.260"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

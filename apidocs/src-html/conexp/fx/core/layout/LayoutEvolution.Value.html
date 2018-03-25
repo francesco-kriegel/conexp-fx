@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package conexp.fx.core.layout;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>/*<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * <a name="line.13"></a>
+<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * <a name="line.18"></a>
+<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.util.ArrayList;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.Collections;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.HashSet;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.List;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.Map;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.NoSuchElementException;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.util.Set;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.concurrent.ExecutionException;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import java.util.concurrent.ExecutorService;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import java.util.concurrent.Future;<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>import com.google.common.collect.Iterables;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import com.google.common.collect.Iterators;<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>import conexp.fx.core.collections.Pair;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import conexp.fx.core.context.Concept;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.gui.task.TimeTask;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import javafx.beans.property.DoubleProperty;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import javafx.beans.property.SimpleDoubleProperty;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import javafx.beans.value.ChangeListener;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import javafx.beans.value.ObservableValue;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import javafx.collections.FXCollections;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import javafx.collections.ObservableSet;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import javafx.geometry.BoundingBox;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import javafx.geometry.Point3D;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import javafx.geometry.Rectangle2D;<a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>public final class LayoutEvolution&lt;G, M&gt; {<a name="line.52"></a>
+<span class="sourceLineNo">053</span><a name="line.53"></a>
+<span class="sourceLineNo">054</span>  public static final &lt;G, M&gt; TimeTask&lt;Void&gt; calculate(final LayoutEvolution&lt;G, M&gt; qualityChart) {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    return new TimeTask&lt;Void&gt;("Quality Measure Chart") {<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>      @Override<a name="line.57"></a>
+<span class="sourceLineNo">058</span>      protected final Void call() {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        updateProgress(0d, 1d);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        if (isCancelled())<a name="line.60"></a>
+<span class="sourceLineNo">061</span>          return null;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        updateMessage("Simulating Concept Movement...");<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        qualityChart.progressProperty.addListener(new ChangeListener&lt;Number&gt;() {<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>          @Override<a name="line.65"></a>
+<span class="sourceLineNo">066</span>          public final void changed(<a name="line.66"></a>
+<span class="sourceLineNo">067</span>              final ObservableValue&lt;? extends Number&gt; observable,<a name="line.67"></a>
+<span class="sourceLineNo">068</span>              final Number oldValue,<a name="line.68"></a>
+<span class="sourceLineNo">069</span>              final Number newValue) {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            updateProgress(newValue.doubleValue(), 1d);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>          }<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        });<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        qualityChart.calculate();<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        updateProgress(1d, 1d);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        return null;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>      }<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    };<a name="line.77"></a>
+<span class="sourceLineNo">078</span>  }<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>  public final class Value implements Comparable&lt;Value&gt; {<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>    public final Point3D         delta;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    public final Rectangle2D     rectangle;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>    public final double          result;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    public final Concept&lt;G, M&gt;   hint;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    public final Map&lt;G, Point3D&gt; seedsG;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    public final Map&lt;M, Point3D&gt; seedsM;<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>    private Value(<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        final Point3D delta,<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        final Rectangle2D rectangle,<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        final Pair&lt;Concept&lt;G, M&gt;, Double&gt; result,<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        final Map&lt;G, Point3D&gt; seedsG,<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        final Map&lt;M, Point3D&gt; seedsM) {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>      this(delta, rectangle, result.second(), result.first(), seedsG, seedsM);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    }<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>    private Value(<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        final Point3D delta,<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        final Rectangle2D rectangle,<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        final double result,<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        final Concept&lt;G, M&gt; hint,<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        final Map&lt;G, Point3D&gt; seedsG,<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        final Map&lt;M, Point3D&gt; seedsM) {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>      super();<a name="line.105"></a>
+<span class="sourceLineNo">106</span>      this.delta = delta;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>      this.rectangle = rectangle;<a name="line.107"></a>
+<span class="sourceLineNo">108</span>      this.result = result;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>      this.hint = hint;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>      this.seedsG = seedsG;<a name="line.110"></a>
+<span class="sourceLineNo">111</span>      this.seedsM = seedsM;<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    }<a name="line.112"></a>
+<span class="sourceLineNo">113</span><a name="line.113"></a>
+<span class="sourceLineNo">114</span>    @Override<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    public final int compareTo(final Value other) {<a name="line.115"></a>
+<span class="sourceLineNo">116</span>      return (int) Math.signum(other.result - this.result);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    }<a name="line.117"></a>
+<span class="sourceLineNo">118</span>  }<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>  private final ExecutorService                                   tpe;<a name="line.120"></a>
+<span class="sourceLineNo">121</span>  private final QualityMeasure&lt;G, M, Pair&lt;Concept&lt;G, M&gt;, Double&gt;&gt; conflictDistance;<a name="line.121"></a>
+<span class="sourceLineNo">122</span>  private final AdditiveConceptLayout&lt;G, M&gt;                       layout;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>  private final Concept&lt;G, M&gt;                                     concept;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>  private final ConceptMovement                                   movement;<a name="line.124"></a>
+<span class="sourceLineNo">125</span>  private double                                                  minY;<a name="line.125"></a>
+<span class="sourceLineNo">126</span>  private final int                                               toSide;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>  private final int                                               zoomInto;<a name="line.127"></a>
+<span class="sourceLineNo">128</span>  private final int                                               steps;<a name="line.128"></a>
+<span class="sourceLineNo">129</span>  public final DoubleProperty                                     progressProperty = new SimpleDoubleProperty(0d);<a name="line.129"></a>
+<span class="sourceLineNo">130</span>  public Value                                                    best;<a name="line.130"></a>
+<span class="sourceLineNo">131</span>  public final ObservableSet&lt;Value&gt;                               values           =<a name="line.131"></a>
+<span class="sourceLineNo">132</span>      FXCollections.observableSet(new HashSet&lt;Value&gt;());<a name="line.132"></a>
+<span class="sourceLineNo">133</span>  private final List&lt;Value&gt;                                       lastValues;<a name="line.133"></a>
+<span class="sourceLineNo">134</span>  private final Set&lt;Value&gt;                                        nextValues       = new HashSet&lt;Value&gt;();<a name="line.134"></a>
+<span class="sourceLineNo">135</span>  private final double                                            numPerDim;<a name="line.135"></a>
+<span class="sourceLineNo">136</span><a name="line.136"></a>
+<span class="sourceLineNo">137</span>  public LayoutEvolution(<a name="line.137"></a>
+<span class="sourceLineNo">138</span>      final AdditiveConceptLayout&lt;G, M&gt; layout,<a name="line.138"></a>
+<span class="sourceLineNo">139</span>      final Concept&lt;G, M&gt; concept,<a name="line.139"></a>
+<span class="sourceLineNo">140</span>      final ConceptMovement movement,<a name="line.140"></a>
+<span class="sourceLineNo">141</span>      final double widthFactor,<a name="line.141"></a>
+<span class="sourceLineNo">142</span>      final double heightFactor,<a name="line.142"></a>
+<span class="sourceLineNo">143</span>      final int toSide,<a name="line.143"></a>
+<span class="sourceLineNo">144</span>      final int steps,<a name="line.144"></a>
+<span class="sourceLineNo">145</span>      final int zoomInto,<a name="line.145"></a>
+<span class="sourceLineNo">146</span>      final QualityMeasure&lt;G, M, Pair&lt;Concept&lt;G, M&gt;, Double&gt;&gt; conflictDistance,<a name="line.146"></a>
+<span class="sourceLineNo">147</span>      final ExecutorService tpe) {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    super();<a name="line.148"></a>
+<span class="sourceLineNo">149</span>    this.layout = layout;<a name="line.149"></a>
+<span class="sourceLineNo">150</span>    this.concept = concept;<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    this.movement = movement;<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    this.toSide = toSide;<a name="line.152"></a>
+<span class="sourceLineNo">153</span>    this.numPerDim = 1d + 2d * toSide;<a name="line.153"></a>
+<span class="sourceLineNo">154</span>    this.zoomInto = zoomInto;<a name="line.154"></a>
+<span class="sourceLineNo">155</span>    this.steps = steps;<a name="line.155"></a>
+<span class="sourceLineNo">156</span>    this.conflictDistance = conflictDistance;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    this.tpe = tpe;<a name="line.157"></a>
+<span class="sourceLineNo">158</span>    this.lastValues = new ArrayList&lt;Value&gt;((int) Math.pow(1d + 2d * toSide, 2d));<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    final BoundingBox layoutBounds = layout.getCurrentBoundingBox(false, false);<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    final double width = widthFactor * layoutBounds.getWidth();<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    final double height = heightFactor * layoutBounds.getHeight();<a name="line.161"></a>
+<span class="sourceLineNo">162</span>    final Point3D origin = layout.getPosition(concept).getValue();<a name="line.162"></a>
+<span class="sourceLineNo">163</span>    final Rectangle2D rectangle =<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        new Rectangle2D(origin.getX() - width / 2d, origin.getY() - height / 2d, width, height);<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    final Value firstValue = new Value(<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        Point3D.ZERO,<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        rectangle,<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        conflictDistance.apply(layout),<a name="line.168"></a>
+<span class="sourceLineNo">169</span>        //        layout.clone()._seedsG,<a name="line.169"></a>
+<span class="sourceLineNo">170</span>        //        layout.clone()._seedsM);<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        layout.clone().seedsG,<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        layout.clone().seedsM);<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    if (concept.equals(layout.lattice.context.selection.topConcept())) {<a name="line.173"></a>
+<span class="sourceLineNo">174</span>      best = firstValue;<a name="line.174"></a>
+<span class="sourceLineNo">175</span>      return;<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    }<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    switch (movement) {<a name="line.177"></a>
+<span class="sourceLineNo">178</span>    case LABEL_SEED:<a name="line.178"></a>
+<span class="sourceLineNo">179</span>      try {<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        minY = layout.getPosition(Iterators.getOnlyElement(layout.lattice.row(concept).iterator())).getValue().getY()<a name="line.180"></a>
+<span class="sourceLineNo">181</span>            - origin.getY();<a name="line.181"></a>
+<span class="sourceLineNo">182</span>      } catch (IllegalArgumentException | NoSuchElementException e) {<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        best = firstValue;<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        return;<a name="line.184"></a>
+<span class="sourceLineNo">185</span>      }<a name="line.185"></a>
+<span class="sourceLineNo">186</span>      break;<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    case INTENT_SEEDS:<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    case INTENT_CHAIN_SEEDS:<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    default:<a name="line.189"></a>
+<span class="sourceLineNo">190</span>      minY = -origin.getY();<a name="line.190"></a>
+<span class="sourceLineNo">191</span>      break;<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    }<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    values.add(firstValue);<a name="line.193"></a>
+<span class="sourceLineNo">194</span>    nextValues.add(firstValue);<a name="line.194"></a>
+<span class="sourceLineNo">195</span>  }<a name="line.195"></a>
+<span class="sourceLineNo">196</span><a name="line.196"></a>
+<span class="sourceLineNo">197</span>  public final Value calculate() {<a name="line.197"></a>
+<span class="sourceLineNo">198</span>    if (!nextValues.isEmpty())<a name="line.198"></a>
+<span class="sourceLineNo">199</span>      for (int step = 0; step &lt; steps; step++)<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        zoomIn();<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    return best;<a name="line.201"></a>
+<span class="sourceLineNo">202</span>  }<a name="line.202"></a>
+<span class="sourceLineNo">203</span><a name="line.203"></a>
+<span class="sourceLineNo">204</span>  private final void zoomIn() {<a name="line.204"></a>
+<span class="sourceLineNo">205</span>    final Set&lt;Future&lt;?&gt;&gt; futures = new HashSet&lt;Future&lt;?&gt;&gt;();<a name="line.205"></a>
+<span class="sourceLineNo">206</span>    for (Value nextValue : nextValues) {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>      values.remove(nextValue);<a name="line.207"></a>
+<span class="sourceLineNo">208</span>      final double tileWidth = nextValue.rectangle.getWidth() / numPerDim;<a name="line.208"></a>
+<span class="sourceLineNo">209</span>      final double tileHeight = nextValue.rectangle.getHeight() / numPerDim;<a name="line.209"></a>
+<span class="sourceLineNo">210</span>      final Value value = new Value(<a name="line.210"></a>
+<span class="sourceLineNo">211</span>          nextValue.delta,<a name="line.211"></a>
+<span class="sourceLineNo">212</span>          new Rectangle2D(<a name="line.212"></a>
+<span class="sourceLineNo">213</span>              nextValue.rectangle.getMinX() + toSide * tileWidth,<a name="line.213"></a>
+<span class="sourceLineNo">214</span>              nextValue.rectangle.getMinY() + toSide * tileHeight,<a name="line.214"></a>
+<span class="sourceLineNo">215</span>              tileWidth,<a name="line.215"></a>
+<span class="sourceLineNo">216</span>              tileHeight),<a name="line.216"></a>
+<span class="sourceLineNo">217</span>          nextValue.result,<a name="line.217"></a>
+<span class="sourceLineNo">218</span>          nextValue.hint,<a name="line.218"></a>
+<span class="sourceLineNo">219</span>          nextValue.seedsG,<a name="line.219"></a>
+<span class="sourceLineNo">220</span>          nextValue.seedsM);<a name="line.220"></a>
+<span class="sourceLineNo">221</span>      values.add(value);<a name="line.221"></a>
+<span class="sourceLineNo">222</span>      lastValues.add(value);<a name="line.222"></a>
+<span class="sourceLineNo">223</span>      for (double i = -toSide; i &lt;= toSide; i++)<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        for (double j = -toSide; j &lt;= toSide; j++)<a name="line.224"></a>
+<span class="sourceLineNo">225</span>          if (i != 0d || j != 0d)<a name="line.225"></a>
+<span class="sourceLineNo">226</span>            futures.add(tpe.submit(create(nextValue, i, j, tileWidth, tileHeight)));<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    }<a name="line.227"></a>
+<span class="sourceLineNo">228</span>    for (Future&lt;?&gt; f : futures)<a name="line.228"></a>
+<span class="sourceLineNo">229</span>      try {<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        f.get();<a name="line.230"></a>
+<span class="sourceLineNo">231</span>      } catch (InterruptedException | ExecutionException e) {<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        e.printStackTrace();<a name="line.232"></a>
+<span class="sourceLineNo">233</span>      }<a name="line.233"></a>
+<span class="sourceLineNo">234</span>    nextValues.clear();<a name="line.234"></a>
+<span class="sourceLineNo">235</span>    Collections.sort(lastValues);<a name="line.235"></a>
+<span class="sourceLineNo">236</span>    for (Value nextValue : Iterables.limit(lastValues, zoomInto))<a name="line.236"></a>
+<span class="sourceLineNo">237</span>      nextValues.add(nextValue);<a name="line.237"></a>
+<span class="sourceLineNo">238</span>    lastValues.clear();<a name="line.238"></a>
+<span class="sourceLineNo">239</span>  }<a name="line.239"></a>
+<span class="sourceLineNo">240</span><a name="line.240"></a>
+<span class="sourceLineNo">241</span>  private final Runnable<a name="line.241"></a>
+<span class="sourceLineNo">242</span>      create(final Value nextValue, final double i, final double j, final double tileWidth, final double tileHeight) {<a name="line.242"></a>
+<span class="sourceLineNo">243</span>    return new Runnable() {<a name="line.243"></a>
+<span class="sourceLineNo">244</span><a name="line.244"></a>
+<span class="sourceLineNo">245</span>      @Override<a name="line.245"></a>
+<span class="sourceLineNo">246</span>      public void run() {<a name="line.246"></a>
+<span class="sourceLineNo">247</span>        final Point3D delta = nextValue.delta.add(i * tileWidth, j * tileHeight, 0);<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        if (delta.getY() &lt; minY)<a name="line.248"></a>
+<span class="sourceLineNo">249</span>          return;<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        final AdditiveConceptLayout&lt;G, M&gt; movedLayout = layout.clone();<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        movedLayout.move(concept, movement, delta);<a name="line.251"></a>
+<span class="sourceLineNo">252</span>        final Value value = new Value(<a name="line.252"></a>
+<span class="sourceLineNo">253</span>            delta,<a name="line.253"></a>
+<span class="sourceLineNo">254</span>            new Rectangle2D(<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                nextValue.rectangle.getMinX() + (i + toSide) * tileWidth,<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                nextValue.rectangle.getMinY() + (j + toSide) * tileHeight,<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                tileWidth,<a name="line.257"></a>
+<span class="sourceLineNo">258</span>                tileHeight),<a name="line.258"></a>
+<span class="sourceLineNo">259</span>            conflictDistance.apply(movedLayout),<a name="line.259"></a>
+<span class="sourceLineNo">260</span>            //            movedLayout._seedsG,<a name="line.260"></a>
+<span class="sourceLineNo">261</span>            //            movedLayout._seedsM);<a name="line.261"></a>
+<span class="sourceLineNo">262</span>            movedLayout.seedsG,<a name="line.262"></a>
+<span class="sourceLineNo">263</span>            movedLayout.seedsM);<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        synchronized (values) {<a name="line.264"></a>
+<span class="sourceLineNo">265</span>          values.add(value);<a name="line.265"></a>
+<span class="sourceLineNo">266</span>        }<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        synchronized (lastValues) {<a name="line.267"></a>
+<span class="sourceLineNo">268</span>          lastValues.add(value);<a name="line.268"></a>
+<span class="sourceLineNo">269</span>        }<a name="line.269"></a>
+<span class="sourceLineNo">270</span>//        synchronized (best) {<a name="line.270"></a>
+<span class="sourceLineNo">271</span>        if (best == null || value.result &gt;= best.result)<a name="line.271"></a>
+<span class="sourceLineNo">272</span>          best = value;<a name="line.272"></a>
+<span class="sourceLineNo">273</span>//        }<a name="line.273"></a>
+<span class="sourceLineNo">274</span>      }<a name="line.274"></a>
+<span class="sourceLineNo">275</span>    };<a name="line.275"></a>
+<span class="sourceLineNo">276</span>  }<a name="line.276"></a>
+<span class="sourceLineNo">277</span>}<a name="line.277"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
