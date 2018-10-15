@@ -24,6 +24,7 @@ package conexp.fx.core.dl;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -34,12 +35,13 @@ import java.util.stream.Stream;
 import org.semanticweb.owlapi.model.IRI;
 
 import conexp.fx.core.collections.BitSetFX;
+import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.util.Meter;
 
 public final class ELNeighborhoodTest {
 
   public static void main(String[] args) {
-    test12();
+    test8();
   }
 
   public static final void test1() {
@@ -141,16 +143,17 @@ public final class ELNeighborhoodTest {
 
   private static final void test8() {
     final Signature sigma = new Signature(IRI.create("foo"));
-    sigma.addConceptNames("A1", "A2", "A3", "A4");
+//    sigma.addConceptNames("A1", "A2", "A3", "A4");
+    sigma.addConceptNames("A", "B", "C", "D");
     sigma.addRoleNames("r", "s");
     final ELConceptDescription C = ELParser.read(
-        // "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2");
-        // "A1 and A2 and A3 and exists r.(A1 and A2) and exists r.(A1 and A3) and exists r.(A2 and A3) and exists r.(A1
-        // and A2 and A3 and exists r.(A1 and A2 and A3)) and exists s.(A1 and exists r.(A2 and exists s.Top) and exists
-        // s.A3 and exists r.A3) and exists s.A2 and exists s.(A3 and A4) and exists s.(exists r.Top and exists s.(A2
-        // and exists r.A3) and exists s.exists r.A4) and exists r.exists r.exists r.exists r.exists r.Top and exists
-        // s.exists r.(A2 and exists s.A4 and exists r.exists s.A3 and exists r.exists r.Top)"
-        "exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))");
+//        "exists r.(exists r.(A and B) and exists r.(A and C))");
+//        "exists r.(exists r.(A1 and A2) and exists r.(A1 and A3))");
+//        "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2");
+//        "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)");
+//        "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))");
+//        "exists r.(exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A and B and exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A and D and exists s.(C and D) and exists r.Top) and exists r.(B and C and exists s.Top) and exists r.(A and B and C) and exists r.exists s.Top and exists r.(B and D and exists r.(A and B)) and exists r.(A and D and exists r.(A and C))");
+    "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)");
     C.reduce();
     System.out.println(C);
     final Meter<Long> timer = Meter.newNanoStopWatch();
@@ -160,31 +163,38 @@ public final class ELNeighborhoodTest {
     System.out.println("has size: " + C.size());
     System.out.println("computation time: " + timer.measureAndFormat());
     timer.reset();
-    System.out.println("has rank: " + C.rank());
-    System.out.println("computation time: " + timer.measureAndFormat());
+//    System.out.println("has rank: " + C.rank());
+//    System.out.println("computation time: " + timer.measureAndFormat());
     System.out.println("and has the following upper neighbors:");
     timer.reset();
-    Set<ELConceptDescription> upperNeighbors = C.upperNeighborsReduced();
+    Set<ELConceptDescription> upperNeighbors = C.upperNeighbors();
     final String upperNeighborsTime = timer.measureAndFormat();
     final AtomicInteger i = new AtomicInteger(0);
     upperNeighbors.forEach(D -> {
-      System.out.println(i.incrementAndGet() + " --- " + D.rank() + " --- " + D);
-//      System.out.println(i.incrementAndGet() + " --- " + D);
+//      System.out.println(i.incrementAndGet() + " --- " + D.rank() + " --- " + D);
+      System.out.println(i.incrementAndGet() + " --- " + D);
     });
     System.out.println("computation time: " + upperNeighborsTime);
-    System.out.println("and has the following lower neighbors:");
-    timer.reset();
-    Set<ELConceptDescription> lowerNeighbors = C.lowerNeighbors(sigma);
-    final String lowerNeighborsTime = timer.measureAndFormat();
-    i.set(0);
-    lowerNeighbors.forEach(D -> {
-      D.reduce();
-      System.out.println(
-          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
-              + " --- " + D.rank() + " --- " + D);
-//      System.out.println(i.incrementAndGet() + " --- " + D);
-    });
-    System.out.println("computation time: " + lowerNeighborsTime);
+//    System.out.println("and has the following lower neighbors:");
+//    timer.reset();
+//    Set<ELConceptDescription> lowerNeighbors = C.lowerNeighborsReduced(sigma);
+//    final String lowerNeighborsTime = timer.measureAndFormat();
+//    i.set(0);
+//    lowerNeighbors.forEach(D -> {
+////      final ELConceptDescription rE = D.clone();
+////      rE.getConceptNames().removeAll(C.getConceptNames());
+////      rE.getExistentialRestrictions().entries().removeAll(C.getExistentialRestrictions().entries());
+//      D.reduce();
+////      System.out.println(
+////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+////              + " --- " + D.rank() + " --- " + D);
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D);
+////      System.out.println("   new conjunct: " + rE);
+////      System.out.println(i.incrementAndGet() + " --- " + D);
+//    });
+//    System.out.println("computation time: " + lowerNeighborsTime);
 //    System.out.println("and has the following lower neighbors (v2):");
 //    timer.reset();
 //    Set<ELConceptDescription> lowerNeighbors2 = C.lowerNeighbors2(sigma);
@@ -198,22 +208,79 @@ public final class ELNeighborhoodTest {
 //      System.out.println(i.incrementAndGet() + " --- " + D);
 //    });
 //    System.out.println("computation time: " + lowerNeighbors2Time);
-    System.out.println("and has the following lower neighbors (v3):");
+//    System.out.println("and has the following lower neighbors (v3):");
+//    timer.reset();
+//    Set<ELConceptDescription> lowerNeighbors3 = C.lowerNeighbors3(sigma);
+//    final String lowerNeighbors3Time = timer.measureAndFormat();
+//    i.set(0);
+//    lowerNeighbors3.forEach(D -> {
+//      D.reduce();
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D.rank() + " --- " + D);
+////      System.out.println(i.incrementAndGet() + " --- " + D);
+//    });
+//    System.out.println("computation time: " + lowerNeighbors3Time);
+//    System.out.println();
+    System.out.println("and has the following lower neighbors (v4):");
     timer.reset();
-    Set<ELConceptDescription> lowerNeighbors3 = C.lowerNeighbors3(sigma);
-    final String lowerNeighbors3Time = timer.measureAndFormat();
+    Set<ELConceptDescription> lowerNeighbors4 = C.lowerNeighbors4(sigma);
+    final String lowerNeighbors4Time = timer.measureAndFormat();
     i.set(0);
-    lowerNeighbors3.forEach(D -> {
+    lowerNeighbors4.forEach(D -> {
       D.reduce();
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D.rank() + " --- " + D);
       System.out.println(
           i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
-              + " --- " + D.rank() + " --- " + D);
+              + " --- " + D);
 //      System.out.println(i.incrementAndGet() + " --- " + D);
     });
-    System.out.println("computation time: " + lowerNeighbors3Time);
+    System.out.println("computation time: " + lowerNeighbors4Time);
     System.out.println();
+    System.out.println("and has the following lower neighbors (v5):");
+    timer.reset();
+    Set<ELConceptDescription> lowerNeighbors5 = C.lowerNeighbors5(sigma);
+    final String lowerNeighbors5Time = timer.measureAndFormat();
+    i.set(0);
+    lowerNeighbors5.forEach(D -> {
+      D.reduce();
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D.rank() + " --- " + D);
+      System.out.println(
+          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+              + " --- " + D);
+//      System.out.println(i.incrementAndGet() + " --- " + D);
+    });
+    System.out.println("computation time: " + lowerNeighbors5Time);
+    System.out.println();
+//    final int size1 = Collections3.quotient(lowerNeighbors, ELConceptDescription.equivalence()).size();
+    final int size4 = Collections3.quotient(lowerNeighbors4, ELConceptDescription.equivalence()).size();
+    final int size5 = Collections3.quotient(lowerNeighbors5, ELConceptDescription.equivalence()).size();
 //    System.out.println("1=2   " + equalsEquivalent(lowerNeighbors, lowerNeighbors2));
-    System.out.println("1=3   " + equalsEquivalent(lowerNeighbors, lowerNeighbors3));
+//    System.out.println("1=3   " + equalsEquivalent(lowerNeighbors, lowerNeighbors3));
+//    System.out.println("time1 = " + lowerNeighborsTime);
+    System.out.println("time4 = " + lowerNeighbors4Time);
+    System.out.println("time5 = " + lowerNeighbors5Time);
+//    System.out.println("size1 = " + size1);
+    System.out.println("size4 = " + size4);
+    System.out.println("size5 = " + size5);
+//    System.out.println("1<4   " + containsEquivalent(lowerNeighbors, lowerNeighbors4));
+//    System.out.println("4<1   " + containsEquivalent(lowerNeighbors4, lowerNeighbors));
+//    System.out.println("1=4   " + equalsEquivalent(lowerNeighbors, lowerNeighbors4));
+//    System.out.println("1<5   " + containsEquivalent(lowerNeighbors, lowerNeighbors5));
+//    System.out.println("5<1   " + containsEquivalent(lowerNeighbors5, lowerNeighbors));
+//    System.out.println("1=5   " + equalsEquivalent(lowerNeighbors, lowerNeighbors5));
+    System.out.println("4<5   " + containsEquivalent(lowerNeighbors4, lowerNeighbors5));
+    System.out.println("5<4   " + containsEquivalent(lowerNeighbors5, lowerNeighbors4));
+    System.out.println("4=5   " + equalsEquivalent(lowerNeighbors4, lowerNeighbors5));
+    Collections3
+        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())
+        .parallelStream()
+        .filter(L -> lowerNeighbors5.parallelStream().noneMatch(L::isEquivalentTo))
+        .forEach(System.out::println);
 //    System.out.println("2=3   " + equalsEquivalent(lowerNeighbors2, lowerNeighbors3));
   }
 
@@ -311,6 +378,36 @@ public final class ELNeighborhoodTest {
       neighborhood.forEach(D -> System.out.println(D));
 //      neighborhood.forEach(D -> System.out.println(D.rank() + "   " + D));
       System.out.println("computation time: " + ctime);
+    }
+  }
+
+  private static final void test13() {
+    final int n = 3;
+    final IRI r = IRI.create("r");
+    final List<ELConceptDescription> atoms = new LinkedList<>();
+    for (int i = 1; i < n + 1; i++) {
+      atoms.add(ELConceptDescription.conceptName(IRI.create("A" + i)));
+    }
+    ELConceptDescription C = ELConceptDescription.conjunction(atoms);
+    int rd = 0;
+    long rank = C.rank();
+    while (true) {
+//      final long lower = 1 + rank;
+//      long upper = 1;
+//      for (long i = 1; i < rank; i++) {
+//        long fac = 1;
+//        for (long j = 0; j < i - 2; j++)
+//          fac *= rank - j;
+//        upper += fac;
+//      }
+      C = ELConceptDescription.conjunction(C, ELConceptDescription.existentialRestriction(r, C)).reduce();
+      rd++;
+      rank = C.rank();
+      System.out.println("role depth: " + rd + "    " + "rank: " + rank);
+      System.out.println(C);
+//      System.out.println("lower bound: " + lower);
+//      System.out.println("upper bound: " + upper);
+      System.out.println();
     }
   }
 
