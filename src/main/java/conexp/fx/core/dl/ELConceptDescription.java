@@ -50,6 +50,8 @@ import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Collections3;
@@ -102,6 +104,32 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
       conjunction.getExistentialRestrictions().putAll(conjunct.getExistentialRestrictions());
     });
     return conjunction;
+  }
+
+  public static final ELConceptDescription
+      random(final Signature sigma, final int maxRoleDepth, final int minSize, final int maxSize) {
+    if (maxRoleDepth < 0 || minSize < 0 || maxSize < 0 || minSize > maxSize)
+      throw new IllegalArgumentException();
+    final double p = Math.random();
+    final double q = Math.random();
+    final ELConceptDescription C = new ELConceptDescription();
+    for (IRI A : sigma.getConceptNames())
+      if (C.size() >= maxSize)
+        return C;
+      else if (Math.random() < p)
+        C.conceptNames.add(A);
+    if (maxRoleDepth > 0)
+      for (IRI r : sigma.getRoleNames())
+        while (Math.random() < q)
+          if (C.size() >= maxSize)
+            return C;
+          else
+            C.existentialRestrictions
+                .put(r, ELConceptDescription.random(sigma, maxRoleDepth - 1, 0, maxSize - C.size()));
+    if (C.size() >= minSize)
+      return C;
+    else
+      return random(sigma, maxRoleDepth, minSize, maxSize);
   }
 
   public static final BiPredicate<ELConceptDescription, ELConceptDescription> quasiOrder() {
@@ -549,8 +577,7 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
     }), reducedForm.existentialRestrictions.entries().parallelStream().map(ER -> {
       final ELConceptDescription upperNeighbor = reducedForm.clone();
       upperNeighbor.existentialRestrictions.remove(ER.getKey(), ER.getValue());
-      ER.getValue().upperNeighbors().forEach(
-          uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
+      ER.getValue().upperNeighbors().forEach(uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
       return upperNeighbor;
     })
 //        .filter(other -> !this.subsumes(other)))
@@ -837,7 +864,7 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
               sigma,
               r,
               C,
-              Collections.singleton(ELConceptDescription.conjunction(filter)),
+              Collections.singleton(ELConceptDescription.conjunction(filter).reduce()),
               filter,
               lowerNeighbors);
         filter.parallelStream().forEach(F -> {
@@ -864,7 +891,7 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
       final Set<ELConceptDescription> lowerNeighbors) {
     final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
     currentCandidates.parallelStream().forEach(D -> {
-      D.reduce();
+//      D.reduce();
       if (filter.parallelStream().noneMatch(F -> F.isSubsumedBy(D))) {
 //      if (!C.isSubsumedBy(ELConceptDescription.existentialRestriction(r, D))) {
         final Set<ELConceptDescription> Us = D.upperNeighborsReduced();
@@ -931,10 +958,13 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
         lowerNeighbors.add(lowerNeighbor);
       } else {
         if (filter.size() > 1) {
-          filter.parallelStream().forEach(F -> filter.parallelStream().filter(G -> !G.equals(F)).forEach(G -> {
-            final ELConceptDescription D = ELConceptDescription.conjunction(F, G);
-            recurseLowerNeighbors5(sigma, r, C, Collections.singleton(D), filter, lowerNeighbors);
-          }));
+          final Set<ELConceptDescription> firstCandidates = filter
+              .parallelStream()
+              .flatMap(
+                  F -> filter.parallelStream().filter(G -> !G.equals(F)).map(
+                      G -> ELConceptDescription.conjunction(F, G).reduce()))
+              .collect(Collectors.toSet());
+          recurseLowerNeighbors5(sigma, r, C, firstCandidates, filter, lowerNeighbors);
         }
         filter.parallelStream().forEach(F -> {
           F.lowerNeighbors5(sigma).parallelStream().forEach(L -> {
@@ -960,7 +990,7 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
       final Set<ELConceptDescription> lowerNeighbors) {
     final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
     currentCandidates.parallelStream().forEach(D -> {
-      D.reduce();
+//      D.reduce();
       if (filter.parallelStream().noneMatch(F -> F.isSubsumedBy(D))) {
         final Set<ELConceptDescription> Us = D.upperNeighborsReduced();
         if (D.topLevelConjuncts() <= filter.size()
@@ -975,6 +1005,423 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
     });
     if (!nextCandidates.isEmpty())
       recurseLowerNeighbors5(sigma, r, C, nextCandidates, filter, lowerNeighbors);
+  }
+
+  public final Set<ELConceptDescription> lowerNeighbors6(final Signature sigma) {
+    final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = C.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final Set<ELConceptDescription> filter = C.existentialRestrictions
+          .entries()
+          .parallelStream()
+          .filter(existentialRestriction -> existentialRestriction.getKey().equals(r))
+          .map(Entry::getValue)
+          .collect(Collectors.toSet());
+      if (filter.isEmpty()) {
+        final ELConceptDescription lowerNeighbor = C.clone();
+        lowerNeighbor.existentialRestrictions.put(r, ELConceptDescription.top());
+        lowerNeighbors.add(lowerNeighbor);
+      } else {
+        if (filter.size() > 1) {
+          final Set<ELConceptDescription> lowerNeighborsOfFilter = filter
+              .parallelStream()
+              .flatMap(F -> F.lowerNeighbors6(sigma).parallelStream())
+              .map(ELConceptDescription::reduce)
+              .collect(Collectors.toSet());
+          recurseLowerNeighbors6(sigma, r, C, lowerNeighborsOfFilter, filter, lowerNeighbors);
+        }
+        filter.parallelStream().forEach(F -> {
+          F.lowerNeighbors6(sigma).parallelStream().forEach(L -> {
+            L.conceptNames.removeIf(A -> F.isSubsumedBy(ELConceptDescription.conceptName(A)));
+            L.existentialRestrictions.entries().removeIf(
+                rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+            final ELConceptDescription rL = ELConceptDescription.existentialRestriction(r, L);
+            if (!C.isSubsumedBy(rL))
+              lowerNeighbors.add(ELConceptDescription.conjunction(C.clone(), rL));
+          });
+        });
+      }
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors6(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription C,
+      final Set<ELConceptDescription> currentCandidates,
+      final Set<ELConceptDescription> filter,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
+    currentCandidates.parallelStream().forEach(D -> {
+//      D.reduce();
+      if (filter.parallelStream().noneMatch(F -> F.isSubsumedBy(D))) {
+        if (D.topLevelConjuncts() <= filter.size()) {
+          final Set<ELConceptDescription> Us = D.upperNeighborsReduced();
+          if (Us.parallelStream().allMatch(U -> filter.parallelStream().anyMatch(F -> F.isSubsumedBy(U)))) {
+            final ELConceptDescription X = C.clone();
+            X.existentialRestrictions.put(r, D);
+            lowerNeighbors.add(X);
+          } else
+            Us.parallelStream().filter(U -> filter.parallelStream().noneMatch(F -> F.isSubsumedBy(U))).forEach(
+                nextCandidates::add);
+        }
+      }
+    });
+    if (!nextCandidates.isEmpty())
+      recurseLowerNeighbors6(sigma, r, C, nextCandidates, filter, lowerNeighbors);
+  }
+
+  public final Set<ELConceptDescription> lowerNeighbors7(final Signature sigma) {
+    final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = C.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final Set<ELConceptDescription> filter = C.existentialRestrictions
+          .entries()
+          .parallelStream()
+          .filter(existentialRestriction -> existentialRestriction.getKey().equals(r))
+          .map(Entry::getValue)
+          .collect(Collectors.toSet());
+      if (filter.isEmpty()) {
+        final ELConceptDescription lowerNeighbor = C.clone();
+        lowerNeighbor.existentialRestrictions.put(r, ELConceptDescription.top());
+        lowerNeighbors.add(lowerNeighbor);
+      } else {
+        if (filter.size() > 1) {
+          final Set<ELConceptDescription> firstCandidates =
+              filter.parallelStream().flatMap(F -> filter.parallelStream().filter(G -> !G.equals(F)).map(G -> {
+                final ELConceptDescription F0 = F.clone();
+                final ELConceptDescription G0 = G.clone();
+                F0.conceptNames.removeIf(A -> G.isSubsumedBy(ELConceptDescription.conceptName(A)));
+                G0.conceptNames.removeIf(A -> F.isSubsumedBy(ELConceptDescription.conceptName(A)));
+                F0.existentialRestrictions.entries().removeIf(
+                    rE -> G.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+                G0.existentialRestrictions.entries().removeIf(
+                    rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+                return ELConceptDescription.conjunction(F0, G0).reduce();
+                // final ELConceptDescription D = ELConceptDescription.conjunction(F, G);
+                // D.reduce();
+                // D.conceptNames.removeIf(
+                // A -> F.isSubsumedBy(ELConceptDescription.conceptName(A))
+                // && G.isSubsumedBy(ELConceptDescription.conceptName(A)));
+                // D.existentialRestrictions.entries().removeIf(
+                // rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue()))
+                // && G.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+                // return D;
+                // final Set<IRI> commonNames = Stream
+                // .concat(
+                // F.getConceptNames().parallelStream().filter(A -> !G.getConceptNames().contains(A)),
+                // G.getConceptNames().parallelStream().filter(A -> !F.getConceptNames().contains(A)))
+                // .collect(Collectors.toSet());
+                // final HashMultimap<IRI, ELConceptDescription> commonExistentialRestrictions = HashMultimap.create();
+                // final SetMultimap<IRI, ELConceptDescription> _commonExistentialRestrictions =
+                // Multimaps.synchronizedSetMultimap(commonExistentialRestrictions);
+                // Stream
+                // .concat(
+                // F.getExistentialRestrictions().entries().parallelStream().filter(
+                // rX -> !G
+                // .isSubsumedBy(ELConceptDescription.existentialRestriction(rX.getKey(), rX.getValue()))),
+                // G.getExistentialRestrictions().entries().parallelStream().filter(
+                // rX -> !F
+                // .isSubsumedBy(ELConceptDescription.existentialRestriction(rX.getKey(), rX.getValue()))))
+                // .forEach(rX -> _commonExistentialRestrictions.put(rX.getKey(), rX.getValue()));
+                // return new ELConceptDescription(commonNames, commonExistentialRestrictions).reduce();
+              })).collect(Collectors.toSet());
+          recurseLowerNeighbors7(sigma, r, C, firstCandidates, filter, lowerNeighbors);
+        }
+        filter.parallelStream().forEach(F -> {
+          F.lowerNeighbors7(sigma).parallelStream().forEach(L -> {
+            L.conceptNames.removeIf(A -> F.isSubsumedBy(ELConceptDescription.conceptName(A)));
+            L.existentialRestrictions.entries().removeIf(
+                rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+            final ELConceptDescription rL = ELConceptDescription.existentialRestriction(r, L);
+            if (!C.isSubsumedBy(rL))
+              lowerNeighbors.add(ELConceptDescription.conjunction(C.clone(), rL));
+          });
+        });
+      }
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors7(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription C,
+      final Set<ELConceptDescription> currentCandidates,
+      final Set<ELConceptDescription> filter,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
+    currentCandidates.parallelStream().forEach(D -> {
+//      D.reduce();
+      if (filter.parallelStream().noneMatch(F -> F.isSubsumedBy(D))) {
+        final Set<ELConceptDescription> Us = D.upperNeighborsReduced();
+        if (D.topLevelConjuncts() <= filter.size()
+            && Us.parallelStream().allMatch(U -> filter.parallelStream().anyMatch(F -> F.isSubsumedBy(U)))) {
+          final ELConceptDescription X = C.clone();
+          X.existentialRestrictions.put(r, D);
+          lowerNeighbors.add(X);
+        } else
+          Us.parallelStream().filter(U -> filter.parallelStream().noneMatch(F -> F.isSubsumedBy(U))).forEach(
+              nextCandidates::add);
+      }
+    });
+    if (!nextCandidates.isEmpty())
+      recurseLowerNeighbors7(sigma, r, C, nextCandidates, filter, lowerNeighbors);
+  }
+
+  public final Set<ELConceptDescription> lowerNeighbors8(final Signature sigma) {
+    final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = C.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final Set<ELConceptDescription> filter = C.existentialRestrictions
+          .entries()
+          .parallelStream()
+          .filter(existentialRestriction -> existentialRestriction.getKey().equals(r))
+          .map(Entry::getValue)
+          .collect(Collectors.toSet());
+      if (filter.isEmpty()) {
+        final ELConceptDescription lowerNeighbor = C.clone();
+        lowerNeighbor.existentialRestrictions.put(r, ELConceptDescription.top());
+        lowerNeighbors.add(lowerNeighbor);
+      } else {
+        if (filter.size() > 1) {
+          final Set<ELConceptDescription> firstCandidates = Stream
+              .concat(
+                  filter.parallelStream().flatMap(F -> F.lowerNeighbors8(sigma).parallelStream()).map(
+                      ELConceptDescription::reduce),
+                  filter.parallelStream().flatMap(F -> filter.parallelStream().filter(G -> !G.equals(F)).map(G -> {
+                    final ELConceptDescription D = ELConceptDescription.conjunction(F, G);
+                    // final ELConceptDescription lcs = ELLeastCommonSubsumer.lcsOfMutuallyIncomparable(F, G);
+                    D.reduce();
+                    // lcs.reduce();
+                    D.conceptNames.removeIf(
+                        A -> F.isSubsumedBy(ELConceptDescription.conceptName(A))
+                            && G.isSubsumedBy(ELConceptDescription.conceptName(A)));
+                    D.existentialRestrictions.entries().removeIf(
+                        rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue()))
+                            && G.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+                    return D;
+                  })).filter(X -> filter.parallelStream().noneMatch(L -> X.isSubsumedBy(L))))
+              .collect(Collectors.toSet());
+          recurseLowerNeighbors8(sigma, r, C, firstCandidates, filter, lowerNeighbors);
+        }
+        filter.parallelStream().forEach(F -> {
+          F.lowerNeighbors8(sigma).parallelStream().forEach(L -> {
+            L.conceptNames.removeIf(A -> F.isSubsumedBy(ELConceptDescription.conceptName(A)));
+            L.existentialRestrictions.entries().removeIf(
+                rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+            final ELConceptDescription rL = ELConceptDescription.existentialRestriction(r, L);
+            if (!C.isSubsumedBy(rL))
+              lowerNeighbors.add(ELConceptDescription.conjunction(C.clone(), rL));
+          });
+        });
+      }
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors8(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription C,
+      final Set<ELConceptDescription> currentCandidates,
+      final Set<ELConceptDescription> filter,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
+    currentCandidates.parallelStream().forEach(D -> {
+      if (filter.parallelStream().noneMatch(F -> F.isSubsumedBy(D))) {
+        final Set<ELConceptDescription> Us = D.upperNeighborsReduced();
+        if (D.topLevelConjuncts() <= filter.size()
+            && Us.parallelStream().allMatch(U -> filter.parallelStream().anyMatch(F -> F.isSubsumedBy(U)))) {
+          final ELConceptDescription X = C.clone();
+          X.existentialRestrictions.put(r, D);
+          lowerNeighbors.add(X);
+        } else
+          Us.parallelStream().filter(U -> filter.parallelStream().noneMatch(F -> F.isSubsumedBy(U))).forEach(
+              nextCandidates::add);
+      }
+    });
+    if (!nextCandidates.isEmpty())
+      recurseLowerNeighbors8(sigma, r, C, nextCandidates, filter, lowerNeighbors);
+  }
+
+  public final Set<ELConceptDescription> lowerNeighbors9(final Signature sigma) {
+    final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = C.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final Set<ELConceptDescription> filter = C.existentialRestrictions
+          .entries()
+          .parallelStream()
+          .filter(existentialRestriction -> existentialRestriction.getKey().equals(r))
+          .map(Entry::getValue)
+          .collect(Collectors.toSet());
+      if (filter.isEmpty()) {
+        final ELConceptDescription lowerNeighbor = C.clone();
+        lowerNeighbor.existentialRestrictions.put(r, ELConceptDescription.top());
+        lowerNeighbors.add(lowerNeighbor);
+      } else {
+        if (filter.size() > 1) {
+          final ELConceptDescription firstCandidate = ELConceptDescription.conjunction(filter);
+          firstCandidate.getConceptNames().removeIf(
+              A -> filter.parallelStream().allMatch(F -> F.getConceptNames().contains(A)));
+          firstCandidate.getExistentialRestrictions().entries().removeIf(rE -> {
+            final ELConceptDescription exrE = ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue());
+            return filter.parallelStream().allMatch(F -> F.isSubsumedBy(exrE));
+          });
+          recurseLowerNeighbors9(sigma, r, C, Collections.singleton(firstCandidate.reduce()), filter, lowerNeighbors);
+        }
+        filter.parallelStream().forEach(F -> {
+          F.lowerNeighbors9(sigma).parallelStream().forEach(L -> {
+            L.conceptNames.removeIf(A -> F.isSubsumedBy(ELConceptDescription.conceptName(A)));
+            L.existentialRestrictions.entries().removeIf(
+                rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+            final ELConceptDescription rL = ELConceptDescription.existentialRestriction(r, L);
+            if (!C.isSubsumedBy(rL))
+              lowerNeighbors.add(ELConceptDescription.conjunction(C.clone(), rL));
+          });
+        });
+      }
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors9(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription C,
+      final Set<ELConceptDescription> currentCandidates,
+      final Set<ELConceptDescription> filter,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
+    currentCandidates.parallelStream().forEach(D -> {
+      if (filter.parallelStream().noneMatch(F -> F.isSubsumedBy(D))) {
+        final Set<ELConceptDescription> Us = D.upperNeighborsReduced();
+        if (D.topLevelConjuncts() <= filter.size()
+            && Us.parallelStream().allMatch(U -> filter.parallelStream().anyMatch(F -> F.isSubsumedBy(U)))) {
+          final ELConceptDescription X = C.clone();
+          X.existentialRestrictions.put(r, D);
+          lowerNeighbors.add(X);
+        } else
+          Us.parallelStream().filter(U -> filter.parallelStream().noneMatch(F -> F.isSubsumedBy(U))).forEach(
+              nextCandidates::add);
+      }
+    });
+    if (!nextCandidates.isEmpty())
+      recurseLowerNeighbors9(sigma, r, C, nextCandidates, filter, lowerNeighbors);
+  }
+
+  public final Set<ELConceptDescription> lowerNeighbors10(final Signature sigma) {
+    final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
+    final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
+    sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
+      final ELConceptDescription lowerNeighbor = C.clone();
+      lowerNeighbor.conceptNames.add(A);
+      return lowerNeighbor;
+    }).forEach(lowerNeighbors::add);
+    sigma.getRoleNames().parallelStream().forEach(r -> {
+      final Set<ELConceptDescription> filter = C.existentialRestrictions
+          .entries()
+          .parallelStream()
+          .filter(existentialRestriction -> existentialRestriction.getKey().equals(r))
+          .map(Entry::getValue)
+          .collect(Collectors.toSet());
+      if (filter.isEmpty()) {
+        final ELConceptDescription lowerNeighbor = C.clone();
+        lowerNeighbor.existentialRestrictions.put(r, ELConceptDescription.top());
+        lowerNeighbors.add(lowerNeighbor);
+      } else {
+        if (filter.size() > 1) {
+          final Set<IRI> forbiddenNames = filter
+              .parallelStream()
+              .flatMap(F -> F.getConceptNames().parallelStream())
+              .distinct()
+              .filter(A -> filter.parallelStream().allMatch(FF -> FF.getConceptNames().contains(A)))
+              .collect(Collectors.toSet());
+          final Set<Entry<IRI, ELConceptDescription>> forbiddenRestrictions = filter
+              .parallelStream()
+              .flatMap(F -> F.getExistentialRestrictions().entries().parallelStream())
+              .distinct()
+              .filter(rE -> {
+                final ELConceptDescription exrE =
+                    ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue());
+                return filter.parallelStream().allMatch(FF -> FF.isSubsumedBy(exrE));
+              })
+              .collect(Collectors.toSet());
+          final Set<ELConceptDescription> firstCandidates =
+              filter.parallelStream().flatMap(F -> filter.parallelStream().filter(G -> !G.equals(F)).map(G -> {
+                final ELConceptDescription that = ELConceptDescription.conjunction(F, G).reduce();
+                that.getConceptNames().removeAll(forbiddenNames);
+                that.getExistentialRestrictions().entries().removeAll(forbiddenRestrictions);
+    //                that.getConceptNames().removeIf(
+    //                    A -> filter.parallelStream().allMatch(FF -> FF.getConceptNames().contains(A)));
+    //                that.getExistentialRestrictions().entries().removeIf(rE -> {
+    //                  final ELConceptDescription exrE =
+    //                      ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue());
+    //                  return filter.parallelStream().allMatch(FF -> FF.isSubsumedBy(exrE));
+    //                });
+                return that;
+              })).collect(Collectors.toSet());
+          recurseLowerNeighbors10(sigma, r, C, firstCandidates, filter, lowerNeighbors);
+        }
+        filter.parallelStream().forEach(F -> {
+          F.lowerNeighbors10(sigma).parallelStream().forEach(L -> {
+            L.conceptNames.removeIf(A -> F.isSubsumedBy(ELConceptDescription.conceptName(A)));
+            L.existentialRestrictions.entries().removeIf(
+                rE -> F.isSubsumedBy(ELConceptDescription.existentialRestriction(rE.getKey(), rE.getValue())));
+            final ELConceptDescription rL = ELConceptDescription.existentialRestriction(r, L);
+            if (!C.isSubsumedBy(rL))
+              lowerNeighbors.add(ELConceptDescription.conjunction(C.clone(), rL));
+          });
+        });
+      }
+    });
+    return lowerNeighbors;
+  }
+
+  private final void recurseLowerNeighbors10(
+      final Signature sigma,
+      final IRI r,
+      final ELConceptDescription C,
+      final Set<ELConceptDescription> currentCandidates,
+      final Set<ELConceptDescription> filter,
+      final Set<ELConceptDescription> lowerNeighbors) {
+    final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
+    currentCandidates.parallelStream().forEach(D -> {
+      if (filter.parallelStream().noneMatch(F -> F.isSubsumedBy(D))) {
+        final Set<ELConceptDescription> Us = D.upperNeighborsReduced();
+        if (D.topLevelConjuncts() <= filter.size()
+            && Us.parallelStream().allMatch(U -> filter.parallelStream().anyMatch(F -> F.isSubsumedBy(U)))) {
+          final ELConceptDescription X = C.clone();
+          X.existentialRestrictions.put(r, D);
+          lowerNeighbors.add(X);
+        } else
+          Us.parallelStream().filter(U -> filter.parallelStream().noneMatch(F -> F.isSubsumedBy(U))).forEach(
+              nextCandidates::add);
+      }
+    });
+    if (!nextCandidates.isEmpty())
+      recurseLowerNeighbors10(sigma, r, C, nextCandidates, filter, lowerNeighbors);
   }
 
   @Override

@@ -125,48 +125,56 @@ public class ELLeastCommonSubsumer {
       return ELConceptDescription.bot();
     else if (Ds.size() == 1)
       return Ds.iterator().next().clone();
-    else {
-      final ELConceptDescription lcs = new ELConceptDescription();
-      final Iterator<ELConceptDescription> it = Ds.iterator();
-      final ELConceptDescription D = it.next();
-      it.remove();
-      final Set<IRI> commonConceptNames = D
-          .getConceptNames()
-          .parallelStream()
-          .filter(A -> Ds.parallelStream().map(ELConceptDescription::getConceptNames).allMatch(As -> As.contains(A)))
-          .collect(Collectors.toSet());
-      lcs.getConceptNames().addAll(commonConceptNames);
-      final Set<IRI> commonRoleNames = D
-          .getExistentialRestrictions()
-          .keySet()
-          .parallelStream()
-          .filter(
-              r -> Ds.parallelStream().map(ELConceptDescription::getExistentialRestrictions).allMatch(
-                  ERs -> ERs.keySet().parallelStream().anyMatch(r::equals)))
-          .collect(Collectors.toSet());
-      Ds.add(D);
-      commonRoleNames
-          .parallelStream()
-          .map(
-              r -> Pair.of(
-                  r,
-                  Sets
-                      .cartesianProduct(
-                          Ds
-                              .parallelStream()
-                              .map(ELConceptDescription::getExistentialRestrictions)
-                              .map(m -> m.get(r))
-                              .map(HashSet::new)
-                              .collect(Collectors.toList()))
-                      .parallelStream()
-                      .map(HashSet::new)
-                      .map(ELLeastCommonSubsumer::lcs)
-                      .map(ELConceptDescription::reduce)
-                      .collect(Collectors.toSet())))
-          .sequential()
-          .forEach(p -> lcs.getExistentialRestrictions().putAll(p.x(), p.y()));;
-      return lcs.clone().reduce();
-    }
+    else
+      return lcsOfMutuallyIncomparable(Ds);
+  }
+
+  public static final ELConceptDescription
+      lcsOfMutuallyIncomparable(final ELConceptDescription C, final ELConceptDescription D) {
+    return lcsOfMutuallyIncomparable(Sets.newHashSet(C, D));
+  }
+
+  public static final ELConceptDescription lcsOfMutuallyIncomparable(final Set<ELConceptDescription> Ds) {
+    final ELConceptDescription lcs = new ELConceptDescription();
+    final Iterator<ELConceptDescription> it = Ds.iterator();
+    final ELConceptDescription D = it.next();
+    it.remove();
+    final Set<IRI> commonConceptNames = D
+        .getConceptNames()
+        .parallelStream()
+        .filter(A -> Ds.parallelStream().map(ELConceptDescription::getConceptNames).allMatch(As -> As.contains(A)))
+        .collect(Collectors.toSet());
+    lcs.getConceptNames().addAll(commonConceptNames);
+    final Set<IRI> commonRoleNames = D
+        .getExistentialRestrictions()
+        .keySet()
+        .parallelStream()
+        .filter(
+            r -> Ds.parallelStream().map(ELConceptDescription::getExistentialRestrictions).allMatch(
+                ERs -> ERs.keySet().parallelStream().anyMatch(r::equals)))
+        .collect(Collectors.toSet());
+    Ds.add(D);
+    commonRoleNames
+        .parallelStream()
+        .map(
+            r -> Pair.of(
+                r,
+                Sets
+                    .cartesianProduct(
+                        Ds
+                            .parallelStream()
+                            .map(ELConceptDescription::getExistentialRestrictions)
+                            .map(m -> m.get(r))
+                            .map(HashSet::new)
+                            .collect(Collectors.toList()))
+                    .parallelStream()
+                    .map(HashSet::new)
+                    .map(ELLeastCommonSubsumer::lcsOfMutuallyIncomparable)
+                    .map(ELConceptDescription::reduce)
+                    .collect(Collectors.toSet())))
+        .sequential()
+        .forEach(p -> lcs.getExistentialRestrictions().putAll(p.x(), p.y()));;
+    return lcs.clone().reduce();
   }
 
   public static final OWLClassExpression of(final OWLClassExpression concept1, final OWLClassExpression concept2) {

@@ -1,5 +1,7 @@
 package conexp.fx.core.dl;
 
+import java.util.Collections;
+
 /*-
  * #%L
  * Concept Explorer FX
@@ -23,6 +25,7 @@ package conexp.fx.core.dl;
  */
 
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -146,14 +149,26 @@ public final class ELNeighborhoodTest {
 //    sigma.addConceptNames("A1", "A2", "A3", "A4");
     sigma.addConceptNames("A", "B", "C", "D");
     sigma.addRoleNames("r", "s");
-    final ELConceptDescription C = ELParser.read(
-//        "exists r.(exists r.(A and B) and exists r.(A and C))");
-//        "exists r.(exists r.(A1 and A2) and exists r.(A1 and A3))");
-//        "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2");
-//        "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)");
-//        "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))");
-//        "exists r.(exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A and B and exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A and D and exists s.(C and D) and exists r.Top) and exists r.(B and C and exists s.Top) and exists r.(A and B and C) and exists r.exists s.Top and exists r.(B and D and exists r.(A and B)) and exists r.(A and D and exists r.(A and C))");
-    "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)");
+//    final ELConceptDescription C = ELParser.read(
+//        // "exists r.(exists r.(A and B) and exists r.(A and C))");
+//        // "exists r.(exists r.(A1 and A2) and exists r.(A1 and A3))");
+//        // "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2");
+//        // "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)");
+//        // "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))");
+//        // "exists r.(exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A
+//        // and B and exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A
+//        // and D and exists s.(C and D) and exists r.Top) and exists r.(B and C and exists s.Top) and exists r.(A and B
+//        // and C) and exists r.exists s.Top and exists r.(B and D and exists r.(A and B)) and exists r.(A and D and
+//        // exists r.(A and C))");
+//                "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)");
+//        //        "exists r.(exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)) and exists s.(exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A))");
+//        "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A) and "
+//        + "exists r.(A and exists r.B) and exists r.(A and C and D) and exists r.(A and D and exists r.(A and B) and exists s.(A and B and C))");
+////    "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A) and "
+////    + "exists r.(A and exists r.B) and exists r.(A and C and D) and exists r.(A and D and exists r.(A and B) and exists s.(A and B and C)) and exists r.(exists s.(A and B) and C and exists s.D)");
+////    "exists r.(exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)) and "
+////    + "exists r.(exists r.(A and exists r.B) and exists r.(A and C and D) and exists r.(A and D and exists r.(A and B) and exists s.(A and B and C)))");
+    final ELConceptDescription C = ELConceptDescription.random(sigma, 3, 16, 48);
     C.reduce();
     System.out.println(C);
     final Meter<Long> timer = Meter.newNanoStopWatch();
@@ -224,7 +239,7 @@ public final class ELNeighborhoodTest {
 //    System.out.println();
     System.out.println("and has the following lower neighbors (v4):");
     timer.reset();
-    Set<ELConceptDescription> lowerNeighbors4 = C.lowerNeighbors4(sigma);
+    Set<ELConceptDescription> lowerNeighbors4 = Collections.emptySet();//C.lowerNeighbors4(sigma);
     final String lowerNeighbors4Time = timer.measureAndFormat();
     i.set(0);
     lowerNeighbors4.forEach(D -> {
@@ -256,31 +271,160 @@ public final class ELNeighborhoodTest {
     });
     System.out.println("computation time: " + lowerNeighbors5Time);
     System.out.println();
+//    System.out.println("and has the following lower neighbors (v6):");
+//    timer.reset();
+//    Set<ELConceptDescription> lowerNeighbors6 = C.lowerNeighbors6(sigma);
+//    final String lowerNeighbors6Time = timer.measureAndFormat();
+//    i.set(0);
+//    lowerNeighbors6.forEach(D -> {
+//      D.reduce();
+////      System.out.println(
+////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+////              + " --- " + D.rank() + " --- " + D);
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D);
+////      System.out.println(i.incrementAndGet() + " --- " + D);
+//    });
+//    System.out.println("computation time: " + lowerNeighbors6Time);
+//    System.out.println();
+//    System.out.println("and has the following lower neighbors (v7):");
+//    timer.reset();
+//    Set<ELConceptDescription> lowerNeighbors7 = C.lowerNeighbors7(sigma);
+//    final String lowerNeighbors7Time = timer.measureAndFormat();
+//    i.set(0);
+//    lowerNeighbors7.forEach(D -> {
+//      D.reduce();
+////      System.out.println(
+////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+////              + " --- " + D.rank() + " --- " + D);
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D);
+////      System.out.println(i.incrementAndGet() + " --- " + D);
+//    });
+//    System.out.println("computation time: " + lowerNeighbors7Time);
+//    System.out.println();
+    System.out.println("and has the following lower neighbors (v8):");
+    timer.reset();
+    Set<ELConceptDescription> lowerNeighbors8 = C.lowerNeighbors8(sigma);
+    final String lowerNeighbors8Time = timer.measureAndFormat();
+    i.set(0);
+    lowerNeighbors8.forEach(D -> {
+      D.reduce();
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D.rank() + " --- " + D);
+      System.out.println(
+          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+              + " --- " + D);
+//      System.out.println(i.incrementAndGet() + " --- " + D);
+    });
+    System.out.println("computation time: " + lowerNeighbors8Time);
+    System.out.println();
+    System.out.println("and has the following lower neighbors (v9):");
+    timer.reset();
+    Set<ELConceptDescription> lowerNeighbors9 = C.lowerNeighbors9(sigma);
+    final String lowerNeighbors9Time = timer.measureAndFormat();
+    i.set(0);
+    lowerNeighbors9.forEach(D -> {
+      D.reduce();
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D.rank() + " --- " + D);
+      System.out.println(
+          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+              + " --- " + D);
+//      System.out.println(i.incrementAndGet() + " --- " + D);
+    });
+    System.out.println("computation time: " + lowerNeighbors9Time);
+    System.out.println();
+    Set<ELConceptDescription> lowerNeighbors10 = C.lowerNeighbors10(sigma);
+    final String lowerNeighbors10Time = timer.measureAndFormat();
+    i.set(0);
+    lowerNeighbors10.forEach(D -> {
+      D.reduce();
+//      System.out.println(
+//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+//              + " --- " + D.rank() + " --- " + D);
+      System.out.println(
+          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+              + " --- " + D);
+//      System.out.println(i.incrementAndGet() + " --- " + D);
+    });
+    System.out.println("computation time: " + lowerNeighbors10Time);
+    System.out.println();
 //    final int size1 = Collections3.quotient(lowerNeighbors, ELConceptDescription.equivalence()).size();
     final int size4 = Collections3.quotient(lowerNeighbors4, ELConceptDescription.equivalence()).size();
     final int size5 = Collections3.quotient(lowerNeighbors5, ELConceptDescription.equivalence()).size();
+//    final int size6 = Collections3.quotient(lowerNeighbors6, ELConceptDescription.equivalence()).size();
+//    final int size7 = Collections3.quotient(lowerNeighbors7, ELConceptDescription.equivalence()).size();
+    final int size8 = Collections3.quotient(lowerNeighbors8, ELConceptDescription.equivalence()).size();
+    final int size9 = Collections3.quotient(lowerNeighbors9, ELConceptDescription.equivalence()).size();
+    final int size10 = Collections3.quotient(lowerNeighbors10, ELConceptDescription.equivalence()).size();
 //    System.out.println("1=2   " + equalsEquivalent(lowerNeighbors, lowerNeighbors2));
 //    System.out.println("1=3   " + equalsEquivalent(lowerNeighbors, lowerNeighbors3));
-//    System.out.println("time1 = " + lowerNeighborsTime);
-    System.out.println("time4 = " + lowerNeighbors4Time);
-    System.out.println("time5 = " + lowerNeighbors5Time);
-//    System.out.println("size1 = " + size1);
-    System.out.println("size4 = " + size4);
-    System.out.println("size5 = " + size5);
-//    System.out.println("1<4   " + containsEquivalent(lowerNeighbors, lowerNeighbors4));
-//    System.out.println("4<1   " + containsEquivalent(lowerNeighbors4, lowerNeighbors));
-//    System.out.println("1=4   " + equalsEquivalent(lowerNeighbors, lowerNeighbors4));
-//    System.out.println("1<5   " + containsEquivalent(lowerNeighbors, lowerNeighbors5));
-//    System.out.println("5<1   " + containsEquivalent(lowerNeighbors5, lowerNeighbors));
-//    System.out.println("1=5   " + equalsEquivalent(lowerNeighbors, lowerNeighbors5));
-    System.out.println("4<5   " + containsEquivalent(lowerNeighbors4, lowerNeighbors5));
-    System.out.println("5<4   " + containsEquivalent(lowerNeighbors5, lowerNeighbors4));
-    System.out.println("4=5   " + equalsEquivalent(lowerNeighbors4, lowerNeighbors5));
-    Collections3
-        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())
-        .parallelStream()
-        .filter(L -> lowerNeighbors5.parallelStream().noneMatch(L::isEquivalentTo))
-        .forEach(System.out::println);
+//    System.out.println("time1  = " + lowerNeighborsTime);
+    System.out.println("time4  = " + lowerNeighbors4Time);
+    System.out.println("time5  = " + lowerNeighbors5Time);
+//    System.out.println("time6  = " + lowerNeighbors6Time);
+//    System.out.println("time7  = " + lowerNeighbors7Time);
+    System.out.println("time8  = " + lowerNeighbors8Time);
+    System.out.println("time9  = " + lowerNeighbors9Time);
+    System.out.println("time10 = " + lowerNeighbors10Time);
+//    System.out.println("size1  = " + size1);
+    System.out.println("size4  = " + size4);
+    System.out.println("size5  = " + size5);
+//    System.out.println("size6  = " + size6);
+//    System.out.println("size7  = " + size7);
+    System.out.println("size8  = " + size8);
+    System.out.println("size9  = " + size9);
+    System.out.println("size10 = " + size10);
+//    System.out.println("1<4    " + containsEquivalent(lowerNeighbors, lowerNeighbors4));
+//    System.out.println("4<1    " + containsEquivalent(lowerNeighbors4, lowerNeighbors));
+//    System.out.println("1=4    " + equalsEquivalent(lowerNeighbors, lowerNeighbors4));
+//    System.out.println("1<5    " + containsEquivalent(lowerNeighbors, lowerNeighbors5));
+//    System.out.println("5<1    " + containsEquivalent(lowerNeighbors5, lowerNeighbors));
+//    System.out.println("1=5    " + equalsEquivalent(lowerNeighbors, lowerNeighbors5));
+    System.out.println("4<5    " + containsEquivalent(lowerNeighbors4, lowerNeighbors5));
+    System.out.println("4>5    " + containsEquivalent(lowerNeighbors5, lowerNeighbors4));
+    System.out.println("4=5    " + equalsEquivalent(lowerNeighbors4, lowerNeighbors5));
+//    System.out.println("5<6    " + containsEquivalent(lowerNeighbors5, lowerNeighbors6));
+//    System.out.println("5>6    " + containsEquivalent(lowerNeighbors6, lowerNeighbors5));
+//    System.out.println("5=6    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors6));
+//    System.out.println("5<7    " + containsEquivalent(lowerNeighbors5, lowerNeighbors7));
+//    System.out.println("5>7    " + containsEquivalent(lowerNeighbors7, lowerNeighbors5));
+//    System.out.println("5=7    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors7));
+    System.out.println("5<8    " + containsEquivalent(lowerNeighbors5, lowerNeighbors8));
+    System.out.println("5>8    " + containsEquivalent(lowerNeighbors8, lowerNeighbors5));
+    System.out.println("5=8    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors8));
+    System.out.println("5<9    " + containsEquivalent(lowerNeighbors5, lowerNeighbors9));
+    System.out.println("5>9    " + containsEquivalent(lowerNeighbors9, lowerNeighbors5));
+    System.out.println("5=9    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors9));
+    System.out.println("5<10   " + containsEquivalent(lowerNeighbors5, lowerNeighbors10));
+    System.out.println("5>10   " + containsEquivalent(lowerNeighbors10, lowerNeighbors5));
+    System.out.println("5=10   " + equalsEquivalent(lowerNeighbors5, lowerNeighbors10));
+    System.out.println();
+//    System.out.println(C + " has the following lower neighbors, that method v6 does not compute:");
+//    Collections3
+//        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())
+//        .parallelStream()
+//        .filter(L -> lowerNeighbors6.parallelStream().noneMatch(L::isEquivalentTo))
+//        .forEach(System.out::println);
+//    System.out.println();
+//    System.out.println(C + " has the following lower neighbors, that method v7 does not compute:");
+//    Collections3
+//        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())
+//        .parallelStream()
+//        .filter(L -> lowerNeighbors7.parallelStream().noneMatch(L::isEquivalentTo))
+//        .forEach(System.out::println);
+//    System.out.println();
+//    System.out.println(C + " has the following lower neighbors, that method v8 does not compute:");
+//    Collections3
+//        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())
+//        .parallelStream()
+//        .filter(L -> lowerNeighbors8.parallelStream().noneMatch(L::isEquivalentTo))
+//        .forEach(System.out::println);
 //    System.out.println("2=3   " + equalsEquivalent(lowerNeighbors2, lowerNeighbors3));
   }
 
