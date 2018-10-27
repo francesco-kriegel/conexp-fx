@@ -585,6 +585,7 @@
               <additionalKeytoolParameter>-keysize</additionalKeytoolParameter>
               <additionalKeytoolParameter>4096</additionalKeytoolParameter>
             </additionalKeytoolParameters>
+            <strictSigning>false</strictSigning>
             <embeddedHeight>100%</embeddedHeight>
             <embeddedWidth>100%</embeddedWidth>
             <jvmArgs>
@@ -603,9 +604,10 @@
             </bundleArguments>
             <!-- <verbose>true</verbose> -->
             <skipJNLP>${skip.jnlp}</skipJNLP>
-            <!-- <jnlpTemplates> <jnlpTemplate>src/main/deploy/templates/conexp-fx-embed.html</jnlpTemplate> 
-              <jnlpTemplate>src/main/deploy/templates/conexp-fx-launch.html</jnlpTemplate> 
-              </jnlpTemplates> -->
+            <jnlpTemplates>
+              <jnlpTemplate>src/main/deploy/templates/conexp-fx-embed.html</jnlpTemplate>
+              <jnlpTemplate>src/main/deploy/templates/conexp-fx-launch.html</jnlpTemplate>
+            </jnlpTemplates>
             <noBlobSigning>true</noBlobSigning>
           </configuration>
           <executions>
