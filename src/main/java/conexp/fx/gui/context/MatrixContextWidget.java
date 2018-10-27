@@ -280,10 +280,14 @@ public class MatrixContextWidget<G, M> extends BorderPane {
               case ENTER:
                 dataset.renameObject(object, (G) textField.getText().trim());
               case ESCAPE:
-                interactionPane.get().getChildren().remove(textField);
+//                interactionPane.get().getChildren().remove(textField);
+                contentPane.get().getChildren().remove(textField);
+                contentPane.get().getChildren().add(view);
               }
             });
-            interactionPane.get().getChildren().add(textField);
+//            interactionPane.get().getChildren().add(textField);
+            contentPane.get().getChildren().remove(view);
+            contentPane.get().getChildren().add(textField);
             textField.focusedProperty().addListener(
                 (observable, oldValue, newValue) -> new Timer().schedule(new TimerTask() {
 
@@ -421,13 +425,17 @@ public class MatrixContextWidget<G, M> extends BorderPane {
               case ENTER:
                 dataset.renameAttribute(attribute, (M) textField.getText().trim());
               case ESCAPE:
-                interactionPane.get().getChildren().remove(textField);
+//                interactionPane.get().getChildren().remove(textField);
+                contentPane.get().getChildren().remove(textField);
+                contentPane.get().getChildren().add(view);
               }
             });
-            textField.rotateProperty().set(-90);
+//            textField.rotateProperty().set(-90);
             textField.setMinSize(colHeaderPane.rowHeight.get(), cellSize.get());
             textField.setMaxSize(colHeaderPane.rowHeight.get(), cellSize.get());
-            interactionPane.get().getChildren().add(textField);
+//            interactionPane.get().getChildren().add(textField);
+            contentPane.get().getChildren().remove(view);
+            contentPane.get().getChildren().add(textField);
             textField.focusedProperty().addListener(
                 (observable, oldValue, newValue) -> new Timer().schedule(new TimerTask() {
 
