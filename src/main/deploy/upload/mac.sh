@@ -8,6 +8,7 @@ ssh francesco@tcs.inf.tu-dresden.de "mkdir -p public_html/conexp-fx"
 scp -r target/apidocs francesco@tcs.inf.tu-dresden.de:public_html/conexp-fx/
 
 ssh francesco@tcs.inf.tu-dresden.de "mkdir -p public_html/conexp-fx/download/$version/$date"
+ls target/jfx/native/
 scp -r target/conexp-fx* francesco@tcs.inf.tu-dresden.de:public_html/conexp-fx/download/$version/$date/
 scp -r target/jfx/native/*.dmg francesco@tcs.inf.tu-dresden.de:public_html/conexp-fx/download/$version/$date/
 

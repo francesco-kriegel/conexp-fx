@@ -5,5 +5,4 @@ date=$(date +%Y-%m-%d)
 
 ssh francesco@tcs.inf.tu-dresden.de "mkdir -p public_html/conexp-fx/download/$version/$date"
 ls target/jfx/native/
-echo "Now starting to scopy..."
 scp -r target/jfx/native/*.msi francesco@tcs.inf.tu-dresden.de:public_html/conexp-fx/download/$version/$date/
