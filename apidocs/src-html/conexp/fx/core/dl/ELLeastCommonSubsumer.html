@@ -133,123 +133,131 @@
 <span class="sourceLineNo">125</span>      return ELConceptDescription.bot();<a name="line.125"></a>
 <span class="sourceLineNo">126</span>    else if (Ds.size() == 1)<a name="line.126"></a>
 <span class="sourceLineNo">127</span>      return Ds.iterator().next().clone();<a name="line.127"></a>
-<span class="sourceLineNo">128</span>    else {<a name="line.128"></a>
-<span class="sourceLineNo">129</span>      final ELConceptDescription lcs = new ELConceptDescription();<a name="line.129"></a>
-<span class="sourceLineNo">130</span>      final Iterator&lt;ELConceptDescription&gt; it = Ds.iterator();<a name="line.130"></a>
-<span class="sourceLineNo">131</span>      final ELConceptDescription D = it.next();<a name="line.131"></a>
-<span class="sourceLineNo">132</span>      it.remove();<a name="line.132"></a>
-<span class="sourceLineNo">133</span>      final Set&lt;IRI&gt; commonConceptNames = D<a name="line.133"></a>
-<span class="sourceLineNo">134</span>          .getConceptNames()<a name="line.134"></a>
-<span class="sourceLineNo">135</span>          .parallelStream()<a name="line.135"></a>
-<span class="sourceLineNo">136</span>          .filter(A -&gt; Ds.parallelStream().map(ELConceptDescription::getConceptNames).allMatch(As -&gt; As.contains(A)))<a name="line.136"></a>
-<span class="sourceLineNo">137</span>          .collect(Collectors.toSet());<a name="line.137"></a>
-<span class="sourceLineNo">138</span>      lcs.getConceptNames().addAll(commonConceptNames);<a name="line.138"></a>
-<span class="sourceLineNo">139</span>      final Set&lt;IRI&gt; commonRoleNames = D<a name="line.139"></a>
-<span class="sourceLineNo">140</span>          .getExistentialRestrictions()<a name="line.140"></a>
-<span class="sourceLineNo">141</span>          .keySet()<a name="line.141"></a>
-<span class="sourceLineNo">142</span>          .parallelStream()<a name="line.142"></a>
-<span class="sourceLineNo">143</span>          .filter(<a name="line.143"></a>
-<span class="sourceLineNo">144</span>              r -&gt; Ds.parallelStream().map(ELConceptDescription::getExistentialRestrictions).allMatch(<a name="line.144"></a>
-<span class="sourceLineNo">145</span>                  ERs -&gt; ERs.keySet().parallelStream().anyMatch(r::equals)))<a name="line.145"></a>
-<span class="sourceLineNo">146</span>          .collect(Collectors.toSet());<a name="line.146"></a>
-<span class="sourceLineNo">147</span>      Ds.add(D);<a name="line.147"></a>
-<span class="sourceLineNo">148</span>      commonRoleNames<a name="line.148"></a>
-<span class="sourceLineNo">149</span>          .parallelStream()<a name="line.149"></a>
-<span class="sourceLineNo">150</span>          .map(<a name="line.150"></a>
-<span class="sourceLineNo">151</span>              r -&gt; Pair.of(<a name="line.151"></a>
-<span class="sourceLineNo">152</span>                  r,<a name="line.152"></a>
-<span class="sourceLineNo">153</span>                  Sets<a name="line.153"></a>
-<span class="sourceLineNo">154</span>                      .cartesianProduct(<a name="line.154"></a>
-<span class="sourceLineNo">155</span>                          Ds<a name="line.155"></a>
-<span class="sourceLineNo">156</span>                              .parallelStream()<a name="line.156"></a>
-<span class="sourceLineNo">157</span>                              .map(ELConceptDescription::getExistentialRestrictions)<a name="line.157"></a>
-<span class="sourceLineNo">158</span>                              .map(m -&gt; m.get(r))<a name="line.158"></a>
-<span class="sourceLineNo">159</span>                              .map(HashSet::new)<a name="line.159"></a>
-<span class="sourceLineNo">160</span>                              .collect(Collectors.toList()))<a name="line.160"></a>
-<span class="sourceLineNo">161</span>                      .parallelStream()<a name="line.161"></a>
-<span class="sourceLineNo">162</span>                      .map(HashSet::new)<a name="line.162"></a>
-<span class="sourceLineNo">163</span>                      .map(ELLeastCommonSubsumer::lcs)<a name="line.163"></a>
-<span class="sourceLineNo">164</span>                      .map(ELConceptDescription::reduce)<a name="line.164"></a>
-<span class="sourceLineNo">165</span>                      .collect(Collectors.toSet())))<a name="line.165"></a>
-<span class="sourceLineNo">166</span>          .sequential()<a name="line.166"></a>
-<span class="sourceLineNo">167</span>          .forEach(p -&gt; lcs.getExistentialRestrictions().putAll(p.x(), p.y()));;<a name="line.167"></a>
-<span class="sourceLineNo">168</span>      return lcs.clone().reduce();<a name="line.168"></a>
-<span class="sourceLineNo">169</span>    }<a name="line.169"></a>
-<span class="sourceLineNo">170</span>  }<a name="line.170"></a>
-<span class="sourceLineNo">171</span><a name="line.171"></a>
-<span class="sourceLineNo">172</span>  public static final OWLClassExpression of(final OWLClassExpression concept1, final OWLClassExpression concept2) {<a name="line.172"></a>
-<span class="sourceLineNo">173</span>    return ELLeastCommonSubsumer<a name="line.173"></a>
-<span class="sourceLineNo">174</span>        .lcs(ELConceptDescription.of(concept1), ELConceptDescription.of(concept2))<a name="line.174"></a>
-<span class="sourceLineNo">175</span>        .toOWLClassExpression();<a name="line.175"></a>
-<span class="sourceLineNo">176</span>  }<a name="line.176"></a>
-<span class="sourceLineNo">177</span><a name="line.177"></a>
-<span class="sourceLineNo">178</span>  public static final OWLClassExpression of(final OWLClassExpression... concepts) {<a name="line.178"></a>
-<span class="sourceLineNo">179</span>    if (concepts.length == 0)<a name="line.179"></a>
-<span class="sourceLineNo">180</span>      return df.getOWLThing();<a name="line.180"></a>
-<span class="sourceLineNo">181</span>    if (concepts.length == 1)<a name="line.181"></a>
-<span class="sourceLineNo">182</span>      return concepts[0];<a name="line.182"></a>
-<span class="sourceLineNo">183</span>    if (concepts.length == 2)<a name="line.183"></a>
-<span class="sourceLineNo">184</span>      return of(concepts[0], concepts[1]);<a name="line.184"></a>
-<span class="sourceLineNo">185</span>    return of(Arrays.asList(concepts));<a name="line.185"></a>
-<span class="sourceLineNo">186</span>  }<a name="line.186"></a>
-<span class="sourceLineNo">187</span><a name="line.187"></a>
-<span class="sourceLineNo">188</span>  public static final OWLClassExpression of(final Collection&lt;OWLClassExpression&gt; concepts) {<a name="line.188"></a>
-<span class="sourceLineNo">189</span>    if (concepts.isEmpty())<a name="line.189"></a>
-<span class="sourceLineNo">190</span>      return df.getOWLThing();<a name="line.190"></a>
-<span class="sourceLineNo">191</span>    final Iterator&lt;OWLClassExpression&gt; it = concepts.iterator();<a name="line.191"></a>
-<span class="sourceLineNo">192</span>    if (concepts.size() == 1)<a name="line.192"></a>
-<span class="sourceLineNo">193</span>      return it.next();<a name="line.193"></a>
-<span class="sourceLineNo">194</span>    if (concepts.size() == 2)<a name="line.194"></a>
-<span class="sourceLineNo">195</span>      return of(it.next(), it.next());<a name="line.195"></a>
-<span class="sourceLineNo">196</span>    OWLClassExpression lcs = it.next();<a name="line.196"></a>
-<span class="sourceLineNo">197</span>    while (it.hasNext())<a name="line.197"></a>
-<span class="sourceLineNo">198</span>      lcs = of(lcs, it.next());<a name="line.198"></a>
-<span class="sourceLineNo">199</span>    return lcs;<a name="line.199"></a>
-<span class="sourceLineNo">200</span>  }<a name="line.200"></a>
-<span class="sourceLineNo">201</span><a name="line.201"></a>
-<span class="sourceLineNo">202</span>//if (concept1.isOWLNothing())<a name="line.202"></a>
-<span class="sourceLineNo">203</span>//  return concept2;<a name="line.203"></a>
-<span class="sourceLineNo">204</span>//if (concept2.isOWLNothing())<a name="line.204"></a>
-<span class="sourceLineNo">205</span>//  return concept1;<a name="line.205"></a>
-<span class="sourceLineNo">206</span>//if (concept1.isOWLThing())<a name="line.206"></a>
-<span class="sourceLineNo">207</span>//  return concept1;<a name="line.207"></a>
-<span class="sourceLineNo">208</span>//if (concept2.isOWLThing())<a name="line.208"></a>
-<span class="sourceLineNo">209</span>//  return concept2;<a name="line.209"></a>
-<span class="sourceLineNo">210</span>//if (concept1 instanceof OWLClass)<a name="line.210"></a>
-<span class="sourceLineNo">211</span>//  if (concept2 instanceof OWLClass)<a name="line.211"></a>
-<span class="sourceLineNo">212</span>//    if (((OWLClass) concept1).getIRI().equals(((OWLClass) concept2).getIRI()))<a name="line.212"></a>
-<span class="sourceLineNo">213</span>//      return concept1;<a name="line.213"></a>
-<span class="sourceLineNo">214</span>//    else<a name="line.214"></a>
-<span class="sourceLineNo">215</span>//      return df.getOWLThing();<a name="line.215"></a>
-<span class="sourceLineNo">216</span>//  else if (concept2 instanceof OWLObjectSomeValuesFrom)<a name="line.216"></a>
-<span class="sourceLineNo">217</span>//    return df.getOWLThing();<a name="line.217"></a>
-<span class="sourceLineNo">218</span>//  else if (concept2 instanceof OWLObjectIntersectionOf)<a name="line.218"></a>
-<span class="sourceLineNo">219</span>//    if (((OWLObjectIntersectionOf) concept2).asConjunctSet().contains(concept1))<a name="line.219"></a>
-<span class="sourceLineNo">220</span>//      return concept1;<a name="line.220"></a>
-<span class="sourceLineNo">221</span>//    else<a name="line.221"></a>
-<span class="sourceLineNo">222</span>//      return df.getOWLThing();<a name="line.222"></a>
-<span class="sourceLineNo">223</span>//  else<a name="line.223"></a>
-<span class="sourceLineNo">224</span>//    throw new ELSyntaxException();<a name="line.224"></a>
-<span class="sourceLineNo">225</span>//else if (concept1 instanceof OWLObjectSomeValuesFrom)<a name="line.225"></a>
-<span class="sourceLineNo">226</span>//  if (concept2 instanceof OWLClass)<a name="line.226"></a>
-<span class="sourceLineNo">227</span>//    return df.getOWLThing();<a name="line.227"></a>
-<span class="sourceLineNo">228</span>//  else if (concept2 instanceof OWLObjectSomeValuesFrom)<a name="line.228"></a>
-<span class="sourceLineNo">229</span>//    if (((OWLObjectSomeValuesFrom) concept1).getProperty().equals(<a name="line.229"></a>
-<span class="sourceLineNo">230</span>//        ((OWLObjectSomeValuesFrom) concept2).getProperty()))<a name="line.230"></a>
-<span class="sourceLineNo">231</span>//      return df.getOWLObjectSomeValuesFrom(<a name="line.231"></a>
-<span class="sourceLineNo">232</span>//          ((OWLObjectSomeValuesFrom) concept1).getProperty(),<a name="line.232"></a>
-<span class="sourceLineNo">233</span>//          of(((OWLObjectSomeValuesFrom) concept1).getFiller(), ((OWLObjectSomeValuesFrom) concept2).getFiller()));<a name="line.233"></a>
-<span class="sourceLineNo">234</span>//    else<a name="line.234"></a>
-<span class="sourceLineNo">235</span>//      return df.getOWLThing();<a name="line.235"></a>
-<span class="sourceLineNo">236</span>//  else if (concept2 instanceof OWLObjectIntersectionOf)<a name="line.236"></a>
-<span class="sourceLineNo">237</span>//    return null;<a name="line.237"></a>
-<span class="sourceLineNo">238</span>//  else<a name="line.238"></a>
-<span class="sourceLineNo">239</span>//    return df.getOWLThing();<a name="line.239"></a>
-<span class="sourceLineNo">240</span>//else if (concept1 instanceof OWLObjectIntersectionOf)<a name="line.240"></a>
-<span class="sourceLineNo">241</span>//<a name="line.241"></a>
-<span class="sourceLineNo">242</span>//  return df.getOWLThing();<a name="line.242"></a>
-<span class="sourceLineNo">243</span><a name="line.243"></a>
-<span class="sourceLineNo">244</span>}<a name="line.244"></a>
+<span class="sourceLineNo">128</span>    else<a name="line.128"></a>
+<span class="sourceLineNo">129</span>      return lcsOfMutuallyIncomparable(Ds);<a name="line.129"></a>
+<span class="sourceLineNo">130</span>  }<a name="line.130"></a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span>  public static final ELConceptDescription<a name="line.132"></a>
+<span class="sourceLineNo">133</span>      lcsOfMutuallyIncomparable(final ELConceptDescription C, final ELConceptDescription D) {<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    return lcsOfMutuallyIncomparable(Sets.newHashSet(C, D));<a name="line.134"></a>
+<span class="sourceLineNo">135</span>  }<a name="line.135"></a>
+<span class="sourceLineNo">136</span><a name="line.136"></a>
+<span class="sourceLineNo">137</span>  public static final ELConceptDescription lcsOfMutuallyIncomparable(final Set&lt;ELConceptDescription&gt; Ds) {<a name="line.137"></a>
+<span class="sourceLineNo">138</span>    final ELConceptDescription lcs = new ELConceptDescription();<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    final Iterator&lt;ELConceptDescription&gt; it = Ds.iterator();<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    final ELConceptDescription D = it.next();<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    it.remove();<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    final Set&lt;IRI&gt; commonConceptNames = D<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        .getConceptNames()<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        .parallelStream()<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        .filter(A -&gt; Ds.parallelStream().map(ELConceptDescription::getConceptNames).allMatch(As -&gt; As.contains(A)))<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        .collect(Collectors.toSet());<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    lcs.getConceptNames().addAll(commonConceptNames);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    final Set&lt;IRI&gt; commonRoleNames = D<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        .getExistentialRestrictions()<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        .keySet()<a name="line.150"></a>
+<span class="sourceLineNo">151</span>        .parallelStream()<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        .filter(<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            r -&gt; Ds.parallelStream().map(ELConceptDescription::getExistentialRestrictions).allMatch(<a name="line.153"></a>
+<span class="sourceLineNo">154</span>                ERs -&gt; ERs.keySet().parallelStream().anyMatch(r::equals)))<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        .collect(Collectors.toSet());<a name="line.155"></a>
+<span class="sourceLineNo">156</span>    Ds.add(D);<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    commonRoleNames<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        .parallelStream()<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        .map(<a name="line.159"></a>
+<span class="sourceLineNo">160</span>            r -&gt; Pair.of(<a name="line.160"></a>
+<span class="sourceLineNo">161</span>                r,<a name="line.161"></a>
+<span class="sourceLineNo">162</span>                Sets<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                    .cartesianProduct(<a name="line.163"></a>
+<span class="sourceLineNo">164</span>                        Ds<a name="line.164"></a>
+<span class="sourceLineNo">165</span>                            .parallelStream()<a name="line.165"></a>
+<span class="sourceLineNo">166</span>                            .map(ELConceptDescription::getExistentialRestrictions)<a name="line.166"></a>
+<span class="sourceLineNo">167</span>                            .map(m -&gt; m.get(r))<a name="line.167"></a>
+<span class="sourceLineNo">168</span>                            .map(HashSet::new)<a name="line.168"></a>
+<span class="sourceLineNo">169</span>                            .collect(Collectors.toList()))<a name="line.169"></a>
+<span class="sourceLineNo">170</span>                    .parallelStream()<a name="line.170"></a>
+<span class="sourceLineNo">171</span>                    .map(HashSet::new)<a name="line.171"></a>
+<span class="sourceLineNo">172</span>                    .map(ELLeastCommonSubsumer::lcsOfMutuallyIncomparable)<a name="line.172"></a>
+<span class="sourceLineNo">173</span>                    .map(ELConceptDescription::reduce)<a name="line.173"></a>
+<span class="sourceLineNo">174</span>                    .collect(Collectors.toSet())))<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        .sequential()<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        .forEach(p -&gt; lcs.getExistentialRestrictions().putAll(p.x(), p.y()));;<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    return lcs.clone().reduce();<a name="line.177"></a>
+<span class="sourceLineNo">178</span>  }<a name="line.178"></a>
+<span class="sourceLineNo">179</span><a name="line.179"></a>
+<span class="sourceLineNo">180</span>  public static final OWLClassExpression of(final OWLClassExpression concept1, final OWLClassExpression concept2) {<a name="line.180"></a>
+<span class="sourceLineNo">181</span>    return ELLeastCommonSubsumer<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        .lcs(ELConceptDescription.of(concept1), ELConceptDescription.of(concept2))<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        .toOWLClassExpression();<a name="line.183"></a>
+<span class="sourceLineNo">184</span>  }<a name="line.184"></a>
+<span class="sourceLineNo">185</span><a name="line.185"></a>
+<span class="sourceLineNo">186</span>  public static final OWLClassExpression of(final OWLClassExpression... concepts) {<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    if (concepts.length == 0)<a name="line.187"></a>
+<span class="sourceLineNo">188</span>      return df.getOWLThing();<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    if (concepts.length == 1)<a name="line.189"></a>
+<span class="sourceLineNo">190</span>      return concepts[0];<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    if (concepts.length == 2)<a name="line.191"></a>
+<span class="sourceLineNo">192</span>      return of(concepts[0], concepts[1]);<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    return of(Arrays.asList(concepts));<a name="line.193"></a>
+<span class="sourceLineNo">194</span>  }<a name="line.194"></a>
+<span class="sourceLineNo">195</span><a name="line.195"></a>
+<span class="sourceLineNo">196</span>  public static final OWLClassExpression of(final Collection&lt;OWLClassExpression&gt; concepts) {<a name="line.196"></a>
+<span class="sourceLineNo">197</span>    if (concepts.isEmpty())<a name="line.197"></a>
+<span class="sourceLineNo">198</span>      return df.getOWLThing();<a name="line.198"></a>
+<span class="sourceLineNo">199</span>    final Iterator&lt;OWLClassExpression&gt; it = concepts.iterator();<a name="line.199"></a>
+<span class="sourceLineNo">200</span>    if (concepts.size() == 1)<a name="line.200"></a>
+<span class="sourceLineNo">201</span>      return it.next();<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    if (concepts.size() == 2)<a name="line.202"></a>
+<span class="sourceLineNo">203</span>      return of(it.next(), it.next());<a name="line.203"></a>
+<span class="sourceLineNo">204</span>    OWLClassExpression lcs = it.next();<a name="line.204"></a>
+<span class="sourceLineNo">205</span>    while (it.hasNext())<a name="line.205"></a>
+<span class="sourceLineNo">206</span>      lcs = of(lcs, it.next());<a name="line.206"></a>
+<span class="sourceLineNo">207</span>    return lcs;<a name="line.207"></a>
+<span class="sourceLineNo">208</span>  }<a name="line.208"></a>
+<span class="sourceLineNo">209</span><a name="line.209"></a>
+<span class="sourceLineNo">210</span>//if (concept1.isOWLNothing())<a name="line.210"></a>
+<span class="sourceLineNo">211</span>//  return concept2;<a name="line.211"></a>
+<span class="sourceLineNo">212</span>//if (concept2.isOWLNothing())<a name="line.212"></a>
+<span class="sourceLineNo">213</span>//  return concept1;<a name="line.213"></a>
+<span class="sourceLineNo">214</span>//if (concept1.isOWLThing())<a name="line.214"></a>
+<span class="sourceLineNo">215</span>//  return concept1;<a name="line.215"></a>
+<span class="sourceLineNo">216</span>//if (concept2.isOWLThing())<a name="line.216"></a>
+<span class="sourceLineNo">217</span>//  return concept2;<a name="line.217"></a>
+<span class="sourceLineNo">218</span>//if (concept1 instanceof OWLClass)<a name="line.218"></a>
+<span class="sourceLineNo">219</span>//  if (concept2 instanceof OWLClass)<a name="line.219"></a>
+<span class="sourceLineNo">220</span>//    if (((OWLClass) concept1).getIRI().equals(((OWLClass) concept2).getIRI()))<a name="line.220"></a>
+<span class="sourceLineNo">221</span>//      return concept1;<a name="line.221"></a>
+<span class="sourceLineNo">222</span>//    else<a name="line.222"></a>
+<span class="sourceLineNo">223</span>//      return df.getOWLThing();<a name="line.223"></a>
+<span class="sourceLineNo">224</span>//  else if (concept2 instanceof OWLObjectSomeValuesFrom)<a name="line.224"></a>
+<span class="sourceLineNo">225</span>//    return df.getOWLThing();<a name="line.225"></a>
+<span class="sourceLineNo">226</span>//  else if (concept2 instanceof OWLObjectIntersectionOf)<a name="line.226"></a>
+<span class="sourceLineNo">227</span>//    if (((OWLObjectIntersectionOf) concept2).asConjunctSet().contains(concept1))<a name="line.227"></a>
+<span class="sourceLineNo">228</span>//      return concept1;<a name="line.228"></a>
+<span class="sourceLineNo">229</span>//    else<a name="line.229"></a>
+<span class="sourceLineNo">230</span>//      return df.getOWLThing();<a name="line.230"></a>
+<span class="sourceLineNo">231</span>//  else<a name="line.231"></a>
+<span class="sourceLineNo">232</span>//    throw new ELSyntaxException();<a name="line.232"></a>
+<span class="sourceLineNo">233</span>//else if (concept1 instanceof OWLObjectSomeValuesFrom)<a name="line.233"></a>
+<span class="sourceLineNo">234</span>//  if (concept2 instanceof OWLClass)<a name="line.234"></a>
+<span class="sourceLineNo">235</span>//    return df.getOWLThing();<a name="line.235"></a>
+<span class="sourceLineNo">236</span>//  else if (concept2 instanceof OWLObjectSomeValuesFrom)<a name="line.236"></a>
+<span class="sourceLineNo">237</span>//    if (((OWLObjectSomeValuesFrom) concept1).getProperty().equals(<a name="line.237"></a>
+<span class="sourceLineNo">238</span>//        ((OWLObjectSomeValuesFrom) concept2).getProperty()))<a name="line.238"></a>
+<span class="sourceLineNo">239</span>//      return df.getOWLObjectSomeValuesFrom(<a name="line.239"></a>
+<span class="sourceLineNo">240</span>//          ((OWLObjectSomeValuesFrom) concept1).getProperty(),<a name="line.240"></a>
+<span class="sourceLineNo">241</span>//          of(((OWLObjectSomeValuesFrom) concept1).getFiller(), ((OWLObjectSomeValuesFrom) concept2).getFiller()));<a name="line.241"></a>
+<span class="sourceLineNo">242</span>//    else<a name="line.242"></a>
+<span class="sourceLineNo">243</span>//      return df.getOWLThing();<a name="line.243"></a>
+<span class="sourceLineNo">244</span>//  else if (concept2 instanceof OWLObjectIntersectionOf)<a name="line.244"></a>
+<span class="sourceLineNo">245</span>//    return null;<a name="line.245"></a>
+<span class="sourceLineNo">246</span>//  else<a name="line.246"></a>
+<span class="sourceLineNo">247</span>//    return df.getOWLThing();<a name="line.247"></a>
+<span class="sourceLineNo">248</span>//else if (concept1 instanceof OWLObjectIntersectionOf)<a name="line.248"></a>
+<span class="sourceLineNo">249</span>//<a name="line.249"></a>
+<span class="sourceLineNo">250</span>//  return df.getOWLThing();<a name="line.250"></a>
+<span class="sourceLineNo">251</span><a name="line.251"></a>
+<span class="sourceLineNo">252</span>}<a name="line.252"></a>
 
 
 

@@ -8,321 +8,562 @@
 <div class="sourceContainer">
 <pre><span class="sourceLineNo">001</span>package conexp.fx.core.dl;<a name="line.1"></a>
 <span class="sourceLineNo">002</span><a name="line.2"></a>
-<span class="sourceLineNo">003</span>/*-<a name="line.3"></a>
-<span class="sourceLineNo">004</span> * #%L<a name="line.4"></a>
-<span class="sourceLineNo">005</span> * Concept Explorer FX<a name="line.5"></a>
-<span class="sourceLineNo">006</span> * %%<a name="line.6"></a>
-<span class="sourceLineNo">007</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.7"></a>
+<span class="sourceLineNo">003</span>import java.util.Collections;<a name="line.3"></a>
+<span class="sourceLineNo">004</span><a name="line.4"></a>
+<span class="sourceLineNo">005</span>/*-<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * #%L<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * Concept Explorer FX<a name="line.7"></a>
 <span class="sourceLineNo">008</span> * %%<a name="line.8"></a>
-<span class="sourceLineNo">009</span> * This program is free software: you can redistribute it and/or modify<a name="line.9"></a>
-<span class="sourceLineNo">010</span> * it under the terms of the GNU General Public License as<a name="line.10"></a>
-<span class="sourceLineNo">011</span> * published by the Free Software Foundation, either version 3 of the<a name="line.11"></a>
-<span class="sourceLineNo">012</span> * License, or (at your option) any later version.<a name="line.12"></a>
-<span class="sourceLineNo">013</span> * <a name="line.13"></a>
-<span class="sourceLineNo">014</span> * This program is distributed in the hope that it will be useful,<a name="line.14"></a>
-<span class="sourceLineNo">015</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.15"></a>
-<span class="sourceLineNo">016</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.16"></a>
-<span class="sourceLineNo">017</span> * GNU General Public License for more details.<a name="line.17"></a>
-<span class="sourceLineNo">018</span> * <a name="line.18"></a>
-<span class="sourceLineNo">019</span> * You should have received a copy of the GNU General Public<a name="line.19"></a>
-<span class="sourceLineNo">020</span> * License along with this program.  If not, see<a name="line.20"></a>
-<span class="sourceLineNo">021</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.21"></a>
-<span class="sourceLineNo">022</span> * #L%<a name="line.22"></a>
-<span class="sourceLineNo">023</span> */<a name="line.23"></a>
-<span class="sourceLineNo">024</span><a name="line.24"></a>
-<span class="sourceLineNo">025</span>import java.util.Deque;<a name="line.25"></a>
-<span class="sourceLineNo">026</span>import java.util.LinkedList;<a name="line.26"></a>
-<span class="sourceLineNo">027</span>import java.util.Set;<a name="line.27"></a>
-<span class="sourceLineNo">028</span>import java.util.concurrent.atomic.AtomicInteger;<a name="line.28"></a>
-<span class="sourceLineNo">029</span>import java.util.function.Consumer;<a name="line.29"></a>
-<span class="sourceLineNo">030</span>import java.util.function.Supplier;<a name="line.30"></a>
-<span class="sourceLineNo">031</span>import java.util.stream.Collectors;<a name="line.31"></a>
-<span class="sourceLineNo">032</span>import java.util.stream.Stream;<a name="line.32"></a>
-<span class="sourceLineNo">033</span><a name="line.33"></a>
-<span class="sourceLineNo">034</span>import org.semanticweb.owlapi.model.IRI;<a name="line.34"></a>
-<span class="sourceLineNo">035</span><a name="line.35"></a>
-<span class="sourceLineNo">036</span>import conexp.fx.core.collections.BitSetFX;<a name="line.36"></a>
-<span class="sourceLineNo">037</span>import conexp.fx.core.util.Meter;<a name="line.37"></a>
-<span class="sourceLineNo">038</span><a name="line.38"></a>
-<span class="sourceLineNo">039</span>public final class ELNeighborhoodTest {<a name="line.39"></a>
-<span class="sourceLineNo">040</span><a name="line.40"></a>
-<span class="sourceLineNo">041</span>  public static void main(String[] args) {<a name="line.41"></a>
-<span class="sourceLineNo">042</span>    test12();<a name="line.42"></a>
-<span class="sourceLineNo">043</span>  }<a name="line.43"></a>
-<span class="sourceLineNo">044</span><a name="line.44"></a>
-<span class="sourceLineNo">045</span>  public static final void test1() {<a name="line.45"></a>
-<span class="sourceLineNo">046</span>    // final ELConceptDescription C = new ELConceptDescription();<a name="line.46"></a>
-<span class="sourceLineNo">047</span>    // C.getConceptNames().add(IRI.create("A"));<a name="line.47"></a>
-<span class="sourceLineNo">048</span>    // // C.getConceptNames().add(IRI.create("B"));<a name="line.48"></a>
-<span class="sourceLineNo">049</span>    // // C.getConceptNames().add(IRI.create("C"));<a name="line.49"></a>
-<span class="sourceLineNo">050</span>    // // C.getConceptNames().add(IRI.create("D"));<a name="line.50"></a>
-<span class="sourceLineNo">051</span>    // final ELConceptDescription C1 = new ELConceptDescription();<a name="line.51"></a>
-<span class="sourceLineNo">052</span>    // C1.getConceptNames().add(IRI.create("A"));<a name="line.52"></a>
-<span class="sourceLineNo">053</span>    // C.getExistentialRestrictions().add(Pair.of(IRI.create("r"), C1));<a name="line.53"></a>
-<span class="sourceLineNo">054</span>    // final ELConceptDescription C2 = new ELConceptDescription();<a name="line.54"></a>
-<span class="sourceLineNo">055</span>    // C2.getConceptNames().add(IRI.create("A"));<a name="line.55"></a>
-<span class="sourceLineNo">056</span>    // C1.getExistentialRestrictions().add(Pair.of(IRI.create("r"), C2));<a name="line.56"></a>
-<span class="sourceLineNo">057</span>    // final ELConceptDescription C3 = new ELConceptDescription();<a name="line.57"></a>
-<span class="sourceLineNo">058</span>    // C3.getConceptNames().add(IRI.create("A"));<a name="line.58"></a>
-<span class="sourceLineNo">059</span>    // C2.getExistentialRestrictions().add(Pair.of(IRI.create("r"), C3));<a name="line.59"></a>
-<span class="sourceLineNo">060</span>  }<a name="line.60"></a>
-<span class="sourceLineNo">061</span><a name="line.61"></a>
-<span class="sourceLineNo">062</span>  private static final void test2() {<a name="line.62"></a>
-<span class="sourceLineNo">063</span>    // final ELConceptDescription C = ELParser.read("A AND EXISTS r . ( A AND EXISTS<a name="line.63"></a>
-<span class="sourceLineNo">064</span>    // r . ( A AND EXISTS r . A ) )");<a name="line.64"></a>
-<span class="sourceLineNo">065</span>    final Deque&lt;String&gt; sources = new LinkedList&lt;&gt;();<a name="line.65"></a>
-<span class="sourceLineNo">066</span>    // sources.add("A AND B");<a name="line.66"></a>
-<span class="sourceLineNo">067</span>    sources.add("A1 and A2 and A3 and A4 and A5");<a name="line.67"></a>
-<span class="sourceLineNo">068</span>    for (int i = 1; i &lt; 100; i++) {<a name="line.68"></a>
-<span class="sourceLineNo">069</span>      // sources.add("A AND B AND EXISTS r.(" + sources.getLast() + ") AND EXISTS s.("<a name="line.69"></a>
-<span class="sourceLineNo">070</span>      // + sources.getLast() + ")");<a name="line.70"></a>
-<span class="sourceLineNo">071</span>      sources.add(sources.getFirst() + " and exists r.(" + sources.getLast() + ")");<a name="line.71"></a>
-<span class="sourceLineNo">072</span>      final ELConceptDescription C = ELParser.read(sources.getLast());<a name="line.72"></a>
-<span class="sourceLineNo">073</span>      final Set&lt;ELConceptDescription&gt; Us = C.upperNeighbors();<a name="line.73"></a>
-<span class="sourceLineNo">074</span>      // System.out.println(i + " -- " + C);<a name="line.74"></a>
-<span class="sourceLineNo">075</span>      System.out.println("C" + i);<a name="line.75"></a>
-<span class="sourceLineNo">076</span>      System.out.println("has size " + C.size());<a name="line.76"></a>
-<span class="sourceLineNo">077</span>      System.out.println("and squared size " + C.size() * C.size());<a name="line.77"></a>
-<span class="sourceLineNo">078</span>      System.out.println(<a name="line.78"></a>
-<span class="sourceLineNo">079</span>          "and its upper neighbors have size "<a name="line.79"></a>
-<span class="sourceLineNo">080</span>              + Us.parallelStream().collect(Collectors.summingLong(ELConceptDescription::size)));<a name="line.80"></a>
-<span class="sourceLineNo">081</span>      // System.out.println(C + " has the following upper neighbors:");<a name="line.81"></a>
-<span class="sourceLineNo">082</span>      // Us.forEach(System.out::println);<a name="line.82"></a>
-<span class="sourceLineNo">083</span>      System.out.println();<a name="line.83"></a>
-<span class="sourceLineNo">084</span>    }<a name="line.84"></a>
-<span class="sourceLineNo">085</span>  }<a name="line.85"></a>
-<span class="sourceLineNo">086</span><a name="line.86"></a>
-<span class="sourceLineNo">087</span>  private static final void test3() {<a name="line.87"></a>
-<span class="sourceLineNo">088</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.88"></a>
-<span class="sourceLineNo">089</span>    final ELConceptDescription C = ELParser.read("exists r.(A and exists r.(A and B) and exists r.(B and C))");<a name="line.89"></a>
-<span class="sourceLineNo">090</span>    System.out.println(C);<a name="line.90"></a>
-<span class="sourceLineNo">091</span>    final AtomicInteger p = new AtomicInteger(0);<a name="line.91"></a>
-<span class="sourceLineNo">092</span>    final BitSetFX ds = new BitSetFX();<a name="line.92"></a>
-<span class="sourceLineNo">093</span>    recurse(C, 0, p::incrementAndGet, d -&gt; {<a name="line.93"></a>
-<span class="sourceLineNo">094</span>      synchronized (ds) {<a name="line.94"></a>
-<span class="sourceLineNo">095</span>        ds.add(d);<a name="line.95"></a>
-<span class="sourceLineNo">096</span>      }<a name="line.96"></a>
-<span class="sourceLineNo">097</span>    });<a name="line.97"></a>
-<span class="sourceLineNo">098</span>    System.out.println("branches: " + p);<a name="line.98"></a>
-<span class="sourceLineNo">099</span>    System.out.println("quasi rank: " + ds);<a name="line.99"></a>
-<span class="sourceLineNo">100</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.100"></a>
-<span class="sourceLineNo">101</span>    timer.reset();<a name="line.101"></a>
-<span class="sourceLineNo">102</span>    System.out.println("rank: " + C.rank());<a name="line.102"></a>
-<span class="sourceLineNo">103</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.103"></a>
-<span class="sourceLineNo">104</span>  }<a name="line.104"></a>
-<span class="sourceLineNo">105</span><a name="line.105"></a>
-<span class="sourceLineNo">106</span>  private static final void<a name="line.106"></a>
-<span class="sourceLineNo">107</span>      recurse(final ELConceptDescription C, final int d, final Supplier&lt;Integer&gt; pinc, final Consumer&lt;Integer&gt; dadd) {<a name="line.107"></a>
-<span class="sourceLineNo">108</span>    if (C.isTop()) {<a name="line.108"></a>
-<span class="sourceLineNo">109</span>      pinc.get();<a name="line.109"></a>
-<span class="sourceLineNo">110</span>      dadd.accept(d);<a name="line.110"></a>
-<span class="sourceLineNo">111</span>      return;<a name="line.111"></a>
-<span class="sourceLineNo">112</span>    }<a name="line.112"></a>
-<span class="sourceLineNo">113</span>    C.upperNeighborsReduced().parallelStream().forEach(D -&gt; {<a name="line.113"></a>
-<span class="sourceLineNo">114</span>//      D.reduce();<a name="line.114"></a>
-<span class="sourceLineNo">115</span>      recurse(D, d + 1, pinc, dadd);<a name="line.115"></a>
-<span class="sourceLineNo">116</span>    });<a name="line.116"></a>
-<span class="sourceLineNo">117</span>  }<a name="line.117"></a>
-<span class="sourceLineNo">118</span><a name="line.118"></a>
-<span class="sourceLineNo">119</span>  private static final void test4() {<a name="line.119"></a>
-<span class="sourceLineNo">120</span>    final ELConceptDescription C = ELParser.read("exists r.(A and B) and exists r.(A and C) and exists r.(B and C)");<a name="line.120"></a>
-<span class="sourceLineNo">121</span>    C.upperNeighborsReduced().forEach(System.out::println);<a name="line.121"></a>
+<span class="sourceLineNo">009</span> * Copyright (C) 2010 - 2018 Francesco Kriegel<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * %%<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * This program is free software: you can redistribute it and/or modify<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * it under the terms of the GNU General Public License as<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * published by the Free Software Foundation, either version 3 of the<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * License, or (at your option) any later version.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * <a name="line.15"></a>
+<span class="sourceLineNo">016</span> * This program is distributed in the hope that it will be useful,<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * but WITHOUT ANY WARRANTY; without even the implied warranty of<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * GNU General Public License for more details.<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * <a name="line.20"></a>
+<span class="sourceLineNo">021</span> * You should have received a copy of the GNU General Public<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * License along with this program.  If not, see<a name="line.22"></a>
+<span class="sourceLineNo">023</span> * &lt;http://www.gnu.org/licenses/gpl-3.0.html&gt;.<a name="line.23"></a>
+<span class="sourceLineNo">024</span> * #L%<a name="line.24"></a>
+<span class="sourceLineNo">025</span> */<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.Deque;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.HashSet;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.LinkedList;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.List;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.util.Set;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.concurrent.atomic.AtomicInteger;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import java.util.function.Consumer;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import java.util.function.Supplier;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import java.util.stream.Collectors;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import java.util.stream.Stream;<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.semanticweb.owlapi.model.IRI;<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>import conexp.fx.core.collections.BitSetFX;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import conexp.fx.core.collections.Collections3;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import conexp.fx.core.util.Meter;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>public final class ELNeighborhoodTest {<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>  public static void main(String[] args) {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    test8();<a name="line.47"></a>
+<span class="sourceLineNo">048</span>  }<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>  public static final void test1() {<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    // final ELConceptDescription C = new ELConceptDescription();<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    // C.getConceptNames().add(IRI.create("A"));<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    // // C.getConceptNames().add(IRI.create("B"));<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    // // C.getConceptNames().add(IRI.create("C"));<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    // // C.getConceptNames().add(IRI.create("D"));<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    // final ELConceptDescription C1 = new ELConceptDescription();<a name="line.56"></a>
+<span class="sourceLineNo">057</span>    // C1.getConceptNames().add(IRI.create("A"));<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    // C.getExistentialRestrictions().add(Pair.of(IRI.create("r"), C1));<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    // final ELConceptDescription C2 = new ELConceptDescription();<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    // C2.getConceptNames().add(IRI.create("A"));<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    // C1.getExistentialRestrictions().add(Pair.of(IRI.create("r"), C2));<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    // final ELConceptDescription C3 = new ELConceptDescription();<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    // C3.getConceptNames().add(IRI.create("A"));<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    // C2.getExistentialRestrictions().add(Pair.of(IRI.create("r"), C3));<a name="line.64"></a>
+<span class="sourceLineNo">065</span>  }<a name="line.65"></a>
+<span class="sourceLineNo">066</span><a name="line.66"></a>
+<span class="sourceLineNo">067</span>  private static final void test2() {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    // final ELConceptDescription C = ELParser.read("A AND EXISTS r . ( A AND EXISTS<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    // r . ( A AND EXISTS r . A ) )");<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    final Deque&lt;String&gt; sources = new LinkedList&lt;&gt;();<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    // sources.add("A AND B");<a name="line.71"></a>
+<span class="sourceLineNo">072</span>    sources.add("A1 and A2 and A3 and A4 and A5");<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    for (int i = 1; i &lt; 100; i++) {<a name="line.73"></a>
+<span class="sourceLineNo">074</span>      // sources.add("A AND B AND EXISTS r.(" + sources.getLast() + ") AND EXISTS s.("<a name="line.74"></a>
+<span class="sourceLineNo">075</span>      // + sources.getLast() + ")");<a name="line.75"></a>
+<span class="sourceLineNo">076</span>      sources.add(sources.getFirst() + " and exists r.(" + sources.getLast() + ")");<a name="line.76"></a>
+<span class="sourceLineNo">077</span>      final ELConceptDescription C = ELParser.read(sources.getLast());<a name="line.77"></a>
+<span class="sourceLineNo">078</span>      final Set&lt;ELConceptDescription&gt; Us = C.upperNeighbors();<a name="line.78"></a>
+<span class="sourceLineNo">079</span>      // System.out.println(i + " -- " + C);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>      System.out.println("C" + i);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>      System.out.println("has size " + C.size());<a name="line.81"></a>
+<span class="sourceLineNo">082</span>      System.out.println("and squared size " + C.size() * C.size());<a name="line.82"></a>
+<span class="sourceLineNo">083</span>      System.out.println(<a name="line.83"></a>
+<span class="sourceLineNo">084</span>          "and its upper neighbors have size "<a name="line.84"></a>
+<span class="sourceLineNo">085</span>              + Us.parallelStream().collect(Collectors.summingLong(ELConceptDescription::size)));<a name="line.85"></a>
+<span class="sourceLineNo">086</span>      // System.out.println(C + " has the following upper neighbors:");<a name="line.86"></a>
+<span class="sourceLineNo">087</span>      // Us.forEach(System.out::println);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>      System.out.println();<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    }<a name="line.89"></a>
+<span class="sourceLineNo">090</span>  }<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>  private static final void test3() {<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    final ELConceptDescription C = ELParser.read("exists r.(A and exists r.(A and B) and exists r.(B and C))");<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    System.out.println(C);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    final AtomicInteger p = new AtomicInteger(0);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>    final BitSetFX ds = new BitSetFX();<a name="line.97"></a>
+<span class="sourceLineNo">098</span>    recurse(C, 0, p::incrementAndGet, d -&gt; {<a name="line.98"></a>
+<span class="sourceLineNo">099</span>      synchronized (ds) {<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        ds.add(d);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>      }<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    });<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    System.out.println("branches: " + p);<a name="line.103"></a>
+<span class="sourceLineNo">104</span>    System.out.println("quasi rank: " + ds);<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    timer.reset();<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    System.out.println("rank: " + C.rank());<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.108"></a>
+<span class="sourceLineNo">109</span>  }<a name="line.109"></a>
+<span class="sourceLineNo">110</span><a name="line.110"></a>
+<span class="sourceLineNo">111</span>  private static final void<a name="line.111"></a>
+<span class="sourceLineNo">112</span>      recurse(final ELConceptDescription C, final int d, final Supplier&lt;Integer&gt; pinc, final Consumer&lt;Integer&gt; dadd) {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    if (C.isTop()) {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>      pinc.get();<a name="line.114"></a>
+<span class="sourceLineNo">115</span>      dadd.accept(d);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>      return;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    }<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    C.upperNeighborsReduced().parallelStream().forEach(D -&gt; {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>//      D.reduce();<a name="line.119"></a>
+<span class="sourceLineNo">120</span>      recurse(D, d + 1, pinc, dadd);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    });<a name="line.121"></a>
 <span class="sourceLineNo">122</span>  }<a name="line.122"></a>
 <span class="sourceLineNo">123</span><a name="line.123"></a>
-<span class="sourceLineNo">124</span>  private static final void test5() {<a name="line.124"></a>
-<span class="sourceLineNo">125</span>    final ELConceptDescription C = ELParser.read("exists r.(A and exists r.(A and B))");<a name="line.125"></a>
+<span class="sourceLineNo">124</span>  private static final void test4() {<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    final ELConceptDescription C = ELParser.read("exists r.(A and B) and exists r.(A and C) and exists r.(B and C)");<a name="line.125"></a>
 <span class="sourceLineNo">126</span>    C.upperNeighborsReduced().forEach(System.out::println);<a name="line.126"></a>
 <span class="sourceLineNo">127</span>  }<a name="line.127"></a>
 <span class="sourceLineNo">128</span><a name="line.128"></a>
-<span class="sourceLineNo">129</span>  private static final void test6() {<a name="line.129"></a>
-<span class="sourceLineNo">130</span>    final ELConceptDescription C = ELParser.read("A and exists r.(A and B)");<a name="line.130"></a>
+<span class="sourceLineNo">129</span>  private static final void test5() {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    final ELConceptDescription C = ELParser.read("exists r.(A and exists r.(A and B))");<a name="line.130"></a>
 <span class="sourceLineNo">131</span>    C.upperNeighborsReduced().forEach(System.out::println);<a name="line.131"></a>
 <span class="sourceLineNo">132</span>  }<a name="line.132"></a>
 <span class="sourceLineNo">133</span><a name="line.133"></a>
-<span class="sourceLineNo">134</span>  private static final void test7() {<a name="line.134"></a>
-<span class="sourceLineNo">135</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.135"></a>
-<span class="sourceLineNo">136</span>    final ELConceptDescription C = ELParser.read("exists r.(A and exists r.(A and B) and exists r.(B and C))");<a name="line.136"></a>
-<span class="sourceLineNo">137</span>    System.out.println(C);<a name="line.137"></a>
-<span class="sourceLineNo">138</span>    System.out.println("rank: " + C.rank());<a name="line.138"></a>
-<span class="sourceLineNo">139</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.139"></a>
-<span class="sourceLineNo">140</span>  }<a name="line.140"></a>
-<span class="sourceLineNo">141</span><a name="line.141"></a>
-<span class="sourceLineNo">142</span>  private static final void test8() {<a name="line.142"></a>
-<span class="sourceLineNo">143</span>    final Signature sigma = new Signature(IRI.create("foo"));<a name="line.143"></a>
-<span class="sourceLineNo">144</span>    sigma.addConceptNames("A1", "A2", "A3", "A4");<a name="line.144"></a>
-<span class="sourceLineNo">145</span>    sigma.addRoleNames("r", "s");<a name="line.145"></a>
-<span class="sourceLineNo">146</span>    final ELConceptDescription C = ELParser.read(<a name="line.146"></a>
-<span class="sourceLineNo">147</span>        // "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2");<a name="line.147"></a>
-<span class="sourceLineNo">148</span>        // "A1 and A2 and A3 and exists r.(A1 and A2) and exists r.(A1 and A3) and exists r.(A2 and A3) and exists r.(A1<a name="line.148"></a>
-<span class="sourceLineNo">149</span>        // and A2 and A3 and exists r.(A1 and A2 and A3)) and exists s.(A1 and exists r.(A2 and exists s.Top) and exists<a name="line.149"></a>
-<span class="sourceLineNo">150</span>        // s.A3 and exists r.A3) and exists s.A2 and exists s.(A3 and A4) and exists s.(exists r.Top and exists s.(A2<a name="line.150"></a>
-<span class="sourceLineNo">151</span>        // and exists r.A3) and exists s.exists r.A4) and exists r.exists r.exists r.exists r.exists r.Top and exists<a name="line.151"></a>
-<span class="sourceLineNo">152</span>        // s.exists r.(A2 and exists s.A4 and exists r.exists s.A3 and exists r.exists r.Top)"<a name="line.152"></a>
-<span class="sourceLineNo">153</span>        "exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))");<a name="line.153"></a>
-<span class="sourceLineNo">154</span>    C.reduce();<a name="line.154"></a>
-<span class="sourceLineNo">155</span>    System.out.println(C);<a name="line.155"></a>
-<span class="sourceLineNo">156</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.156"></a>
-<span class="sourceLineNo">157</span>    System.out.println("has role depth: " + C.roleDepth());<a name="line.157"></a>
-<span class="sourceLineNo">158</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.158"></a>
-<span class="sourceLineNo">159</span>    timer.reset();<a name="line.159"></a>
-<span class="sourceLineNo">160</span>    System.out.println("has size: " + C.size());<a name="line.160"></a>
-<span class="sourceLineNo">161</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.161"></a>
-<span class="sourceLineNo">162</span>    timer.reset();<a name="line.162"></a>
-<span class="sourceLineNo">163</span>    System.out.println("has rank: " + C.rank());<a name="line.163"></a>
-<span class="sourceLineNo">164</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.164"></a>
-<span class="sourceLineNo">165</span>    System.out.println("and has the following upper neighbors:");<a name="line.165"></a>
-<span class="sourceLineNo">166</span>    timer.reset();<a name="line.166"></a>
-<span class="sourceLineNo">167</span>    Set&lt;ELConceptDescription&gt; upperNeighbors = C.upperNeighborsReduced();<a name="line.167"></a>
-<span class="sourceLineNo">168</span>    final String upperNeighborsTime = timer.measureAndFormat();<a name="line.168"></a>
-<span class="sourceLineNo">169</span>    final AtomicInteger i = new AtomicInteger(0);<a name="line.169"></a>
-<span class="sourceLineNo">170</span>    upperNeighbors.forEach(D -&gt; {<a name="line.170"></a>
-<span class="sourceLineNo">171</span>      System.out.println(i.incrementAndGet() + " --- " + D.rank() + " --- " + D);<a name="line.171"></a>
-<span class="sourceLineNo">172</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.172"></a>
-<span class="sourceLineNo">173</span>    });<a name="line.173"></a>
-<span class="sourceLineNo">174</span>    System.out.println("computation time: " + upperNeighborsTime);<a name="line.174"></a>
-<span class="sourceLineNo">175</span>    System.out.println("and has the following lower neighbors:");<a name="line.175"></a>
-<span class="sourceLineNo">176</span>    timer.reset();<a name="line.176"></a>
-<span class="sourceLineNo">177</span>    Set&lt;ELConceptDescription&gt; lowerNeighbors = C.lowerNeighbors(sigma);<a name="line.177"></a>
-<span class="sourceLineNo">178</span>    final String lowerNeighborsTime = timer.measureAndFormat();<a name="line.178"></a>
-<span class="sourceLineNo">179</span>    i.set(0);<a name="line.179"></a>
-<span class="sourceLineNo">180</span>    lowerNeighbors.forEach(D -&gt; {<a name="line.180"></a>
-<span class="sourceLineNo">181</span>      D.reduce();<a name="line.181"></a>
-<span class="sourceLineNo">182</span>      System.out.println(<a name="line.182"></a>
-<span class="sourceLineNo">183</span>          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.183"></a>
-<span class="sourceLineNo">184</span>              + " --- " + D.rank() + " --- " + D);<a name="line.184"></a>
-<span class="sourceLineNo">185</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.185"></a>
-<span class="sourceLineNo">186</span>    });<a name="line.186"></a>
-<span class="sourceLineNo">187</span>    System.out.println("computation time: " + lowerNeighborsTime);<a name="line.187"></a>
-<span class="sourceLineNo">188</span>//    System.out.println("and has the following lower neighbors (v2):");<a name="line.188"></a>
-<span class="sourceLineNo">189</span>//    timer.reset();<a name="line.189"></a>
-<span class="sourceLineNo">190</span>//    Set&lt;ELConceptDescription&gt; lowerNeighbors2 = C.lowerNeighbors2(sigma);<a name="line.190"></a>
-<span class="sourceLineNo">191</span>//    final String lowerNeighbors2Time = timer.measureAndFormat();<a name="line.191"></a>
-<span class="sourceLineNo">192</span>//    i.set(0);<a name="line.192"></a>
-<span class="sourceLineNo">193</span>//    lowerNeighbors2.forEach(D -&gt; {<a name="line.193"></a>
-<span class="sourceLineNo">194</span>////      D.reduce();<a name="line.194"></a>
-<span class="sourceLineNo">195</span>////      System.out.println(<a name="line.195"></a>
-<span class="sourceLineNo">196</span>////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.196"></a>
-<span class="sourceLineNo">197</span>////              + " --- " + D.rank() + " --- " + D);<a name="line.197"></a>
-<span class="sourceLineNo">198</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.198"></a>
-<span class="sourceLineNo">199</span>//    });<a name="line.199"></a>
-<span class="sourceLineNo">200</span>//    System.out.println("computation time: " + lowerNeighbors2Time);<a name="line.200"></a>
-<span class="sourceLineNo">201</span>    System.out.println("and has the following lower neighbors (v3):");<a name="line.201"></a>
-<span class="sourceLineNo">202</span>    timer.reset();<a name="line.202"></a>
-<span class="sourceLineNo">203</span>    Set&lt;ELConceptDescription&gt; lowerNeighbors3 = C.lowerNeighbors3(sigma);<a name="line.203"></a>
-<span class="sourceLineNo">204</span>    final String lowerNeighbors3Time = timer.measureAndFormat();<a name="line.204"></a>
-<span class="sourceLineNo">205</span>    i.set(0);<a name="line.205"></a>
-<span class="sourceLineNo">206</span>    lowerNeighbors3.forEach(D -&gt; {<a name="line.206"></a>
-<span class="sourceLineNo">207</span>      D.reduce();<a name="line.207"></a>
-<span class="sourceLineNo">208</span>      System.out.println(<a name="line.208"></a>
-<span class="sourceLineNo">209</span>          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.209"></a>
-<span class="sourceLineNo">210</span>              + " --- " + D.rank() + " --- " + D);<a name="line.210"></a>
-<span class="sourceLineNo">211</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.211"></a>
-<span class="sourceLineNo">212</span>    });<a name="line.212"></a>
-<span class="sourceLineNo">213</span>    System.out.println("computation time: " + lowerNeighbors3Time);<a name="line.213"></a>
-<span class="sourceLineNo">214</span>    System.out.println();<a name="line.214"></a>
-<span class="sourceLineNo">215</span>//    System.out.println("1=2   " + equalsEquivalent(lowerNeighbors, lowerNeighbors2));<a name="line.215"></a>
-<span class="sourceLineNo">216</span>    System.out.println("1=3   " + equalsEquivalent(lowerNeighbors, lowerNeighbors3));<a name="line.216"></a>
-<span class="sourceLineNo">217</span>//    System.out.println("2=3   " + equalsEquivalent(lowerNeighbors2, lowerNeighbors3));<a name="line.217"></a>
-<span class="sourceLineNo">218</span>  }<a name="line.218"></a>
-<span class="sourceLineNo">219</span><a name="line.219"></a>
-<span class="sourceLineNo">220</span>  private static final boolean<a name="line.220"></a>
-<span class="sourceLineNo">221</span>      containsEquivalent(final Set&lt;ELConceptDescription&gt; Cs, final Set&lt;ELConceptDescription&gt; Ds) {<a name="line.221"></a>
-<span class="sourceLineNo">222</span>    return Cs.parallelStream().allMatch(C -&gt; Ds.parallelStream().anyMatch(C::isEquivalentTo));<a name="line.222"></a>
-<span class="sourceLineNo">223</span>  }<a name="line.223"></a>
-<span class="sourceLineNo">224</span><a name="line.224"></a>
-<span class="sourceLineNo">225</span>  private static final boolean<a name="line.225"></a>
-<span class="sourceLineNo">226</span>      equalsEquivalent(final Set&lt;ELConceptDescription&gt; Cs, final Set&lt;ELConceptDescription&gt; Ds) {<a name="line.226"></a>
-<span class="sourceLineNo">227</span>    return Stream<a name="line.227"></a>
-<span class="sourceLineNo">228</span>        .&lt;Supplier&lt;Boolean&gt;&gt; of(() -&gt; containsEquivalent(Cs, Ds), () -&gt; containsEquivalent(Ds, Cs))<a name="line.228"></a>
-<span class="sourceLineNo">229</span>        .parallel()<a name="line.229"></a>
-<span class="sourceLineNo">230</span>        .allMatch(Supplier::get);<a name="line.230"></a>
-<span class="sourceLineNo">231</span>  }<a name="line.231"></a>
-<span class="sourceLineNo">232</span><a name="line.232"></a>
-<span class="sourceLineNo">233</span>  private static final void test9() {<a name="line.233"></a>
-<span class="sourceLineNo">234</span>    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))"<a name="line.234"></a>
-<span class="sourceLineNo">235</span>//            "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2"<a name="line.235"></a>
-<span class="sourceLineNo">236</span>//            "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃s.∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2"<a name="line.236"></a>
-<span class="sourceLineNo">237</span>//        "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2 and exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)"<a name="line.237"></a>
-<span class="sourceLineNo">238</span>    );<a name="line.238"></a>
-<span class="sourceLineNo">239</span>    C.reduce();<a name="line.239"></a>
-<span class="sourceLineNo">240</span>    System.out.println(C);<a name="line.240"></a>
-<span class="sourceLineNo">241</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.241"></a>
-<span class="sourceLineNo">242</span>    for (int i = 0; i &lt; 3; i++) {<a name="line.242"></a>
-<span class="sourceLineNo">243</span>      timer.reset();<a name="line.243"></a>
-<span class="sourceLineNo">244</span>      System.out.println("rank: " + C.unreducedRank());<a name="line.244"></a>
-<span class="sourceLineNo">245</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.245"></a>
-<span class="sourceLineNo">246</span>      timer.reset();<a name="line.246"></a>
-<span class="sourceLineNo">247</span>      System.out.println("rank2: " + C.unreducedRank2());<a name="line.247"></a>
-<span class="sourceLineNo">248</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.248"></a>
-<span class="sourceLineNo">249</span>      timer.reset();<a name="line.249"></a>
-<span class="sourceLineNo">250</span>      System.out.println("rank3: " + C.rank3());<a name="line.250"></a>
-<span class="sourceLineNo">251</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.251"></a>
-<span class="sourceLineNo">252</span>      timer.reset();<a name="line.252"></a>
-<span class="sourceLineNo">253</span>      System.out.println("rank4: " + C.unreducedRank4());<a name="line.253"></a>
-<span class="sourceLineNo">254</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.254"></a>
-<span class="sourceLineNo">255</span>    }<a name="line.255"></a>
-<span class="sourceLineNo">256</span>  }<a name="line.256"></a>
-<span class="sourceLineNo">257</span><a name="line.257"></a>
-<span class="sourceLineNo">258</span>  private static final void test10() {<a name="line.258"></a>
-<span class="sourceLineNo">259</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.259"></a>
-<span class="sourceLineNo">260</span>    String source = "(A⊓B⊓C)";<a name="line.260"></a>
-<span class="sourceLineNo">261</span>    for (int i = 0; i &lt; 10; i++) {<a name="line.261"></a>
-<span class="sourceLineNo">262</span>      source = "∃r." + source;<a name="line.262"></a>
-<span class="sourceLineNo">263</span>      final ELConceptDescription C = ELParser.read(source);<a name="line.263"></a>
-<span class="sourceLineNo">264</span>      System.out.println(C);<a name="line.264"></a>
-<span class="sourceLineNo">265</span>      timer.reset();<a name="line.265"></a>
-<span class="sourceLineNo">266</span>      System.out.println("rank1: " + C.rank());<a name="line.266"></a>
-<span class="sourceLineNo">267</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.267"></a>
-<span class="sourceLineNo">268</span>//      timer.reset();<a name="line.268"></a>
-<span class="sourceLineNo">269</span>//      System.out.println("rank3: " + C.rank3());<a name="line.269"></a>
-<span class="sourceLineNo">270</span>//      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.270"></a>
-<span class="sourceLineNo">271</span>      timer.reset();<a name="line.271"></a>
-<span class="sourceLineNo">272</span>      System.out.println("rank2: " + C.rank2());<a name="line.272"></a>
-<span class="sourceLineNo">273</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.273"></a>
-<span class="sourceLineNo">274</span>      System.out.println();<a name="line.274"></a>
-<span class="sourceLineNo">275</span>    }<a name="line.275"></a>
-<span class="sourceLineNo">276</span>  }<a name="line.276"></a>
-<span class="sourceLineNo">277</span><a name="line.277"></a>
-<span class="sourceLineNo">278</span>  private static final void test11() {<a name="line.278"></a>
-<span class="sourceLineNo">279</span>    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2))");<a name="line.279"></a>
-<span class="sourceLineNo">280</span>    final ELConceptDescription D = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓∃r.(A1⊓A2⊓A3)⊓∃r.∃s.(A1 and A2 AND A3))");<a name="line.280"></a>
-<span class="sourceLineNo">281</span>    C.reduce();<a name="line.281"></a>
-<span class="sourceLineNo">282</span>    D.reduce();<a name="line.282"></a>
-<span class="sourceLineNo">283</span>    System.out.println(C);<a name="line.283"></a>
-<span class="sourceLineNo">284</span>    System.out.println(D);<a name="line.284"></a>
-<span class="sourceLineNo">285</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.285"></a>
-<span class="sourceLineNo">286</span>    for (int i = 0; i &lt; 3; i++) {<a name="line.286"></a>
-<span class="sourceLineNo">287</span>      timer.reset();<a name="line.287"></a>
-<span class="sourceLineNo">288</span>      System.out.println("distance: " + C.distanceTo(D));<a name="line.288"></a>
-<span class="sourceLineNo">289</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.289"></a>
-<span class="sourceLineNo">290</span>      timer.reset();<a name="line.290"></a>
-<span class="sourceLineNo">291</span>      System.out.println("distance2: " + C.distanceTo2(D));<a name="line.291"></a>
-<span class="sourceLineNo">292</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.292"></a>
-<span class="sourceLineNo">293</span>    }<a name="line.293"></a>
-<span class="sourceLineNo">294</span>  }<a name="line.294"></a>
-<span class="sourceLineNo">295</span><a name="line.295"></a>
-<span class="sourceLineNo">296</span>  private static final void test12() {<a name="line.296"></a>
-<span class="sourceLineNo">297</span>    final Signature sigma = new Signature(IRI.create("foo"));<a name="line.297"></a>
-<span class="sourceLineNo">298</span>    sigma.addConceptNames("A1", "A2", "A3", "A4");<a name="line.298"></a>
-<span class="sourceLineNo">299</span>    sigma.addRoleNames("r", "s");<a name="line.299"></a>
-<span class="sourceLineNo">300</span>    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓∃r.(A1⊓A2⊓A3)⊓∃s.(A1 and ∃r.A3))");<a name="line.300"></a>
-<span class="sourceLineNo">301</span>    C.reduce();<a name="line.301"></a>
-<span class="sourceLineNo">302</span>    final int radius = 3;<a name="line.302"></a>
-<span class="sourceLineNo">303</span>    System.out.println(C);<a name="line.303"></a>
-<span class="sourceLineNo">304</span>    System.out.println("radius: " + radius);<a name="line.304"></a>
-<span class="sourceLineNo">305</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.305"></a>
-<span class="sourceLineNo">306</span>    for (int i = 0; i &lt; 3; i++) {<a name="line.306"></a>
-<span class="sourceLineNo">307</span>      timer.reset();<a name="line.307"></a>
-<span class="sourceLineNo">308</span>      final Set&lt;ELConceptDescription&gt; neighborhood = C.neighborhood(radius, sigma);<a name="line.308"></a>
-<span class="sourceLineNo">309</span>      final String ctime = timer.measureAndFormat();<a name="line.309"></a>
-<span class="sourceLineNo">310</span>      System.out.println(neighborhood.size() + " neighbors:");<a name="line.310"></a>
-<span class="sourceLineNo">311</span>      neighborhood.forEach(D -&gt; System.out.println(D));<a name="line.311"></a>
-<span class="sourceLineNo">312</span>//      neighborhood.forEach(D -&gt; System.out.println(D.rank() + "   " + D));<a name="line.312"></a>
-<span class="sourceLineNo">313</span>      System.out.println("computation time: " + ctime);<a name="line.313"></a>
-<span class="sourceLineNo">314</span>    }<a name="line.314"></a>
-<span class="sourceLineNo">315</span>  }<a name="line.315"></a>
-<span class="sourceLineNo">316</span><a name="line.316"></a>
-<span class="sourceLineNo">317</span>}<a name="line.317"></a>
+<span class="sourceLineNo">134</span>  private static final void test6() {<a name="line.134"></a>
+<span class="sourceLineNo">135</span>    final ELConceptDescription C = ELParser.read("A and exists r.(A and B)");<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    C.upperNeighborsReduced().forEach(System.out::println);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>  }<a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138"></a>
+<span class="sourceLineNo">139</span>  private static final void test7() {<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    final ELConceptDescription C = ELParser.read("exists r.(A and exists r.(A and B) and exists r.(B and C))");<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    System.out.println(C);<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    System.out.println("rank: " + C.rank());<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.144"></a>
+<span class="sourceLineNo">145</span>  }<a name="line.145"></a>
+<span class="sourceLineNo">146</span><a name="line.146"></a>
+<span class="sourceLineNo">147</span>  private static final void test8() {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    final Signature sigma = new Signature(IRI.create("foo"));<a name="line.148"></a>
+<span class="sourceLineNo">149</span>//    sigma.addConceptNames("A1", "A2", "A3", "A4");<a name="line.149"></a>
+<span class="sourceLineNo">150</span>    sigma.addConceptNames("A", "B", "C", "D");<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    sigma.addRoleNames("r", "s");<a name="line.151"></a>
+<span class="sourceLineNo">152</span>//    final ELConceptDescription C = ELParser.read(<a name="line.152"></a>
+<span class="sourceLineNo">153</span>//        // "exists r.(exists r.(A and B) and exists r.(A and C))");<a name="line.153"></a>
+<span class="sourceLineNo">154</span>//        // "exists r.(exists r.(A1 and A2) and exists r.(A1 and A3))");<a name="line.154"></a>
+<span class="sourceLineNo">155</span>//        // "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2");<a name="line.155"></a>
+<span class="sourceLineNo">156</span>//        // "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)");<a name="line.156"></a>
+<span class="sourceLineNo">157</span>//        // "∃r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3)))");<a name="line.157"></a>
+<span class="sourceLineNo">158</span>//        // "exists r.(exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A<a name="line.158"></a>
+<span class="sourceLineNo">159</span>//        // and B and exists s.(A and B) and exists r.(A and B) and exists s.(A and C and exists s.Top)) and exists r.(A<a name="line.159"></a>
+<span class="sourceLineNo">160</span>//        // and D and exists s.(C and D) and exists r.Top) and exists r.(B and C and exists s.Top) and exists r.(A and B<a name="line.160"></a>
+<span class="sourceLineNo">161</span>//        // and C) and exists r.exists s.Top and exists r.(B and D and exists r.(A and B)) and exists r.(A and D and<a name="line.161"></a>
+<span class="sourceLineNo">162</span>//        // exists r.(A and C))");<a name="line.162"></a>
+<span class="sourceLineNo">163</span>//                "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)");<a name="line.163"></a>
+<span class="sourceLineNo">164</span>//        //        "exists r.(exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)) and exists s.(exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A))");<a name="line.164"></a>
+<span class="sourceLineNo">165</span>//        "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A) and "<a name="line.165"></a>
+<span class="sourceLineNo">166</span>//        + "exists r.(A and exists r.B) and exists r.(A and C and D) and exists r.(A and D and exists r.(A and B) and exists s.(A and B and C))");<a name="line.166"></a>
+<span class="sourceLineNo">167</span>////    "exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A) and "<a name="line.167"></a>
+<span class="sourceLineNo">168</span>////    + "exists r.(A and exists r.B) and exists r.(A and C and D) and exists r.(A and D and exists r.(A and B) and exists s.(A and B and C)) and exists r.(exists s.(A and B) and C and exists s.D)");<a name="line.168"></a>
+<span class="sourceLineNo">169</span>////    "exists r.(exists r.(A and B and exists r.Top) and exists r.(A and C and exists s.Top) and exists r.(A and D and exists r.A)) and "<a name="line.169"></a>
+<span class="sourceLineNo">170</span>////    + "exists r.(exists r.(A and exists r.B) and exists r.(A and C and D) and exists r.(A and D and exists r.(A and B) and exists s.(A and B and C)))");<a name="line.170"></a>
+<span class="sourceLineNo">171</span>    final ELConceptDescription C = ELConceptDescription.random(sigma, 3, 16, 48);<a name="line.171"></a>
+<span class="sourceLineNo">172</span>    C.reduce();<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    System.out.println(C);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.174"></a>
+<span class="sourceLineNo">175</span>    System.out.println("has role depth: " + C.roleDepth());<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    timer.reset();<a name="line.177"></a>
+<span class="sourceLineNo">178</span>    System.out.println("has size: " + C.size());<a name="line.178"></a>
+<span class="sourceLineNo">179</span>    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.179"></a>
+<span class="sourceLineNo">180</span>    timer.reset();<a name="line.180"></a>
+<span class="sourceLineNo">181</span>//    System.out.println("has rank: " + C.rank());<a name="line.181"></a>
+<span class="sourceLineNo">182</span>//    System.out.println("computation time: " + timer.measureAndFormat());<a name="line.182"></a>
+<span class="sourceLineNo">183</span>    System.out.println("and has the following upper neighbors:");<a name="line.183"></a>
+<span class="sourceLineNo">184</span>    timer.reset();<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    Set&lt;ELConceptDescription&gt; upperNeighbors = C.upperNeighbors();<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    final String upperNeighborsTime = timer.measureAndFormat();<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    final AtomicInteger i = new AtomicInteger(0);<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    upperNeighbors.forEach(D -&gt; {<a name="line.188"></a>
+<span class="sourceLineNo">189</span>//      System.out.println(i.incrementAndGet() + " --- " + D.rank() + " --- " + D);<a name="line.189"></a>
+<span class="sourceLineNo">190</span>      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    });<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    System.out.println("computation time: " + upperNeighborsTime);<a name="line.192"></a>
+<span class="sourceLineNo">193</span>//    System.out.println("and has the following lower neighbors:");<a name="line.193"></a>
+<span class="sourceLineNo">194</span>//    timer.reset();<a name="line.194"></a>
+<span class="sourceLineNo">195</span>//    Set&lt;ELConceptDescription&gt; lowerNeighbors = C.lowerNeighborsReduced(sigma);<a name="line.195"></a>
+<span class="sourceLineNo">196</span>//    final String lowerNeighborsTime = timer.measureAndFormat();<a name="line.196"></a>
+<span class="sourceLineNo">197</span>//    i.set(0);<a name="line.197"></a>
+<span class="sourceLineNo">198</span>//    lowerNeighbors.forEach(D -&gt; {<a name="line.198"></a>
+<span class="sourceLineNo">199</span>////      final ELConceptDescription rE = D.clone();<a name="line.199"></a>
+<span class="sourceLineNo">200</span>////      rE.getConceptNames().removeAll(C.getConceptNames());<a name="line.200"></a>
+<span class="sourceLineNo">201</span>////      rE.getExistentialRestrictions().entries().removeAll(C.getExistentialRestrictions().entries());<a name="line.201"></a>
+<span class="sourceLineNo">202</span>//      D.reduce();<a name="line.202"></a>
+<span class="sourceLineNo">203</span>////      System.out.println(<a name="line.203"></a>
+<span class="sourceLineNo">204</span>////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.204"></a>
+<span class="sourceLineNo">205</span>////              + " --- " + D.rank() + " --- " + D);<a name="line.205"></a>
+<span class="sourceLineNo">206</span>//      System.out.println(<a name="line.206"></a>
+<span class="sourceLineNo">207</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.207"></a>
+<span class="sourceLineNo">208</span>//              + " --- " + D);<a name="line.208"></a>
+<span class="sourceLineNo">209</span>////      System.out.println("   new conjunct: " + rE);<a name="line.209"></a>
+<span class="sourceLineNo">210</span>////      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.210"></a>
+<span class="sourceLineNo">211</span>//    });<a name="line.211"></a>
+<span class="sourceLineNo">212</span>//    System.out.println("computation time: " + lowerNeighborsTime);<a name="line.212"></a>
+<span class="sourceLineNo">213</span>//    System.out.println("and has the following lower neighbors (v2):");<a name="line.213"></a>
+<span class="sourceLineNo">214</span>//    timer.reset();<a name="line.214"></a>
+<span class="sourceLineNo">215</span>//    Set&lt;ELConceptDescription&gt; lowerNeighbors2 = C.lowerNeighbors2(sigma);<a name="line.215"></a>
+<span class="sourceLineNo">216</span>//    final String lowerNeighbors2Time = timer.measureAndFormat();<a name="line.216"></a>
+<span class="sourceLineNo">217</span>//    i.set(0);<a name="line.217"></a>
+<span class="sourceLineNo">218</span>//    lowerNeighbors2.forEach(D -&gt; {<a name="line.218"></a>
+<span class="sourceLineNo">219</span>////      D.reduce();<a name="line.219"></a>
+<span class="sourceLineNo">220</span>////      System.out.println(<a name="line.220"></a>
+<span class="sourceLineNo">221</span>////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.221"></a>
+<span class="sourceLineNo">222</span>////              + " --- " + D.rank() + " --- " + D);<a name="line.222"></a>
+<span class="sourceLineNo">223</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.223"></a>
+<span class="sourceLineNo">224</span>//    });<a name="line.224"></a>
+<span class="sourceLineNo">225</span>//    System.out.println("computation time: " + lowerNeighbors2Time);<a name="line.225"></a>
+<span class="sourceLineNo">226</span>//    System.out.println("and has the following lower neighbors (v3):");<a name="line.226"></a>
+<span class="sourceLineNo">227</span>//    timer.reset();<a name="line.227"></a>
+<span class="sourceLineNo">228</span>//    Set&lt;ELConceptDescription&gt; lowerNeighbors3 = C.lowerNeighbors3(sigma);<a name="line.228"></a>
+<span class="sourceLineNo">229</span>//    final String lowerNeighbors3Time = timer.measureAndFormat();<a name="line.229"></a>
+<span class="sourceLineNo">230</span>//    i.set(0);<a name="line.230"></a>
+<span class="sourceLineNo">231</span>//    lowerNeighbors3.forEach(D -&gt; {<a name="line.231"></a>
+<span class="sourceLineNo">232</span>//      D.reduce();<a name="line.232"></a>
+<span class="sourceLineNo">233</span>//      System.out.println(<a name="line.233"></a>
+<span class="sourceLineNo">234</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.234"></a>
+<span class="sourceLineNo">235</span>//              + " --- " + D.rank() + " --- " + D);<a name="line.235"></a>
+<span class="sourceLineNo">236</span>////      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.236"></a>
+<span class="sourceLineNo">237</span>//    });<a name="line.237"></a>
+<span class="sourceLineNo">238</span>//    System.out.println("computation time: " + lowerNeighbors3Time);<a name="line.238"></a>
+<span class="sourceLineNo">239</span>//    System.out.println();<a name="line.239"></a>
+<span class="sourceLineNo">240</span>    System.out.println("and has the following lower neighbors (v4):");<a name="line.240"></a>
+<span class="sourceLineNo">241</span>    timer.reset();<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    Set&lt;ELConceptDescription&gt; lowerNeighbors4 = Collections.emptySet();//C.lowerNeighbors4(sigma);<a name="line.242"></a>
+<span class="sourceLineNo">243</span>    final String lowerNeighbors4Time = timer.measureAndFormat();<a name="line.243"></a>
+<span class="sourceLineNo">244</span>    i.set(0);<a name="line.244"></a>
+<span class="sourceLineNo">245</span>    lowerNeighbors4.forEach(D -&gt; {<a name="line.245"></a>
+<span class="sourceLineNo">246</span>      D.reduce();<a name="line.246"></a>
+<span class="sourceLineNo">247</span>//      System.out.println(<a name="line.247"></a>
+<span class="sourceLineNo">248</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.248"></a>
+<span class="sourceLineNo">249</span>//              + " --- " + D.rank() + " --- " + D);<a name="line.249"></a>
+<span class="sourceLineNo">250</span>      System.out.println(<a name="line.250"></a>
+<span class="sourceLineNo">251</span>          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.251"></a>
+<span class="sourceLineNo">252</span>              + " --- " + D);<a name="line.252"></a>
+<span class="sourceLineNo">253</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.253"></a>
+<span class="sourceLineNo">254</span>    });<a name="line.254"></a>
+<span class="sourceLineNo">255</span>    System.out.println("computation time: " + lowerNeighbors4Time);<a name="line.255"></a>
+<span class="sourceLineNo">256</span>    System.out.println();<a name="line.256"></a>
+<span class="sourceLineNo">257</span>    System.out.println("and has the following lower neighbors (v5):");<a name="line.257"></a>
+<span class="sourceLineNo">258</span>    timer.reset();<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    Set&lt;ELConceptDescription&gt; lowerNeighbors5 = C.lowerNeighbors5(sigma);<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    final String lowerNeighbors5Time = timer.measureAndFormat();<a name="line.260"></a>
+<span class="sourceLineNo">261</span>    i.set(0);<a name="line.261"></a>
+<span class="sourceLineNo">262</span>    lowerNeighbors5.forEach(D -&gt; {<a name="line.262"></a>
+<span class="sourceLineNo">263</span>      D.reduce();<a name="line.263"></a>
+<span class="sourceLineNo">264</span>//      System.out.println(<a name="line.264"></a>
+<span class="sourceLineNo">265</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.265"></a>
+<span class="sourceLineNo">266</span>//              + " --- " + D.rank() + " --- " + D);<a name="line.266"></a>
+<span class="sourceLineNo">267</span>      System.out.println(<a name="line.267"></a>
+<span class="sourceLineNo">268</span>          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.268"></a>
+<span class="sourceLineNo">269</span>              + " --- " + D);<a name="line.269"></a>
+<span class="sourceLineNo">270</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.270"></a>
+<span class="sourceLineNo">271</span>    });<a name="line.271"></a>
+<span class="sourceLineNo">272</span>    System.out.println("computation time: " + lowerNeighbors5Time);<a name="line.272"></a>
+<span class="sourceLineNo">273</span>    System.out.println();<a name="line.273"></a>
+<span class="sourceLineNo">274</span>//    System.out.println("and has the following lower neighbors (v6):");<a name="line.274"></a>
+<span class="sourceLineNo">275</span>//    timer.reset();<a name="line.275"></a>
+<span class="sourceLineNo">276</span>//    Set&lt;ELConceptDescription&gt; lowerNeighbors6 = C.lowerNeighbors6(sigma);<a name="line.276"></a>
+<span class="sourceLineNo">277</span>//    final String lowerNeighbors6Time = timer.measureAndFormat();<a name="line.277"></a>
+<span class="sourceLineNo">278</span>//    i.set(0);<a name="line.278"></a>
+<span class="sourceLineNo">279</span>//    lowerNeighbors6.forEach(D -&gt; {<a name="line.279"></a>
+<span class="sourceLineNo">280</span>//      D.reduce();<a name="line.280"></a>
+<span class="sourceLineNo">281</span>////      System.out.println(<a name="line.281"></a>
+<span class="sourceLineNo">282</span>////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.282"></a>
+<span class="sourceLineNo">283</span>////              + " --- " + D.rank() + " --- " + D);<a name="line.283"></a>
+<span class="sourceLineNo">284</span>//      System.out.println(<a name="line.284"></a>
+<span class="sourceLineNo">285</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.285"></a>
+<span class="sourceLineNo">286</span>//              + " --- " + D);<a name="line.286"></a>
+<span class="sourceLineNo">287</span>////      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.287"></a>
+<span class="sourceLineNo">288</span>//    });<a name="line.288"></a>
+<span class="sourceLineNo">289</span>//    System.out.println("computation time: " + lowerNeighbors6Time);<a name="line.289"></a>
+<span class="sourceLineNo">290</span>//    System.out.println();<a name="line.290"></a>
+<span class="sourceLineNo">291</span>//    System.out.println("and has the following lower neighbors (v7):");<a name="line.291"></a>
+<span class="sourceLineNo">292</span>//    timer.reset();<a name="line.292"></a>
+<span class="sourceLineNo">293</span>//    Set&lt;ELConceptDescription&gt; lowerNeighbors7 = C.lowerNeighbors7(sigma);<a name="line.293"></a>
+<span class="sourceLineNo">294</span>//    final String lowerNeighbors7Time = timer.measureAndFormat();<a name="line.294"></a>
+<span class="sourceLineNo">295</span>//    i.set(0);<a name="line.295"></a>
+<span class="sourceLineNo">296</span>//    lowerNeighbors7.forEach(D -&gt; {<a name="line.296"></a>
+<span class="sourceLineNo">297</span>//      D.reduce();<a name="line.297"></a>
+<span class="sourceLineNo">298</span>////      System.out.println(<a name="line.298"></a>
+<span class="sourceLineNo">299</span>////          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.299"></a>
+<span class="sourceLineNo">300</span>////              + " --- " + D.rank() + " --- " + D);<a name="line.300"></a>
+<span class="sourceLineNo">301</span>//      System.out.println(<a name="line.301"></a>
+<span class="sourceLineNo">302</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.302"></a>
+<span class="sourceLineNo">303</span>//              + " --- " + D);<a name="line.303"></a>
+<span class="sourceLineNo">304</span>////      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.304"></a>
+<span class="sourceLineNo">305</span>//    });<a name="line.305"></a>
+<span class="sourceLineNo">306</span>//    System.out.println("computation time: " + lowerNeighbors7Time);<a name="line.306"></a>
+<span class="sourceLineNo">307</span>//    System.out.println();<a name="line.307"></a>
+<span class="sourceLineNo">308</span>    System.out.println("and has the following lower neighbors (v8):");<a name="line.308"></a>
+<span class="sourceLineNo">309</span>    timer.reset();<a name="line.309"></a>
+<span class="sourceLineNo">310</span>    Set&lt;ELConceptDescription&gt; lowerNeighbors8 = C.lowerNeighbors8(sigma);<a name="line.310"></a>
+<span class="sourceLineNo">311</span>    final String lowerNeighbors8Time = timer.measureAndFormat();<a name="line.311"></a>
+<span class="sourceLineNo">312</span>    i.set(0);<a name="line.312"></a>
+<span class="sourceLineNo">313</span>    lowerNeighbors8.forEach(D -&gt; {<a name="line.313"></a>
+<span class="sourceLineNo">314</span>      D.reduce();<a name="line.314"></a>
+<span class="sourceLineNo">315</span>//      System.out.println(<a name="line.315"></a>
+<span class="sourceLineNo">316</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.316"></a>
+<span class="sourceLineNo">317</span>//              + " --- " + D.rank() + " --- " + D);<a name="line.317"></a>
+<span class="sourceLineNo">318</span>      System.out.println(<a name="line.318"></a>
+<span class="sourceLineNo">319</span>          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.319"></a>
+<span class="sourceLineNo">320</span>              + " --- " + D);<a name="line.320"></a>
+<span class="sourceLineNo">321</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.321"></a>
+<span class="sourceLineNo">322</span>    });<a name="line.322"></a>
+<span class="sourceLineNo">323</span>    System.out.println("computation time: " + lowerNeighbors8Time);<a name="line.323"></a>
+<span class="sourceLineNo">324</span>    System.out.println();<a name="line.324"></a>
+<span class="sourceLineNo">325</span>    System.out.println("and has the following lower neighbors (v9):");<a name="line.325"></a>
+<span class="sourceLineNo">326</span>    timer.reset();<a name="line.326"></a>
+<span class="sourceLineNo">327</span>    Set&lt;ELConceptDescription&gt; lowerNeighbors9 = C.lowerNeighbors9(sigma);<a name="line.327"></a>
+<span class="sourceLineNo">328</span>    final String lowerNeighbors9Time = timer.measureAndFormat();<a name="line.328"></a>
+<span class="sourceLineNo">329</span>    i.set(0);<a name="line.329"></a>
+<span class="sourceLineNo">330</span>    lowerNeighbors9.forEach(D -&gt; {<a name="line.330"></a>
+<span class="sourceLineNo">331</span>      D.reduce();<a name="line.331"></a>
+<span class="sourceLineNo">332</span>//      System.out.println(<a name="line.332"></a>
+<span class="sourceLineNo">333</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.333"></a>
+<span class="sourceLineNo">334</span>//              + " --- " + D.rank() + " --- " + D);<a name="line.334"></a>
+<span class="sourceLineNo">335</span>      System.out.println(<a name="line.335"></a>
+<span class="sourceLineNo">336</span>          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.336"></a>
+<span class="sourceLineNo">337</span>              + " --- " + D);<a name="line.337"></a>
+<span class="sourceLineNo">338</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.338"></a>
+<span class="sourceLineNo">339</span>    });<a name="line.339"></a>
+<span class="sourceLineNo">340</span>    System.out.println("computation time: " + lowerNeighbors9Time);<a name="line.340"></a>
+<span class="sourceLineNo">341</span>    System.out.println();<a name="line.341"></a>
+<span class="sourceLineNo">342</span>    Set&lt;ELConceptDescription&gt; lowerNeighbors10 = C.lowerNeighbors10(sigma);<a name="line.342"></a>
+<span class="sourceLineNo">343</span>    final String lowerNeighbors10Time = timer.measureAndFormat();<a name="line.343"></a>
+<span class="sourceLineNo">344</span>    i.set(0);<a name="line.344"></a>
+<span class="sourceLineNo">345</span>    lowerNeighbors10.forEach(D -&gt; {<a name="line.345"></a>
+<span class="sourceLineNo">346</span>      D.reduce();<a name="line.346"></a>
+<span class="sourceLineNo">347</span>//      System.out.println(<a name="line.347"></a>
+<span class="sourceLineNo">348</span>//          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.348"></a>
+<span class="sourceLineNo">349</span>//              + " --- " + D.rank() + " --- " + D);<a name="line.349"></a>
+<span class="sourceLineNo">350</span>      System.out.println(<a name="line.350"></a>
+<span class="sourceLineNo">351</span>          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)<a name="line.351"></a>
+<span class="sourceLineNo">352</span>              + " --- " + D);<a name="line.352"></a>
+<span class="sourceLineNo">353</span>//      System.out.println(i.incrementAndGet() + " --- " + D);<a name="line.353"></a>
+<span class="sourceLineNo">354</span>    });<a name="line.354"></a>
+<span class="sourceLineNo">355</span>    System.out.println("computation time: " + lowerNeighbors10Time);<a name="line.355"></a>
+<span class="sourceLineNo">356</span>    System.out.println();<a name="line.356"></a>
+<span class="sourceLineNo">357</span>//    final int size1 = Collections3.quotient(lowerNeighbors, ELConceptDescription.equivalence()).size();<a name="line.357"></a>
+<span class="sourceLineNo">358</span>    final int size4 = Collections3.quotient(lowerNeighbors4, ELConceptDescription.equivalence()).size();<a name="line.358"></a>
+<span class="sourceLineNo">359</span>    final int size5 = Collections3.quotient(lowerNeighbors5, ELConceptDescription.equivalence()).size();<a name="line.359"></a>
+<span class="sourceLineNo">360</span>//    final int size6 = Collections3.quotient(lowerNeighbors6, ELConceptDescription.equivalence()).size();<a name="line.360"></a>
+<span class="sourceLineNo">361</span>//    final int size7 = Collections3.quotient(lowerNeighbors7, ELConceptDescription.equivalence()).size();<a name="line.361"></a>
+<span class="sourceLineNo">362</span>    final int size8 = Collections3.quotient(lowerNeighbors8, ELConceptDescription.equivalence()).size();<a name="line.362"></a>
+<span class="sourceLineNo">363</span>    final int size9 = Collections3.quotient(lowerNeighbors9, ELConceptDescription.equivalence()).size();<a name="line.363"></a>
+<span class="sourceLineNo">364</span>    final int size10 = Collections3.quotient(lowerNeighbors10, ELConceptDescription.equivalence()).size();<a name="line.364"></a>
+<span class="sourceLineNo">365</span>//    System.out.println("1=2   " + equalsEquivalent(lowerNeighbors, lowerNeighbors2));<a name="line.365"></a>
+<span class="sourceLineNo">366</span>//    System.out.println("1=3   " + equalsEquivalent(lowerNeighbors, lowerNeighbors3));<a name="line.366"></a>
+<span class="sourceLineNo">367</span>//    System.out.println("time1  = " + lowerNeighborsTime);<a name="line.367"></a>
+<span class="sourceLineNo">368</span>    System.out.println("time4  = " + lowerNeighbors4Time);<a name="line.368"></a>
+<span class="sourceLineNo">369</span>    System.out.println("time5  = " + lowerNeighbors5Time);<a name="line.369"></a>
+<span class="sourceLineNo">370</span>//    System.out.println("time6  = " + lowerNeighbors6Time);<a name="line.370"></a>
+<span class="sourceLineNo">371</span>//    System.out.println("time7  = " + lowerNeighbors7Time);<a name="line.371"></a>
+<span class="sourceLineNo">372</span>    System.out.println("time8  = " + lowerNeighbors8Time);<a name="line.372"></a>
+<span class="sourceLineNo">373</span>    System.out.println("time9  = " + lowerNeighbors9Time);<a name="line.373"></a>
+<span class="sourceLineNo">374</span>    System.out.println("time10 = " + lowerNeighbors10Time);<a name="line.374"></a>
+<span class="sourceLineNo">375</span>//    System.out.println("size1  = " + size1);<a name="line.375"></a>
+<span class="sourceLineNo">376</span>    System.out.println("size4  = " + size4);<a name="line.376"></a>
+<span class="sourceLineNo">377</span>    System.out.println("size5  = " + size5);<a name="line.377"></a>
+<span class="sourceLineNo">378</span>//    System.out.println("size6  = " + size6);<a name="line.378"></a>
+<span class="sourceLineNo">379</span>//    System.out.println("size7  = " + size7);<a name="line.379"></a>
+<span class="sourceLineNo">380</span>    System.out.println("size8  = " + size8);<a name="line.380"></a>
+<span class="sourceLineNo">381</span>    System.out.println("size9  = " + size9);<a name="line.381"></a>
+<span class="sourceLineNo">382</span>    System.out.println("size10 = " + size10);<a name="line.382"></a>
+<span class="sourceLineNo">383</span>//    System.out.println("1&lt;4    " + containsEquivalent(lowerNeighbors, lowerNeighbors4));<a name="line.383"></a>
+<span class="sourceLineNo">384</span>//    System.out.println("4&lt;1    " + containsEquivalent(lowerNeighbors4, lowerNeighbors));<a name="line.384"></a>
+<span class="sourceLineNo">385</span>//    System.out.println("1=4    " + equalsEquivalent(lowerNeighbors, lowerNeighbors4));<a name="line.385"></a>
+<span class="sourceLineNo">386</span>//    System.out.println("1&lt;5    " + containsEquivalent(lowerNeighbors, lowerNeighbors5));<a name="line.386"></a>
+<span class="sourceLineNo">387</span>//    System.out.println("5&lt;1    " + containsEquivalent(lowerNeighbors5, lowerNeighbors));<a name="line.387"></a>
+<span class="sourceLineNo">388</span>//    System.out.println("1=5    " + equalsEquivalent(lowerNeighbors, lowerNeighbors5));<a name="line.388"></a>
+<span class="sourceLineNo">389</span>    System.out.println("4&lt;5    " + containsEquivalent(lowerNeighbors4, lowerNeighbors5));<a name="line.389"></a>
+<span class="sourceLineNo">390</span>    System.out.println("4&gt;5    " + containsEquivalent(lowerNeighbors5, lowerNeighbors4));<a name="line.390"></a>
+<span class="sourceLineNo">391</span>    System.out.println("4=5    " + equalsEquivalent(lowerNeighbors4, lowerNeighbors5));<a name="line.391"></a>
+<span class="sourceLineNo">392</span>//    System.out.println("5&lt;6    " + containsEquivalent(lowerNeighbors5, lowerNeighbors6));<a name="line.392"></a>
+<span class="sourceLineNo">393</span>//    System.out.println("5&gt;6    " + containsEquivalent(lowerNeighbors6, lowerNeighbors5));<a name="line.393"></a>
+<span class="sourceLineNo">394</span>//    System.out.println("5=6    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors6));<a name="line.394"></a>
+<span class="sourceLineNo">395</span>//    System.out.println("5&lt;7    " + containsEquivalent(lowerNeighbors5, lowerNeighbors7));<a name="line.395"></a>
+<span class="sourceLineNo">396</span>//    System.out.println("5&gt;7    " + containsEquivalent(lowerNeighbors7, lowerNeighbors5));<a name="line.396"></a>
+<span class="sourceLineNo">397</span>//    System.out.println("5=7    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors7));<a name="line.397"></a>
+<span class="sourceLineNo">398</span>    System.out.println("5&lt;8    " + containsEquivalent(lowerNeighbors5, lowerNeighbors8));<a name="line.398"></a>
+<span class="sourceLineNo">399</span>    System.out.println("5&gt;8    " + containsEquivalent(lowerNeighbors8, lowerNeighbors5));<a name="line.399"></a>
+<span class="sourceLineNo">400</span>    System.out.println("5=8    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors8));<a name="line.400"></a>
+<span class="sourceLineNo">401</span>    System.out.println("5&lt;9    " + containsEquivalent(lowerNeighbors5, lowerNeighbors9));<a name="line.401"></a>
+<span class="sourceLineNo">402</span>    System.out.println("5&gt;9    " + containsEquivalent(lowerNeighbors9, lowerNeighbors5));<a name="line.402"></a>
+<span class="sourceLineNo">403</span>    System.out.println("5=9    " + equalsEquivalent(lowerNeighbors5, lowerNeighbors9));<a name="line.403"></a>
+<span class="sourceLineNo">404</span>    System.out.println("5&lt;10   " + containsEquivalent(lowerNeighbors5, lowerNeighbors10));<a name="line.404"></a>
+<span class="sourceLineNo">405</span>    System.out.println("5&gt;10   " + containsEquivalent(lowerNeighbors10, lowerNeighbors5));<a name="line.405"></a>
+<span class="sourceLineNo">406</span>    System.out.println("5=10   " + equalsEquivalent(lowerNeighbors5, lowerNeighbors10));<a name="line.406"></a>
+<span class="sourceLineNo">407</span>    System.out.println();<a name="line.407"></a>
+<span class="sourceLineNo">408</span>//    System.out.println(C + " has the following lower neighbors, that method v6 does not compute:");<a name="line.408"></a>
+<span class="sourceLineNo">409</span>//    Collections3<a name="line.409"></a>
+<span class="sourceLineNo">410</span>//        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())<a name="line.410"></a>
+<span class="sourceLineNo">411</span>//        .parallelStream()<a name="line.411"></a>
+<span class="sourceLineNo">412</span>//        .filter(L -&gt; lowerNeighbors6.parallelStream().noneMatch(L::isEquivalentTo))<a name="line.412"></a>
+<span class="sourceLineNo">413</span>//        .forEach(System.out::println);<a name="line.413"></a>
+<span class="sourceLineNo">414</span>//    System.out.println();<a name="line.414"></a>
+<span class="sourceLineNo">415</span>//    System.out.println(C + " has the following lower neighbors, that method v7 does not compute:");<a name="line.415"></a>
+<span class="sourceLineNo">416</span>//    Collections3<a name="line.416"></a>
+<span class="sourceLineNo">417</span>//        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())<a name="line.417"></a>
+<span class="sourceLineNo">418</span>//        .parallelStream()<a name="line.418"></a>
+<span class="sourceLineNo">419</span>//        .filter(L -&gt; lowerNeighbors7.parallelStream().noneMatch(L::isEquivalentTo))<a name="line.419"></a>
+<span class="sourceLineNo">420</span>//        .forEach(System.out::println);<a name="line.420"></a>
+<span class="sourceLineNo">421</span>//    System.out.println();<a name="line.421"></a>
+<span class="sourceLineNo">422</span>//    System.out.println(C + " has the following lower neighbors, that method v8 does not compute:");<a name="line.422"></a>
+<span class="sourceLineNo">423</span>//    Collections3<a name="line.423"></a>
+<span class="sourceLineNo">424</span>//        .representatives(lowerNeighbors4, ELConceptDescription.equivalence())<a name="line.424"></a>
+<span class="sourceLineNo">425</span>//        .parallelStream()<a name="line.425"></a>
+<span class="sourceLineNo">426</span>//        .filter(L -&gt; lowerNeighbors8.parallelStream().noneMatch(L::isEquivalentTo))<a name="line.426"></a>
+<span class="sourceLineNo">427</span>//        .forEach(System.out::println);<a name="line.427"></a>
+<span class="sourceLineNo">428</span>//    System.out.println("2=3   " + equalsEquivalent(lowerNeighbors2, lowerNeighbors3));<a name="line.428"></a>
+<span class="sourceLineNo">429</span>  }<a name="line.429"></a>
+<span class="sourceLineNo">430</span><a name="line.430"></a>
+<span class="sourceLineNo">431</span>  private static final boolean<a name="line.431"></a>
+<span class="sourceLineNo">432</span>      containsEquivalent(final Set&lt;ELConceptDescription&gt; Cs, final Set&lt;ELConceptDescription&gt; Ds) {<a name="line.432"></a>
+<span class="sourceLineNo">433</span>    return Cs.parallelStream().allMatch(C -&gt; Ds.parallelStream().anyMatch(C::isEquivalentTo));<a name="line.433"></a>
+<span class="sourceLineNo">434</span>  }<a name="line.434"></a>
+<span class="sourceLineNo">435</span><a name="line.435"></a>
+<span class="sourceLineNo">436</span>  private static final boolean<a name="line.436"></a>
+<span class="sourceLineNo">437</span>      equalsEquivalent(final Set&lt;ELConceptDescription&gt; Cs, final Set&lt;ELConceptDescription&gt; Ds) {<a name="line.437"></a>
+<span class="sourceLineNo">438</span>    return Stream<a name="line.438"></a>
+<span class="sourceLineNo">439</span>        .&lt;Supplier&lt;Boolean&gt;&gt; of(() -&gt; containsEquivalent(Cs, Ds), () -&gt; containsEquivalent(Ds, Cs))<a name="line.439"></a>
+<span class="sourceLineNo">440</span>        .parallel()<a name="line.440"></a>
+<span class="sourceLineNo">441</span>        .allMatch(Supplier::get);<a name="line.441"></a>
+<span class="sourceLineNo">442</span>  }<a name="line.442"></a>
+<span class="sourceLineNo">443</span><a name="line.443"></a>
+<span class="sourceLineNo">444</span>  private static final void test9() {<a name="line.444"></a>
+<span class="sourceLineNo">445</span>    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))"<a name="line.445"></a>
+<span class="sourceLineNo">446</span>//            "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2"<a name="line.446"></a>
+<span class="sourceLineNo">447</span>//            "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃s.∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2"<a name="line.447"></a>
+<span class="sourceLineNo">448</span>//        "A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2 and exists r.(A1⊓A2⊓A3⊓∃s.(A1⊓∃r.A3⊓∃s.A3⊓∃r.(A2⊓∃s.⊤))⊓∃s.(∃r.⊤⊓∃s.(A2⊓∃r.A3)⊓∃s.∃r.A4)⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3))⊓∃s.(A3⊓A4)⊓∃s.A2)"<a name="line.448"></a>
+<span class="sourceLineNo">449</span>    );<a name="line.449"></a>
+<span class="sourceLineNo">450</span>    C.reduce();<a name="line.450"></a>
+<span class="sourceLineNo">451</span>    System.out.println(C);<a name="line.451"></a>
+<span class="sourceLineNo">452</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.452"></a>
+<span class="sourceLineNo">453</span>    for (int i = 0; i &lt; 3; i++) {<a name="line.453"></a>
+<span class="sourceLineNo">454</span>      timer.reset();<a name="line.454"></a>
+<span class="sourceLineNo">455</span>      System.out.println("rank: " + C.unreducedRank());<a name="line.455"></a>
+<span class="sourceLineNo">456</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.456"></a>
+<span class="sourceLineNo">457</span>      timer.reset();<a name="line.457"></a>
+<span class="sourceLineNo">458</span>      System.out.println("rank2: " + C.unreducedRank2());<a name="line.458"></a>
+<span class="sourceLineNo">459</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.459"></a>
+<span class="sourceLineNo">460</span>      timer.reset();<a name="line.460"></a>
+<span class="sourceLineNo">461</span>      System.out.println("rank3: " + C.rank3());<a name="line.461"></a>
+<span class="sourceLineNo">462</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.462"></a>
+<span class="sourceLineNo">463</span>      timer.reset();<a name="line.463"></a>
+<span class="sourceLineNo">464</span>      System.out.println("rank4: " + C.unreducedRank4());<a name="line.464"></a>
+<span class="sourceLineNo">465</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.465"></a>
+<span class="sourceLineNo">466</span>    }<a name="line.466"></a>
+<span class="sourceLineNo">467</span>  }<a name="line.467"></a>
+<span class="sourceLineNo">468</span><a name="line.468"></a>
+<span class="sourceLineNo">469</span>  private static final void test10() {<a name="line.469"></a>
+<span class="sourceLineNo">470</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.470"></a>
+<span class="sourceLineNo">471</span>    String source = "(A⊓B⊓C)";<a name="line.471"></a>
+<span class="sourceLineNo">472</span>    for (int i = 0; i &lt; 10; i++) {<a name="line.472"></a>
+<span class="sourceLineNo">473</span>      source = "∃r." + source;<a name="line.473"></a>
+<span class="sourceLineNo">474</span>      final ELConceptDescription C = ELParser.read(source);<a name="line.474"></a>
+<span class="sourceLineNo">475</span>      System.out.println(C);<a name="line.475"></a>
+<span class="sourceLineNo">476</span>      timer.reset();<a name="line.476"></a>
+<span class="sourceLineNo">477</span>      System.out.println("rank1: " + C.rank());<a name="line.477"></a>
+<span class="sourceLineNo">478</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.478"></a>
+<span class="sourceLineNo">479</span>//      timer.reset();<a name="line.479"></a>
+<span class="sourceLineNo">480</span>//      System.out.println("rank3: " + C.rank3());<a name="line.480"></a>
+<span class="sourceLineNo">481</span>//      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.481"></a>
+<span class="sourceLineNo">482</span>      timer.reset();<a name="line.482"></a>
+<span class="sourceLineNo">483</span>      System.out.println("rank2: " + C.rank2());<a name="line.483"></a>
+<span class="sourceLineNo">484</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.484"></a>
+<span class="sourceLineNo">485</span>      System.out.println();<a name="line.485"></a>
+<span class="sourceLineNo">486</span>    }<a name="line.486"></a>
+<span class="sourceLineNo">487</span>  }<a name="line.487"></a>
+<span class="sourceLineNo">488</span><a name="line.488"></a>
+<span class="sourceLineNo">489</span>  private static final void test11() {<a name="line.489"></a>
+<span class="sourceLineNo">490</span>    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓A3⊓∃r.(A1⊓A2))");<a name="line.490"></a>
+<span class="sourceLineNo">491</span>    final ELConceptDescription D = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓∃r.(A1⊓A2⊓A3)⊓∃r.∃s.(A1 and A2 AND A3))");<a name="line.491"></a>
+<span class="sourceLineNo">492</span>    C.reduce();<a name="line.492"></a>
+<span class="sourceLineNo">493</span>    D.reduce();<a name="line.493"></a>
+<span class="sourceLineNo">494</span>    System.out.println(C);<a name="line.494"></a>
+<span class="sourceLineNo">495</span>    System.out.println(D);<a name="line.495"></a>
+<span class="sourceLineNo">496</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.496"></a>
+<span class="sourceLineNo">497</span>    for (int i = 0; i &lt; 3; i++) {<a name="line.497"></a>
+<span class="sourceLineNo">498</span>      timer.reset();<a name="line.498"></a>
+<span class="sourceLineNo">499</span>      System.out.println("distance: " + C.distanceTo(D));<a name="line.499"></a>
+<span class="sourceLineNo">500</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.500"></a>
+<span class="sourceLineNo">501</span>      timer.reset();<a name="line.501"></a>
+<span class="sourceLineNo">502</span>      System.out.println("distance2: " + C.distanceTo2(D));<a name="line.502"></a>
+<span class="sourceLineNo">503</span>      System.out.println("computation time: " + timer.measureAndFormat());<a name="line.503"></a>
+<span class="sourceLineNo">504</span>    }<a name="line.504"></a>
+<span class="sourceLineNo">505</span>  }<a name="line.505"></a>
+<span class="sourceLineNo">506</span><a name="line.506"></a>
+<span class="sourceLineNo">507</span>  private static final void test12() {<a name="line.507"></a>
+<span class="sourceLineNo">508</span>    final Signature sigma = new Signature(IRI.create("foo"));<a name="line.508"></a>
+<span class="sourceLineNo">509</span>    sigma.addConceptNames("A1", "A2", "A3", "A4");<a name="line.509"></a>
+<span class="sourceLineNo">510</span>    sigma.addRoleNames("r", "s");<a name="line.510"></a>
+<span class="sourceLineNo">511</span>    final ELConceptDescription C = ELParser.read("A1⊓A2⊓A3⊓∃r.(A1⊓A2⊓∃r.(A1⊓A2⊓A3)⊓∃s.(A1 and ∃r.A3))");<a name="line.511"></a>
+<span class="sourceLineNo">512</span>    C.reduce();<a name="line.512"></a>
+<span class="sourceLineNo">513</span>    final int radius = 3;<a name="line.513"></a>
+<span class="sourceLineNo">514</span>    System.out.println(C);<a name="line.514"></a>
+<span class="sourceLineNo">515</span>    System.out.println("radius: " + radius);<a name="line.515"></a>
+<span class="sourceLineNo">516</span>    final Meter&lt;Long&gt; timer = Meter.newNanoStopWatch();<a name="line.516"></a>
+<span class="sourceLineNo">517</span>    for (int i = 0; i &lt; 3; i++) {<a name="line.517"></a>
+<span class="sourceLineNo">518</span>      timer.reset();<a name="line.518"></a>
+<span class="sourceLineNo">519</span>      final Set&lt;ELConceptDescription&gt; neighborhood = C.neighborhood(radius, sigma);<a name="line.519"></a>
+<span class="sourceLineNo">520</span>      final String ctime = timer.measureAndFormat();<a name="line.520"></a>
+<span class="sourceLineNo">521</span>      System.out.println(neighborhood.size() + " neighbors:");<a name="line.521"></a>
+<span class="sourceLineNo">522</span>      neighborhood.forEach(D -&gt; System.out.println(D));<a name="line.522"></a>
+<span class="sourceLineNo">523</span>//      neighborhood.forEach(D -&gt; System.out.println(D.rank() + "   " + D));<a name="line.523"></a>
+<span class="sourceLineNo">524</span>      System.out.println("computation time: " + ctime);<a name="line.524"></a>
+<span class="sourceLineNo">525</span>    }<a name="line.525"></a>
+<span class="sourceLineNo">526</span>  }<a name="line.526"></a>
+<span class="sourceLineNo">527</span><a name="line.527"></a>
+<span class="sourceLineNo">528</span>  private static final void test13() {<a name="line.528"></a>
+<span class="sourceLineNo">529</span>    final int n = 3;<a name="line.529"></a>
+<span class="sourceLineNo">530</span>    final IRI r = IRI.create("r");<a name="line.530"></a>
+<span class="sourceLineNo">531</span>    final List&lt;ELConceptDescription&gt; atoms = new LinkedList&lt;&gt;();<a name="line.531"></a>
+<span class="sourceLineNo">532</span>    for (int i = 1; i &lt; n + 1; i++) {<a name="line.532"></a>
+<span class="sourceLineNo">533</span>      atoms.add(ELConceptDescription.conceptName(IRI.create("A" + i)));<a name="line.533"></a>
+<span class="sourceLineNo">534</span>    }<a name="line.534"></a>
+<span class="sourceLineNo">535</span>    ELConceptDescription C = ELConceptDescription.conjunction(atoms);<a name="line.535"></a>
+<span class="sourceLineNo">536</span>    int rd = 0;<a name="line.536"></a>
+<span class="sourceLineNo">537</span>    long rank = C.rank();<a name="line.537"></a>
+<span class="sourceLineNo">538</span>    while (true) {<a name="line.538"></a>
+<span class="sourceLineNo">539</span>//      final long lower = 1 + rank;<a name="line.539"></a>
+<span class="sourceLineNo">540</span>//      long upper = 1;<a name="line.540"></a>
+<span class="sourceLineNo">541</span>//      for (long i = 1; i &lt; rank; i++) {<a name="line.541"></a>
+<span class="sourceLineNo">542</span>//        long fac = 1;<a name="line.542"></a>
+<span class="sourceLineNo">543</span>//        for (long j = 0; j &lt; i - 2; j++)<a name="line.543"></a>
+<span class="sourceLineNo">544</span>//          fac *= rank - j;<a name="line.544"></a>
+<span class="sourceLineNo">545</span>//        upper += fac;<a name="line.545"></a>
+<span class="sourceLineNo">546</span>//      }<a name="line.546"></a>
+<span class="sourceLineNo">547</span>      C = ELConceptDescription.conjunction(C, ELConceptDescription.existentialRestriction(r, C)).reduce();<a name="line.547"></a>
+<span class="sourceLineNo">548</span>      rd++;<a name="line.548"></a>
+<span class="sourceLineNo">549</span>      rank = C.rank();<a name="line.549"></a>
+<span class="sourceLineNo">550</span>      System.out.println("role depth: " + rd + "    " + "rank: " + rank);<a name="line.550"></a>
+<span class="sourceLineNo">551</span>      System.out.println(C);<a name="line.551"></a>
+<span class="sourceLineNo">552</span>//      System.out.println("lower bound: " + lower);<a name="line.552"></a>
+<span class="sourceLineNo">553</span>//      System.out.println("upper bound: " + upper);<a name="line.553"></a>
+<span class="sourceLineNo">554</span>      System.out.println();<a name="line.554"></a>
+<span class="sourceLineNo">555</span>    }<a name="line.555"></a>
+<span class="sourceLineNo">556</span>  }<a name="line.556"></a>
+<span class="sourceLineNo">557</span><a name="line.557"></a>
+<span class="sourceLineNo">558</span>}<a name="line.558"></a>
 
 
 
