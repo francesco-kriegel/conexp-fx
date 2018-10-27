@@ -5,7 +5,7 @@
 
   <groupId>me.kriegel.francesco</groupId>
   <artifactId>conexp-fx</artifactId>
-  <version>5.5.0-SNAPSHOT</version>
+  <version>5.5.1-SNAPSHOT</version>
   <name>Concept Explorer FX</name>
   <description>Software for Formal Concept Analysis with Description Logics Extensions</description>
   <packaging>jar</packaging>
