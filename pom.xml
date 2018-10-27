@@ -101,7 +101,8 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>24.0-jre</version>
+      <version>27.0-jre</version>
+      <!-- <version>24.0-jre</version> -->
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -556,7 +557,8 @@
         <plugin>
           <groupId>com.zenjava</groupId>
           <artifactId>javafx-maven-plugin</artifactId>
-          <version>8.8.3</version>
+          <!-- <version>8.8.3</version> -->
+          <version>8.9.0-SNAPSHOT</version>
           <configuration>
             <appName>${project.name}</appName>
             <!-- <updateExistingJar>true</updateExistingJar> -->
@@ -1023,7 +1025,8 @@
           <plugin>
             <groupId>com.zenjava</groupId>
             <artifactId>javafx-maven-plugin</artifactId>
-            <version>8.8.3</version>
+            <!-- <version>8.8.3</version> -->
+            <version>8.9.0-SNAPSHOT</version>
             <executions>
               <execution>
                 <id>generate-keystore</id>
