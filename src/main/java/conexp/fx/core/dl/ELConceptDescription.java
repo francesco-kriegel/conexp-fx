@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +34,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -51,13 +49,14 @@ import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.Pair;
+import conexp.fx.core.math.GuavaIsomorphism;
 import conexp.fx.core.math.PartialComparable;
 import conexp.fx.core.util.UnicodeSymbols;
 
@@ -193,9 +192,10 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
     }
     if (concept instanceof OWLObjectSomeValuesFrom) {
       final OWLObjectSomeValuesFrom existentialRestriction = (OWLObjectSomeValuesFrom) concept;
-      this.existentialRestrictions.put(
-          ((OWLObjectProperty) existentialRestriction.getProperty()).getIRI(),
-          new ELConceptDescription(existentialRestriction.getFiller()));
+      this.existentialRestrictions
+          .put(
+              ((OWLObjectProperty) existentialRestriction.getProperty()).getIRI(),
+              new ELConceptDescription(existentialRestriction.getFiller()));
       return;
     }
     if (concept instanceof OWLObjectIntersectionOf) {
@@ -204,9 +204,10 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
         if (conjunct instanceof OWLClass)
           this.conceptNames.add(((OWLClass) conjunct).getIRI());
         else if (conjunct instanceof OWLObjectSomeValuesFrom)
-          this.existentialRestrictions.put(
-              ((OWLObjectProperty) ((OWLObjectSomeValuesFrom) conjunct).getProperty()).getIRI(),
-              new ELConceptDescription(((OWLObjectSomeValuesFrom) conjunct).getFiller()));
+          this.existentialRestrictions
+              .put(
+                  ((OWLObjectProperty) ((OWLObjectSomeValuesFrom) conjunct).getProperty()).getIRI(),
+                  new ELConceptDescription(((OWLObjectSomeValuesFrom) conjunct).getFiller()));
         else
           throw new ELSyntaxException();
       return;
@@ -260,18 +261,21 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
     if (conceptNames.isEmpty() && existentialRestrictions.size() == 1) {
       final Entry<IRI, ELConceptDescription> existentialRestriction =
           existentialRestrictions.entries().iterator().next();
-      return df.getOWLObjectSomeValuesFrom(
-          df.getOWLObjectProperty(existentialRestriction.getKey()),
-          existentialRestriction.getValue().toOWLClassExpression());
+      return df
+          .getOWLObjectSomeValuesFrom(
+              df.getOWLObjectProperty(existentialRestriction.getKey()),
+              existentialRestriction.getValue().toOWLClassExpression());
     }
     final Set<OWLClassExpression> conjuncts = new HashSet<>();
     for (IRI conceptName : conceptNames)
       conjuncts.add(df.getOWLClass(conceptName));
     for (Entry<IRI, ELConceptDescription> existentialRestriction : existentialRestrictions.entries())
-      conjuncts.add(
-          df.getOWLObjectSomeValuesFrom(
-              df.getOWLObjectProperty(existentialRestriction.getKey()),
-              existentialRestriction.getValue().toOWLClassExpression()));
+      conjuncts
+          .add(
+              df
+                  .getOWLObjectSomeValuesFrom(
+                      df.getOWLObjectProperty(existentialRestriction.getKey()),
+                      existentialRestriction.getValue().toOWLClassExpression()));
     return df.getOWLObjectIntersectionOf(conjuncts);
   }
 
@@ -290,8 +294,10 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
   public final ELConceptDescription without(final ELConceptDescription that) {
     final ELConceptDescription result = this.clone();
     result.getConceptNames().removeAll(that.getConceptNames());
-    result.getExistentialRestrictions().entries().removeIf(
-        rE -> that.isSubsumedBy(ELConceptDescription.existentialRestriction(rE)));
+    result
+        .getExistentialRestrictions()
+        .entries()
+        .removeIf(rE -> that.isSubsumedBy(ELConceptDescription.existentialRestriction(rE)));
     return result;
   }
 
@@ -304,8 +310,10 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
   }
 
   public final boolean isEquivalentTo(final ELConceptDescription other) {
-    return Stream.<Supplier<Boolean>> of(() -> this.subsumes(other), () -> other.subsumes(this)).parallel().allMatch(
-        Supplier::get);
+    return Stream
+        .<Supplier<Boolean>> of(() -> this.subsumes(other), () -> other.subsumes(this))
+        .parallel()
+        .allMatch(Supplier::get);
   }
 
   public final boolean isLowerNeighborOf(final ELConceptDescription other) {
@@ -351,20 +359,47 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
         .orElse(0);
   }
 
-  public final int topLevelConjuncts() {
-    return conceptNames.size() + existentialRestrictions.size();
+  public final Collection<ELConceptDescription> topLevelConjuncts() {
+    return Collections3
+        .union(
+            Collections2.transform(conceptNames, ELConceptDescription::conceptName),
+            Collections2.transform(existentialRestrictions.entries(), ELConceptDescription::existentialRestriction));
+//    return Collections3.transform(
+//        conceptNames,
+//        GuavaIsomorphism.create(A -> ELConceptDescription.conceptName(A), A -> A.getConceptNames().iterator().next()));
+//    return conceptNames.size() + existentialRestrictions.size();
   }
 
   public final int size() {
-    return Math.max(
-        1,
-        2 * conceptNames.size() + existentialRestrictions.size() - 1
-            + existentialRestrictions
-                .entries()
-                .parallelStream()
-                .map(Entry::getValue)
-                .map((ELConceptDescription c) -> 1 + c.size())
-                .reduce(0, Integer::sum));
+    return Math
+        .max(
+            1,
+            2 * conceptNames.size() + existentialRestrictions.size() - 1
+                + existentialRestrictions
+                    .entries()
+                    .parallelStream()
+                    .map(Entry::getValue)
+                    .map((ELConceptDescription c) -> 1 + c.size())
+                    .reduce(0, Integer::sum));
+  }
+
+  public final int size2() {
+    return conceptNames.size() + existentialRestrictions
+        .entries()
+        .parallelStream()
+        .map(Entry::getValue)
+        .map(C -> 1 + C.size2())
+        .reduce(0, Integer::sum);
+  }
+
+  public final long rank5() {
+    long rank = 0;
+    ELConceptDescription C = this.clone().reduce();
+    while (!C.isTop()) {
+      C = C.oneUpperNeighbor();
+      rank++;
+    }
+    return rank;
   }
 
   public final int rank() {
@@ -754,10 +789,13 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
                 .parallelStream()
                 .filter(entry -> FF.contains(entry.getKey()))
                 .map(
-                    entry -> Sets.filter(
-                        entry.getValue(),
-                        X -> FF.parallelStream().filter(F1 -> !entry.getKey().equals(F1)).allMatch(
-                            F1 -> F1.isSubsumedBy(X))))
+                    entry -> Sets
+                        .filter(
+                            entry.getValue(),
+                            X -> FF
+                                .parallelStream()
+                                .filter(F1 -> !entry.getKey().equals(F1))
+                                .allMatch(F1 -> F1.isSubsumedBy(X))))
                 .reduce(
                     Collections.singleton(Collections.<ELConceptDescription> emptySet()),
                     (X, Y) -> X.parallelStream().flatMap(x -> Y.parallelStream().map(y -> {
@@ -834,10 +872,13 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
                 .parallelStream()
                 .filter(entry -> FF.contains(entry.getKey()))
                 .map(
-                    entry -> Sets.filter(
-                        entry.getValue(),
-                        X -> FF.parallelStream().filter(F1 -> !entry.getKey().equals(F1)).allMatch(
-                            F1 -> subsumees.get(X).contains(F1))))
+                    entry -> Sets
+                        .filter(
+                            entry.getValue(),
+                            X -> FF
+                                .parallelStream()
+                                .filter(F1 -> !entry.getKey().equals(F1))
+                                .allMatch(F1 -> subsumees.get(X).contains(F1))))
                 .reduce(
                     Collections.singleton(Collections.<ELConceptDescription> emptySet()),
                     (X, Y) -> X.parallelStream().flatMap(x -> Y.parallelStream().map(y -> {
@@ -853,8 +894,10 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
                 .parallelStream()
                 .forEach(f -> {
                   final ELConceptDescription D = ELConceptDescription.conjunction(f);
-                  if (filter.parallelStream().filter(F0 -> !FF.contains(F0)).noneMatch(
-                      F0 -> f.parallelStream().allMatch(X -> subsumees.get(X).contains(F0)))) {
+                  if (filter
+                      .parallelStream()
+                      .filter(F0 -> !FF.contains(F0))
+                      .noneMatch(F0 -> f.parallelStream().allMatch(X -> subsumees.get(X).contains(F0)))) {
                     final ELConceptDescription C_and_rD = C.clone();
                     C_and_rD.getExistentialRestrictions().put(r, D.clone());
                     lowerNeighbors.add(C_and_rD);
@@ -901,8 +944,10 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
       final Set<ELConceptDescription> lowerNeighbors) {
     final Set<ELConceptDescription> nextCandidates = Sets.newConcurrentHashSet();
     currentCandidates.parallelStream().forEach(D -> {
-      if (!D.upperNeighborsReduced().parallelStream().allMatch(
-          U -> C.isSubsumedBy(ELConceptDescription.existentialRestriction(r, U))))
+      if (!D
+          .upperNeighborsReduced()
+          .parallelStream()
+          .allMatch(U -> C.isSubsumedBy(ELConceptDescription.existentialRestriction(r, U))))
         return;
       else if (filter.parallelStream().anyMatch(F -> F.isSubsumedBy(D)))
         D.lowerNeighbors1(sigma).parallelStream().forEach(nextCandidates::add);
@@ -2184,14 +2229,18 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
 
   @Override
   public final boolean smaller(final ELConceptDescription other) {
-    return Stream.<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> other.subsumes(this)).parallel().allMatch(
-        Supplier::get);
+    return Stream
+        .<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> other.subsumes(this))
+        .parallel()
+        .allMatch(Supplier::get);
   }
 
   @Override
   public final boolean greater(final ELConceptDescription other) {
-    return Stream.<Supplier<Boolean>> of(() -> this.subsumes(other), () -> !other.subsumes(this)).parallel().allMatch(
-        Supplier::get);
+    return Stream
+        .<Supplier<Boolean>> of(() -> this.subsumes(other), () -> !other.subsumes(this))
+        .parallel()
+        .allMatch(Supplier::get);
   }
 
   @Override
@@ -2206,8 +2255,10 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
 
   @Override
   public final boolean uncomparable(final ELConceptDescription other) {
-    return Stream.<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> !other.subsumes(this)).parallel().allMatch(
-        Supplier::get);
+    return Stream
+        .<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> !other.subsumes(this))
+        .parallel()
+        .allMatch(Supplier::get);
   }
 
 }

@@ -51,8 +51,7 @@ import conexp.fx.core.util.Meter;
 public final class ELNeighborhoodTest {
 
   public static void main(String[] args) {
-//    test8();
-    test17();
+    test19();
   }
 
   public static final void test1() {
@@ -88,9 +87,10 @@ public final class ELNeighborhoodTest {
       System.out.println("C" + i);
       System.out.println("has size " + C.size());
       System.out.println("and squared size " + C.size() * C.size());
-      System.out.println(
-          "and its upper neighbors have size "
-              + Us.parallelStream().collect(Collectors.summingLong(ELConceptDescription::size)));
+      System.out
+          .println(
+              "and its upper neighbors have size "
+                  + Us.parallelStream().collect(Collectors.summingLong(ELConceptDescription::size)));
       // System.out.println(C + " has the following upper neighbors:");
       // Us.forEach(System.out::println);
       System.out.println();
@@ -193,9 +193,10 @@ public final class ELNeighborhoodTest {
 //      System.out.println(
 //          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
 //              + " --- " + D.rank() + " --- " + D);
-      System.out.println(
-          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
-              + " --- " + C.isEquivalentTo(D) + " --- " + D);
+      System.out
+          .println(
+              i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+                  + " --- " + C.isEquivalentTo(D) + " --- " + D);
 //      System.out.println(i.incrementAndGet() + " --- " + D);
     });
     System.out.println("computation time: " + lowerNeighborsTime);
@@ -211,9 +212,10 @@ public final class ELNeighborhoodTest {
 //      System.out.println(
 //          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
 //              + " --- " + D.rank() + " --- " + D);
-      System.out.println(
-          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
-              + " --- " + C.isEquivalentTo(D) + " --- " + D);
+      System.out
+          .println(
+              i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+                  + " --- " + C.isEquivalentTo(D) + " --- " + D);
 //      System.out.println(i.incrementAndGet() + " --- " + D);
     });
     System.out.println("computation time: " + lowerNeighborsATime);
@@ -229,9 +231,10 @@ public final class ELNeighborhoodTest {
 //      System.out.println(
 //          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
 //              + " --- " + D.rank() + " --- " + D);
-      System.out.println(
-          i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
-              + " --- " + C.isEquivalentTo(D) + " --- " + D);
+      System.out
+          .println(
+              i.incrementAndGet() + " --- " + D.upperNeighborsReduced().parallelStream().anyMatch(C::isEquivalentTo)
+                  + " --- " + C.isEquivalentTo(D) + " --- " + D);
 //      System.out.println(i.incrementAndGet() + " --- " + D);
     });
     System.out.println("computation time: " + lowerNeighborsBTime);
@@ -803,9 +806,10 @@ public final class ELNeighborhoodTest {
       }
       final int size = C.size();
       final Set<ELConceptDescription> lowerNeighbors = C.lowerNeighbors(Σ);
-      System.out.println(
-          "n = " + n + "     sqrt(size) = " + Math.sqrt(size) / 2d + "     log(number of lower neighbors) = "
-              + Math.log(lowerNeighbors.size()) / Math.log(2d));
+      System.out
+          .println(
+              "n = " + n + "     sqrt(size) = " + Math.sqrt(size) / 2d + "     log(number of lower neighbors) = "
+                  + Math.log(lowerNeighbors.size()) / Math.log(2d));
     }
   }
 
@@ -848,6 +852,106 @@ public final class ELNeighborhoodTest {
       System.out.println("||D|| = " + max + " for some D≺C");
       System.out.println();
     }
+  }
+
+  private static final void test18() {
+    final Signature Σ = new Signature(IRI.create("conexp-fx"));
+    Σ.addConceptNames("A", "B", "C");
+    Σ.addRoleNames("r");
+    for (int m = 1; m < 16; m++) {
+      ELConceptDescription X = new ELConceptDescription();
+      X.getConceptNames().add(IRI.create("A"));
+      X.getConceptNames().add(IRI.create("B"));
+      X.getConceptNames().add(IRI.create("C"));
+      System.out.println("  m   = " + m);
+      for (int n = 1; n <= m; n++) {
+        X = X.exists(IRI.create("r"));
+//        final int rank = X.rank();
+//        System.out.println("role depth = " + n);
+//        System.out.println("      rank = " + rank);
+//        System.out.println();
+      }
+      System.out.println("  X   = " + X);
+      System.out.println("||X|| = " + X.size2());
+      System.out.println(" |X|  = " + X.rank());
+      for (int n = 0; n < 256; n++) {
+////        System.out.println("n = " + n);
+//        System.out.println(X);
+        final Set<ELConceptDescription> upperNeighbors = X.upperNeighborsReduced();
+//        System.out.println("has " + upperNeighbors.size() + " upper neighbors");
+//        System.out.println();
+        if (upperNeighbors.size() > 1)
+          break;
+        X = upperNeighbors.iterator().next();
+      }
+      for (ELConceptDescription Y : X.topLevelConjuncts()) {
+        System.out.println("  Y   = " + Y);
+        System.out.println("||Y|| = " + Y.size2());
+        System.out.println(" |Y|  = " + Y.rank());
+        break;
+      }
+      System.out.println();
+    }
+  }
+
+  private static final void test19() {
+    final Meter<Long> meter = Meter.newNanoStopWatch();
+    for (int n = 3; n < 5; n++) {
+      for (int k = 0; k < 6; k++) {
+//        if ((k == 4 || k == 5) && n == 2) {
+//          System.out.println("k=" + k + " n=" + n + " skipped");
+//          continue;
+//        }
+        ELConceptDescription C = buildUglyELConceptDescription(k, n);
+        System.out.println("k=" + k + " n=" + n + " C=" + C);
+        try {
+          meter.reset();
+          final int rank = C.rank();
+          System.out.println("|C|₁=" + rank + " in " + meter.measureAndFormat());
+        } catch (Exception __) {
+          System.out.println("|C|₁=? in " + meter.measureAndFormat());
+        }
+        try {
+          meter.reset();
+          final int rank2 = C.rank2();
+          System.out.println("|C|₂=" + rank2 + " in " + meter.measureAndFormat());
+        } catch (Exception __) {
+          System.out.println("|C|₂=? in " + meter.measureAndFormat());
+        }
+//        try {
+//          meter.reset();
+//          final int rank3 = C.rank3();
+//          System.out.println("|C|₃=" + rank3 + " in " + meter.measureAndFormat());
+//        } catch (Exception __) {
+//          System.out.println("|C|₃=? in " + meter.measureAndFormat());
+//        }
+//        try {
+//          meter.reset();
+//          final int rank4 = C.rank4();
+//          System.out.println("|C|₄=" + rank4 + " in " + meter.measureAndFormat());
+//        } catch (Exception __) {
+//          System.out.println("|C|₄=? in " + meter.measureAndFormat());
+//        }
+        try {
+          meter.reset();
+          final long rank5 = C.rank5();
+          System.out.println("|C|₅=" + rank5 + " in " + meter.measureAndFormat());
+        } catch (Exception __) {
+          System.out.println("|C|₅=? in " + meter.measureAndFormat());
+        }
+      }
+      System.out.println("--------------------------------------------------------------------------------");
+    }
+  }
+
+  private static final ELConceptDescription buildUglyELConceptDescription(final int k, final int n) {
+    ELConceptDescription C = ELConceptDescription.top();
+    for (int i = 1; i <= k; i++)
+      C = C.and(ELConceptDescription.conceptName(IRI.create("A" + i)));
+    for (int j = 0; j < n; j++) {
+      C = C.exists(IRI.create("r"));
+    }
+    return C;
   }
 
 }
