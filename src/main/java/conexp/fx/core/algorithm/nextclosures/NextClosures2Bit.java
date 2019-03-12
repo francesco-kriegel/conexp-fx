@@ -197,11 +197,17 @@ public class NextClosures2Bit {
         bitCompute(rcxt, executor, __ -> {}, __ -> {}, updateStatus, updateProgress, isCancelled);
     final NextClosuresState<G, M, Set<M>> x = NextClosuresState.withHashSets(cxt.colHeads());
     final Map<Set<M>, Set<Set<M>>> irr = new ConcurrentHashMap<>();
-    ccxt.colHeads().parallelStream().filter(atts -> !rcxt.colHeads().contains(atts)).forEach(
-        atts -> irr.put(atts, new HashSet<Set<M>>(ccxt.attributeQuasiOrder().col(atts))));
+    ccxt
+        .colHeads()
+        .parallelStream()
+        .filter(atts -> !rcxt.colHeads().contains(atts))
+        .forEach(atts -> irr.put(atts, new HashSet<Set<M>>(ccxt.attributeQuasiOrder().col(atts))));
     final Map<Set<G>, Set<Set<G>>> jrr = new ConcurrentHashMap<>();
-    ccxt.rowHeads().parallelStream().filter(objs -> !rcxt.rowHeads().contains(objs)).forEach(
-        objs -> jrr.put(objs, new HashSet<Set<G>>(ccxt.objectQuasiOrder().col(objs))));
+    ccxt
+        .rowHeads()
+        .parallelStream()
+        .filter(objs -> !rcxt.rowHeads().contains(objs))
+        .forEach(objs -> jrr.put(objs, new HashSet<Set<G>>(ccxt.objectQuasiOrder().col(objs))));
     final Map<Set<M>, M> f = new ConcurrentHashMap<>();
     ccxt.colHeads().parallelStream().map(c -> new HashSet<M>(c)).forEach(c -> f.put(c, c.iterator().next()));
     r
@@ -239,13 +245,14 @@ public class NextClosures2Bit {
         .keySet()
         .parallelStream()
         .flatMap(
-            ir -> Stream.<Implication<G, M>> of(
-                new Implication<G, M>(
-                    Collections.singleton(f.get(ir)),
-                    irr.get(ir).parallelStream().map(f::get).collect(Collectors.toSet())),
-                new Implication<G, M>(
-                    irr.get(ir).parallelStream().map(f::get).collect(Collectors.toSet()),
-                    Collections.singleton(f.get(ir)))))
+            ir -> Stream
+                .<Implication<G, M>> of(
+                    new Implication<G, M>(
+                        Collections.singleton(f.get(ir)),
+                        irr.get(ir).parallelStream().map(f::get).collect(Collectors.toSet())),
+                    new Implication<G, M>(
+                        irr.get(ir).parallelStream().map(f::get).collect(Collectors.toSet()),
+                        Collections.singleton(f.get(ir)))))
         .forEach(implicationConsumer.andThen(x.implications::add));
     return x.getResultAndDispose();
   }

@@ -103,6 +103,19 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
     return set -> cxt.rowAnd(cxt.colAnd(set));
   }
 
+  public static <G, M> ClosureOperator<M>
+      joiningImplications(final Context<G, M> cxt, final Set<M> premises, final Set<M> conclusions) {
+    return set -> {
+      final HashSet<M> pintersection = new HashSet<>(set);
+      pintersection.retainAll(premises);
+      final Set<M> cattributes = cxt.rowAnd(cxt.colAnd(pintersection));
+      cattributes.retainAll(conclusions);
+      final Set<M> closure = new HashSet<>(cattributes);
+      closure.addAll(set);
+      return closure;
+    };
+  }
+
   public static <G, M, C extends Set<M>> C implicativeClosure(
       final Collection<Implication<G, M>> implications,
       final int firstPremiseSize,

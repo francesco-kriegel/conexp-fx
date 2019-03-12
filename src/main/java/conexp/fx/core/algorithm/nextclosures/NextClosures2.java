@@ -55,6 +55,105 @@ import conexp.fx.gui.util.Platform2;
 
 public final class NextClosures2 {
 
+  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> compute(
+      final Set<M> baseSet,
+      final ClosureOperator<M> clop,
+      final Function<Set<M>, Set<G>> extension,
+      final ExecutorService executor,
+      final Consumer<Concept<G, M>> conceptConsumer,
+      final Consumer<Implication<G, M>> implicationConsumer,
+      final Consumer<String> updateStatus,
+      final Consumer<Double> updateProgress,
+      final Supplier<Boolean> isCancelled) {
+    final int max = baseSet.size();
+    final NextClosuresState<G, M, Set<M>> state = NextClosuresState.withHashSets(baseSet);
+//    final Function<BitSetFX, BitSetFX> cl = bitClosure(b.implications);
+    for (; state.cardinality <= max; state.cardinality++) {
+      if (isCancelled.get())
+        break;
+      final double q = ((double) state.cardinality) / ((double) max);
+      final int p = (int) (100d * q);
+      updateStatus.accept("current cardinality: " + state.cardinality + "/" + max + " (" + p + "%)");
+      updateProgress.accept(q);
+      final Set<Future<?>> fs = Collections3.newConcurrentHashSet();
+      final Set<Set<M>> cc = state.getActualCandidates();
+      cc.forEach(c -> fs.add(executor.submit(() -> {
+        final Set<M> d = ClosureOperator
+            .implicativeClosure(state.implications, state.getFirstPremiseSize(c), true, true, true, HashSet::new, c);
+        if (c.containsAll(d)) {
+//        if (c.containsAll(d)) {
+//          final BitSetFX c1 = mcxt._colAnd(c);
+//          final BitSetFX c2 = mcxt._rowAnd(c1);
+          final Set<M> c2 = clop.closure(c);
+          if (state.isNewIntent(c2)) {
+            state.concepts.add(new Concept<G, M>(extension.apply(c2), c2));
+            state.addNewCandidates(c2);
+          }
+          if (!c.containsAll(c2)) {
+//          if (!c.containsAll(c2)) {
+            c2.removeAll(c);
+            state.implications.add(new Implication<G, M>(c, c2));
+          }
+        } else
+          state.addCandidate(d);
+//        state.candidates.remove(c);
+      })));
+      for (Future<?> f : fs)
+        try {
+          f.get();
+        } catch (InterruptedException | ExecutionException __) {}
+      state.candidates.keySet().removeAll(cc);
+    }
+    updateStatus.accept(state.concepts.size() + " concepts, and " + state.implications.size() + " implications found");
+//    final NextClosuresState<G, M, Set<M>> r = NextClosuresState.withHashSets(cxt.colHeads());
+//    state.concepts
+//        .parallelStream()
+//        .map(
+//            c -> new Concept<G, M>(
+//                mcxt.rowHeads().getAll(c.getExtent(), true),
+//                mcxt.colHeads().getAll(c.getIntent(), true)))
+//        .forEach(conceptConsumer.andThen(r.concepts::add));
+//    state.implications
+//        .parallelStream()
+//        .map(
+//            i -> new Implication<G, M>(
+//                mcxt.colHeads().getAll(i.getPremise(), true),
+//                mcxt.colHeads().getAll(i.getConclusion(), true)))
+//        .forEach(implicationConsumer.andThen(r.implications::add));
+//    return r.getResultAndDispose();
+    return state.getResultAndDispose();
+  }
+
+  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
+      compute(final Set<M> baseSet, final ClosureOperator<M> clop, final Function<Set<M>, Set<G>> extension) {
+    return compute(
+        baseSet,
+        clop,
+        extension,
+        Executors.newWorkStealingPool(),
+        __ -> {},
+        __ -> {},
+        __ -> {},
+        __ -> {},
+        () -> false);
+  }
+
+  public static <G, M> Set<Implication<G, M>> transformToJoiningImplications(
+      final Context<G, M> cxt,
+      final Set<M> premises,
+      final Set<M> conclusions,
+      final Set<Implication<G, M>> implications) {
+    final Set<Implication<G, M>> joiningImplications = new HashSet<>();
+    for (Implication<G, M> implication : implications) {
+      final Set<M> premise = new HashSet<>(implication.getPremise());
+      premise.retainAll(premises);
+      final Set<M> conclusion = cxt.rowAnd(cxt.colAnd(premise));
+      conclusion.retainAll(conclusions);
+      joiningImplications.add(new Implication<G, M>(premise, conclusion));
+    }
+    return joiningImplications;
+  }
+
   public static final <T> Set<Set<T>>
       compute(final Set<T> baseSet, final ClosureOperator<T> clop, final boolean verbose, final ExecutorService tpe) {
     final Map<Set<T>, Set<T>> closures = new ConcurrentHashMap<>();
@@ -125,9 +224,10 @@ public final class NextClosures2 {
     if (backgroundKnowledge.length == 0)
       clop = i -> ClosureOperator.fromImplications(result.implications, i, true, true);
     else
-      clop = i -> ClosureOperator.supremum(
-          ClosureOperator.fromImplications(result.implications, i, true, true),
-          ClosureOperator.fromImplications(Collections3.union(backgroundKnowledge), false, true));
+      clop = i -> ClosureOperator
+          .supremum(
+              ClosureOperator.fromImplications(result.implications, i, true, true),
+              ClosureOperator.fromImplications(Collections3.union(backgroundKnowledge), false, true));
 //    final ClosureOperator<M> clop = ClosureOperator.fromImplications(result.implications, true, true);
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
