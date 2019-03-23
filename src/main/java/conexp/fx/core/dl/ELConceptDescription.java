@@ -56,6 +56,7 @@ import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.Pair;
+import conexp.fx.core.dl.deprecated.Signature;
 import conexp.fx.core.math.GuavaIsomorphism;
 import conexp.fx.core.math.PartialComparable;
 import conexp.fx.core.util.UnicodeSymbols;
