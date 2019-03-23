@@ -34,8 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
@@ -125,7 +123,7 @@ public final class ConcurrentHashSetMultimap<K, V> implements SetMultimap<K, V> 
 
   @Override
   public Multiset<K> keys() {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("Operation is not implemented.");
   }
 
   @Override
@@ -134,12 +132,13 @@ public final class ConcurrentHashSetMultimap<K, V> implements SetMultimap<K, V> 
 
       @Override
       public Iterator<V> iterator() {
-        return Iterators.concat(
-            Collections2
-                .transform(
-                    ConcurrentHashSetMultimap.this.map.keySet(),
-                    key -> ConcurrentHashSetMultimap.this.map.get(key).iterator())
-                .iterator());
+        return Iterators
+            .concat(
+                Collections2
+                    .transform(
+                        ConcurrentHashSetMultimap.this.map.keySet(),
+                        key -> ConcurrentHashSetMultimap.this.map.get(key).iterator())
+                    .iterator());
       }
 
       @Override
@@ -175,14 +174,16 @@ public final class ConcurrentHashSetMultimap<K, V> implements SetMultimap<K, V> 
 
       @Override
       public Iterator<Entry<K, V>> iterator() {
-        return Iterators.concat(
-            Collections2
-                .transform(
-                    ConcurrentHashSetMultimap.this.map.keySet(),
-                    key -> Iterators.transform(
-                        ConcurrentHashSetMultimap.this.map.get(key).iterator(),
-                        value -> new AbstractMap.SimpleEntry<>(key, value)))
-                .iterator());
+        return Iterators
+            .concat(
+                Collections2
+                    .transform(
+                        ConcurrentHashSetMultimap.this.map.keySet(),
+                        key -> Iterators
+                            .transform(
+                                ConcurrentHashSetMultimap.this.map.get(key).iterator(),
+                                value -> new AbstractMap.SimpleEntry<>(key, value)))
+                    .iterator());
       }
 
       @Override
