@@ -60,14 +60,14 @@ import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.MatrixContext;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
 
-public class Interpretation2 {
+public class OWLInterpretation2 {
 
   protected final Matrix3D<OWLNamedIndividual, OWLObjectProperty, OWLClass>           concepts;
   protected final Matrix3D<OWLNamedIndividual, OWLObjectProperty, OWLNamedIndividual> roles;
   protected final OWLDataFactory                                                      df;
   protected final OWLObjectProperty                                                   type;
 
-  public Interpretation2(final int individuals, final int concepts, final int roles) {
+  public OWLInterpretation2(final int individuals, final int concepts, final int roles) {
     super();
     this.concepts = new Matrix3D<OWLNamedIndividual, OWLObjectProperty, OWLClass>(individuals, 1, concepts);
     this.roles =
@@ -305,7 +305,7 @@ public class Interpretation2 {
     return mmscConjuncts;
   }
 
-  public static final Interpretation2 importFromRDFFile(final File rdfFile, final String baseURI)
+  public static final OWLInterpretation2 importFromRDFFile(final File rdfFile, final String baseURI)
       throws RepositoryException, RDFParseException, IOException {
     final Repository repo = new SailRepository(new MemoryStore());
     final RepositoryConnection connection = repo.getConnection();
@@ -315,7 +315,7 @@ public class Interpretation2 {
     return importFromRDFRepository(repo);
   }
 
-  public static final Interpretation2 importFromRDFRepository(final Repository repo) throws RepositoryException {
+  public static final OWLInterpretation2 importFromRDFRepository(final Repository repo) throws RepositoryException {
     final RepositoryConnection connection = repo.getConnection();
 
     final Set<Resource> properties = new HashSet<Resource>();
@@ -339,7 +339,7 @@ public class Interpretation2 {
     }
     statements3.close();
 
-    final Interpretation2 i = new Interpretation2(individuals.size(), classes.size(), properties.size());
+    final OWLInterpretation2 i = new OWLInterpretation2(individuals.size(), classes.size(), properties.size());
     for (Resource individual : individuals)
       i.addIndividual(individual.stringValue());
     for (Resource clazz : classes)

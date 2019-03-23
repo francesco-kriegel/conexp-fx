@@ -1,20 +1,16 @@
-package conexp.fx.core.dl
+package conexp.fx.core.dl.deprecated
 
 import java.io.File
-
 import scala.collection.JavaConverters.asScalaSetConverter
 import scala.collection.JavaConverters.mutableSetAsJavaSetConverter
 import scala.collection.JavaConverters.setAsJavaSetConverter
-
 import org.semanticweb.owlapi.model.IRI
-
-import conexp.fx.core.collections.Pair
 import conexp.fx.core.collections.setlist.HashSetArrayList
 import conexp.fx.core.context.MatrixContext
 import conexp.fx.core.exporter.CXTExporter
-import conexp.fx.core.util.UnicodeSymbols
 import conexp.fx.core.util.Meter
-import java.util.HashSet
+import conexp.fx.core.dl.ELConceptDescription
+import conexp.fx.core.dl.Signature
 
 object ELSubsumptionContextGenerator {
 

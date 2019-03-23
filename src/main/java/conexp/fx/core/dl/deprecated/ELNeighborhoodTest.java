@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 import java.util.Collection;
 
@@ -46,6 +46,8 @@ import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.BitSetFX;
 import conexp.fx.core.collections.Collections3;
+import conexp.fx.core.dl.ELConceptDescription;
+import conexp.fx.core.dl.Signature;
 import conexp.fx.core.util.Meter;
 
 public final class ELNeighborhoodTest {
