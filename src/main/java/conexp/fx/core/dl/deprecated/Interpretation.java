@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 /*
  * #%L
@@ -29,6 +29,7 @@ import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.math.ClosureOperator;
 
+@Deprecated
 public interface Interpretation<I, C, G, T> {
 
   public Set<I> getDomain();

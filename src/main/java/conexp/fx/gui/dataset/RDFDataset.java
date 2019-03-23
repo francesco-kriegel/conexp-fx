@@ -42,7 +42,7 @@ import org.openrdf.sail.memory.MemoryStore;
 import org.semanticweb.owlapi.model.IRI;
 
 import conexp.fx.core.builder.Requests;
-import conexp.fx.core.dl.OWLInterpretation;
+import conexp.fx.core.dl.deprecated.OWLInterpretation;
 import conexp.fx.core.importer.RDFImporter;
 import conexp.fx.core.util.FileFormat;
 import conexp.fx.gui.ConExpFX;

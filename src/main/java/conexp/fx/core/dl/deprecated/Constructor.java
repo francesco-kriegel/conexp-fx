@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 import conexp.fx.core.util.UnicodeSymbols;
 
@@ -24,6 +24,7 @@ import conexp.fx.core.util.UnicodeSymbols;
  * #L%
  */
 
+@Deprecated
 public enum Constructor {
   CONJUNCTION("Conjunction", "C" + UnicodeSymbols.SQCAP + "D"),
   EXISTENTIAL_RESTRICTION("Existential Restriction", UnicodeSymbols.EXISTS + "r.C"),

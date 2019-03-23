@@ -22,7 +22,7 @@ package conexp.fx.core.dl.deprecated;
  * #L%
  */
 
-
+@Deprecated
 public class DescriptionGraphBuilder {
 
 //  public final static DescriptionGraph fromRDFGraph(final File file) throws RepositoryException, RDFParseException,

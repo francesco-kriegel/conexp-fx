@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 /*
  * #%L
@@ -60,6 +60,7 @@ import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.MatrixContext;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
 
+@Deprecated
 public class OWLInterpretation2 {
 
   protected final Matrix3D<OWLNamedIndividual, OWLObjectProperty, OWLClass>           concepts;
@@ -117,10 +118,11 @@ public class OWLInterpretation2 {
   }
 
   public final void addRoleAssertion(final String d, final String r, final String e) {
-    this.addRoleAssertion(
-        df.getOWLNamedIndividual(IRI.create(d)),
-        df.getOWLObjectProperty(IRI.create(r)),
-        df.getOWLNamedIndividual(IRI.create(e)));
+    this
+        .addRoleAssertion(
+            df.getOWLNamedIndividual(IRI.create(d)),
+            df.getOWLObjectProperty(IRI.create(r)),
+            df.getOWLNamedIndividual(IRI.create(e)));
   }
 
   public final Set<OWLNamedIndividual> getIndividuals() {
@@ -155,8 +157,9 @@ public class OWLInterpretation2 {
     if (c instanceof OWLClass)
       return concepts.get(i, type, (OWLClass) c);
     if (c instanceof OWLObjectSomeValuesFrom)
-      return roles.cut(i, (OWLObjectProperty) ((OWLObjectSomeValuesFrom) c).getProperty()).anyMatch(
-          j -> isInstanceOf(j, ((OWLObjectSomeValuesFrom) c).getFiller()));
+      return roles
+          .cut(i, (OWLObjectProperty) ((OWLObjectSomeValuesFrom) c).getProperty())
+          .anyMatch(j -> isInstanceOf(j, ((OWLObjectSomeValuesFrom) c).getFiller()));
     if (c instanceof OWLObjectIntersectionOf)
       return ((OWLObjectIntersectionOf) c).asConjunctSet().stream().allMatch(d -> isInstanceOf(i, d));
     return false;
@@ -360,10 +363,11 @@ public class OWLInterpretation2 {
       final Statement stmt = statements5.next();
       if (!stmt.getPredicate().equals(RDF.TYPE) && !stmt.getObject().equals(RDF.PROPERTY)
           && !stmt.getObject().equals(RDFS.CLASS))
-        i.addRoleAssertion(
-            stmt.getSubject().stringValue(),
-            stmt.getPredicate().stringValue(),
-            stmt.getObject().stringValue());
+        i
+            .addRoleAssertion(
+                stmt.getSubject().stringValue(),
+                stmt.getPredicate().stringValue(),
+                stmt.getObject().stringValue());
     }
     statements5.close();
 

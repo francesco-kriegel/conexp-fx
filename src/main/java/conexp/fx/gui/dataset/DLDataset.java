@@ -27,7 +27,7 @@ import java.util.Set;
 import org.semanticweb.owlapi.model.IRI;
 
 import conexp.fx.core.collections.Pair;
-import conexp.fx.core.dl.OWLInterpretation;
+import conexp.fx.core.dl.deprecated.OWLInterpretation;
 import conexp.fx.core.util.IdGenerator;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.assistent.InducedContextAssistent;

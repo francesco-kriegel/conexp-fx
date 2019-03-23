@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 import java.io.BufferedReader;
 
@@ -50,7 +50,13 @@ import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
+import conexp.fx.core.dl.ELConceptDescription;
+import conexp.fx.core.dl.ELConceptInclusion;
+import conexp.fx.core.dl.ELLeastCommonSubsumer;
+import conexp.fx.core.dl.ELReasoner;
+import conexp.fx.core.dl.ELTBox;
 
+@Deprecated
 public final class ELInterpretation extends AInterpretation<ELConceptDescription, ELConceptInclusion, ELTBox> {
 
   public ELInterpretation(final IRI baseIRI) {
@@ -71,11 +77,17 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       return false;
     if (conceptExpression.isTop())
       return true;
-    return conceptExpression.getConceptNames().parallelStream().allMatch(
-        conceptName -> conceptNameExtensions.get(conceptName).contains(individual))
-        && conceptExpression.getExistentialRestrictions().entries().parallelStream().allMatch(
-            existentialRestriction -> getRoleSuccessorStream(existentialRestriction.getKey(), individual)
-                .anyMatch(successor -> isInstanceOf(successor, existentialRestriction.getValue())));
+    return conceptExpression
+        .getConceptNames()
+        .parallelStream()
+        .allMatch(conceptName -> conceptNameExtensions.get(conceptName).contains(individual))
+        && conceptExpression
+            .getExistentialRestrictions()
+            .entries()
+            .parallelStream()
+            .allMatch(
+                existentialRestriction -> getRoleSuccessorStream(existentialRestriction.getKey(), individual)
+                    .anyMatch(successor -> isInstanceOf(successor, existentialRestriction.getValue())));
   }
 
 //  @Override
@@ -168,9 +180,10 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       final int maxCardinality,
       final Constructor... constructors) {
     checkRoleDepth(roleDepth);
-    return ELLeastCommonSubsumer.lcs(
-        new HashSet<>(
-            Collections2.transform(individuals, individual -> getMostSpecificConcept(individual, 0, roleDepth))));
+    return ELLeastCommonSubsumer
+        .lcs(
+            new HashSet<>(
+                Collections2.transform(individuals, individual -> getMostSpecificConcept(individual, 0, roleDepth))));
   }
 
 //  private Set<ELNormalForm> getAllMostSpecificConcepts(final int roleDepth) {
@@ -245,11 +258,12 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
       for (ELConceptDescription concept2 : inducedContext.colHeads())
         if (!concept1.equals(concept2))
           if (subsumptionTest.test(concept1, concept2))
-            backgroundImplications.add(
-                new Implication<IRI, ELConceptDescription>(
-                    Collections.singleton(concept1),
-                    Collections.singleton(concept2),
-                    Collections.emptySet()));
+            backgroundImplications
+                .add(
+                    new Implication<IRI, ELConceptDescription>(
+                        Collections.singleton(concept1),
+                        Collections.singleton(concept2),
+                        Collections.emptySet()));
     return backgroundImplications;
   }
 
@@ -267,10 +281,12 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
     final ResultC<IRI, ELConceptDescription> result =
         NextClosures1C.computeWithBackgroundImplications(inducedContext, backgroundImplications, false);
     for (Entry<Set<ELConceptDescription>, Set<ELConceptDescription>> entry : result.implications.entrySet())
-      tbox.getGCIs().add(
-          new ELConceptInclusion(
-              ELConceptDescription.conjunction(entry.getKey()).clone().reduce(),
-              ELConceptDescription.conjunction(entry.getValue()).clone().reduce()));
+      tbox
+          .getGCIs()
+          .add(
+              new ELConceptInclusion(
+                  ELConceptDescription.conjunction(entry.getKey()).clone().reduce(),
+                  ELConceptDescription.conjunction(entry.getValue()).clone().reduce()));
     return tbox;
   }
 

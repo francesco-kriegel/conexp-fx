@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 /*
  * #%L
@@ -22,6 +22,7 @@ package conexp.fx.core.dl;
  * #L%
  */
 
+@Deprecated
 public enum DescriptionLogic {
   L0(Constructor.CONJUNCTION),
   EL(Constructor.CONJUNCTION, Constructor.EXISTENTIAL_RESTRICTION),

@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 /*
  * #%L
@@ -34,6 +34,7 @@ import org.ujmp.core.enums.ValueType;
 
 import conexp.fx.core.collections.Pair;
 
+@Deprecated
 public class Matrix3D<G, M, W> {
 
   protected final Matrix        mat;

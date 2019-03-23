@@ -32,7 +32,7 @@ import conexp.fx.core.builder.Requests.Source;
 import conexp.fx.core.builder.Requests.Type;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.dl.Constructor;
+import conexp.fx.core.dl.deprecated.Constructor;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.assistent.InducedContextAssistent.Result;
 import conexp.fx.gui.dataset.DLDataset;

@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 /*
  * #%L
@@ -48,6 +48,7 @@ import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.SparseContext;
 import conexp.fx.core.math.ClosureOperator;
 
+@Deprecated
 public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C, G, T> {
 
   protected final Set<IRI>                      domain;

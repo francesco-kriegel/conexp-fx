@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 /*
  * #%L
@@ -31,9 +31,10 @@ import com.google.common.collect.Collections2;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 
+@Deprecated
 public final class Signature {
 
-  private final IRI      baseIRI;
+  private final IRI          baseIRI;
   private final SetList<IRI> conceptNames    = new HashSetArrayList<IRI>();
   private final SetList<IRI> roleNames       = new HashSetArrayList<IRI>();
   private final SetList<IRI> individualNames = new HashSetArrayList<IRI>();
