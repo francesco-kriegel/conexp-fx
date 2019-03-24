@@ -13,6 +13,7 @@ conexp.fx.core.context
 conexp.fx.core.context.negation
 conexp.fx.core.context.temporal
 conexp.fx.core.dl
+conexp.fx.core.dl.deprecated
 conexp.fx.core.exporter
 conexp.fx.core.importer
 conexp.fx.core.layout
