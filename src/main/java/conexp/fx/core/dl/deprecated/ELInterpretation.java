@@ -138,7 +138,7 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
 
   @Override
   public final boolean models(ELTBox tBox) {
-    return tBox.getGCIs().parallelStream().allMatch(this::satisfies);
+    return tBox.getConceptInclusions().parallelStream().allMatch(this::satisfies);
   }
 
   @Override
@@ -282,7 +282,7 @@ public final class ELInterpretation extends AInterpretation<ELConceptDescription
         NextClosures1C.computeWithBackgroundImplications(inducedContext, backgroundImplications, false);
     for (Entry<Set<ELConceptDescription>, Set<ELConceptDescription>> entry : result.implications.entrySet())
       tbox
-          .getGCIs()
+          .getConceptInclusions()
           .add(
               new ELConceptInclusion(
                   ELConceptDescription.conjunction(entry.getKey()).clone().reduce(),

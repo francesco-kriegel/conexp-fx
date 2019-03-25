@@ -1,5 +1,8 @@
 package conexp.fx.core.dl;
 
+import java.util.Collections;
+import java.util.HashMap;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -23,10 +26,12 @@ package conexp.fx.core.dl;
  */
 
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -34,15 +39,147 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class ELTBox {
 
-  private final Set<ELConceptInclusion> gcis;
+  private final Set<ELConceptInclusion> conceptInclusions;
 
   public ELTBox() {
     super();
-    this.gcis = new HashSet<ELConceptInclusion>();
+    this.conceptInclusions = new HashSet<ELConceptInclusion>();
   }
 
-  public final Set<ELConceptInclusion> getGCIs() {
-    return gcis;
+  public final Set<ELConceptInclusion> getConceptInclusions() {
+    return conceptInclusions;
+  }
+
+  private final class CanonicalModelBuilder {
+
+    private final ELConceptDescription                    C;
+    private final ELInterpretation2<ELConceptDescription> canmod;
+
+    private CanonicalModelBuilder(final ELConceptDescription C) {
+      super();
+      this.C = C;
+      this.canmod = new ELInterpretation2<>();
+    }
+
+    private final void insert(final ELConceptDescription D) {
+      insert(D, D);
+    }
+
+    private final void insert(final ELConceptDescription X, final ELConceptDescription D) {
+      for (IRI A : D.getConceptNames())
+        canmod.getConceptNameExtensionMatrix().add(X, A);
+      for (Entry<IRI, ELConceptDescription> rE : D.getExistentialRestrictions().entries()) {
+        canmod.getRoleNameExtensionMatrix(rE.getKey()).add(X, rE.getValue());
+        insert(rE.getValue());
+      }
+    }
+
+    private final ELInterpretation2<ELConceptDescription> buildAndGet() {
+      insert(C);
+      boolean changed = true;
+      while (changed) {
+        changed = false;
+        for (ELConceptInclusion ci : conceptInclusions)
+          for (ELConceptDescription o : new HashSet<>(canmod.getDomain())) {
+            final ELConceptDescription char1 =
+                canmod.getMostSpecificConceptDescription(Collections.singleton(o), ci.getSubsumee().roleDepth());
+            final ELConceptDescription char2 =
+                canmod.getMostSpecificConceptDescription(Collections.singleton(o), ci.getSubsumer().roleDepth());
+            if (char1.isSubsumedBy(ci.getSubsumee()) && !char2.isSubsumedBy(ci.getSubsumer())) {
+              insert(o, ci.getSubsumer());
+              changed = true;
+            }
+          }
+      }
+      return this.canmod;
+    }
+
+  }
+
+  public final ELInterpretation2<ELConceptDescription> getCanonicalModel(final ELConceptDescription C) {
+    return new CanonicalModelBuilder(C).buildAndGet();
+  }
+
+  public final ELConceptDescription getMostSpecificConsequence(final ELConceptDescription C, final int roleDepth) {
+    return getCanonicalModel(C).getMostSpecificConceptDescription(Collections.singleton(C), roleDepth);
+  }
+
+  private final class CanonicalModelBuilderLutz {
+
+    private final ELConceptDescription                    C;
+    private final ELInterpretation2<ELConceptDescription> canmod;
+    private final Set<Entry<IRI, ELConceptDescription>>   exsubT;
+    private final Set<ELConceptDescription>               domain;
+    private final Set<IRI>                                conceptNames = new HashSet<>();
+    private final Set<IRI>                                roleNames    = new HashSet<>();
+
+    private CanonicalModelBuilderLutz(final ELConceptDescription C) {
+      super();
+      this.C = C;
+      this.canmod = new ELInterpretation2<>();
+      this.exsubT = new HashSet<>();
+      this.domain = new HashSet<>();
+    }
+
+    private final void populate_exsubT(final ELConceptDescription X) {
+      exsubT.addAll(X.getExistentialRestrictions().entries());
+      for (ELConceptDescription Y : X.getExistentialRestrictions().values())
+        populate_exsubT(Y);
+    }
+
+    private final void populate_domain(final ELConceptDescription X) {
+      domain.addAll(X.getExistentialRestrictions().values());
+      for (ELConceptDescription Y : X.getExistentialRestrictions().values())
+        populate_domain(Y);
+    }
+
+    private final void populate_signature(final ELConceptDescription X) {
+      conceptNames.addAll(X.getConceptNames());
+      roleNames.addAll(X.getExistentialRestrictions().keys());
+      for (ELConceptDescription Y : X.getExistentialRestrictions().values())
+        populate_signature(Y);
+    }
+
+    private final ELInterpretation2<ELConceptDescription> buildAndGet() {
+      for (ELConceptInclusion ci : conceptInclusions) {
+        populate_exsubT(ci.getSubsumee());
+        populate_exsubT(ci.getSubsumer());
+      }
+      domain.add(C);
+      populate_domain(C);
+      for (Entry<IRI, ELConceptDescription> e : exsubT)
+        domain.add(e.getValue());
+      populate_signature(C);
+      for (ELConceptInclusion ci : conceptInclusions) {
+        populate_signature(ci.getSubsumee());
+        populate_signature(ci.getSubsumer());
+      }
+      for (ELConceptDescription D : domain) {
+        for (IRI A : conceptNames)
+          if (ELReasoner.isSubsumedBy(D, ELConceptDescription.conceptName(A), ELTBox.this))
+            canmod.getConceptNameExtensionMatrix().add(D, A);
+        for (ELConceptDescription E : domain)
+          for (IRI r : roleNames) {
+            final HashMap<IRI, ELConceptDescription> hashMap = new HashMap<>();
+            hashMap.put(r, E);
+            final Entry<IRI, ELConceptDescription> rE = hashMap.entrySet().iterator().next();
+            if ((exsubT.contains(rE)
+                && ELReasoner.isSubsumedBy(D, ELConceptDescription.existentialRestriction(rE), ELTBox.this))
+                || D.getExistentialRestrictions().containsEntry(r, E))
+              canmod.getRoleNameExtensionMatrix(r).add(D, E);
+          }
+      }
+      return canmod;
+    }
+
+  }
+
+  public final ELInterpretation2<ELConceptDescription> getCanonicalModelLutz(final ELConceptDescription C) {
+    return new CanonicalModelBuilderLutz(C).buildAndGet();
+  }
+
+  public final ELConceptDescription getMostSpecificConsequenceLutz(final ELConceptDescription C, final int roleDepth) {
+    return getCanonicalModelLutz(C).getMostSpecificConceptDescription(Collections.singleton(C), roleDepth);
   }
 
   @Override
@@ -52,7 +189,7 @@ public class ELTBox {
     if (!(obj instanceof ELTBox))
       return false;
     final ELTBox other = (ELTBox) obj;
-    return this.gcis.equals(other.gcis);
+    return this.conceptInclusions.equals(other.conceptInclusions);
   }
 
   public final OWLOntology toOWLOntology() {
@@ -60,13 +197,17 @@ public class ELTBox {
       final OWLOntologyManager om = OWLManager.createOWLOntologyManager();
       final OWLDataFactory df = om.getOWLDataFactory();
       final OWLOntology ontology = om.createOntology();
-      gcis.parallelStream().forEach(
-          gci -> om.applyChange(
-              new AddAxiom(
-                  ontology,
-                  df.getOWLSubClassOfAxiom(
-                      gci.getSubsumee().clone().reduce().toOWLClassExpression(),
-                      gci.getSubsumer().clone().reduce().toOWLClassExpression()))));
+      conceptInclusions
+          .parallelStream()
+          .forEach(
+              gci -> om
+                  .applyChange(
+                      new AddAxiom(
+                          ontology,
+                          df
+                              .getOWLSubClassOfAxiom(
+                                  gci.getSubsumee().clone().reduce().toOWLClassExpression(),
+                                  gci.getSubsumer().clone().reduce().toOWLClassExpression()))));
       return ontology;
     } catch (OWLOntologyCreationException e) {
       throw new RuntimeException(e);
@@ -75,12 +216,12 @@ public class ELTBox {
 
   @Override
   public int hashCode() {
-    return 23 * gcis.hashCode() + 99;
+    return 23 * conceptInclusions.hashCode() + 99;
   }
 
   @Override
   public String toString() {
-    return "EL-TBox " + gcis.toString();
+    return "EL-TBox " + conceptInclusions.toString();
   }
 
 }

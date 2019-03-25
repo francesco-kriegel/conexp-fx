@@ -62,10 +62,18 @@ public class ELReasoner {
       return true;
     if (!concept1.getConceptNames().containsAll(concept2.getConceptNames()))
       return false;
-    return concept2.getExistentialRestrictions().entries().parallelStream().allMatch(
-        existentialRestriction2 -> concept1.getExistentialRestrictions().entries().parallelStream().anyMatch(
-            existentialRestriction1 -> existentialRestriction2.getKey().equals(existentialRestriction1.getKey())
-                && isSubsumedBy(existentialRestriction1.getValue(), existentialRestriction2.getValue())));
+    return concept2
+        .getExistentialRestrictions()
+        .entries()
+        .parallelStream()
+        .allMatch(
+            existentialRestriction2 -> concept1
+                .getExistentialRestrictions()
+                .entries()
+                .parallelStream()
+                .anyMatch(
+                    existentialRestriction1 -> existentialRestriction2.getKey().equals(existentialRestriction1.getKey())
+                        && isSubsumedBy(existentialRestriction1.getValue(), existentialRestriction2.getValue())));
   }
 
   public static final boolean
@@ -95,13 +103,14 @@ public class ELReasoner {
     om.applyChange(new AddAxiom(ontology, _ax1));
     om.applyChange(new AddAxiom(ontology, _ax2));
 
-    final OWLReasoner elk = new ElkReasonerFactory().createReasoner(ontology);
-    elk.flush();
-    elk.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+    final OWLReasoner reasoner = new ElkReasonerFactory().createReasoner(ontology);
+//    final OWLReasoner reasoner = new JcelReasonerFactory().createReasoner(ontology);
+    reasoner.flush();
+    reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 
     final boolean result =
-        elk.getEquivalentClasses(c2).contains(c1) || elk.getSubClasses(c2, false).getFlattened().contains(c1);
-    elk.dispose();
+        reasoner.getEquivalentClasses(c2).contains(c1) || reasoner.getSubClasses(c2, false).getFlattened().contains(c1);
+    reasoner.dispose();
     om.applyChange(new RemoveAxiom(ontology, ax1));
     om.applyChange(new RemoveAxiom(ontology, ax2));
     om.applyChange(new RemoveAxiom(ontology, _ax1));

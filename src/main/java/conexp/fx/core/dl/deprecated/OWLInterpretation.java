@@ -59,6 +59,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
+import org.semanticweb.owlapi.model.parameters.Imports;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
@@ -207,9 +208,8 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
 
   @Override
   public final boolean models(final OWLOntology tBox) {
-    return tBox
-        // .getTBoxAxioms(Imports.INCLUDED)
-        .getTBoxAxioms(true)
+    return tBox.getTBoxAxioms(Imports.INCLUDED)
+//        .getTBoxAxioms(true)
         .parallelStream()
         .allMatch(gci -> (gci instanceof OWLSubClassOfAxiom) ? satisfies((OWLSubClassOfAxiom) gci) : true);
   }
