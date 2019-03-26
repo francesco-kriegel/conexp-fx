@@ -28,7 +28,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <application.javaVersion>1.8</application.javaVersion>
-    <javafx.version>8u201</javafx.version>
+    <javafx.version>8u192</javafx.version>
     <javafx.jar>${java.home}/lib/ext/jfxrt.jar</javafx.jar>
     <javafx.javadoc>lib/javafx-${javafx.version}-apidocs.zip</javafx.javadoc>
     <javafx.sources>${java.home}/../javafx-src.zip</javafx.sources>
