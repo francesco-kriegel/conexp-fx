@@ -27,7 +27,8 @@ import java.util.Set;
 
 import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Context;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.dl.Signature;
+import conexp.fx.core.math.SetClosureOperator;
 
 @Deprecated
 public interface Interpretation<I, C, G, T> {
@@ -74,7 +75,7 @@ public interface Interpretation<I, C, G, T> {
   public T computeTBoxBase(int roleDepth, int maxCardinality, T backgroundOntology, Constructor... constructors)
       throws Exception;
 
-  public ClosureOperator<I> getClosureOperator(int roleDepth, int maxCardinality, Constructor... constructors);
+  public SetClosureOperator<I> getClosureOperator(int roleDepth, int maxCardinality, Constructor... constructors);
 
   default void checkRoleDepth(final int roleDepth) {
     if (roleDepth < 0)

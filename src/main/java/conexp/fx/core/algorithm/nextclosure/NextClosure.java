@@ -38,7 +38,7 @@ import conexp.fx.core.collections.setlist.SetList.LecticOrder;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 
 public class NextClosure {
 
@@ -53,7 +53,7 @@ public class NextClosure {
 
   public static <G, M> Iterable<Either<Concept<G, M>, Implication<G, M>>> implications(final MatrixContext<G, M> cxt) {
     final Set<Implication<G, M>> implications = Sets.newHashSet();
-    final ClosureOperator<M> clop = ClosureOperator.fromImplications(implications, true, true);
+    final SetClosureOperator<M> clop = SetClosureOperator.fromImplications(implications, true, true);
     final Function<Set<M>, Either<Concept<G, M>, Implication<G, M>>> clop2 = set -> {
       final Set<M> quasiIntent = clop.closure(set);
       final Set<G> extent = cxt.colAnd(quasiIntent);
@@ -77,7 +77,7 @@ public class NextClosure {
       conceptsAndImplications(final MatrixContext<G, M> cxt) {
     final Set<Concept<G, M>> concepts = Sets.newHashSet();
     final Set<Implication<G, M>> implications = Sets.newHashSet();
-    enumerate(cxt.colHeads(), ClosureOperator.fromImplications(implications, true, true)).forEach(quasiIntent -> {
+    enumerate(cxt.colHeads(), SetClosureOperator.fromImplications(implications, true, true)).forEach(quasiIntent -> {
       final Set<G> extent = cxt.colAnd(quasiIntent);
       final Set<M> intent = cxt.rowAnd(extent);
       if (quasiIntent.size() != intent.size()) {
@@ -89,7 +89,7 @@ public class NextClosure {
     return Pair.of(concepts, implications);
   }
 
-  public static <T> Iterable<Set<T>> enumerate(final SetList<T> base, final ClosureOperator<T> clop) {
+  public static <T> Iterable<Set<T>> enumerate(final SetList<T> base, final SetClosureOperator<T> clop) {
     return enumerate(base, new HashSet<T>(), clop::closure, t -> t);
   }
 

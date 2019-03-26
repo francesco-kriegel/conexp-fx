@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 import conexp.fx.core.util.UnicodeSymbols;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 
@@ -52,7 +52,7 @@ public class Implication<G, M> extends de.tudresden.inf.tcs.fcalib.Implication<M
   }
 
   public static final <G, M> boolean entails(final Set<Implication<G, M>> x, final Implication<G, M> y) {
-    return ClosureOperator.fromImplications(x, false, false).closure(y.getPremise()).containsAll(y.getConclusion());
+    return SetClosureOperator.fromImplications(x, false, false).closure(y.getPremise()).containsAll(y.getConclusion());
   }
 
   private final Set<G> support;

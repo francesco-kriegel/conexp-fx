@@ -55,6 +55,7 @@ import conexp.fx.core.dl.ELConceptInclusion;
 import conexp.fx.core.dl.ELLeastCommonSubsumer;
 import conexp.fx.core.dl.ELReasoner;
 import conexp.fx.core.dl.ELTBox;
+import conexp.fx.core.dl.Signature;
 
 @Deprecated
 public final class ELInterpretation extends AInterpretation<ELConceptDescription, ELConceptInclusion, ELTBox> {

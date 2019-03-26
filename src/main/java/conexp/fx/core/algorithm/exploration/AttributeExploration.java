@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
 import conexp.fx.core.collections.setlist.SetList.LecticOrder;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 import conexp.fx.gui.exploration.HumanExpert;
 
 /**
@@ -67,7 +67,7 @@ public final class AttributeExploration<G, M> {
   protected final Expert<G, M>           expert;
   protected Set<M>                       pseudoClosure = new HashSet<M>();
   protected final Set<Implication<G, M>> implications  = new HashSet<Implication<G, M>>();
-  private final ClosureOperator<M>       clop          = ClosureOperator.fromImplications(implications, true, true);
+  private final SetClosureOperator<M>       clop          = SetClosureOperator.fromImplications(implications, true, true);
   private final LecticOrder<M>           lecticOrder;
 
   /**

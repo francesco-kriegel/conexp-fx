@@ -35,7 +35,7 @@ import conexp.fx.core.algorithm.nextclosures.NextClosuresState;
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.exploration.HumanExpertP;
@@ -58,11 +58,11 @@ public class ParallelAttributeExploration {
     final NextClosuresState<String, M, Set<M>> result = NextClosuresState.withHashSets(cxt.colHeads());
     final int maxCardinality = cxt.colHeads().size();
     // expert.onCancelRunnable.set(() -> result.cardinality = maxCardinality);
-    final ClosureOperator<M> clop = backgroundKnowledge == null || backgroundKnowledge.isEmpty()
-        ? ClosureOperator.fromImplications(result.implications, true, false)
-        : ClosureOperator.supremum(
-            ClosureOperator.fromImplications(result.implications, true, false),
-            ClosureOperator.fromImplications(backgroundKnowledge, false, false));
+    final SetClosureOperator<M> clop = backgroundKnowledge == null || backgroundKnowledge.isEmpty()
+        ? SetClosureOperator.fromImplications(result.implications, true, false)
+        : SetClosureOperator.supremum(
+            SetClosureOperator.fromImplications(result.implications, true, false),
+            SetClosureOperator.fromImplications(backgroundKnowledge, false, false));
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
       if (isCancelled.get())
         break;

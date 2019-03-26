@@ -1,5 +1,9 @@
 package conexp.fx.core.dl;
 
+import java.util.stream.Collectors;
+
+import org.semanticweb.owlapi.model.IRI;
+
 /*
  * #%L
  * Concept Explorer FX
@@ -26,6 +30,12 @@ import conexp.fx.core.util.UnicodeSymbols;
 
 public class ELConceptInclusion {
 
+  public static final ELConceptInclusion parse(final String subsumeeExpression, final String subsumerExpression) {
+    return new ELConceptInclusion(
+        ELConceptDescription.parse(subsumeeExpression),
+        ELConceptDescription.parse(subsumerExpression));
+  }
+
   private final ELConceptDescription subsumee;
   private final ELConceptDescription subsumer;
 
@@ -35,12 +45,25 @@ public class ELConceptInclusion {
     this.subsumer = subsumer;
   }
 
+  public final Signature getSignature() {
+    final Signature sigma = new Signature(IRI.generateDocumentIRI());
+    sigma.getConceptNames().addAll(subsumee.getConceptNamesInSignature().collect(Collectors.toSet()));
+    sigma.getConceptNames().addAll(subsumer.getConceptNamesInSignature().collect(Collectors.toSet()));
+    sigma.getRoleNames().addAll(subsumee.getRoleNamesInSignature().collect(Collectors.toSet()));
+    sigma.getRoleNames().addAll(subsumer.getRoleNamesInSignature().collect(Collectors.toSet()));
+    return sigma;
+  }
+
   public final ELConceptDescription getSubsumee() {
     return subsumee;
   }
 
   public final ELConceptDescription getSubsumer() {
     return subsumer;
+  }
+
+  public final boolean isTautological() {
+    return subsumee.isSubsumedBy(subsumer);
   }
 
   @Override

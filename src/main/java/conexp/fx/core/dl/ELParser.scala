@@ -17,6 +17,7 @@ sealed trait ELToken
 case class CNAME(value: String) extends ELToken
 case class RNAME(value: String) extends ELToken
 case object TOP extends ELToken
+case object BOT extends ELToken
 case object AND extends ELToken
 case object EXISTS extends ELToken
 case object DOT extends ELToken
@@ -28,21 +29,22 @@ object ELLexer extends RegexParsers {
   override def skipWhitespace = true
   override val whiteSpace = "[ \t\r\f\n]+".r
 
-  def cname: Parser[CNAME] = "[A-Z][a-zA-Z0-9]*".r ^^ { value => CNAME(value) }
-  def rname: Parser[RNAME] = "[a-z][a-zA-Z0-9]*".r ^^ { value => RNAME(value) }
-  def top: Parser[ELToken] = ("TOP" | "top" | "Top" | "⊤") ^^ { _ => TOP }
-  def and: Parser[ELToken] = ("AND" | "and" | "And" | "⊓") ^^ { _ => AND }
-  def exists: Parser[ELToken] = ("EXISTS" | "exists" | "Exists" | "∃") ^^ { _ => EXISTS }
-  def dot: Parser[ELToken] = "." ^^ { _ => DOT }
-  def openbrace: Parser[ELToken] = "(" ^^ { _ => OPENBRACE }
-  def closebrace: Parser[ELToken] = ")" ^^ { _ => CLOSEBRACE }
+  def cname: Parser[CNAME] = "[A-Z][a-zA-Z0-9]*".r ^^ { value ⇒ CNAME(value) }
+  def rname: Parser[RNAME] = "[a-z][a-zA-Z0-9]*".r ^^ { value ⇒ RNAME(value) }
+  def top: Parser[ELToken] = ("TOP" | "top" | "Top" | "⊤") ^^ { _ ⇒ TOP }
+  def bot: Parser[ELToken] = ("BOT" | "bot" | "Bot" | "⊥") ^^ { _ ⇒ BOT }
+  def and: Parser[ELToken] = ("AND" | "and" | "And" | "⊓") ^^ { _ ⇒ AND }
+  def exists: Parser[ELToken] = ("EXISTS" | "exists" | "Exists" | "∃") ^^ { _ ⇒ EXISTS }
+  def dot: Parser[ELToken] = "." ^^ { _ ⇒ DOT }
+  def openbrace: Parser[ELToken] = "(" ^^ { _ ⇒ OPENBRACE }
+  def closebrace: Parser[ELToken] = ")" ^^ { _ ⇒ CLOSEBRACE }
 
-  def tokens: Parser[List[ELToken]] = phrase(rep1(and | exists | dot | openbrace | closebrace | top | cname | rname))
+  def tokens: Parser[List[ELToken]] = phrase(rep1(and | exists | dot | openbrace | closebrace | top | bot | cname | rname))
 
   def apply(source: String): Either[ELLexerError, List[ELToken]] = {
     parse(tokens, source) match {
-      case NoSuccess(msg, next)  => Left(ELLexerError(msg + " at line " + next.pos.line + ", column " + next.pos.column + "\r\n" + next.pos.longString))
-      case Success(result, next) => Right(result)
+      case NoSuccess(msg, next)  ⇒ Left(ELLexerError(msg + " at line " + next.pos.line + ", column " + next.pos.column + "\r\n" + next.pos.longString))
+      case Success(result, next) ⇒ Right(result)
     }
   }
 
@@ -59,27 +61,31 @@ object ELParser extends Parsers {
     override def rest: Reader[ELToken] = new ELTokenReader(tokens.tail)
   }
 
-  private def top: Parser[ELConceptDescription] = accept("top", { case TOP => ELConceptDescription.top() })
+  private def top: Parser[ELConceptDescription] = accept("top", { case TOP ⇒ ELConceptDescription.top() })
 
-  private def cname: Parser[ELConceptDescription] = accept("cname", { case CNAME(value) => ELConceptDescription.conceptName(IRI.create(value)) })
+  private def bot: Parser[ELConceptDescription] = accept("bot", { case BOT ⇒ ELConceptDescription.bot() })
 
-  private def rname: Parser[IRI] = accept("rname", { case RNAME(value) => IRI.create(value) })
+  private def cname: Parser[ELConceptDescription] = accept("cname", { case CNAME(value) ⇒ ELConceptDescription.conceptName(IRI.create(value)) })
+
+  private def rname: Parser[IRI] = accept("rname", { case RNAME(value) ⇒ IRI.create(value) })
 
   private def conjunction: Parser[ELConceptDescription] = {
-    (top | cname | existentialRestriction) ~ rep(AND ~> (top | cname | existentialRestriction)) ^^ {
-      case c ~ cs => ELConceptDescription.conjunction((c :: cs).asJavaCollection)
+    (top | bot | cname | existentialRestriction) ~ rep(AND ~> (top | bot | cname | existentialRestriction)) ^^ {
+      case c ~ cs ⇒ ELConceptDescription.conjunction((c :: cs).asJavaCollection)
     }
   }
 
   private def existentialRestriction: Parser[ELConceptDescription] = {
     (EXISTS ~ rname ~ DOT ~ top) ^^ {
-      case _ ~ r ~ _ ~ a => ELConceptDescription.existentialRestriction(r, a)
+      case _ ~ r ~ _ ~ a ⇒ ELConceptDescription.existentialRestriction(r, a)
+    } | (EXISTS ~ rname ~ DOT ~ bot) ^^ {
+      case _ ~ r ~ _ ~ a ⇒ ELConceptDescription.existentialRestriction(r, a)
     } | (EXISTS ~ rname ~ DOT ~ cname) ^^ {
-      case _ ~ r ~ _ ~ a => ELConceptDescription.existentialRestriction(r, a)
+      case _ ~ r ~ _ ~ a ⇒ ELConceptDescription.existentialRestriction(r, a)
     } | (EXISTS ~ rname ~ DOT ~ existentialRestriction) ^^ {
-      case _ ~ r ~ _ ~ c => ELConceptDescription.existentialRestriction(r, c)
+      case _ ~ r ~ _ ~ c ⇒ ELConceptDescription.existentialRestriction(r, c)
     } | (EXISTS ~ rname ~ DOT ~ OPENBRACE ~ conjunction ~ CLOSEBRACE) ^^ {
-      case _ ~ r ~ _ ~ _ ~ c ~ _ => ELConceptDescription.existentialRestriction(r, c)
+      case _ ~ r ~ _ ~ _ ~ c ~ _ ⇒ ELConceptDescription.existentialRestriction(r, c)
     }
   }
 

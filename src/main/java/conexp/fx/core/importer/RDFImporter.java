@@ -61,8 +61,8 @@ import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.MatrixContext;
+import conexp.fx.core.dl.Signature;
 import conexp.fx.core.dl.deprecated.OWLInterpretation;
-import conexp.fx.core.dl.deprecated.Signature;
 
 public class RDFImporter {
 

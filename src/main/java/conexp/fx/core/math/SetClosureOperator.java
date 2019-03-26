@@ -40,7 +40,7 @@ import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
 
 @FunctionalInterface
-public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
+public interface SetClosureOperator<M> extends Function<Set<M>, Set<M>> {
 
   @Override
   public default Set<M> apply(final Set<M> set) {
@@ -59,35 +59,35 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
   }
 
   @SafeVarargs
-  public static <T> ClosureOperator<T> infimum(final ClosureOperator<T>... closureOperators) {
+  public static <T> SetClosureOperator<T> infimum(final SetClosureOperator<T>... closureOperators) {
     return infimum(Arrays.asList(closureOperators));
   }
 
-  public static <T> ClosureOperator<T> infimum(final Iterable<ClosureOperator<T>> closureOperators) {
+  public static <T> SetClosureOperator<T> infimum(final Iterable<SetClosureOperator<T>> closureOperators) {
     return set -> {
       final Set<T> closure = new HashSet<T>();
-      final Iterator<ClosureOperator<T>> iterator = closureOperators.iterator();
+      final Iterator<SetClosureOperator<T>> iterator = closureOperators.iterator();
       if (iterator.hasNext())
-        set.addAll(iterator.next().closure(set));
+        closure.addAll(iterator.next().closure(set));
       while (iterator.hasNext())
-        set.retainAll(iterator.next().closure(set));
+        closure.retainAll(iterator.next().closure(set));
       return closure;
     };
   }
 
   @SafeVarargs
-  public static <T> ClosureOperator<T> supremum(final ClosureOperator<T>... closureOperators) {
+  public static <T> SetClosureOperator<T> supremum(final SetClosureOperator<T>... closureOperators) {
     return supremum(Arrays.asList(closureOperators));
   }
 
-  public static <T> ClosureOperator<T> supremum(final Iterable<ClosureOperator<T>> closureOperators) {
+  public static <T> SetClosureOperator<T> supremum(final Iterable<SetClosureOperator<T>> closureOperators) {
     return set -> {
       final Set<T> closure = new HashSet<T>();
       closure.addAll(set);
       boolean changed = true;
       while (changed) {
         changed = false;
-        for (ClosureOperator<T> clop : closureOperators)
+        for (SetClosureOperator<T> clop : closureOperators)
           changed |= closure.addAll(clop.closure(closure));
       }
       return closure;
@@ -99,11 +99,11 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
 //    }
   }
 
-  public static <G, M> ClosureOperator<M> fromContext(final Context<G, M> cxt) {
+  public static <G, M> SetClosureOperator<M> fromContext(final Context<G, M> cxt) {
     return set -> cxt.rowAnd(cxt.colAnd(set));
   }
 
-  public static <G, M> ClosureOperator<M>
+  public static <G, M> SetClosureOperator<M>
       joiningImplications(final Context<G, M> cxt, final Set<M> premises, final Set<M> conclusions) {
     return set -> {
       final HashSet<M> pintersection = new HashSet<>(set);
@@ -171,7 +171,7 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
     return closure;
   }
 
-  public static <G, M, C extends Set<M>> ClosureOperator<M> fromImplications(
+  public static <G, M, C extends Set<M>> SetClosureOperator<M> fromImplications(
       final Collection<Implication<G, M>> implications,
       final int firstPremiseSize,
       final boolean includePseudoClosures,
@@ -188,7 +188,7 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
         set);
   }
 
-  public static <G, M> ClosureOperator<M> fromImplications(
+  public static <G, M> SetClosureOperator<M> fromImplications(
       final Collection<Implication<G, M>> implications,
       final int firstPremiseSize,
       final boolean includePseudoClosures,
@@ -196,18 +196,18 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
     return fromImplications(implications, firstPremiseSize, includePseudoClosures, parallel, false, HashSet<M>::new);
   }
 
-  public static <G, M> ClosureOperator<M> fromImplications(
+  public static <G, M> SetClosureOperator<M> fromImplications(
       final Collection<Implication<G, M>> implications,
       final boolean includePseudoClosures,
       final boolean parallel) {
     return fromImplications(implications, 0, includePseudoClosures, parallel);
   }
 
-  public static <G, M> ClosureOperator<M> fromImplications(final Collection<Implication<G, M>> implications) {
+  public static <G, M> SetClosureOperator<M> fromImplications(final Collection<Implication<G, M>> implications) {
     return fromImplications(implications, false, true);
   }
 
-  public static <G, M> ClosureOperator<M>
+  public static <G, M> SetClosureOperator<M>
       fromImplicationSetLinClosure(final Collection<Implication<G, M>> implications) {
     return set -> {
 
@@ -262,7 +262,7 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
     };
   }
 
-  public static <G, M> ClosureOperator<M>
+  public static <G, M> SetClosureOperator<M>
       fromImplicationSetDowlingGalier(final Collection<Implication<G, M>> implications) {
     throw new NotImplementedException("");
   }
@@ -302,8 +302,8 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
    * @return a closure operator, whose closed sets are those that do not exceed the given maximal cardinality, or
    *         contains all elements from the base set.
    */
-  public static <G, M> ClosureOperator<M> byMaximalCardinality(final int maxCard, final Collection<M> baseSet) {
-    return new ClosureOperator<M>() {
+  public static <G, M> SetClosureOperator<M> byMaximalCardinality(final int maxCard, final Collection<M> baseSet) {
+    return new SetClosureOperator<M>() {
 
       @Override
       public boolean isClosed(final Set<M> set) {
@@ -334,8 +334,8 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
    * @return a closure operator, whose closed sets are those that have an extent with at least minSupp elements in the
    *         given formal context cxt, or contain all elements from the context's codomain.
    */
-  public static <G, M> ClosureOperator<M> byMinimalSupport(final int minSupp, final Context<G, M> cxt) {
-    return new ClosureOperator<M>() {
+  public static <G, M> SetClosureOperator<M> byMinimalSupport(final int minSupp, final Context<G, M> cxt) {
+    return new SetClosureOperator<M>() {
 
       @Override
       public boolean isClosed(final Set<M> set) {
@@ -365,8 +365,8 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
    * @param baseSet
    * @return a closure operator, whose closed sets are those that contain all given elements.
    */
-  public static <G, M> ClosureOperator<M> containsAllFrom(final Collection<M> elements, final Set<M> baseSet) {
-    return new ClosureOperator<M>() {
+  public static <G, M> SetClosureOperator<M> containsAllFrom(final Collection<M> elements, final Set<M> baseSet) {
+    return new SetClosureOperator<M>() {
 
       @Override
       public boolean isClosed(final Set<M> set) {
@@ -399,8 +399,8 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
    * @return a closure operator, whose closed sets are those, that are subsets of elements, or contain all elements from
    *         the baseSet.
    */
-  public static <G, M> ClosureOperator<M> isSubsetOf(final Collection<M> elements, final Set<M> baseSet) {
-    return new ClosureOperator<M>() {
+  public static <G, M> SetClosureOperator<M> isSubsetOf(final Collection<M> elements, final Set<M> baseSet) {
+    return new SetClosureOperator<M>() {
 
       @Override
       public boolean isClosed(final Set<M> set) {
@@ -425,8 +425,8 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
     };
   }
 
-  public static <M> ClosureOperator<M> bottom() {
-    return new ClosureOperator<M>() {
+  public static <M> SetClosureOperator<M> bottom() {
+    return new SetClosureOperator<M>() {
 
       @Override
       public final boolean isClosed(final Set<M> set) {
@@ -445,8 +445,8 @@ public interface ClosureOperator<M> extends Function<Set<M>, Set<M>> {
     };
   }
 
-  public static <M> ClosureOperator<M> top(final Set<M> baseSet) {
-    return new ClosureOperator<M>() {
+  public static <M> SetClosureOperator<M> top(final Set<M> baseSet) {
+    return new SetClosureOperator<M>() {
 
       @Override
       public final boolean isClosed(final Set<M> set) {

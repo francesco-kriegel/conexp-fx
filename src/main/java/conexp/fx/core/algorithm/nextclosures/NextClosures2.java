@@ -47,7 +47,7 @@ import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.task.TimeTask;
@@ -57,14 +57,15 @@ public final class NextClosures2 {
 
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> compute(
       final Set<M> baseSet,
-      final ClosureOperator<M> clop,
+      final SetClosureOperator<M> clop,
       final Function<Set<M>, Set<G>> extension,
       final ExecutorService executor,
       final Consumer<Concept<G, M>> conceptConsumer,
       final Consumer<Implication<G, M>> implicationConsumer,
       final Consumer<String> updateStatus,
       final Consumer<Double> updateProgress,
-      final Supplier<Boolean> isCancelled) {
+      final Supplier<Boolean> isCancelled,
+      final Set<Implication<G, M>> backgroundKnowledge) {
     final int max = baseSet.size();
     final NextClosuresState<G, M, Set<M>> state = NextClosuresState.withHashSets(baseSet);
 //    final Function<BitSetFX, BitSetFX> cl = bitClosure(b.implications);
@@ -78,8 +79,23 @@ public final class NextClosures2 {
       final Set<Future<?>> fs = Collections3.newConcurrentHashSet();
       final Set<Set<M>> cc = state.getActualCandidates();
       cc.forEach(c -> fs.add(executor.submit(() -> {
-        final Set<M> d = ClosureOperator
-            .implicativeClosure(state.implications, state.getFirstPremiseSize(c), true, true, true, HashSet::new, c);
+//        final Set<M> d = SetClosureOperator
+//            .implicativeClosure(state.implications, state.getFirstPremiseSize(c), true, true, true, HashSet::new, c);
+        final SetClosureOperator<M> _clop = backgroundKnowledge.isEmpty()
+            ? SetClosureOperator
+                .fromImplications(state.implications, state.getFirstPremiseSize(c), true, true, true, HashSet::new)
+            : SetClosureOperator
+                .supremum(
+                    SetClosureOperator
+                        .fromImplications(
+                            state.implications,
+                            state.getFirstPremiseSize(c),
+                            true,
+                            true,
+                            true,
+                            HashSet::new),
+                    SetClosureOperator.fromImplications(backgroundKnowledge, false, true));
+        final Set<M> d = _clop.closure(c);
         if (c.containsAll(d)) {
 //        if (c.containsAll(d)) {
 //          final BitSetFX c1 = mcxt._colAnd(c);
@@ -92,7 +108,9 @@ public final class NextClosures2 {
           if (!c.containsAll(c2)) {
 //          if (!c.containsAll(c2)) {
             c2.removeAll(c);
-            state.implications.add(new Implication<G, M>(c, c2));
+            final Implication<G, M> impl = new Implication<G, M>(c, c2);
+            implicationConsumer.accept(impl);
+            state.implications.add(impl);
           }
         } else
           state.addCandidate(d);
@@ -124,8 +142,11 @@ public final class NextClosures2 {
     return state.getResultAndDispose();
   }
 
-  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
-      compute(final Set<M> baseSet, final ClosureOperator<M> clop, final Function<Set<M>, Set<G>> extension) {
+  public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>> compute(
+      final Set<M> baseSet,
+      final SetClosureOperator<M> clop,
+      final Function<Set<M>, Set<G>> extension,
+      final Set<Implication<G, M>> backgroundKnowledge) {
     return compute(
         baseSet,
         clop,
@@ -135,7 +156,8 @@ public final class NextClosures2 {
         __ -> {},
         __ -> {},
         __ -> {},
-        () -> false);
+        () -> false,
+        backgroundKnowledge);
   }
 
   public static <G, M> Set<Implication<G, M>> transformToJoiningImplications(
@@ -154,8 +176,11 @@ public final class NextClosures2 {
     return joiningImplications;
   }
 
-  public static final <T> Set<Set<T>>
-      compute(final Set<T> baseSet, final ClosureOperator<T> clop, final boolean verbose, final ExecutorService tpe) {
+  public static final <T> Set<Set<T>> compute(
+      final Set<T> baseSet,
+      final SetClosureOperator<T> clop,
+      final boolean verbose,
+      final ExecutorService tpe) {
     final Map<Set<T>, Set<T>> closures = new ConcurrentHashMap<>();
     final Set<Set<T>> candidates = Collections3.newConcurrentHashSet();
     candidates.add(new HashSet<T>());
@@ -220,14 +245,14 @@ public final class NextClosures2 {
     if (!cxt.models(Collections3.union(backgroundKnowledge)))
       throw new RuntimeException("The background implications are not valid in the formal context.");
     final NextClosuresState<G, M, Set<M>> result = NextClosuresState.withHashSets(cxt.colHeads());
-    final Function<Integer, ClosureOperator<M>> clop;
+    final Function<Integer, SetClosureOperator<M>> clop;
     if (backgroundKnowledge.length == 0)
-      clop = i -> ClosureOperator.fromImplications(result.implications, i, true, true);
+      clop = i -> SetClosureOperator.fromImplications(result.implications, i, true, true);
     else
-      clop = i -> ClosureOperator
+      clop = i -> SetClosureOperator
           .supremum(
-              ClosureOperator.fromImplications(result.implications, i, true, true),
-              ClosureOperator.fromImplications(Collections3.union(backgroundKnowledge), false, true));
+              SetClosureOperator.fromImplications(result.implications, i, true, true),
+              SetClosureOperator.fromImplications(Collections3.union(backgroundKnowledge), false, true));
 //    final ClosureOperator<M> clop = ClosureOperator.fromImplications(result.implications, true, true);
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {

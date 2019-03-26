@@ -32,7 +32,8 @@ public class ELCanModTest {
   public static void main(String[] args) {
 //    foo();
 //    bar();
-    baz2();
+//    baz2();
+    System.out.println(ELConceptDescription.parse("∃r.(B⊓∃r.⊤⊓∃r.C)⊓∃r.(C⊓∃r.B⊓∃r.⊤)").reduce());
   }
 
   private static void foo() {

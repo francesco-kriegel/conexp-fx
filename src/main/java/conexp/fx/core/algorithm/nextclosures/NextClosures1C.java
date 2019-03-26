@@ -42,7 +42,7 @@ import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 
 public final class NextClosures1C {
 
@@ -53,9 +53,9 @@ public final class NextClosures1C {
     final Map<Set<M>, Integer>       candidates   = new ConcurrentHashMap<Set<M>, Integer>();
     private final Set<Set<M>>        processed    = Collections3.newConcurrentHashSet();
     int                              cardinality  = 0;
-    private final ClosureOperator<M> clop;
+    private final SetClosureOperator<M> clop;
 
-    public ResultC(ClosureOperator<M> clop) {
+    public ResultC(SetClosureOperator<M> clop) {
       this.clop = clop;
       candidates.put(new HashSet<M>(), 0);
     }
@@ -121,14 +121,14 @@ public final class NextClosures1C {
 
   public static final <G, M> ResultC<G, M> compute(
       final Context<G, M> cxt,
-      final ClosureOperator<M> clop,
+      final SetClosureOperator<M> clop,
       final boolean verbose,
       final ThreadPoolExecutor tpe) {
     if (verbose)
       System.out
           .println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize() + " cores...");
     final ResultC<G, M> result = new ResultC<G, M>(clop);
-    final ClosureOperator<M> sup = ClosureOperator.supremum(ClosureOperator.fromContext(cxt), clop);
+    final SetClosureOperator<M> sup = SetClosureOperator.supremum(SetClosureOperator.fromContext(cxt), clop);
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
       if (verbose) {
@@ -149,7 +149,7 @@ public final class NextClosures1C {
 //      for (final Set<M> candidate : candidatesN) {
       result.candidates.keySet().parallelStream().filter(c -> c.size() == result.cardinality).forEach(candidate -> {
         futures.add(tpe.submit(() -> {
-          final Set<M> closure = ClosureOperator
+          final Set<M> closure = SetClosureOperator
               .fromImplications(
                   result.implications
                       .entrySet()
@@ -198,7 +198,7 @@ public final class NextClosures1C {
   }
 
   public static final <G, M> ResultC<G, M>
-      compute(final Context<G, M> cxt, final ClosureOperator<M> clop, final boolean verbose, final int cores) {
+      compute(final Context<G, M> cxt, final SetClosureOperator<M> clop, final boolean verbose, final int cores) {
     if (cores > Runtime.getRuntime().availableProcessors())
       throw new IllegalArgumentException(
           "Requested pool size is too large. VM has only " + Runtime.getRuntime().availableProcessors()
@@ -213,7 +213,7 @@ public final class NextClosures1C {
   }
 
   public static final <G, M> ResultC<G, M>
-      compute(final Context<G, M> cxt, final ClosureOperator<M> clop, final boolean verbose) {
+      compute(final Context<G, M> cxt, final SetClosureOperator<M> clop, final boolean verbose) {
     final int maxc = Runtime.getRuntime().availableProcessors();
     final int cores = maxc < 9 ? maxc : (maxc * 3) / 4;
     return compute(cxt, clop, verbose, cores);
@@ -223,27 +223,27 @@ public final class NextClosures1C {
       final Context<G, M> cxt,
       final Set<Implication<G, M>> backgroundImplications,
       final boolean verbose) {
-    return compute(cxt, ClosureOperator.fromImplications(backgroundImplications, false, true), verbose);
+    return compute(cxt, SetClosureOperator.fromImplications(backgroundImplications, false, true), verbose);
   }
 
   public static final <G, M> ResultC<G, M>
       computeIceberg(final Context<G, M> cxt, final int minSupp, final boolean verbose) {
-    return compute(cxt, ClosureOperator.byMinimalSupport(minSupp, cxt), verbose);
+    return compute(cxt, SetClosureOperator.byMinimalSupport(minSupp, cxt), verbose);
   }
 
   public static final <G, M> ResultC<G, M>
       computeByMaxCard(final Context<G, M> cxt, final int maxCard, final boolean verbose) {
-    return compute(cxt, ClosureOperator.byMaximalCardinality(maxCard, cxt.colHeads()), verbose);
+    return compute(cxt, SetClosureOperator.byMaximalCardinality(maxCard, cxt.colHeads()), verbose);
   }
 
   public static final <G, M> ResultC<G, M>
       computeBelow(final Context<G, M> cxt, final Collection<M> elements, final boolean verbose) {
-    return compute(cxt, ClosureOperator.isSubsetOf(elements, cxt.colHeads()), verbose);
+    return compute(cxt, SetClosureOperator.isSubsetOf(elements, cxt.colHeads()), verbose);
   }
 
   public static final <G, M> ResultC<G, M>
       computeAbove(final Context<G, M> cxt, final Collection<M> elements, final boolean verbose) {
-    return compute(cxt, ClosureOperator.containsAllFrom(elements, cxt.colHeads()), verbose);
+    return compute(cxt, SetClosureOperator.containsAllFrom(elements, cxt.colHeads()), verbose);
   }
 
 }

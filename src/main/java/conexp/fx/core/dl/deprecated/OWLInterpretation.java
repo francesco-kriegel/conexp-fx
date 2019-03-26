@@ -78,7 +78,8 @@ import conexp.fx.core.dl.ELConceptDescription;
 import conexp.fx.core.dl.ELLeastCommonSubsumer;
 import conexp.fx.core.dl.ELReasoner;
 import conexp.fx.core.dl.ELSyntaxException;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.dl.Signature;
+import conexp.fx.core.math.SetClosureOperator;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectComplementOfImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectIntersectionOfImpl;
@@ -731,7 +732,7 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     final Set<OWLSubPropertyChainOfAxiom> base = new HashSet<OWLSubPropertyChainOfAxiom>();
 
     final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> cxt = getInducedRoleContext(roleDepth);
-    final ClosureOperator<Triple<Integer, IRI, Integer>> clop = new ClosureOperator<Triple<Integer, IRI, Integer>>() {
+    final SetClosureOperator<Triple<Integer, IRI, Integer>> clop = new SetClosureOperator<Triple<Integer, IRI, Integer>>() {
 
       @Override
       public Set<Triple<Integer, IRI, Integer>> closure(Set<Triple<Integer, IRI, Integer>> set) {

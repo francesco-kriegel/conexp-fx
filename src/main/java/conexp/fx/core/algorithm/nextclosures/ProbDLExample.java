@@ -36,7 +36,7 @@ import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 
 public final class ProbDLExample {
 
@@ -77,7 +77,7 @@ public final class ProbDLExample {
     NextClosures2.compute(cxt).first().stream().map(Concept::getIntent).forEach(System.out::println);
 
     final Set<Implication<String, String>> j =
-        NextClosures2C.compute(cxt, ClosureOperator.fromImplications(bimp)).second();
+        NextClosures2C.compute(cxt, SetClosureOperator.fromImplications(bimp)).second();
     System.out.println(i.size() == j.size());
     System.out.println(i.equals(j));
     System.out.println(Implication.equivalent(i, j));
@@ -96,7 +96,7 @@ public final class ProbDLExample {
     do {
       a = null;
       for (String x : r)
-        if (ClosureOperator
+        if (SetClosureOperator
             .fromImplications(bimp, false, true)
             .closure(Sets.difference(Sets.newHashSet(r), Collections.singleton(x)))
             .contains(x)) {

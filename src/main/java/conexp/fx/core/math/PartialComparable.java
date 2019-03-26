@@ -27,13 +27,30 @@ package conexp.fx.core.math;
 
 public interface PartialComparable<E> extends Comparable<E> {
 
-  public boolean smaller(E e);
+  public default boolean equivalent(E e) {
+    return compareTo(e) == 0;
+  }
 
-  public boolean greater(E e);
+  public default boolean smaller(E e) {
+    return compareTo(e) == -1;
+  }
 
-  public boolean smallerEq(E e);
+  public default boolean greater(E e) {
+    return compareTo(e) == 1;
+  }
 
-  public boolean greaterEq(E e);
+  public default boolean smallerEq(E e) {
+    final int c = compareTo(e);
+    return c == -1 || c == 0;
+  }
 
-  public boolean uncomparable(E e);
+  public default boolean greaterEq(E e) {
+    final int c = compareTo(e);
+    return c == 0 || c == 1;
+  }
+
+  public default boolean uncomparable(E e) {
+    final int c = compareTo(e);
+    return c < 1 || c > 1;
+  }
 }

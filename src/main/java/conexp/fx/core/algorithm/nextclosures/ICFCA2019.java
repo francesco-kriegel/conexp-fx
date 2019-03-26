@@ -24,6 +24,7 @@ package conexp.fx.core.algorithm.nextclosures;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -32,7 +33,7 @@ import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.importer.CXTImporter;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 
 public class ICFCA2019 {
 
@@ -58,7 +59,7 @@ public class ICFCA2019 {
     final Set<String> baseSet = new HashSet<>();
     baseSet.addAll(pset);
     baseSet.addAll(cset);
-    final ClosureOperator<String> clop = ClosureOperator.joiningImplications(cxt, pset, cset);
+    final SetClosureOperator<String> clop = SetClosureOperator.joiningImplications(cxt, pset, cset);
     final Set<Implication<String, String>> implications = NextClosures2
         .compute(
             baseSet,
@@ -69,7 +70,8 @@ public class ICFCA2019 {
             __ -> {},
             System.out::println,
             __ -> {},
-            () -> false)
+            () -> false,
+            Collections.emptySet())
         .second();
     System.out.println("implications of clop:");
     implications.forEach(System.out::println);

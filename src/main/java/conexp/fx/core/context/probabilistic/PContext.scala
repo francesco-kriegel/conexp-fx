@@ -11,7 +11,7 @@ import conexp.fx.core.algorithm.nextclosures.NextClosures2C
 import conexp.fx.core.context.Context
 import conexp.fx.core.context.Implication
 import conexp.fx.core.context.MatrixContext
-import conexp.fx.core.math.ClosureOperator
+import conexp.fx.core.math.SetClosureOperator
 
 class PContext[G, M, W] {
 
@@ -88,7 +88,7 @@ class PContext[G, M, W] {
   }
 
   def probabilisticImplicationalBase: java.util.Set[Implication[G, PAttribute[M]]] = {
-    (NextClosures2C compute (probabilisticScaling, ClosureOperator.fromImplications(trivialImplications))) second
+    (NextClosures2C compute (probabilisticScaling, SetClosureOperator.fromImplications(trivialImplications))) second
     //    (NextClosures2Bit bitCompute probabilisticScaling) second
   }
 

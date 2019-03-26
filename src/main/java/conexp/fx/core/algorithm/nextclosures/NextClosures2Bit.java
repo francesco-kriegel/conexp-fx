@@ -44,7 +44,7 @@ import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 import conexp.fx.core.math.Math3;
 import conexp.fx.core.util.Meter;
 import conexp.fx.gui.ConExpFX;
@@ -76,7 +76,7 @@ public class NextClosures2Bit {
       final Set<Future<?>> fs = Collections3.newConcurrentHashSet();
       final Set<BitSetFX> cc = state.getActualCandidates();
       cc.forEach(c -> fs.add(executor.submit(() -> {
-        final BitSetFX d = ClosureOperator
+        final BitSetFX d = SetClosureOperator
             .implicativeClosure(state.implications, state.getFirstPremiseSize(c), true, true, true, BitSetFX::new, c);
         if (c.geq(d)) {
 //        if (c.containsAll(d)) {

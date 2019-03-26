@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
@@ -37,13 +38,28 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import conexp.fx.core.collections.relation.MatrixRelation;
+
 public class ELTBox {
+
+  private static final IRI              NOTHING = OWLManager.getOWLDataFactory().getOWLNothing().getIRI();
 
   private final Set<ELConceptInclusion> conceptInclusions;
 
   public ELTBox() {
     super();
-    this.conceptInclusions = new HashSet<ELConceptInclusion>();
+    this.conceptInclusions = new HashSet<>();
+  }
+
+  public final Signature getSignature() {
+    final Signature sigma = new Signature(IRI.generateDocumentIRI());
+    for (ELConceptInclusion ci : conceptInclusions) {
+      sigma.getConceptNames().addAll(ci.getSubsumee().getConceptNamesInSignature().collect(Collectors.toSet()));
+      sigma.getConceptNames().addAll(ci.getSubsumer().getConceptNamesInSignature().collect(Collectors.toSet()));
+      sigma.getRoleNames().addAll(ci.getSubsumee().getRoleNamesInSignature().collect(Collectors.toSet()));
+      sigma.getRoleNames().addAll(ci.getSubsumer().getRoleNamesInSignature().collect(Collectors.toSet()));
+    }
+    return sigma;
   }
 
   public final Set<ELConceptInclusion> getConceptInclusions() {
@@ -91,6 +107,27 @@ public class ELTBox {
             }
           }
       }
+      changed = true;
+      while (changed) {
+        changed = false;
+        for (ELConceptDescription o : canmod.getDomain())
+          if (canmod.getConceptNameExtensionMatrix().contains(o, NOTHING))
+            for (MatrixRelation<ELConceptDescription, ELConceptDescription> r : canmod
+                .getRoleNameExtensionMatrixMap()
+                .values())
+              if (r.colHeads().contains(o))
+                for (ELConceptDescription p : r.col(o))
+                  changed |= canmod.add(p, NOTHING);
+      }
+      for (ELConceptDescription o : canmod.getDomain())
+        if (canmod.getConceptNameExtensionMatrix().contains(o, NOTHING)) {
+          canmod.getConceptNameExtensionMatrix().row(o).retainAll(Collections.singleton(NOTHING));
+          for (MatrixRelation<ELConceptDescription, ELConceptDescription> r : canmod
+              .getRoleNameExtensionMatrixMap()
+              .values())
+            if (r.rowHeads().contains(o))
+              r.row(o).clear();
+        }
       return this.canmod;
     }
 

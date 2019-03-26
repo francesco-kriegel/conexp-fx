@@ -10,7 +10,7 @@ import conexp.fx.core.context.MatrixContext
 import conexp.fx.core.exporter.CXTExporter
 import conexp.fx.core.util.Meter
 import conexp.fx.core.dl.ELConceptDescription
-import conexp.fx.core.dl.deprecated.Signature
+import conexp.fx.core.dl.Signature
 
 object ELSubsumptionContextGenerator {
 

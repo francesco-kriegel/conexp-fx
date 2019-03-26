@@ -46,7 +46,8 @@ import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.context.SparseContext;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.dl.Signature;
+import conexp.fx.core.math.SetClosureOperator;
 
 @Deprecated
 public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C, G, T> {
@@ -202,7 +203,7 @@ public abstract class AInterpretation<C, G, T> implements Interpretation<IRI, C,
       getBackgroundImplications(final Context<IRI, C> inducedContext, final T backgroundTBox);
 
   @Override
-  public final ClosureOperator<IRI>
+  public final SetClosureOperator<IRI>
       getClosureOperator(final int roleDepth, final int maxCardinality, final Constructor... constructors) {
     return set -> getConceptExpressionExtension(getMostSpecificConcept(set, roleDepth, maxCardinality, constructors));
   }

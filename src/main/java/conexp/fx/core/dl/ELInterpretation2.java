@@ -51,12 +51,32 @@ public class ELInterpretation2<I> {
     this.roleNameExtensionMatrix = new HashMap<>();
   }
 
+  public final Signature getSignature(final boolean onlyActiveSignature) {
+    final Signature sigma = new Signature(IRI.generateDocumentIRI());
+    if (!onlyActiveSignature) {
+      sigma.getConceptNames().addAll(conceptNameExtensionMatrix.colHeads());
+      sigma.getRoleNames().addAll(roleNameExtensionMatrix.keySet());
+    } else {
+      for (IRI A : conceptNameExtensionMatrix.colHeads())
+        if (!conceptNameExtensionMatrix.col(A).isEmpty())
+          sigma.getConceptNames().add(A);
+      for (IRI r : roleNameExtensionMatrix.keySet())
+        if (!roleNameExtensionMatrix.get(r).isEmpty())
+          sigma.getRoleNames().add(r);
+    }
+    return sigma;
+  }
+
   public final MatrixRelation<I, IRI> getConceptNameExtensionMatrix() {
     return this.conceptNameExtensionMatrix;
   }
 
   public final MatrixRelation<I, I> getRoleNameExtensionMatrix(final IRI roleName) {
     return this.roleNameExtensionMatrix.computeIfAbsent(roleName, __ -> new MatrixRelation<>(true));
+  }
+
+  public final Map<IRI, MatrixRelation<I, I>> getRoleNameExtensionMatrixMap() {
+    return this.roleNameExtensionMatrix;
   }
 
   public final Set<I> getDomain() {
@@ -66,17 +86,36 @@ public class ELInterpretation2<I> {
         .reduce((Set<I>) conceptNameExtensionMatrix.rowHeads(), (s, m) -> Sets.union(s, m.colHeads()), Sets::union);
   }
 
+  public final boolean add(final I i, final IRI A) {
+    return conceptNameExtensionMatrix.add(i, A);
+  }
+
+  public final boolean add(final I i, final String A) {
+    return add(i, IRI.create(A));
+  }
+
+  public final boolean add(final I i, final IRI r, final I j) {
+    return getRoleNameExtensionMatrix(r).add(i, j);
+  }
+
+  public final boolean add(final I i, final String r, final I j) {
+    return add(i, IRI.create(r), j);
+  }
+
   private final Predicate<I> satisfiesAllExistentialRestrictions(final ELConceptDescription conceptDescription) {
     return i -> conceptDescription
         .getExistentialRestrictions()
         .entries()
         .parallelStream()
         .allMatch(
-            e -> roleNameExtensionMatrix
-                .get(e.getKey())
-                .row(i)
-                .parallelStream()
-                .anyMatch(j -> isInExtensionOf(j, e.getValue())));
+            e -> roleNameExtensionMatrix.containsKey(e.getKey())
+                && roleNameExtensionMatrix.get(e.getKey()).rowHeads().contains(i)
+                    ? roleNameExtensionMatrix
+                        .get(e.getKey())
+                        .row(i)
+                        .parallelStream()
+                        .anyMatch(j -> isInExtensionOf(j, e.getValue()))
+                    : false);
   }
 
   public final Set<I> getExtension(final ELConceptDescription conceptDescription) {

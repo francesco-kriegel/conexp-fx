@@ -36,7 +36,7 @@ import conexp.fx.core.collections.Pair;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.context.Context;
 import conexp.fx.core.context.Implication;
-import conexp.fx.core.math.ClosureOperator;
+import conexp.fx.core.math.SetClosureOperator;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.task.TimeTask;
@@ -52,7 +52,7 @@ public final class NextClosures2C {
       final Consumer<String> updateStatus,
       final Consumer<Double> updateProgress,
       final Supplier<Boolean> isCancelled,
-      final ClosureOperator<M> constraint) {
+      final SetClosureOperator<M> constraint) {
     final NextClosuresState<G, M, Set<M>> result = NextClosuresState.withHashSets(cxt.colHeads());
     result.candidates.clear();
     final HashSet<M> firstCandidate = new HashSet<M>();
@@ -61,7 +61,7 @@ public final class NextClosures2C {
     result.cardinality = firstCardinality;
     result.candidates.put(firstCandidate, firstCardinality);
 //    final ClosureOperator<M> clop = ClosureOperator.fromImplications(result.implications, true, true);
-    final ClosureOperator<M> sup = ClosureOperator.supremum(ClosureOperator.fromContext(cxt), constraint);
+    final SetClosureOperator<M> sup = SetClosureOperator.supremum(SetClosureOperator.fromContext(cxt), constraint);
     final int maxCardinality = cxt.colHeads().size();
     for (; result.cardinality <= maxCardinality; result.cardinality++) {
       try {
@@ -76,9 +76,9 @@ public final class NextClosures2C {
       result.candidates.keySet().parallelStream().filter(c -> c.size() == result.cardinality).forEach(candidate -> {
         futures.add(executor.submit(() -> {
           final Set<M> closure =
-              ClosureOperator
+              SetClosureOperator
                   .supremum(
-                      ClosureOperator
+                      SetClosureOperator
                           .fromImplications(result.implications, result.candidates.get(candidate), true, true),
                       constraint)
                   .closure(candidate);
@@ -116,7 +116,7 @@ public final class NextClosures2C {
   }
 
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
-      compute(final Context<G, M> cxt, final ExecutorService executor, final ClosureOperator<M> constraint) {
+      compute(final Context<G, M> cxt, final ExecutorService executor, final SetClosureOperator<M> constraint) {
     return compute(
         cxt,
         executor,
@@ -129,7 +129,7 @@ public final class NextClosures2C {
   }
 
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
-      compute(final Context<G, M> cxt, final int cores, final ClosureOperator<M> constraint) {
+      compute(final Context<G, M> cxt, final int cores, final SetClosureOperator<M> constraint) {
     if (cores > Runtime.getRuntime().availableProcessors())
       throw new IllegalArgumentException(
           "Requested pool size is too large. VM has only " + Runtime.getRuntime().availableProcessors()
@@ -145,11 +145,11 @@ public final class NextClosures2C {
   }
 
   public static final <G, M> Pair<Set<Concept<G, M>>, Set<Implication<G, M>>>
-      compute(final Context<G, M> cxt, final ClosureOperator<M> constraint) {
+      compute(final Context<G, M> cxt, final SetClosureOperator<M> constraint) {
     return compute(cxt, Runtime.getRuntime().availableProcessors() - 1, constraint);
   }
 
-  public static final <G, M> TimeTask<?> createTask(FCADataset<G, M> dataset, final ClosureOperator<M> constraint) {
+  public static final <G, M> TimeTask<?> createTask(FCADataset<G, M> dataset, final SetClosureOperator<M> constraint) {
     return new TimeTask<Void>(dataset, "NextClosures") {
 
       @Override

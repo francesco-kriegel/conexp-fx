@@ -56,17 +56,19 @@ import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.Pair;
-import conexp.fx.core.dl.deprecated.Signature;
-import conexp.fx.core.math.GuavaIsomorphism;
-import conexp.fx.core.math.PartialComparable;
+import conexp.fx.core.math.LatticeElement;
 import conexp.fx.core.util.UnicodeSymbols;
 
-public final class ELConceptDescription implements PartialComparable<ELConceptDescription>, Cloneable {
+public final class ELConceptDescription implements LatticeElement<ELConceptDescription>, Cloneable {
 
   private static final OWLDataFactory df = OWLManager.getOWLDataFactory();
 
   public static final ELConceptDescription of(final OWLClassExpression concept) {
     return new ELConceptDescription(concept);
+  }
+
+  public static final ELConceptDescription parse(final String expression) {
+    return ELParser.read(expression);
   }
 
   public static final ELConceptDescription bot() {
@@ -244,6 +246,30 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
     return conceptNames.isEmpty() && existentialRestrictions.isEmpty();
   }
 
+  public final Signature getSignature() {
+    final Signature sigma = new Signature(IRI.generateDocumentIRI());
+    sigma.getConceptNames().addAll(getConceptNamesInSignature().collect(Collectors.toSet()));
+    sigma.getRoleNames().addAll(getRoleNamesInSignature().collect(Collectors.toSet()));
+    return sigma;
+  }
+
+  protected final Stream<IRI> getConceptNamesInSignature() {
+    return Stream
+        .concat(
+            conceptNames.parallelStream(),
+            existentialRestrictions
+                .values()
+                .parallelStream()
+                .flatMap(ELConceptDescription::getConceptNamesInSignature));
+  }
+
+  protected final Stream<IRI> getRoleNamesInSignature() {
+    return Stream
+        .concat(
+            existentialRestrictions.keys().parallelStream(),
+            existentialRestrictions.values().parallelStream().flatMap(ELConceptDescription::getRoleNamesInSignature));
+  }
+
   public final Set<IRI> getConceptNames() {
     return conceptNames;
   }
@@ -358,6 +384,15 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
         .map(ELConceptDescription::roleDepth)
         .max(Integer::compare)
         .orElse(0);
+  }
+
+  public final void restrictTo(final int roleDepth) {
+    if (roleDepth < 0)
+      throw new IllegalArgumentException();
+    else if (roleDepth == 0)
+      existentialRestrictions.clear();
+    else
+      existentialRestrictions.values().parallelStream().forEach(filler -> filler.restrictTo(roleDepth - 1));
   }
 
   public final Collection<ELConceptDescription> topLevelConjuncts() {
@@ -2229,6 +2264,14 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
   }
 
   @Override
+  public final boolean equivalent(final ELConceptDescription other) {
+    return Stream
+        .<Supplier<Boolean>> of(() -> this.subsumes(other), () -> other.subsumes(this))
+        .parallel()
+        .allMatch(Supplier::get);
+  }
+
+  @Override
   public final boolean smaller(final ELConceptDescription other) {
     return Stream
         .<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> other.subsumes(this))
@@ -2260,6 +2303,51 @@ public final class ELConceptDescription implements PartialComparable<ELConceptDe
         .<Supplier<Boolean>> of(() -> !this.subsumes(other), () -> !other.subsumes(this))
         .parallel()
         .allMatch(Supplier::get);
+  }
+
+  @Override
+  public ELConceptDescription infimum(ELConceptDescription e) {
+    return and(e);
+  }
+
+  @Override
+  public ELConceptDescription supremum(ELConceptDescription e) {
+    return lcs(e);
+  }
+
+  @Override
+  public boolean inf(ELConceptDescription e) {
+    if (smallerEq(e))
+      return false;
+    else {
+      conceptNames.addAll(e.conceptNames);
+      existentialRestrictions.putAll(e.existentialRestrictions);
+      return true;
+    }
+  }
+
+  @Override
+  public boolean sup(ELConceptDescription e) {
+    if (greaterEq(e))
+      return false;
+    else {
+      final ELConceptDescription supremum = supremum(e);
+      conceptNames.clear();
+      existentialRestrictions.clear();
+      conceptNames.addAll(supremum.conceptNames);
+      existentialRestrictions.putAll(supremum.existentialRestrictions);
+      return true;
+    }
+  }
+
+  @Override
+  public ELConceptDescription greatest() {
+    return ELConceptDescription.top();
+  }
+
+  @Override
+  public ELConceptDescription smallest() {
+    return ELConceptDescription.bot();
   }
 
 }
