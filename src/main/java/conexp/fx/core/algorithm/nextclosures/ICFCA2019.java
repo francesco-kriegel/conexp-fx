@@ -65,6 +65,7 @@ public class ICFCA2019 {
             baseSet,
             clop,
             cxt::colAnd,
+            __ -> false,
             Executors.newWorkStealingPool(),
             __ -> {},
             __ -> {},

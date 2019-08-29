@@ -36,7 +36,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <encoding>UTF-8</encoding>
-    <scala.version>2.12.8</scala.version>
+    <scala.version>2.12.9</scala.version>
     <scala.compat.version>2.12</scala.compat.version>
     <bundles.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/download/</bundles.url>
     <webstart.url>https://lat.inf.tu-dresden.de/~francesco/conexp-fx/webstart/${project.build.finalName}.html</webstart.url>
@@ -209,6 +209,12 @@
           <artifactId>owlapi-distribution</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>apache-jena-libs</artifactId>
+      <version>3.10.0</version>
+      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.openrdf.sesame</groupId>
@@ -913,7 +919,7 @@
     <profile>
       <id>mac</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <!-- <activeByDefault>true</activeByDefault> -->
         <os>
           <!-- <family>mac</family> -->
           <name>mac os x</name>

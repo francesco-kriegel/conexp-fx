@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.semanticweb.owlapi.model.IRI;
@@ -41,7 +43,7 @@ import conexp.fx.core.math.SetClosureOperator;
 public final class ELAxiomatizer {
 
   public static final <I> ELAxiomatizer from(final Signature sigma, final ELInterpretation2<I> i, final int roleDepth) {
-    return new ELAxiomatizer(sigma, roleDepth, DualClosureOperator.fromInterpretation(i, roleDepth));
+    return new ELAxiomatizer(sigma, roleDepth, true, __ -> false, DualClosureOperator.fromInterpretation(i, roleDepth));
   }
 
   public static final <I> ELAxiomatizer
@@ -49,12 +51,16 @@ public final class ELAxiomatizer {
     return new ELAxiomatizer(
         sigma,
         roleDepth,
+        true,
+        __ -> false,
         DualClosureOperator
             .infimum(DualClosureOperator.fromInterpretation(i, roleDepth), DualClosureOperator.fromTBox(t, roleDepth)));
   }
 
   private final Signature                                 sigma;
   private final int                                       roleDepth;
+  private final boolean                                   withBot;
+  private final Predicate<ELConceptDescription>           hasEmptySupport;
   private final DualClosureOperator<ELConceptDescription> clop;
   private Set<ELConceptDescription>                       closures;
   private final Set<ELConceptDescription>                 visited;
@@ -64,10 +70,14 @@ public final class ELAxiomatizer {
   public ELAxiomatizer(
       final Signature sigma,
       final int roleDepth,
+      final boolean withBot,
+      final Predicate<ELConceptDescription> hasEmptySupport,
       final DualClosureOperator<ELConceptDescription> clop) {
     super();
     this.sigma = sigma;
     this.roleDepth = roleDepth;
+    this.withBot = withBot;
+    this.hasEmptySupport = hasEmptySupport;
     this.clop = clop;
     this.closures = Sets.newConcurrentHashSet();
     this.visited = Sets.newConcurrentHashSet();
@@ -88,7 +98,8 @@ public final class ELAxiomatizer {
     closures = Collections3.representatives(closures, ELConceptDescription::equivalent);
     System.out.println("  " + closures.size() + " closures");
     System.out.println("Constructing attributes...");
-    attributes.add(ELConceptDescription.bot());
+    if (withBot)
+      attributes.add(ELConceptDescription.bot());
     for (IRI A : sigma.getConceptNames())
       attributes.add(ELConceptDescription.conceptName(A));
     for (IRI r : sigma.getRoleNames())
@@ -98,14 +109,17 @@ public final class ELAxiomatizer {
     System.out.println(attributes);
   }
 
+  private AtomicInteger num = new AtomicInteger();
+
   private final void findClosuresBelow(final ELConceptDescription c) {
     if (!visited.contains(c))
       try {
         visited.add(c);
-//        System.out.println("Searching closures below " + c);
+        System.out.println("Searching closures below " + c);
         final ELConceptDescription closure = clop.closure(c);
         closure.restrictTo(roleDepth - 1);
         closures.add(closure);
+        System.out.println("closure " + num.incrementAndGet() + " " + closure);
         for (final ELConceptDescription lower : closure.lowerNeighborsB(sigma))
           if (lower.roleDepth() < roleDepth)
             findClosuresBelow(lower);
@@ -125,6 +139,7 @@ public final class ELAxiomatizer {
             attributes,
             setClop,
             __ -> Collections.emptySet(),
+            set -> hasEmptySupport.test(ELConceptDescription.conjunction(set)),
             Executors.newWorkStealingPool(),
             __ -> {},
             implication -> {
@@ -173,7 +188,7 @@ public final class ELAxiomatizer {
     for (int d = 0; d < 5; d++) {
       final DualClosureOperator<ELConceptDescription> clop =
           DualClosureOperator.infimum(DualClosureOperator.fromTBox(t1, d), DualClosureOperator.fromTBox(t2, d));
-      final ELAxiomatizer axiomatizer = new ELAxiomatizer(sigma, d, clop);
+      final ELAxiomatizer axiomatizer = new ELAxiomatizer(sigma, d, true, __ -> false, clop);
       axiomatizer.initialize();
       final ELTBox base = axiomatizer.compute();
       System.out.println("d=" + d);
@@ -203,7 +218,7 @@ public final class ELAxiomatizer {
       final DualClosureOperator<ELConceptDescription> clop = DualClosureOperator
           .supremum(DualClosureOperator.fromInterpretation(i, d), DualClosureOperator.fromTBox(t, d));
       System.out.println("Car has closure " + clop.closure(ELConceptDescription.parse("Car")));
-      final ELAxiomatizer axiomatizer = new ELAxiomatizer(sigma, d, clop);
+      final ELAxiomatizer axiomatizer = new ELAxiomatizer(sigma, d, true, __ -> false, clop);
       axiomatizer.initialize();
       final ELTBox base = axiomatizer.compute();
       System.out.println("d=" + d);
@@ -211,9 +226,9 @@ public final class ELAxiomatizer {
       System.out.println();
     }
   }
-  
+
   private static void baz() {
-    
+
   }
 
 }

@@ -3,6 +3,7 @@ package conexp.fx.core.dl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -154,7 +155,46 @@ public class ELInterpretation2<I> {
     return tBox.getConceptInclusions().parallelStream().allMatch(this::models);
   }
 
+  public final ELConceptDescription getMostSpecificConceptDescription(final I object, final int roleDepth) {
+    if (roleDepth < 0)
+      throw new IllegalArgumentException();
+    else {
+      final ELConceptDescription mmsc = new ELConceptDescription();
+      mmsc.getConceptNames().addAll(conceptNameExtensionMatrix.row(object));
+      if (roleDepth > 0) {
+        for (Entry<IRI, MatrixRelation<I, I>> e : roleNameExtensionMatrix.entrySet())
+          if (e.getValue().rowHeads().contains(object))
+            for (I successor : e.getValue().row(object))
+              mmsc
+                  .getExistentialRestrictions()
+                  .put(e.getKey(), getMostSpecificConceptDescription(successor, roleDepth - 1));
+      }
+      return mmsc.reduce();
+    }
+  }
+
   public final ELConceptDescription getMostSpecificConceptDescription(final Set<I> objects, final int roleDepth) {
+    if (roleDepth < 0)
+      throw new IllegalArgumentException();
+    else if (objects.isEmpty())
+      return ELConceptDescription.bot();
+    else {
+      final Iterator<I> it = objects.iterator();
+      ELConceptDescription mmsc = getMostSpecificConceptDescription(it.next(), roleDepth);
+      while (it.hasNext())
+        mmsc = ELLeastCommonSubsumer.lcs(mmsc, getMostSpecificConceptDescription(it.next(), roleDepth));
+      return mmsc;
+    }
+//      return objects
+//          .parallelStream()
+//          .reduce(
+//              ELConceptDescription.bot(),
+//              (mmsc, object) -> ELLeastCommonSubsumer.lcs(mmsc, getMostSpecificConceptDescription(object, roleDepth)),
+//              ELLeastCommonSubsumer::lcs)
+//          .reduce();
+  }
+
+  public final ELConceptDescription getMostSpecificConceptDescription2(final Set<I> objects, final int roleDepth) {
     if (roleDepth < 0)
       throw new IllegalArgumentException();
     else if (objects.isEmpty())

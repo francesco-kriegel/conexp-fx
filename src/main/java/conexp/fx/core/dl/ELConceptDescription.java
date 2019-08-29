@@ -2166,6 +2166,70 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
     return sb.toString();
   }
 
+  private final String toShortString(IRI iri) {
+    return iri.toString().substring(iri.toString().indexOf("#") + 1);
+  }
+
+  public final String toShortString() {
+    if (isBot())
+      return UnicodeSymbols.BOT;
+    if (isTop())
+      return UnicodeSymbols.TOP;
+    final StringBuilder sb = new StringBuilder();
+    final Iterator<IRI> it1 = conceptNames.iterator();
+    if (it1.hasNext()) {
+      sb.append(toShortString(it1.next()));
+    }
+    while (it1.hasNext()) {
+      // sb.append(" ");
+      sb.append(UnicodeSymbols.SQCAP);
+      // sb.append(" ");
+      sb.append(toShortString(it1.next()));
+    }
+    if (!conceptNames.isEmpty() && !existentialRestrictions.isEmpty()) {
+      // sb.append(" ");
+      sb.append(UnicodeSymbols.SQCAP);
+      // sb.append(" ");
+    }
+    final Iterator<Entry<IRI, ELConceptDescription>> it2 = existentialRestrictions.entries().iterator();
+    if (it2.hasNext()) {
+      final Entry<IRI, ELConceptDescription> existentialRestriction = it2.next();
+      sb.append(UnicodeSymbols.EXISTS);
+      // sb.append(" ");
+      sb.append(toShortString(existentialRestriction.getKey()));
+      // sb.append(" ");
+      sb.append(".");
+      if (existentialRestriction.getValue().conceptNames.size()
+          + existentialRestriction.getValue().existentialRestrictions.size() <= 1)
+        sb.append(existentialRestriction.getValue().toShortString());
+      else {
+        sb.append("(");
+        sb.append(existentialRestriction.getValue().toShortString());
+        sb.append(")");
+      }
+    }
+    while (it2.hasNext()) {
+      // sb.append(" ");
+      sb.append(UnicodeSymbols.SQCAP);
+      final Entry<IRI, ELConceptDescription> existentialRestriction = it2.next();
+      // sb.append(" ");
+      sb.append(UnicodeSymbols.EXISTS);
+      // sb.append(" ");
+      sb.append(toShortString(existentialRestriction.getKey()));
+      // sb.append(" ");
+      sb.append(".");
+      if (existentialRestriction.getValue().conceptNames.size()
+          + existentialRestriction.getValue().existentialRestrictions.size() <= 1)
+        sb.append(existentialRestriction.getValue().toShortString());
+      else {
+        sb.append("(");
+        sb.append(existentialRestriction.getValue().toShortString());
+        sb.append(")");
+      }
+    }
+    return sb.toString();
+  }
+
   public final String toLaTeXString() {
     if (this.isBot())
       return "\\bot";

@@ -2,7 +2,10 @@ package conexp.fx.core.dl;
 
 import java.util.stream.Collectors;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
 /*
  * #%L
@@ -29,6 +32,8 @@ import org.semanticweb.owlapi.model.IRI;
 import conexp.fx.core.util.UnicodeSymbols;
 
 public class ELConceptInclusion {
+
+  private static final OWLDataFactory df = OWLManager.getOWLDataFactory();
 
   public static final ELConceptInclusion parse(final String subsumeeExpression, final String subsumerExpression) {
     return new ELConceptInclusion(
@@ -84,6 +89,10 @@ public class ELConceptInclusion {
   @Override
   public String toString() {
     return subsumee.toString() + " " + UnicodeSymbols.SQSUBSETEQ + " " + subsumer.toString();
+  }
+
+  public OWLSubClassOfAxiom toOWLSubClassOfAxiom() {
+    return df.getOWLSubClassOfAxiom(subsumee.toOWLClassExpression(), subsumer.toOWLClassExpression());
   }
 
 }

@@ -36,6 +36,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,7 @@ public final class NextClosures2 {
       final Set<M> baseSet,
       final SetClosureOperator<M> clop,
       final Function<Set<M>, Set<G>> extension,
+      final Predicate<Set<M>> monotoneBreakPredicate,
       final ExecutorService executor,
       final Consumer<Concept<G, M>> conceptConsumer,
       final Consumer<Implication<G, M>> implicationConsumer,
@@ -79,6 +81,8 @@ public final class NextClosures2 {
       final Set<Future<?>> fs = Collections3.newConcurrentHashSet();
       final Set<Set<M>> cc = state.getActualCandidates();
       cc.forEach(c -> fs.add(executor.submit(() -> {
+        if (monotoneBreakPredicate.test(c))
+          return;
 //        final Set<M> d = SetClosureOperator
 //            .implicativeClosure(state.implications, state.getFirstPremiseSize(c), true, true, true, HashSet::new, c);
         final SetClosureOperator<M> _clop = backgroundKnowledge.isEmpty()
@@ -151,6 +155,7 @@ public final class NextClosures2 {
         baseSet,
         clop,
         extension,
+        __ -> false,
         Executors.newWorkStealingPool(),
         __ -> {},
         __ -> {},
