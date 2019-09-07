@@ -40,108 +40,109 @@
 <span class="sourceLineNo">032</span>  public static void main(String[] args) {<a name="line.32"></a>
 <span class="sourceLineNo">033</span>//    foo();<a name="line.33"></a>
 <span class="sourceLineNo">034</span>//    bar();<a name="line.34"></a>
-<span class="sourceLineNo">035</span>    baz2();<a name="line.35"></a>
-<span class="sourceLineNo">036</span>  }<a name="line.36"></a>
-<span class="sourceLineNo">037</span><a name="line.37"></a>
-<span class="sourceLineNo">038</span>  private static void foo() {<a name="line.38"></a>
-<span class="sourceLineNo">039</span>    // This is the example in my DAM 2019 paper.<a name="line.39"></a>
-<span class="sourceLineNo">040</span>    final ELTBox tBox = new ELTBox();<a name="line.40"></a>
-<span class="sourceLineNo">041</span>//    tBox<a name="line.41"></a>
-<span class="sourceLineNo">042</span>//        .getConceptInclusions()<a name="line.42"></a>
-<span class="sourceLineNo">043</span>//        .add(<a name="line.43"></a>
-<span class="sourceLineNo">044</span>//            new ELConceptInclusion(<a name="line.44"></a>
-<span class="sourceLineNo">045</span>//                ELConceptDescription.conceptName(IRI.create("A")),<a name="line.45"></a>
-<span class="sourceLineNo">046</span>//                ELConceptDescription<a name="line.46"></a>
-<span class="sourceLineNo">047</span>//                    .existentialRestriction(<a name="line.47"></a>
-<span class="sourceLineNo">048</span>//                        IRI.create("r"),<a name="line.48"></a>
-<span class="sourceLineNo">049</span>//                        ELConceptDescription.existentialRestriction(IRI.create("r"), ELConceptDescription.top()))));<a name="line.49"></a>
-<span class="sourceLineNo">050</span>//    tBox<a name="line.50"></a>
-<span class="sourceLineNo">051</span>//        .getConceptInclusions()<a name="line.51"></a>
-<span class="sourceLineNo">052</span>//        .add(<a name="line.52"></a>
-<span class="sourceLineNo">053</span>//            new ELConceptInclusion(<a name="line.53"></a>
-<span class="sourceLineNo">054</span>//                ELConceptDescription.existentialRestriction(IRI.create("r"), ELConceptDescription.top()),<a name="line.54"></a>
-<span class="sourceLineNo">055</span>//                ELConceptDescription<a name="line.55"></a>
-<span class="sourceLineNo">056</span>//                    .existentialRestriction(IRI.create("s"), ELConceptDescription.conceptName(IRI.create("A")))));<a name="line.56"></a>
-<span class="sourceLineNo">057</span>    tBox.getConceptInclusions().add(new ELConceptInclusion(ELParser.read("A"), ELParser.read("exists r.exists r.Top")));<a name="line.57"></a>
-<span class="sourceLineNo">058</span>    tBox.getConceptInclusions().add(new ELConceptInclusion(ELParser.read("exists r.Top"), ELParser.read("exists s.A")));<a name="line.58"></a>
-<span class="sourceLineNo">059</span>//    final ELConceptDescription C = new ELConceptDescription();<a name="line.59"></a>
-<span class="sourceLineNo">060</span>//    C.getConceptNames().add(IRI.create("A"));<a name="line.60"></a>
-<span class="sourceLineNo">061</span>//    C.getConceptNames().add(IRI.create("B"));<a name="line.61"></a>
-<span class="sourceLineNo">062</span>    final ELConceptDescription C = ELParser.read("A and B");<a name="line.62"></a>
-<span class="sourceLineNo">063</span>    System.out.println(tBox);<a name="line.63"></a>
-<span class="sourceLineNo">064</span>    System.out.println(C);<a name="line.64"></a>
-<span class="sourceLineNo">065</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.65"></a>
-<span class="sourceLineNo">066</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.66"></a>
-<span class="sourceLineNo">067</span>      System.out.println(tBox.getMostSpecificConsequence(C, d));<a name="line.67"></a>
-<span class="sourceLineNo">068</span>    }<a name="line.68"></a>
-<span class="sourceLineNo">069</span>  }<a name="line.69"></a>
-<span class="sourceLineNo">070</span><a name="line.70"></a>
-<span class="sourceLineNo">071</span>  private static void bar() {<a name="line.71"></a>
-<span class="sourceLineNo">072</span>    final Set&lt;Set&lt;Integer&gt;&gt; hypergraph = new HashSet&lt;&gt;();<a name="line.72"></a>
-<span class="sourceLineNo">073</span>    hypergraph.add(Sets.newHashSet(1, 2, 3));<a name="line.73"></a>
-<span class="sourceLineNo">074</span>    hypergraph.add(Sets.newHashSet(2, 3, 4));<a name="line.74"></a>
-<span class="sourceLineNo">075</span>    hypergraph.add(Sets.newHashSet(2, 5, 8));<a name="line.75"></a>
-<span class="sourceLineNo">076</span>    hypergraph.add(Sets.newHashSet(7, 8, 9));<a name="line.76"></a>
-<span class="sourceLineNo">077</span>//    hypergraph.add(Sets.newHashSet());<a name="line.77"></a>
+<span class="sourceLineNo">035</span>//    baz2();<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    System.out.println(ELConceptDescription.parse("∃r.(B⊓∃r.⊤⊓∃r.C)⊓∃r.(C⊓∃r.B⊓∃r.⊤)").reduce());<a name="line.36"></a>
+<span class="sourceLineNo">037</span>  }<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>  private static void foo() {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    // This is the example in my DAM 2019 paper.<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    final ELTBox tBox = new ELTBox();<a name="line.41"></a>
+<span class="sourceLineNo">042</span>//    tBox<a name="line.42"></a>
+<span class="sourceLineNo">043</span>//        .getConceptInclusions()<a name="line.43"></a>
+<span class="sourceLineNo">044</span>//        .add(<a name="line.44"></a>
+<span class="sourceLineNo">045</span>//            new ELConceptInclusion(<a name="line.45"></a>
+<span class="sourceLineNo">046</span>//                ELConceptDescription.conceptName(IRI.create("A")),<a name="line.46"></a>
+<span class="sourceLineNo">047</span>//                ELConceptDescription<a name="line.47"></a>
+<span class="sourceLineNo">048</span>//                    .existentialRestriction(<a name="line.48"></a>
+<span class="sourceLineNo">049</span>//                        IRI.create("r"),<a name="line.49"></a>
+<span class="sourceLineNo">050</span>//                        ELConceptDescription.existentialRestriction(IRI.create("r"), ELConceptDescription.top()))));<a name="line.50"></a>
+<span class="sourceLineNo">051</span>//    tBox<a name="line.51"></a>
+<span class="sourceLineNo">052</span>//        .getConceptInclusions()<a name="line.52"></a>
+<span class="sourceLineNo">053</span>//        .add(<a name="line.53"></a>
+<span class="sourceLineNo">054</span>//            new ELConceptInclusion(<a name="line.54"></a>
+<span class="sourceLineNo">055</span>//                ELConceptDescription.existentialRestriction(IRI.create("r"), ELConceptDescription.top()),<a name="line.55"></a>
+<span class="sourceLineNo">056</span>//                ELConceptDescription<a name="line.56"></a>
+<span class="sourceLineNo">057</span>//                    .existentialRestriction(IRI.create("s"), ELConceptDescription.conceptName(IRI.create("A")))));<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    tBox.getConceptInclusions().add(new ELConceptInclusion(ELParser.read("A"), ELParser.read("exists r.exists r.Top")));<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    tBox.getConceptInclusions().add(new ELConceptInclusion(ELParser.read("exists r.Top"), ELParser.read("exists s.A")));<a name="line.59"></a>
+<span class="sourceLineNo">060</span>//    final ELConceptDescription C = new ELConceptDescription();<a name="line.60"></a>
+<span class="sourceLineNo">061</span>//    C.getConceptNames().add(IRI.create("A"));<a name="line.61"></a>
+<span class="sourceLineNo">062</span>//    C.getConceptNames().add(IRI.create("B"));<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    final ELConceptDescription C = ELParser.read("A and B");<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    System.out.println(tBox);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    System.out.println(C);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>      System.out.println(tBox.getMostSpecificConsequence(C, d));<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    }<a name="line.69"></a>
+<span class="sourceLineNo">070</span>  }<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>  private static void bar() {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    final Set&lt;Set&lt;Integer&gt;&gt; hypergraph = new HashSet&lt;&gt;();<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    hypergraph.add(Sets.newHashSet(1, 2, 3));<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    hypergraph.add(Sets.newHashSet(2, 3, 4));<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    hypergraph.add(Sets.newHashSet(2, 5, 8));<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    hypergraph.add(Sets.newHashSet(7, 8, 9));<a name="line.77"></a>
 <span class="sourceLineNo">078</span>//    hypergraph.add(Sets.newHashSet());<a name="line.78"></a>
-<span class="sourceLineNo">079</span>    final Set&lt;Set&lt;Integer&gt;&gt; mhs = ELInterpretation2.getMinimalHittingSets(hypergraph);<a name="line.79"></a>
-<span class="sourceLineNo">080</span>    System.out.println(hypergraph);<a name="line.80"></a>
-<span class="sourceLineNo">081</span>    System.out.println(mhs);<a name="line.81"></a>
-<span class="sourceLineNo">082</span>  }<a name="line.82"></a>
-<span class="sourceLineNo">083</span><a name="line.83"></a>
-<span class="sourceLineNo">084</span>  private static ELConceptInclusion parseCI(String subsumee, String subsumer) {<a name="line.84"></a>
-<span class="sourceLineNo">085</span>    return new ELConceptInclusion(ELParser.read(subsumee), ELParser.read(subsumer));<a name="line.85"></a>
-<span class="sourceLineNo">086</span>  }<a name="line.86"></a>
-<span class="sourceLineNo">087</span><a name="line.87"></a>
-<span class="sourceLineNo">088</span>  private static void baz0() {<a name="line.88"></a>
-<span class="sourceLineNo">089</span>    final ELTBox tBox = new ELTBox();<a name="line.89"></a>
-<span class="sourceLineNo">090</span>    tBox.getConceptInclusions().add(parseCI("Elefant", "Mammal"));<a name="line.90"></a>
-<span class="sourceLineNo">091</span>    tBox.getConceptInclusions().add(parseCI("Mammal", "exists hasParent. Mammal"));<a name="line.91"></a>
-<span class="sourceLineNo">092</span>    tBox.getConceptInclusions().add(parseCI("Elefant", "exists hasParent. Elefant"));<a name="line.92"></a>
-<span class="sourceLineNo">093</span>    final ELConceptDescription C = ELParser.read("Elefant");<a name="line.93"></a>
-<span class="sourceLineNo">094</span>    System.out.println(tBox);<a name="line.94"></a>
-<span class="sourceLineNo">095</span>    System.out.println(C);<a name="line.95"></a>
-<span class="sourceLineNo">096</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.96"></a>
-<span class="sourceLineNo">097</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.97"></a>
-<span class="sourceLineNo">098</span>      System.out.println(tBox.getMostSpecificConsequence(C, d));<a name="line.98"></a>
-<span class="sourceLineNo">099</span>    }<a name="line.99"></a>
-<span class="sourceLineNo">100</span>  }<a name="line.100"></a>
-<span class="sourceLineNo">101</span><a name="line.101"></a>
-<span class="sourceLineNo">102</span>  private static void baz1() {<a name="line.102"></a>
-<span class="sourceLineNo">103</span>    final ELTBox tBox = new ELTBox();<a name="line.103"></a>
-<span class="sourceLineNo">104</span>    tBox.getConceptInclusions().add(parseCI("exists hasChild. Top", "Parent"));<a name="line.104"></a>
-<span class="sourceLineNo">105</span>    tBox.getConceptInclusions().add(parseCI("exists hasChild. exists hasChild. Top", "Grandparent"));<a name="line.105"></a>
-<span class="sourceLineNo">106</span>    final ELConceptDescription C = ELParser.read("exists hasChild. exists hasChild. Top");<a name="line.106"></a>
-<span class="sourceLineNo">107</span>    System.out.println(tBox);<a name="line.107"></a>
-<span class="sourceLineNo">108</span>    System.out.println(C);<a name="line.108"></a>
-<span class="sourceLineNo">109</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.109"></a>
-<span class="sourceLineNo">110</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.110"></a>
-<span class="sourceLineNo">111</span>      System.out.println(tBox.getMostSpecificConsequence(C, d));<a name="line.111"></a>
-<span class="sourceLineNo">112</span>    }<a name="line.112"></a>
-<span class="sourceLineNo">113</span>  }<a name="line.113"></a>
-<span class="sourceLineNo">114</span><a name="line.114"></a>
-<span class="sourceLineNo">115</span>  private static void baz2() {<a name="line.115"></a>
-<span class="sourceLineNo">116</span>    final ELTBox tBox = new ELTBox();<a name="line.116"></a>
-<span class="sourceLineNo">117</span>    tBox.getConceptInclusions().add(parseCI("A", "exists r.B"));<a name="line.117"></a>
-<span class="sourceLineNo">118</span>    tBox.getConceptInclusions().add(parseCI("B", "C"));<a name="line.118"></a>
-<span class="sourceLineNo">119</span>    tBox.getConceptInclusions().add(parseCI("exists r. C", "exists s. exists r.B"));<a name="line.119"></a>
-<span class="sourceLineNo">120</span>    tBox.getConceptInclusions().add(parseCI("exists s. Top", "C"));<a name="line.120"></a>
-<span class="sourceLineNo">121</span>    tBox.getConceptInclusions().add(parseCI("A and B", "exists r. C"));<a name="line.121"></a>
-<span class="sourceLineNo">122</span>    final ELConceptDescription C = ELParser.read("A");<a name="line.122"></a>
-<span class="sourceLineNo">123</span>    System.out.println(tBox);<a name="line.123"></a>
-<span class="sourceLineNo">124</span>    System.out.println(C);<a name="line.124"></a>
-<span class="sourceLineNo">125</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.125"></a>
-<span class="sourceLineNo">126</span>    System.out.println(tBox.getCanonicalModelLutz(C));<a name="line.126"></a>
-<span class="sourceLineNo">127</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.127"></a>
-<span class="sourceLineNo">128</span>      final ELConceptDescription mss = tBox.getMostSpecificConsequence(C, d);<a name="line.128"></a>
-<span class="sourceLineNo">129</span>      System.out.println(mss);<a name="line.129"></a>
-<span class="sourceLineNo">130</span>      final ELConceptDescription mssL = tBox.getMostSpecificConsequenceLutz(C, d);<a name="line.130"></a>
-<span class="sourceLineNo">131</span>      System.out.println(mssL);<a name="line.131"></a>
-<span class="sourceLineNo">132</span>      System.out.println(mss.isEquivalentTo(mssL));<a name="line.132"></a>
-<span class="sourceLineNo">133</span>    }<a name="line.133"></a>
-<span class="sourceLineNo">134</span>  }<a name="line.134"></a>
-<span class="sourceLineNo">135</span><a name="line.135"></a>
-<span class="sourceLineNo">136</span>}<a name="line.136"></a>
+<span class="sourceLineNo">079</span>//    hypergraph.add(Sets.newHashSet());<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    final Set&lt;Set&lt;Integer&gt;&gt; mhs = ELInterpretation2.getMinimalHittingSets(hypergraph);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    System.out.println(hypergraph);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    System.out.println(mhs);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>  }<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>  private static ELConceptInclusion parseCI(String subsumee, String subsumer) {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    return new ELConceptInclusion(ELParser.read(subsumee), ELParser.read(subsumer));<a name="line.86"></a>
+<span class="sourceLineNo">087</span>  }<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>  private static void baz0() {<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    final ELTBox tBox = new ELTBox();<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    tBox.getConceptInclusions().add(parseCI("Elefant", "Mammal"));<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    tBox.getConceptInclusions().add(parseCI("Mammal", "exists hasParent. Mammal"));<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    tBox.getConceptInclusions().add(parseCI("Elefant", "exists hasParent. Elefant"));<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    final ELConceptDescription C = ELParser.read("Elefant");<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    System.out.println(tBox);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    System.out.println(C);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.97"></a>
+<span class="sourceLineNo">098</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.98"></a>
+<span class="sourceLineNo">099</span>      System.out.println(tBox.getMostSpecificConsequence(C, d));<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    }<a name="line.100"></a>
+<span class="sourceLineNo">101</span>  }<a name="line.101"></a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span>  private static void baz1() {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>    final ELTBox tBox = new ELTBox();<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    tBox.getConceptInclusions().add(parseCI("exists hasChild. Top", "Parent"));<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    tBox.getConceptInclusions().add(parseCI("exists hasChild. exists hasChild. Top", "Grandparent"));<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    final ELConceptDescription C = ELParser.read("exists hasChild. exists hasChild. Top");<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    System.out.println(tBox);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    System.out.println(C);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.110"></a>
+<span class="sourceLineNo">111</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>      System.out.println(tBox.getMostSpecificConsequence(C, d));<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    }<a name="line.113"></a>
+<span class="sourceLineNo">114</span>  }<a name="line.114"></a>
+<span class="sourceLineNo">115</span><a name="line.115"></a>
+<span class="sourceLineNo">116</span>  private static void baz2() {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    final ELTBox tBox = new ELTBox();<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    tBox.getConceptInclusions().add(parseCI("A", "exists r.B"));<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    tBox.getConceptInclusions().add(parseCI("B", "C"));<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    tBox.getConceptInclusions().add(parseCI("exists r. C", "exists s. exists r.B"));<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    tBox.getConceptInclusions().add(parseCI("exists s. Top", "C"));<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    tBox.getConceptInclusions().add(parseCI("A and B", "exists r. C"));<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    final ELConceptDescription C = ELParser.read("A");<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    System.out.println(tBox);<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    System.out.println(C);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    System.out.println(tBox.getCanonicalModel(C));<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    System.out.println(tBox.getCanonicalModelLutz(C));<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    for (int d = 0; d &lt; 5; d++) {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>      final ELConceptDescription mss = tBox.getMostSpecificConsequence(C, d);<a name="line.129"></a>
+<span class="sourceLineNo">130</span>      System.out.println(mss);<a name="line.130"></a>
+<span class="sourceLineNo">131</span>      final ELConceptDescription mssL = tBox.getMostSpecificConsequenceLutz(C, d);<a name="line.131"></a>
+<span class="sourceLineNo">132</span>      System.out.println(mssL);<a name="line.132"></a>
+<span class="sourceLineNo">133</span>      System.out.println(mss.isEquivalentTo(mssL));<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    }<a name="line.134"></a>
+<span class="sourceLineNo">135</span>  }<a name="line.135"></a>
+<span class="sourceLineNo">136</span><a name="line.136"></a>
+<span class="sourceLineNo">137</span>}<a name="line.137"></a>
 
 
 

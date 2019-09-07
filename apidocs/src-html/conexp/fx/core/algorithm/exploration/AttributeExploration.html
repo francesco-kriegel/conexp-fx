@@ -38,7 +38,7 @@
 <span class="sourceLineNo">030</span>import conexp.fx.core.collections.setlist.SetList.LecticOrder;<a name="line.30"></a>
 <span class="sourceLineNo">031</span>import conexp.fx.core.context.Implication;<a name="line.31"></a>
 <span class="sourceLineNo">032</span>import conexp.fx.core.context.MatrixContext;<a name="line.32"></a>
-<span class="sourceLineNo">033</span>import conexp.fx.core.math.ClosureOperator;<a name="line.33"></a>
+<span class="sourceLineNo">033</span>import conexp.fx.core.math.SetClosureOperator;<a name="line.33"></a>
 <span class="sourceLineNo">034</span>import conexp.fx.gui.exploration.HumanExpert;<a name="line.34"></a>
 <span class="sourceLineNo">035</span><a name="line.35"></a>
 <span class="sourceLineNo">036</span>/**<a name="line.36"></a>
@@ -75,7 +75,7 @@
 <span class="sourceLineNo">067</span>  protected final Expert&lt;G, M&gt;           expert;<a name="line.67"></a>
 <span class="sourceLineNo">068</span>  protected Set&lt;M&gt;                       pseudoClosure = new HashSet&lt;M&gt;();<a name="line.68"></a>
 <span class="sourceLineNo">069</span>  protected final Set&lt;Implication&lt;G, M&gt;&gt; implications  = new HashSet&lt;Implication&lt;G, M&gt;&gt;();<a name="line.69"></a>
-<span class="sourceLineNo">070</span>  private final ClosureOperator&lt;M&gt;       clop          = ClosureOperator.fromImplications(implications, true, true);<a name="line.70"></a>
+<span class="sourceLineNo">070</span>  private final SetClosureOperator&lt;M&gt;       clop          = SetClosureOperator.fromImplications(implications, true, true);<a name="line.70"></a>
 <span class="sourceLineNo">071</span>  private final LecticOrder&lt;M&gt;           lecticOrder;<a name="line.71"></a>
 <span class="sourceLineNo">072</span><a name="line.72"></a>
 <span class="sourceLineNo">073</span>  /**<a name="line.73"></a>

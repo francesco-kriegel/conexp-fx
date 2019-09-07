@@ -52,7 +52,7 @@
 <span class="sourceLineNo">044</span>import conexp.fx.core.context.Context;<a name="line.44"></a>
 <span class="sourceLineNo">045</span>import conexp.fx.core.context.Implication;<a name="line.45"></a>
 <span class="sourceLineNo">046</span>import conexp.fx.core.context.MatrixContext;<a name="line.46"></a>
-<span class="sourceLineNo">047</span>import conexp.fx.core.math.ClosureOperator;<a name="line.47"></a>
+<span class="sourceLineNo">047</span>import conexp.fx.core.math.SetClosureOperator;<a name="line.47"></a>
 <span class="sourceLineNo">048</span>import conexp.fx.core.math.Math3;<a name="line.48"></a>
 <span class="sourceLineNo">049</span>import conexp.fx.core.util.Meter;<a name="line.49"></a>
 <span class="sourceLineNo">050</span>import conexp.fx.gui.ConExpFX;<a name="line.50"></a>
@@ -84,7 +84,7 @@
 <span class="sourceLineNo">076</span>      final Set&lt;Future&lt;?&gt;&gt; fs = Collections3.newConcurrentHashSet();<a name="line.76"></a>
 <span class="sourceLineNo">077</span>      final Set&lt;BitSetFX&gt; cc = state.getActualCandidates();<a name="line.77"></a>
 <span class="sourceLineNo">078</span>      cc.forEach(c -&gt; fs.add(executor.submit(() -&gt; {<a name="line.78"></a>
-<span class="sourceLineNo">079</span>        final BitSetFX d = ClosureOperator<a name="line.79"></a>
+<span class="sourceLineNo">079</span>        final BitSetFX d = SetClosureOperator<a name="line.79"></a>
 <span class="sourceLineNo">080</span>            .implicativeClosure(state.implications, state.getFirstPremiseSize(c), true, true, true, BitSetFX::new, c);<a name="line.80"></a>
 <span class="sourceLineNo">081</span>        if (c.geq(d)) {<a name="line.81"></a>
 <span class="sourceLineNo">082</span>//        if (c.containsAll(d)) {<a name="line.82"></a>

@@ -50,7 +50,7 @@
 <span class="sourceLineNo">042</span>import conexp.fx.core.context.Concept;<a name="line.42"></a>
 <span class="sourceLineNo">043</span>import conexp.fx.core.context.Context;<a name="line.43"></a>
 <span class="sourceLineNo">044</span>import conexp.fx.core.context.Implication;<a name="line.44"></a>
-<span class="sourceLineNo">045</span>import conexp.fx.core.math.ClosureOperator;<a name="line.45"></a>
+<span class="sourceLineNo">045</span>import conexp.fx.core.math.SetClosureOperator;<a name="line.45"></a>
 <span class="sourceLineNo">046</span><a name="line.46"></a>
 <span class="sourceLineNo">047</span>public final class NextClosures1C {<a name="line.47"></a>
 <span class="sourceLineNo">048</span><a name="line.48"></a>
@@ -61,9 +61,9 @@
 <span class="sourceLineNo">053</span>    final Map&lt;Set&lt;M&gt;, Integer&gt;       candidates   = new ConcurrentHashMap&lt;Set&lt;M&gt;, Integer&gt;();<a name="line.53"></a>
 <span class="sourceLineNo">054</span>    private final Set&lt;Set&lt;M&gt;&gt;        processed    = Collections3.newConcurrentHashSet();<a name="line.54"></a>
 <span class="sourceLineNo">055</span>    int                              cardinality  = 0;<a name="line.55"></a>
-<span class="sourceLineNo">056</span>    private final ClosureOperator&lt;M&gt; clop;<a name="line.56"></a>
+<span class="sourceLineNo">056</span>    private final SetClosureOperator&lt;M&gt; clop;<a name="line.56"></a>
 <span class="sourceLineNo">057</span><a name="line.57"></a>
-<span class="sourceLineNo">058</span>    public ResultC(ClosureOperator&lt;M&gt; clop) {<a name="line.58"></a>
+<span class="sourceLineNo">058</span>    public ResultC(SetClosureOperator&lt;M&gt; clop) {<a name="line.58"></a>
 <span class="sourceLineNo">059</span>      this.clop = clop;<a name="line.59"></a>
 <span class="sourceLineNo">060</span>      candidates.put(new HashSet&lt;M&gt;(), 0);<a name="line.60"></a>
 <span class="sourceLineNo">061</span>    }<a name="line.61"></a>
@@ -129,14 +129,14 @@
 <span class="sourceLineNo">121</span><a name="line.121"></a>
 <span class="sourceLineNo">122</span>  public static final &lt;G, M&gt; ResultC&lt;G, M&gt; compute(<a name="line.122"></a>
 <span class="sourceLineNo">123</span>      final Context&lt;G, M&gt; cxt,<a name="line.123"></a>
-<span class="sourceLineNo">124</span>      final ClosureOperator&lt;M&gt; clop,<a name="line.124"></a>
+<span class="sourceLineNo">124</span>      final SetClosureOperator&lt;M&gt; clop,<a name="line.124"></a>
 <span class="sourceLineNo">125</span>      final boolean verbose,<a name="line.125"></a>
 <span class="sourceLineNo">126</span>      final ThreadPoolExecutor tpe) {<a name="line.126"></a>
 <span class="sourceLineNo">127</span>    if (verbose)<a name="line.127"></a>
 <span class="sourceLineNo">128</span>      System.out<a name="line.128"></a>
 <span class="sourceLineNo">129</span>          .println("NextClosures running on " + tpe.getCorePoolSize() + " - " + tpe.getMaximumPoolSize() + " cores...");<a name="line.129"></a>
 <span class="sourceLineNo">130</span>    final ResultC&lt;G, M&gt; result = new ResultC&lt;G, M&gt;(clop);<a name="line.130"></a>
-<span class="sourceLineNo">131</span>    final ClosureOperator&lt;M&gt; sup = ClosureOperator.supremum(ClosureOperator.fromContext(cxt), clop);<a name="line.131"></a>
+<span class="sourceLineNo">131</span>    final SetClosureOperator&lt;M&gt; sup = SetClosureOperator.supremum(SetClosureOperator.fromContext(cxt), clop);<a name="line.131"></a>
 <span class="sourceLineNo">132</span>    final int maxCardinality = cxt.colHeads().size();<a name="line.132"></a>
 <span class="sourceLineNo">133</span>    for (; result.cardinality &lt;= maxCardinality; result.cardinality++) {<a name="line.133"></a>
 <span class="sourceLineNo">134</span>      if (verbose) {<a name="line.134"></a>
@@ -157,7 +157,7 @@
 <span class="sourceLineNo">149</span>//      for (final Set&lt;M&gt; candidate : candidatesN) {<a name="line.149"></a>
 <span class="sourceLineNo">150</span>      result.candidates.keySet().parallelStream().filter(c -&gt; c.size() == result.cardinality).forEach(candidate -&gt; {<a name="line.150"></a>
 <span class="sourceLineNo">151</span>        futures.add(tpe.submit(() -&gt; {<a name="line.151"></a>
-<span class="sourceLineNo">152</span>          final Set&lt;M&gt; closure = ClosureOperator<a name="line.152"></a>
+<span class="sourceLineNo">152</span>          final Set&lt;M&gt; closure = SetClosureOperator<a name="line.152"></a>
 <span class="sourceLineNo">153</span>              .fromImplications(<a name="line.153"></a>
 <span class="sourceLineNo">154</span>                  result.implications<a name="line.154"></a>
 <span class="sourceLineNo">155</span>                      .entrySet()<a name="line.155"></a>
@@ -206,7 +206,7 @@
 <span class="sourceLineNo">198</span>  }<a name="line.198"></a>
 <span class="sourceLineNo">199</span><a name="line.199"></a>
 <span class="sourceLineNo">200</span>  public static final &lt;G, M&gt; ResultC&lt;G, M&gt;<a name="line.200"></a>
-<span class="sourceLineNo">201</span>      compute(final Context&lt;G, M&gt; cxt, final ClosureOperator&lt;M&gt; clop, final boolean verbose, final int cores) {<a name="line.201"></a>
+<span class="sourceLineNo">201</span>      compute(final Context&lt;G, M&gt; cxt, final SetClosureOperator&lt;M&gt; clop, final boolean verbose, final int cores) {<a name="line.201"></a>
 <span class="sourceLineNo">202</span>    if (cores &gt; Runtime.getRuntime().availableProcessors())<a name="line.202"></a>
 <span class="sourceLineNo">203</span>      throw new IllegalArgumentException(<a name="line.203"></a>
 <span class="sourceLineNo">204</span>          "Requested pool size is too large. VM has only " + Runtime.getRuntime().availableProcessors()<a name="line.204"></a>
@@ -221,7 +221,7 @@
 <span class="sourceLineNo">213</span>  }<a name="line.213"></a>
 <span class="sourceLineNo">214</span><a name="line.214"></a>
 <span class="sourceLineNo">215</span>  public static final &lt;G, M&gt; ResultC&lt;G, M&gt;<a name="line.215"></a>
-<span class="sourceLineNo">216</span>      compute(final Context&lt;G, M&gt; cxt, final ClosureOperator&lt;M&gt; clop, final boolean verbose) {<a name="line.216"></a>
+<span class="sourceLineNo">216</span>      compute(final Context&lt;G, M&gt; cxt, final SetClosureOperator&lt;M&gt; clop, final boolean verbose) {<a name="line.216"></a>
 <span class="sourceLineNo">217</span>    final int maxc = Runtime.getRuntime().availableProcessors();<a name="line.217"></a>
 <span class="sourceLineNo">218</span>    final int cores = maxc &lt; 9 ? maxc : (maxc * 3) / 4;<a name="line.218"></a>
 <span class="sourceLineNo">219</span>    return compute(cxt, clop, verbose, cores);<a name="line.219"></a>
@@ -231,27 +231,27 @@
 <span class="sourceLineNo">223</span>      final Context&lt;G, M&gt; cxt,<a name="line.223"></a>
 <span class="sourceLineNo">224</span>      final Set&lt;Implication&lt;G, M&gt;&gt; backgroundImplications,<a name="line.224"></a>
 <span class="sourceLineNo">225</span>      final boolean verbose) {<a name="line.225"></a>
-<span class="sourceLineNo">226</span>    return compute(cxt, ClosureOperator.fromImplications(backgroundImplications, false, true), verbose);<a name="line.226"></a>
+<span class="sourceLineNo">226</span>    return compute(cxt, SetClosureOperator.fromImplications(backgroundImplications, false, true), verbose);<a name="line.226"></a>
 <span class="sourceLineNo">227</span>  }<a name="line.227"></a>
 <span class="sourceLineNo">228</span><a name="line.228"></a>
 <span class="sourceLineNo">229</span>  public static final &lt;G, M&gt; ResultC&lt;G, M&gt;<a name="line.229"></a>
 <span class="sourceLineNo">230</span>      computeIceberg(final Context&lt;G, M&gt; cxt, final int minSupp, final boolean verbose) {<a name="line.230"></a>
-<span class="sourceLineNo">231</span>    return compute(cxt, ClosureOperator.byMinimalSupport(minSupp, cxt), verbose);<a name="line.231"></a>
+<span class="sourceLineNo">231</span>    return compute(cxt, SetClosureOperator.byMinimalSupport(minSupp, cxt), verbose);<a name="line.231"></a>
 <span class="sourceLineNo">232</span>  }<a name="line.232"></a>
 <span class="sourceLineNo">233</span><a name="line.233"></a>
 <span class="sourceLineNo">234</span>  public static final &lt;G, M&gt; ResultC&lt;G, M&gt;<a name="line.234"></a>
 <span class="sourceLineNo">235</span>      computeByMaxCard(final Context&lt;G, M&gt; cxt, final int maxCard, final boolean verbose) {<a name="line.235"></a>
-<span class="sourceLineNo">236</span>    return compute(cxt, ClosureOperator.byMaximalCardinality(maxCard, cxt.colHeads()), verbose);<a name="line.236"></a>
+<span class="sourceLineNo">236</span>    return compute(cxt, SetClosureOperator.byMaximalCardinality(maxCard, cxt.colHeads()), verbose);<a name="line.236"></a>
 <span class="sourceLineNo">237</span>  }<a name="line.237"></a>
 <span class="sourceLineNo">238</span><a name="line.238"></a>
 <span class="sourceLineNo">239</span>  public static final &lt;G, M&gt; ResultC&lt;G, M&gt;<a name="line.239"></a>
 <span class="sourceLineNo">240</span>      computeBelow(final Context&lt;G, M&gt; cxt, final Collection&lt;M&gt; elements, final boolean verbose) {<a name="line.240"></a>
-<span class="sourceLineNo">241</span>    return compute(cxt, ClosureOperator.isSubsetOf(elements, cxt.colHeads()), verbose);<a name="line.241"></a>
+<span class="sourceLineNo">241</span>    return compute(cxt, SetClosureOperator.isSubsetOf(elements, cxt.colHeads()), verbose);<a name="line.241"></a>
 <span class="sourceLineNo">242</span>  }<a name="line.242"></a>
 <span class="sourceLineNo">243</span><a name="line.243"></a>
 <span class="sourceLineNo">244</span>  public static final &lt;G, M&gt; ResultC&lt;G, M&gt;<a name="line.244"></a>
 <span class="sourceLineNo">245</span>      computeAbove(final Context&lt;G, M&gt; cxt, final Collection&lt;M&gt; elements, final boolean verbose) {<a name="line.245"></a>
-<span class="sourceLineNo">246</span>    return compute(cxt, ClosureOperator.containsAllFrom(elements, cxt.colHeads()), verbose);<a name="line.246"></a>
+<span class="sourceLineNo">246</span>    return compute(cxt, SetClosureOperator.containsAllFrom(elements, cxt.colHeads()), verbose);<a name="line.246"></a>
 <span class="sourceLineNo">247</span>  }<a name="line.247"></a>
 <span class="sourceLineNo">248</span><a name="line.248"></a>
 <span class="sourceLineNo">249</span>}<a name="line.249"></a>

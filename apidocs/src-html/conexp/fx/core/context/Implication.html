@@ -40,7 +40,7 @@
 <span class="sourceLineNo">032</span><a name="line.32"></a>
 <span class="sourceLineNo">033</span>import com.google.common.collect.Sets;<a name="line.33"></a>
 <span class="sourceLineNo">034</span><a name="line.34"></a>
-<span class="sourceLineNo">035</span>import conexp.fx.core.math.ClosureOperator;<a name="line.35"></a>
+<span class="sourceLineNo">035</span>import conexp.fx.core.math.SetClosureOperator;<a name="line.35"></a>
 <span class="sourceLineNo">036</span>import conexp.fx.core.util.UnicodeSymbols;<a name="line.36"></a>
 <span class="sourceLineNo">037</span>import de.tudresden.inf.tcs.fcaapi.FCAImplication;<a name="line.37"></a>
 <span class="sourceLineNo">038</span><a name="line.38"></a>
@@ -60,7 +60,7 @@
 <span class="sourceLineNo">052</span>  }<a name="line.52"></a>
 <span class="sourceLineNo">053</span><a name="line.53"></a>
 <span class="sourceLineNo">054</span>  public static final &lt;G, M&gt; boolean entails(final Set&lt;Implication&lt;G, M&gt;&gt; x, final Implication&lt;G, M&gt; y) {<a name="line.54"></a>
-<span class="sourceLineNo">055</span>    return ClosureOperator.fromImplications(x, false, false).closure(y.getPremise()).containsAll(y.getConclusion());<a name="line.55"></a>
+<span class="sourceLineNo">055</span>    return SetClosureOperator.fromImplications(x, false, false).closure(y.getPremise()).containsAll(y.getConclusion());<a name="line.55"></a>
 <span class="sourceLineNo">056</span>  }<a name="line.56"></a>
 <span class="sourceLineNo">057</span><a name="line.57"></a>
 <span class="sourceLineNo">058</span>  private final Set&lt;G&gt; support;<a name="line.58"></a>
