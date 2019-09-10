@@ -681,6 +681,40 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
     ).collect(Collectors.toSet());
   }
 
+  /**
+   * Computes the upper n-neighbors of this concept description. If n is set to {@link java.lang.Integer.MAX_VALUE},
+   * then the semantic upper neighbors are computed, and if n is set to 1, then the syntactic upper neighbors are
+   * computed.
+   */
+  public final Set<ELConceptDescription> upperNNeighbors(int n) {
+    final ELConceptDescription reducedForm = this.clone().reduce();
+    final Stream<ELConceptDescription> upperNNeighborsFromConceptNames =
+        reducedForm.conceptNames.parallelStream().map(A -> {
+          final ELConceptDescription upperNeighbor = reducedForm.clone();
+          upperNeighbor.conceptNames.remove(A);
+          return upperNeighbor;
+        });
+    final Stream<ELConceptDescription> _upperNNeighborsFromExistentialRestrictions =
+        reducedForm.existentialRestrictions.entries().parallelStream().flatMap(ER -> {
+          final Set<ELConceptDescription> all_uERs = ER.getValue().upperNNeighbors(n);
+          return Sets.combinations(all_uERs, Math.min(n, all_uERs.size())).stream().parallel().map(uERs -> {
+            final ELConceptDescription upperNeighbor = reducedForm.clone();
+            upperNeighbor.existentialRestrictions.remove(ER.getKey(), ER.getValue());
+            uERs.forEach(uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
+            return upperNeighbor;
+          });
+        });
+    final Stream<ELConceptDescription> upperNNeighborsFromExistentialRestrictions;
+    if (n < Integer.MAX_VALUE)
+      upperNNeighborsFromExistentialRestrictions =
+          _upperNNeighborsFromExistentialRestrictions.filter(other -> !ELConceptDescription.this.subsumes(other));
+    else
+      upperNNeighborsFromExistentialRestrictions = _upperNNeighborsFromExistentialRestrictions;
+    return Stream
+        .concat(upperNNeighborsFromConceptNames, upperNNeighborsFromExistentialRestrictions)
+        .collect(Collectors.toSet());
+  }
+
   public final Set<ELConceptDescription> upperNeighborsReduced() {
     final ELConceptDescription reducedForm = this.clone().reduce();
     return Collections3.representatives(Stream.concat(reducedForm.conceptNames.parallelStream().map(A -> {
@@ -706,8 +740,51 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
           .forEach(uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
       return upperNeighbor;
     })
-//        .filter(other -> !this.subsumes(other)))
+    // .filter(other -> !this.subsumes(other)))
     ).collect(Collectors.toSet()), (X, Y) -> X.isEquivalentTo(Y));
+  }
+
+  public final Set<ELConceptDescription> upperNNeighborsReduced(int n) {
+    final ELConceptDescription reducedForm = this.clone().reduce();
+    final Stream<ELConceptDescription> upperNNeighborsFromConceptNames =
+        reducedForm.conceptNames.parallelStream().map(A -> {
+          final ELConceptDescription upperNeighbor = reducedForm.clone();
+          upperNeighbor.conceptNames.remove(A);
+          return upperNeighbor;
+        });
+    final Stream<ELConceptDescription> _upperNNeighborsFromExistentialRestrictions =
+        reducedForm.existentialRestrictions.entries().parallelStream().flatMap(ER -> {
+          final Set<ELConceptDescription> all_uERs = ER.getValue().upperNNeighborsReduced(n);
+          return Sets.combinations(all_uERs, Math.min(n, all_uERs.size())).stream().parallel().map(uERs -> {
+            final ELConceptDescription upperNeighbor = reducedForm.clone();
+            upperNeighbor.existentialRestrictions.remove(ER.getKey(), ER.getValue());
+            uERs
+                .parallelStream()
+                .filter(
+                    uER -> reducedForm.existentialRestrictions
+                        .entries()
+                        .parallelStream()
+                        .filter(otherER -> !otherER.equals(ER))
+                        .filter(otherER -> ER.getKey().equals(otherER.getKey()))
+                        .map(Entry::getValue)
+                        .noneMatch(uER::subsumes))
+                .sequential()
+                .forEach(uER -> upperNeighbor.existentialRestrictions.put(ER.getKey(), uER));
+            return upperNeighbor;
+          });
+        });
+    final Stream<ELConceptDescription> upperNNeighborsFromExistentialRestrictions;
+    if (n < Integer.MAX_VALUE)
+      upperNNeighborsFromExistentialRestrictions =
+          _upperNNeighborsFromExistentialRestrictions.filter(other -> !ELConceptDescription.this.subsumes(other));
+    else
+      upperNNeighborsFromExistentialRestrictions = _upperNNeighborsFromExistentialRestrictions;
+    return Collections3
+        .representatives(
+            Stream
+                .concat(upperNNeighborsFromConceptNames, upperNNeighborsFromExistentialRestrictions)
+                .collect(Collectors.toSet()),
+            ELConceptDescription::isEquivalentTo);
   }
 
   public final Set<ELConceptDescription> lowerNeighbors(final Signature sigma) {
@@ -2290,6 +2367,37 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
     return this.conceptNames.equals(other.conceptNames)
         && this.existentialRestrictions.equals(other.existentialRestrictions);
   }
+
+//  public final boolean deepEquals(ELConceptDescription other) {
+//    return this.conceptNames
+//        .stream()
+//        .parallel()
+//        .allMatch(a -> other.conceptNames.stream().parallel().anyMatch(b -> a.equals(b)))
+//        && other.conceptNames
+//            .stream()
+//            .parallel()
+//            .allMatch(a -> this.conceptNames.stream().parallel().anyMatch(b -> a.equals(b)))
+//        && this.existentialRestrictions
+//            .entries()
+//            .stream()
+//            .parallel()
+//            .allMatch(
+//                rd -> other.existentialRestrictions
+//                    .entries()
+//                    .stream()
+//                    .parallel()
+//                    .anyMatch(se -> rd.getKey().equals(se.getKey()) && rd.getValue().deepEquals(se.getValue())))
+//        && other.existentialRestrictions
+//            .entries()
+//            .stream()
+//            .parallel()
+//            .allMatch(
+//                rd -> this.existentialRestrictions
+//                    .entries()
+//                    .stream()
+//                    .parallel()
+//                    .anyMatch(se -> rd.getKey().equals(se.getKey()) && rd.getValue().deepEquals(se.getValue())));
+//  }
 
   @Override
   public final int hashCode() {
