@@ -1,4 +1,4 @@
-package conexp.fx.core.dl;
+package conexp.fx.core.dl.deprecated;
 
 /*-
  * #%L
@@ -26,6 +26,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+
+import conexp.fx.core.dl.ELConceptDescription;
+import conexp.fx.core.dl.ELConceptInclusion;
+import conexp.fx.core.dl.ELInterpretation2;
+import conexp.fx.core.dl.ELParser;
+import conexp.fx.core.dl.ELTBox;
 
 public class ELCanModTest {
 

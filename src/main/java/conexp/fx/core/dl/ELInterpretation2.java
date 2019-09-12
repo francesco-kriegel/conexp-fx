@@ -1,23 +1,30 @@
 package conexp.fx.core.dl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.semanticweb.owlapi.model.IRI;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Sets;
 
+import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.collections.relation.MatrixRelation;
+import conexp.fx.core.math.BooleanMatrices;
 
 /*-
  * #%L
@@ -50,6 +57,23 @@ public class ELInterpretation2<I> {
     super();
     this.conceptNameExtensionMatrix = new MatrixRelation<>(false);
     this.roleNameExtensionMatrix = new HashMap<>();
+  }
+
+  public ELInterpretation2(
+      MatrixRelation<I, IRI> conceptNameExtensionMatrix,
+      Map<IRI, MatrixRelation<I, I>> roleNameExtensionMatrix) {
+    super();
+    this.conceptNameExtensionMatrix = conceptNameExtensionMatrix;
+    this.roleNameExtensionMatrix = roleNameExtensionMatrix;
+  }
+
+  public final ELInterpretation2<I> clone() {
+    final MatrixRelation<I, IRI> _conceptNameExtensionMatrix = this.conceptNameExtensionMatrix.clone();
+    final Map<IRI, MatrixRelation<I, I>> _roleNameExtensionMatrix = new HashMap<>();
+    this.roleNameExtensionMatrix
+        .entrySet()
+        .forEach(entry -> _roleNameExtensionMatrix.put(entry.getKey(), entry.getValue().clone()));
+    return new ELInterpretation2<>(_conceptNameExtensionMatrix, _roleNameExtensionMatrix);
   }
 
   public final Signature getSignature(final boolean onlyActiveSignature) {
@@ -250,6 +274,128 @@ public class ELInterpretation2<I> {
       hittingSets.removeAll(nonMinimalHittingSets);
       return hittingSets;
     }
+  }
+
+  public ELInterpretation2<Set<I>> reduce() {
+    // Step 1: Domain Reduction
+    final BiPredicate<I, I> bisimilar =
+        (i, j) -> (new ELsiConceptDescription<I>(this, i)).isEquivalentTo(new ELsiConceptDescription<I>(this, j));
+    final Set<Set<I>> quotientDomain = Collections3.quotient(getDomain(), bisimilar);
+    final ELInterpretation2<Set<I>> reduction = new ELInterpretation2<Set<I>>();
+    final Signature activeSignature = this.getSignature(true);
+    reduction.getConceptNameExtensionMatrix().colHeads().addAll(activeSignature.getConceptNames());
+    reduction.getConceptNameExtensionMatrix().rowHeads().addAll(quotientDomain);
+    activeSignature.getConceptNames().forEach(conceptName -> {
+      final Set<Set<I>> col = reduction.getConceptNameExtensionMatrix().col(conceptName);
+      quotientDomain.forEach(equivalenceClass -> {
+        if (getConceptNameExtensionMatrix().contains(equivalenceClass.iterator().next(), conceptName))
+          col.add(equivalenceClass);
+      });
+    });
+    activeSignature.getRoleNames().forEach(roleName -> {
+      reduction.getRoleNameExtensionMatrix(roleName).rowHeads().addAll(quotientDomain);
+      quotientDomain.forEach(equivalenceClass -> {
+        quotientDomain.forEach(fquivalenceClass -> {
+          if ((new ELsiConceptDescription<I>(this, equivalenceClass.iterator().next()))
+              .isSubsumedBy(
+                  ELsiConceptDescription
+                      .exists(roleName, new ELsiConceptDescription<I>(this, fquivalenceClass.iterator().next()))))
+            reduction.getRoleNameExtensionMatrix(roleName).add(equivalenceClass, fquivalenceClass);
+        });
+      });
+    });
+
+    // Step 2: Successor Reduction
+    activeSignature.getRoleNames().forEach(roleName -> {
+      final MatrixRelation<Set<I>, Set<I>> roleExtension = reduction.getRoleNameExtensionMatrix(roleName);
+      roleExtension.rowHeads().forEach(x -> {
+        final Set<Set<I>> successors = roleExtension.row(x);
+        final Set<Set<I>> superfluousSuccessors = Sets.newConcurrentHashSet();
+        successors.forEach(y -> {
+          successors.forEach(z -> {
+            if (!(y.equals(z)) && (new ELsiConceptDescription<Set<I>>(reduction, y))
+                .isSubsumedBy(new ELsiConceptDescription<Set<I>>(reduction, z)))
+              superfluousSuccessors.add(z);
+          });
+        });
+        successors.removeAll(superfluousSuccessors);
+      });
+    });
+
+    // Step 3: Connected Component
+    // cannot be computed here, since we have no selected root element
+
+    return reduction;
+  }
+
+  public ELInterpretation2<I> connectedComponent(I root) {
+    final MatrixRelation<I, I> reachabilityMatrix = new MatrixRelation<I, I>(true);
+    this.getRoleNameExtensionMatrixMap().keySet().forEach(roleName -> {
+      reachabilityMatrix.addAll(this.getRoleNameExtensionMatrix(roleName));
+    });
+    reachabilityMatrix.setMatrix(BooleanMatrices.transitiveClosure(reachabilityMatrix.matrix()));
+    final Set<I> reachableElements = new HashSet<I>(reachabilityMatrix.row(root));
+    final ELInterpretation2<I> connectedComponent = this.clone();
+    connectedComponent.getConceptNameExtensionMatrix().rowHeads().retainAll(reachableElements);
+    connectedComponent.getRoleNameExtensionMatrixMap().keySet().forEach(roleName -> {
+      connectedComponent.getRoleNameExtensionMatrix(roleName).rowHeads().retainAll(reachableElements);
+    });
+    return connectedComponent;
+  }
+
+  public static <J> ELInterpretation2<List<J>> productOf(List<ELInterpretation2<J>> factors) {
+    final int n = factors.size();
+    final HashSet<List<J>> productDomain = new HashSet<>(
+        Lists
+            .transform(
+                Lists.cartesianProduct(Lists.transform(factors, factor -> new ArrayList<J>(factor.getDomain()))),
+                tuple -> new ArrayList<J>(tuple)));
+    final ELInterpretation2<List<J>> product = new ELInterpretation2<>();
+    final Set<IRI> conceptNames = new HashSet<>(
+        factors
+            .stream()
+            .map(factor -> (Set<IRI>) factor.getSignature(true).getConceptNames())
+            .reduce(Sets::intersection)
+            .get());
+    final Set<IRI> roleNames = new HashSet<>(
+        factors
+            .stream()
+            .map(factor -> (Set<IRI>) factor.getSignature(true).getRoleNames())
+            .reduce(Sets::intersection)
+            .get());
+    productDomain.forEach(tuple -> {
+      conceptNames.forEach(conceptName -> {
+        if (IntStream
+            .range(0, n)
+            .allMatch(k -> factors.get(k).getConceptNameExtensionMatrix().contains(tuple.get(k), conceptName)))
+          product.getConceptNameExtensionMatrix().add(tuple, conceptName);
+      });
+      roleNames.forEach(roleName -> {
+        productDomain.forEach(tuple2 -> {
+          if (IntStream
+              .range(0, n)
+              .allMatch(k -> factors.get(k).getRoleNameExtensionMatrix(roleName).contains(tuple.get(k), tuple2.get(k))))
+            product.getRoleNameExtensionMatrix(roleName).add(tuple, tuple2);
+        });
+      });
+    });
+    return product;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null)
+      return false;
+    if (!(obj instanceof ELInterpretation2))
+      return false;
+    final ELInterpretation2<?> other = (ELInterpretation2<?>) obj;
+    return this.conceptNameExtensionMatrix.equals(other.conceptNameExtensionMatrix)
+        && this.roleNameExtensionMatrix.equals(other.roleNameExtensionMatrix);
+  }
+
+  @Override
+  public int hashCode() {
+    return 67 * this.conceptNameExtensionMatrix.hashCode() + 257 * this.roleNameExtensionMatrix.hashCode();
   }
 
   @Override

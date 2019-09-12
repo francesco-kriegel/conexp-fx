@@ -97,7 +97,7 @@ object ELParser extends Parsers {
     }
   }
 
-  def read(code: String): ELConceptDescription = {
+  implicit def read(code: String): ELConceptDescription = {
     val lexerResult = ELLexer(code)
     if (lexerResult.isLeft) throw new RuntimeException(lexerResult.left.get.msg)
     else {
