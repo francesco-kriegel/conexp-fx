@@ -19,6 +19,7 @@ import monix.eval.Coeval
 import conexp.fx.core.math.LatticeElement
 import org.ujmp.core.calculation.Calculation.Ret
 import com.google.common.collect.Sets
+import org.semanticweb.owlapi.apibinding.OWLManager
 
 object ELsiConceptDescription {
 
@@ -140,6 +141,8 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
 
   def approximate(roleDepth: Integer): ELConceptDescription = {
     if (roleDepth < 0) throw new IllegalArgumentException()
+    if (isBot())
+      ELConceptDescription.bot()
     val approximation = new ELConceptDescription
     if (interpretation.getConceptNameExtensionMatrix.rowHeads contains element)
       interpretation.getConceptNameExtensionMatrix.row(element).forEach(approximation.getConceptNames add _)
@@ -157,8 +160,16 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
     new ELsiConceptDescription[java.util.Set[I]](reduction, root)
   }
 
-  def subsumes[J](other: ELsiConceptDescription[J]): Boolean =
-    checkExistenceOfSimulation(interpretation, element, other.interpretation, other.element, Set[Pair[I, J]]())
+  def isBot(): Boolean = {
+    interpretation.getConceptNameExtensionMatrix().colHeads().contains(OWLManager.getOWLDataFactory().getOWLNothing()) &&
+      !interpretation.getConceptNameExtensionMatrix().col(OWLManager.getOWLDataFactory().getOWLNothing()).isEmpty()
+  }
+
+  def subsumes[J](other: ELsiConceptDescription[J]): Boolean = {
+    if (other.isBot()) true
+    else if (this.isBot()) false
+    else checkExistenceOfSimulation(interpretation, element, other.interpretation, other.element, Set[Pair[I, J]]())
+  }
 
   def emptySetIfNull[T](set: java.util.Set[T]): java.util.Set[T] =
     if (set == null) Collections.emptySet() else set

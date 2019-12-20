@@ -41,7 +41,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.ClassExpressionType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -243,7 +242,8 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final boolean isBot() {
-    return conceptNames.contains(df.getOWLNothing().getIRI());
+    return conceptNames.contains(df.getOWLNothing().getIRI())
+        || existentialRestrictions.values().parallelStream().anyMatch(ELConceptDescription::isBot);
   }
 
   public final boolean isTop() {
@@ -356,25 +356,31 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final ELConceptDescription reduce() {
-    for (Entry<IRI, ELConceptDescription> er : existentialRestrictions.entries())
-      er.getValue().reduce();
-    final Function<Entry<IRI, ELConceptDescription>, Stream<Pair<Entry<IRI, ELConceptDescription>, Entry<IRI, ELConceptDescription>>>> f =
-        er1 -> existentialRestrictions
-            .entries()
-            .parallelStream()
-            .filter(er2 -> er1.getKey().equals(er2.getKey()))
-            .filter(er2 -> !er1.equals(er2))
-            .map(er2 -> Pair.of(er1, er2));
-    final Set<Entry<IRI, ELConceptDescription>> superfluousERs = existentialRestrictions
-        .entries()
-        .parallelStream()
-        .map(f)
-        .reduce(Stream::concat)
-        .orElseGet(Stream::empty)
-        .filter(p -> p.first().getValue().isSubsumedBy(p.second().getValue()))
-        .map(Pair::second)
-        .collect(Collectors.toSet());
-    superfluousERs.forEach(x -> existentialRestrictions.remove(x.getKey(), x.getValue()));
+    if (isBot()) {
+      conceptNames.clear();
+      conceptNames.add(df.getOWLNothing().getIRI());
+      existentialRestrictions.clear();
+    } else {
+      for (Entry<IRI, ELConceptDescription> er : existentialRestrictions.entries())
+        er.getValue().reduce();
+      final Function<Entry<IRI, ELConceptDescription>, Stream<Pair<Entry<IRI, ELConceptDescription>, Entry<IRI, ELConceptDescription>>>> f =
+          er1 -> existentialRestrictions
+              .entries()
+              .parallelStream()
+              .filter(er2 -> er1.getKey().equals(er2.getKey()))
+              .filter(er2 -> !er1.equals(er2))
+              .map(er2 -> Pair.of(er1, er2));
+      final Set<Entry<IRI, ELConceptDescription>> superfluousERs = existentialRestrictions
+          .entries()
+          .parallelStream()
+          .map(f)
+          .reduce(Stream::concat)
+          .orElseGet(Stream::empty)
+          .filter(p -> p.first().getValue().isSubsumedBy(p.second().getValue()))
+          .map(Pair::second)
+          .collect(Collectors.toSet());
+      superfluousERs.forEach(x -> existentialRestrictions.remove(x.getKey(), x.getValue()));
+    }
     return this;
   }
 
@@ -443,12 +449,16 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final int rank() {
+    if (isBot())
+      return Integer.MAX_VALUE;
     return this.clone().reduce().unreducedRank();
   }
 
   public final int unreducedRank() {
     if (this.isTop())
       return 0;
+    else if (this.isBot())
+      return Integer.MAX_VALUE;
     else
       return 1 + this.oneUpperNeighbor().unreducedRank();
   }
@@ -2194,6 +2204,10 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
 
   @Override
   public final String toString() {
+    return toShortString();
+  }
+
+  public final String toLongString() {
     if (isBot())
       return UnicodeSymbols.BOT;
     if (isTop())

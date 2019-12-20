@@ -88,7 +88,15 @@ public class ELConceptInclusion {
 
   @Override
   public String toString() {
+    return toShortString();
+  }
+  
+  public String toLongString() {
     return subsumee.toString() + " " + UnicodeSymbols.SQSUBSETEQ + " " + subsumer.toString();
+  }
+
+  public String toShortString() {
+    return subsumee.toShortString() + " " + UnicodeSymbols.SQSUBSETEQ + " " + subsumer.toShortString();
   }
 
   public OWLSubClassOfAxiom toOWLSubClassOfAxiom() {
