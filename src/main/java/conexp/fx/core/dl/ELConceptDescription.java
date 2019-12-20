@@ -190,11 +190,13 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
       conceptNames.add(df.getOWLNothing().getIRI());
       return;
     }
-    if (concept instanceof OWLClass) { // better use concept.getClassExpressionType().equals(ClassExpressionType.OWL_CLASS)
+    if (concept instanceof OWLClass) { // better use
+                                       // concept.getClassExpressionType().equals(ClassExpressionType.OWL_CLASS)
       this.conceptNames.add(((OWLClass) concept).getIRI());
       return;
     }
-    if (concept instanceof OWLObjectSomeValuesFrom) { // better use concept.getClassExpressionType().equals(ClassExpressionType.OBJECT_SOME_VALUES_FROM)
+    if (concept instanceof OWLObjectSomeValuesFrom) { // better use
+                                                      // concept.getClassExpressionType().equals(ClassExpressionType.OBJECT_SOME_VALUES_FROM)
       final OWLObjectSomeValuesFrom existentialRestriction = (OWLObjectSomeValuesFrom) concept;
       this.existentialRestrictions
           .put(
@@ -202,7 +204,8 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
               new ELConceptDescription(existentialRestriction.getFiller()));
       return;
     }
-    if (concept instanceof OWLObjectIntersectionOf) { // better use concept.getClassExpressionType().equals(ClassExpressionType.OBJECT_INTERSECTION_OF)
+    if (concept instanceof OWLObjectIntersectionOf) { // better use
+                                                      // concept.getClassExpressionType().equals(ClassExpressionType.OBJECT_INTERSECTION_OF)
       final OWLObjectIntersectionOf conjunction = (OWLObjectIntersectionOf) concept;
       for (OWLClassExpression conjunct : conjunction.asConjunctSet())
         if (conjunct instanceof OWLClass)
@@ -789,6 +792,8 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final Set<ELConceptDescription> lowerNeighbors(final Signature sigma) {
+    if (isBot())
+      return Collections.emptySet();
     final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
     final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
     sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
@@ -866,6 +871,8 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final Set<ELConceptDescription> lowerNeighborsA(final Signature sigma) {
+    if (isBot())
+      return Collections.emptySet();
     final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
     final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
     sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
@@ -939,6 +946,8 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final Set<ELConceptDescription> lowerNeighborsB(final Signature sigma) {
+    if (isBot())
+      return Collections.emptySet();
     final ELConceptDescription C = ELConceptDescription.this.clone().reduce();
     final Set<ELConceptDescription> lowerNeighbors = Sets.newConcurrentHashSet();
     sigma.getConceptNames().parallelStream().filter(A -> !C.conceptNames.contains(A)).map(A -> {
