@@ -270,7 +270,7 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
       if (skip.add((y, c))) {
         //      if (y.isLeft || !(mostSpecificConsequence.interpretation.getDomain contains y.right)) {
         //      if (y.isLeft || !(mostSpecificConsequence.interpretation.getDomain contains y)) {
-//        println("inserting: " + c.approximate(2) + "   @   " + (if (y.isLeft) y.left.get else y.right.get.approximate(2)))
+        //        println("inserting: " + c.approximate(2) + "   @   " + (if (y.isLeft) y.left.get else y.right.get.approximate(2)))
         c.interpretation.getConceptNameExtensionMatrix.row(c.element).forEach(a ⇒ {
           mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.add(y, a)
           while (!mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.contains(y, a)) {
@@ -280,7 +280,8 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
           }
         })
         c.interpretation.getRoleNameExtensionMatrixMap.keySet().forEach(role ⇒
-          c.interpretation.getRoleNameExtensionMatrix(role).row(c.element).forEach(successor ⇒ {
+          guardedUnmodifiableRow(c.interpretation.getRoleNameExtensionMatrix(role), c.element).forEach(successor ⇒ {
+            //          c.interpretation.getRoleNameExtensionMatrix(role).row(c.element).forEach(successor ⇒ {
             val d = c.rotate(successor)
             val z = Right(d)
             insert(z, d)
@@ -291,12 +292,12 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
     var changed = true
     while (changed) {
       changed = false
-//      println("current saturation: " + mostSpecificConsequence.approximate(2))
-//      println(mostSpecificConsequence.interpretation)
-//      println()
+      //      println("current saturation: " + mostSpecificConsequence.approximate(2))
+      //      println(mostSpecificConsequence.interpretation)
+      //      println()
       new HashSet(mostSpecificConsequence.interpretation.getDomain).forEach(x ⇒
         tbox.foreach(gci ⇒ {
-//          println("testing whether   " + (if (x.isLeft) x.left.get else x.right.get.approximate(2)) + "   satisfies   " + gci._1.approximate(2) + " SubClassOf " + gci._2.approximate(2))
+          //          println("testing whether   " + (if (x.isLeft) x.left.get else x.right.get.approximate(2)) + "   satisfies   " + gci._1.approximate(2) + " SubClassOf " + gci._2.approximate(2))
           if ((mostSpecificConsequence.rotate(x) isSubsumedBy gci._1) && !(mostSpecificConsequence.rotate(x) isSubsumedBy gci._2)) {
             insert(x, gci._2)
             changed = true
