@@ -877,9 +877,9 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
           .selectColumns(Ret.LINK, colHeads.indicesOf(_r.colHeads, false))
           .or(
               Ret.ORIG,
-              _r.matrix.selectRows(Ret.LINK, _r.rowHeads.indicesOf(rowHeads, false)).selectColumns(
-                  Ret.LINK,
-                  _r.colHeads.indicesOf(colHeads, false)));
+              _r.matrix
+                  .selectRows(Ret.LINK, _r.rowHeads.indicesOf(rowHeads, false))
+                  .selectColumns(Ret.LINK, _r.colHeads.indicesOf(colHeads, false)));
       push(new RelationEvent<R, C>(RelationEvent.ALL_CHANGED, null, null, null));
       changed = true;
     } else {
@@ -952,11 +952,14 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       matrix.selectRows(Ret.LINK, i0).selectColumns(Ret.LINK, j0).and(Ret.ORIG, false);
       matrix.selectRows(Ret.LINK, i0).selectColumns(Ret.LINK, j).and(Ret.ORIG, false);
       matrix.selectRows(Ret.LINK, i).selectColumns(Ret.LINK, j0).and(Ret.ORIG, false);
-      matrix.selectRows(Ret.LINK, i).selectColumns(Ret.LINK, j).and(
-          Ret.ORIG,
-          _r.matrix.selectRows(Ret.LINK, _r.rowHeads.indicesOf(rowHeads, false)).selectColumns(
-              Ret.LINK,
-              _r.colHeads.indicesOf(colHeads, false)));
+      matrix
+          .selectRows(Ret.LINK, i)
+          .selectColumns(Ret.LINK, j)
+          .and(
+              Ret.ORIG,
+              _r.matrix
+                  .selectRows(Ret.LINK, _r.rowHeads.indicesOf(rowHeads, false))
+                  .selectColumns(Ret.LINK, _r.colHeads.indicesOf(colHeads, false)));
       push(new RelationEvent<R, C>(RelationEvent.ALL_CHANGED, null, null, null));
       changed = true;
     } else {
@@ -1318,8 +1321,10 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   public final Set<C> rowAnd(final Collection<?> c) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return new HashSet<C>(colHeads());
-    return colHeads().parallelStream().filter(col -> c.parallelStream().allMatch(row -> contains(row, col))).collect(
-        Collectors.toSet());
+    return colHeads()
+        .parallelStream()
+        .filter(col -> c.parallelStream().allMatch(row -> contains(row, col)))
+        .collect(Collectors.toSet());
 //    return Sets.filter(colHeads(), new Predicate<C>() {
 //
 //      private final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, rowHeads.indicesOf(c, true));
@@ -1333,8 +1338,10 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   public final Set<R> colAnd(final Collection<?> c) {
     if (rowHeads().size() == 0 || colHeads().size() == 0)
       return new HashSet<R>(rowHeads());
-    return rowHeads().parallelStream().filter(row -> c.parallelStream().allMatch(col -> contains(row, col))).collect(
-        Collectors.toSet());
+    return rowHeads()
+        .parallelStream()
+        .filter(row -> c.parallelStream().allMatch(col -> contains(row, col)))
+        .collect(Collectors.toSet());
 //    return Sets.filter(rowHeads(), new Predicate<R>() {
 //
 //      private final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, colHeads.indicesOf(c, true));
@@ -1446,10 +1453,10 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       return Collections3.integers(colHeads.size());
 //      return SetLists.integers(colHeads.size());
     final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
-    return j.parallelStream().filter(_j -> rowAnd.getBoolean(0, _j)).collect(
-        BitSetFX::new,
-        BitSetFX::add,
-        BitSetFX::addAll);
+    return j
+        .parallelStream()
+        .filter(_j -> rowAnd.getBoolean(0, _j))
+        .collect(BitSetFX::new, BitSetFX::add, BitSetFX::addAll);
 //    return Collections3.newBitSetFX(Collections2.filter(j, new Predicate<Integer>() {
 //
 //      private final BooleanMatrix rowAnd = BooleanMatrices.andRow(matrix, i);
@@ -1465,10 +1472,10 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
       return Collections3.integers(rowHeads().size());
 //      return SetLists.integers(rowHeads.size());
     final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
-    return i.parallelStream().filter(_i -> colAnd.getBoolean(_i, 0)).collect(
-        BitSetFX::new,
-        BitSetFX::add,
-        BitSetFX::addAll);
+    return i
+        .parallelStream()
+        .filter(_i -> colAnd.getBoolean(_i, 0))
+        .collect(BitSetFX::new, BitSetFX::add, BitSetFX::addAll);
 //    return Collections3.newBitSetFX(Collections2.filter(i, new Predicate<Integer>() {
 //
 //      private final BooleanMatrix colAnd = BooleanMatrices.andCol(matrix, j);
@@ -1604,6 +1611,13 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
     pushAllChangedEvent();
   }
 
+  @Deprecated
+  public final void rewriteMatrix() {
+    final BooleanMatrix copy = BooleanMatrices.clone(matrix);
+    setMatrix(BooleanMatrices.empty(matrix.getRowCount(), matrix.getColumnCount()));
+    matrix.or(Ret.ORIG, copy);
+  }
+
   public final void setContent(final SetList<R> rows, final SetList<C> cols, final BooleanMatrix matrix) {
     rowHeads.addAll(rows);
     if (!homogen)
@@ -1689,13 +1703,17 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   }
 
   public final boolean isAntisymmetric() {
-    return matrix.and(Ret.NEW, matrix.transpose(Ret.NEW)).le(Ret.NEW, BooleanMatrices.identity(size())).equals(
-        BooleanMatrices.full(size()));
+    return matrix
+        .and(Ret.NEW, matrix.transpose(Ret.NEW))
+        .le(Ret.NEW, BooleanMatrices.identity(size()))
+        .equals(BooleanMatrices.full(size()));
   }
 
   public final boolean isQuasiconnex() {
-    return matrix.or(Ret.NEW, matrix.transpose(Ret.NEW)).ge(Ret.NEW, BooleanMatrices.negativeIdentity(size())).equals(
-        BooleanMatrices.full(size()));
+    return matrix
+        .or(Ret.NEW, matrix.transpose(Ret.NEW))
+        .ge(Ret.NEW, BooleanMatrices.negativeIdentity(size()))
+        .equals(BooleanMatrices.full(size()));
   }
 
   public final boolean isAlternative() {
@@ -1750,8 +1768,10 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   }
 
   public final boolean isAcyclic() {
-    return BooleanMatrices.transitiveClosure(matrix()).le(Ret.NEW, matrix.transpose(Ret.NEW).not(Ret.NEW)).equals(
-        BooleanMatrices.full(size()));
+    return BooleanMatrices
+        .transitiveClosure(matrix())
+        .le(Ret.NEW, matrix.transpose(Ret.NEW).not(Ret.NEW))
+        .equals(BooleanMatrices.full(size()));
   }
 
   public final boolean isNTransitive(final int n) {
@@ -1763,12 +1783,19 @@ public class MatrixRelation<R, C> extends AbstractRelation<R, C> {
   }
 
   public final boolean isLeftComparative() {
-    return matrix.transpose(Ret.NEW).mtimes(Ret.NEW, false, matrix).toBooleanMatrix().le(Ret.NEW, matrix).equals(
-        BooleanMatrices.full(size()));
+    return matrix
+        .transpose(Ret.NEW)
+        .mtimes(Ret.NEW, false, matrix)
+        .toBooleanMatrix()
+        .le(Ret.NEW, matrix)
+        .equals(BooleanMatrices.full(size()));
   }
 
   public final boolean isRightComparative() {
-    return matrix.mtimes(Ret.NEW, false, matrix.transpose(Ret.NEW)).toBooleanMatrix().le(Ret.NEW, matrix).equals(
-        BooleanMatrices.full(size()));
+    return matrix
+        .mtimes(Ret.NEW, false, matrix.transpose(Ret.NEW))
+        .toBooleanMatrix()
+        .le(Ret.NEW, matrix)
+        .equals(BooleanMatrices.full(size()));
   }
 }

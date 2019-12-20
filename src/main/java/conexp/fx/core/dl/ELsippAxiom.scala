@@ -83,7 +83,7 @@ case class ELsippDomainRestriction[I, C, R](
   extends ELsippAxiom[I, C, R] {
 
   def toConceptInclusion() =
-    ELsippConceptInclusion[I, C, R](ExistentialRestriction(roleName, Top()), conceptDescription)
+    ELsippConceptInclusion[I, C, R](ExistentialRestriction(roleName, TopConceptDescription()), conceptDescription)
 
 }
 

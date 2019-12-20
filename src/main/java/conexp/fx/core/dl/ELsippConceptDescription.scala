@@ -2,6 +2,11 @@ package conexp.fx.core.dl
 
 import scala.language.implicitConversions
 import conexp.fx.core.util.UnicodeSymbols
+import com.google.common.collect.Sets
+import scala.collection.JavaConverters._
+import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicIntegerArray
+import java.util.concurrent.atomic.AtomicReferenceArray
 
 object ELsippConceptDescription {
 
@@ -28,12 +33,7 @@ object ELsippConceptDescription {
 
 abstract class ELsippConceptDescription[I, C, R] {
 
-  def and(that: ELsippConceptDescription[I, C, R]): ELsippConceptDescription[I, C, R] = {
-    that match {
-      case Conjunction(cs) ⇒ Conjunction(Set(this) ++ cs)
-      case default         ⇒ Conjunction(Set(this, that))
-    }
-  }
+  def and(that: ELsippConceptDescription[I, C, R]): ELsippConceptDescription[I, C, R] = Conjunction(this, that)
 
   def &(that: ELsippConceptDescription[I, C, R]): ELsippConceptDescription[I, C, R] = and(that)
 
@@ -53,7 +53,7 @@ abstract class ELsippConceptDescription[I, C, R] {
 
 }
 
-case class Top[I, C, R]() extends ELsippConceptDescription[I, C, R] {
+case class TopConceptDescription[I, C, R]() extends ELsippConceptDescription[I, C, R] {
 
   override def and(that: ELsippConceptDescription[I, C, R]): ELsippConceptDescription[I, C, R] = that
 
@@ -63,9 +63,9 @@ case class Top[I, C, R]() extends ELsippConceptDescription[I, C, R] {
 
 }
 
-case class Bot[I, C, R]() extends ELsippConceptDescription[I, C, R] {
+case class BottomConceptDescription[I, C, R]() extends ELsippConceptDescription[I, C, R] {
 
-  override def and(that: ELsippConceptDescription[I, C, R]): Bot[I, C, R] = this
+  override def and(that: ELsippConceptDescription[I, C, R]): BottomConceptDescription[I, C, R] = this
 
   override def toString = UnicodeSymbols.BOT
   override def roleDepth = 0
@@ -83,6 +83,8 @@ case class ConceptName[I, C, R](conceptName: C) extends ELsippConceptDescription
 
 case class IndividualName[I, C, R](individualName: I) extends ELsippConceptDescription[I, C, R] {
 
+  val individualNameReference: AtomicReference[I] = new AtomicReference(individualName)
+  
   override def toString = individualName.toString
   override def roleDepth = 0
   override def size = 1
@@ -91,20 +93,25 @@ case class IndividualName[I, C, R](individualName: I) extends ELsippConceptDescr
 
 case class ExistentialRestriction[I, C, R](roleName: R, conceptDescription: ELsippConceptDescription[I, C, R]) extends ELsippConceptDescription[I, C, R] {
 
+  val roleNameReference: AtomicReference[R] = new AtomicReference(roleName)
+  val conceptDescriptionReference: AtomicReference[ELsippConceptDescription[I, C, R]] = new AtomicReference(conceptDescription)
+  
   override def toString = UnicodeSymbols.EXISTS + roleName.toString + "." + conceptDescription.toString
   override def roleDepth = 1 + conceptDescription.roleDepth
   override def size = 1 + conceptDescription.size
 
 }
 
-case class Conjunction[I, C, R](conceptDescriptions: Set[ELsippConceptDescription[I, C, R]]) extends ELsippConceptDescription[I, C, R] {
+case class Conjunction[I, C, R](conceptDescriptions: ELsippConceptDescription[I, C, R]*) extends ELsippConceptDescription[I, C, R] {
 
-  override def and(that: ELsippConceptDescription[I, C, R]): Conjunction[I, C, R] = {
-    that match {
-      case Conjunction(cs) ⇒ Conjunction(conceptDescriptions ++ cs)
-      case default         ⇒ Conjunction(conceptDescriptions ++ Set(that))
+  val conjuncts: scala.collection.mutable.Set[ELsippConceptDescription[I, C, R]] = Sets.newConcurrentHashSet().asScala
+  def flatten(conceptDescription: ELsippConceptDescription[I, C, R]) {
+    conceptDescription match {
+      case conjunction: Conjunction[I, C, R] ⇒ flatten(conjunction)
+      case default                           ⇒ conjuncts add conceptDescription
     }
   }
+  conceptDescriptions.foreach(flatten)
 
   override def toString = conceptDescriptions.mkString("(", UnicodeSymbols.SQCAP, ")")
   override def roleDepth = conceptDescriptions.map(_.roleDepth).max
@@ -114,6 +121,9 @@ case class Conjunction[I, C, R](conceptDescriptions: Set[ELsippConceptDescriptio
 
 case class PointedInterpretation[I, C, R, J](val interpretation: ELInterpretation2[J], val element: J) extends ELsippConceptDescription[I, C, R] {
 
+  val foo: AtomicReferenceArray[Boolean] = ???
+  val elementReference: AtomicReference[J] = new AtomicReference(element)
+  
   override def toString = ""
   override def roleDepth = 0
   override def size = 0

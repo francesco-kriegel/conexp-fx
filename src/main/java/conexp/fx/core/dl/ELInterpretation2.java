@@ -184,7 +184,8 @@ public class ELInterpretation2<I> {
       throw new IllegalArgumentException();
     else {
       final ELConceptDescription mmsc = new ELConceptDescription();
-      mmsc.getConceptNames().addAll(conceptNameExtensionMatrix.row(object));
+      if (conceptNameExtensionMatrix.rowHeads().contains(object))
+        mmsc.getConceptNames().addAll(conceptNameExtensionMatrix.row(object));
       if (roleDepth > 0) {
         for (Entry<IRI, MatrixRelation<I, I>> e : roleNameExtensionMatrix.entrySet())
           if (e.getValue().rowHeads().contains(object))

@@ -267,7 +267,7 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C> {
     return a;
   }
 
-  private static final int colspan = 5;
+  private static final int colspan = 8;
 
   public String toString() {
     final StringBuilder s = new StringBuilder();

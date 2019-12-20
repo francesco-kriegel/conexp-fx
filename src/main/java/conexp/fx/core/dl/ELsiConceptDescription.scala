@@ -5,16 +5,20 @@ import java.util.HashMap
 import java.util.HashSet
 import java.util.concurrent.atomic.AtomicInteger
 
+import scala.annotation.tailrec
+import scala.collection.JavaConverters._
+
 import org.semanticweb.owlapi.model.IRI
 
 import conexp.fx.core.collections.relation.MatrixRelation
+import conexp.fx.core.collections.relation.Relation
 import conexp.fx.core.collections.setlist.SetList
 import conexp.fx.core.collections.setlist.SetLists
 import conexp.fx.core.math.BooleanMatrices
-import conexp.fx.core.collections.relation.Relation
+import monix.eval.Coeval
+import conexp.fx.core.math.LatticeElement
+import org.ujmp.core.calculation.Calculation.Ret
 import com.google.common.collect.Sets
-
-import scala.collection.JavaConverters._
 
 object ELsiConceptDescription {
 
@@ -173,6 +177,23 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
       Collections.emptySet()
   }
 
+  //  private def checkExistenceOfSimulation[I, J](
+  //    interpretation: ELInterpretation2[I], element: I,
+  //    jnterpretation: ELInterpretation2[J], flement: J,
+  //    partialSimulation: Set[Pair[I, J]]): Boolean = {
+  //    if (partialSimulation contains Pair(element, flement))
+  //      true
+  //    else if (!(guardedUnmodifiableRow(jnterpretation.getConceptNameExtensionMatrix, flement) containsAll guardedUnmodifiableRow(interpretation.getConceptNameExtensionMatrix, element)))
+  //      false
+  //    else if (interpretation.getRoleNameExtensionMatrixMap.keySet().stream().allMatch(role ⇒
+  //      guardedUnmodifiableRow(interpretation.getRoleNameExtensionMatrix(role), element).stream().allMatch(successor ⇒
+  //        guardedUnmodifiableRow(jnterpretation.getRoleNameExtensionMatrix(role), flement).stream().anyMatch(duccessor ⇒
+  //          checkExistenceOfSimulation(interpretation, successor, jnterpretation, duccessor, partialSimulation + Pair(element, flement))))))
+  //      true
+  //    else
+  //      false
+  //  }
+
   private def checkExistenceOfSimulation[I, J](
     interpretation: ELInterpretation2[I], element: I,
     jnterpretation: ELInterpretation2[J], flement: J,
@@ -181,14 +202,52 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
       true
     else if (!(guardedUnmodifiableRow(jnterpretation.getConceptNameExtensionMatrix, flement) containsAll guardedUnmodifiableRow(interpretation.getConceptNameExtensionMatrix, element)))
       false
-    else if (interpretation.getRoleNameExtensionMatrixMap.keySet().stream().allMatch(role ⇒
-      guardedUnmodifiableRow(interpretation.getRoleNameExtensionMatrix(role), element).stream().allMatch(successor ⇒
-        guardedUnmodifiableRow(jnterpretation.getRoleNameExtensionMatrix(role), flement).stream().anyMatch(duccessor ⇒
-          checkExistenceOfSimulation(interpretation, successor, jnterpretation, duccessor, partialSimulation + Pair(element, flement))))))
-      true
-    else
-      false
+    else {
+      val qartialSimulation = partialSimulation + Pair(element, flement)
+      interpretation.getRoleNameExtensionMatrixMap.keySet().stream().allMatch(role ⇒
+        guardedUnmodifiableRow(interpretation.getRoleNameExtensionMatrix(role), element).stream().allMatch(successor ⇒
+          guardedUnmodifiableRow(jnterpretation.getRoleNameExtensionMatrix(role), flement).stream().anyMatch(tuccessor ⇒
+            checkExistenceOfSimulation(interpretation, successor, jnterpretation, tuccessor, qartialSimulation))))
+      //      val roleNames = interpretation.getRoleNameExtensionMatrixMap.keySet()
+      //      roleNames.asScala.map(roleName ⇒ Coeval[Boolean] {
+      //        val successors = guardedUnmodifiableRow(interpretation.getRoleNameExtensionMatrix(roleName), element)
+      //        val tuccessors = guardedUnmodifiableRow(jnterpretation.getRoleNameExtensionMatrix(roleName), flement)
+      //        successors.asScala.map(successor ⇒ Coeval[Boolean] {
+      //          tuccessors.asScala.map(tuccessor ⇒ Coeval[Boolean] {
+      //            checkExistenceOfSimulation(interpretation, successor, jnterpretation, tuccessor, qartialSimulation)
+      //          }).exists(_.value)
+      //        }).forall(_.value)
+      //      }).forall(_.value)
+    }
   }
+
+  //  @tailrec private def checkExistenceOfSimulation2[I, J](
+  //    interpretation: ELInterpretation2[I], element: I,
+  //    jnterpretation: ELInterpretation2[J], flement: J,
+  //    partialSimulation: Set[Pair[I, J]]): Boolean = {
+  //    if (partialSimulation contains Pair(element, flement))
+  //      true
+  //    else if (!(guardedUnmodifiableRow(jnterpretation.getConceptNameExtensionMatrix, flement) containsAll guardedUnmodifiableRow(interpretation.getConceptNameExtensionMatrix, element)))
+  //      false
+  //    else {
+  //      val qartialSimulation = partialSimulation + Pair(element, flement)
+  //      var pairs = new scala.collection.mutable.HashSet[(I, scala.collection.mutable.Set[J])]()
+  //      interpretation.getRoleNameExtensionMatrixMap.keySet().forEach(key ⇒ {
+  //        val xs = guardedUnmodifiableRow(interpretation.getRoleNameExtensionMatrix(key), element)
+  //        val ys = guardedUnmodifiableRow(jnterpretation.getRoleNameExtensionMatrix(key), flement)
+  //        xs.forEach(x ⇒ {
+  //          pairs += ((x, ys.asScala))
+  //        })
+  //      })
+  //      true
+  //    }
+  //    //    else interpretation.getRoleNameExtensionMatrixMap.keySet().stream().allMatch(role ⇒
+  //    //      guardedUnmodifiableRow(interpretation.getRoleNameExtensionMatrix(role), element).stream().allMatch(successor ⇒
+  //    //        guardedUnmodifiableRow(jnterpretation.getRoleNameExtensionMatrix(role), flement).stream().anyMatch(duccessor ⇒ {
+  //    //          val qartialSimulation = partialSimulation + Pair(element, flement)
+  //    //          checkExistenceOfSimulation2(interpretation, successor, jnterpretation, duccessor, qartialSimulation)
+  //    //        })))
+  //  }
 
   def isSubsumedBy[J](other: ELsiConceptDescription[J]) = other subsumes this
   def isEquivalentTo[J](other: ELsiConceptDescription[J]) = (this subsumes other) && (other subsumes this)
@@ -206,27 +265,43 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
     })
     val graph: ELInterpretation2[Either[I, ELsiConceptDescription[J]]] = new ELInterpretation2(matrix, natrix)
     val mostSpecificConsequence = new ELsiConceptDescription(graph, Left(element))
+    val skip = Sets.newConcurrentHashSet[Pair[Either[I, ELsiConceptDescription[J]], ELsiConceptDescription[J]]]
     def insert(y: Either[I, ELsiConceptDescription[J]], c: ELsiConceptDescription[J]) {
-      if (y.isLeft || !(mostSpecificConsequence.interpretation.getDomain contains y.right)) {
-        c.interpretation.getConceptNameExtensionMatrix.row(c.element).forEach(a ⇒ mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.add(y, a))
+      if (skip.add((y, c))) {
+        //      if (y.isLeft || !(mostSpecificConsequence.interpretation.getDomain contains y.right)) {
+        //      if (y.isLeft || !(mostSpecificConsequence.interpretation.getDomain contains y)) {
+//        println("inserting: " + c.approximate(2) + "   @   " + (if (y.isLeft) y.left.get else y.right.get.approximate(2)))
+        c.interpretation.getConceptNameExtensionMatrix.row(c.element).forEach(a ⇒ {
+          mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.add(y, a)
+          while (!mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.contains(y, a)) {
+            System.err.println("something does not work...")
+            mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.rewriteMatrix()
+            mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.add(y, a)
+          }
+        })
         c.interpretation.getRoleNameExtensionMatrixMap.keySet().forEach(role ⇒
           c.interpretation.getRoleNameExtensionMatrix(role).row(c.element).forEach(successor ⇒ {
             val d = c.rotate(successor)
             val z = Right(d)
-            mostSpecificConsequence.interpretation.getRoleNameExtensionMatrix(role).add(y, z)
             insert(z, d)
+            mostSpecificConsequence.interpretation.getRoleNameExtensionMatrix(role).add(y, z)
           }))
       }
     }
     var changed = true
     while (changed) {
       changed = false
+//      println("current saturation: " + mostSpecificConsequence.approximate(2))
+//      println(mostSpecificConsequence.interpretation)
+//      println()
       new HashSet(mostSpecificConsequence.interpretation.getDomain).forEach(x ⇒
-        tbox.foreach(gci ⇒
+        tbox.foreach(gci ⇒ {
+//          println("testing whether   " + (if (x.isLeft) x.left.get else x.right.get.approximate(2)) + "   satisfies   " + gci._1.approximate(2) + " SubClassOf " + gci._2.approximate(2))
           if ((mostSpecificConsequence.rotate(x) isSubsumedBy gci._1) && !(mostSpecificConsequence.rotate(x) isSubsumedBy gci._2)) {
             insert(x, gci._2)
             changed = true
-          }))
+          }
+        }))
     }
     mostSpecificConsequence
   }
