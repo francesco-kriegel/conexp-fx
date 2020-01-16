@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -197,25 +197,35 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
     if (concept instanceof OWLObjectSomeValuesFrom) { // better use
                                                       // concept.getClassExpressionType().equals(ClassExpressionType.OBJECT_SOME_VALUES_FROM)
       final OWLObjectSomeValuesFrom existentialRestriction = (OWLObjectSomeValuesFrom) concept;
-      this.existentialRestrictions
-          .put(
-              ((OWLObjectProperty) existentialRestriction.getProperty()).getIRI(),
-              new ELConceptDescription(existentialRestriction.getFiller()));
+      if (existentialRestriction.getProperty() instanceof OWLObjectProperty) {
+        this.existentialRestrictions
+            .put(
+                ((OWLObjectProperty) existentialRestriction.getProperty()).getIRI(),
+                new ELConceptDescription(existentialRestriction.getFiller()));
+      } else {
+        throw new ELSyntaxException();
+      }
       return;
     }
     if (concept instanceof OWLObjectIntersectionOf) { // better use
                                                       // concept.getClassExpressionType().equals(ClassExpressionType.OBJECT_INTERSECTION_OF)
       final OWLObjectIntersectionOf conjunction = (OWLObjectIntersectionOf) concept;
-      for (OWLClassExpression conjunct : conjunction.asConjunctSet())
-        if (conjunct instanceof OWLClass)
+      for (OWLClassExpression conjunct : conjunction.asConjunctSet()) {
+        if (conjunct instanceof OWLClass) {
           this.conceptNames.add(((OWLClass) conjunct).getIRI());
-        else if (conjunct instanceof OWLObjectSomeValuesFrom)
-          this.existentialRestrictions
-              .put(
-                  ((OWLObjectProperty) ((OWLObjectSomeValuesFrom) conjunct).getProperty()).getIRI(),
-                  new ELConceptDescription(((OWLObjectSomeValuesFrom) conjunct).getFiller()));
-        else
+        } else if (conjunct instanceof OWLObjectSomeValuesFrom) {
+          if (((OWLObjectSomeValuesFrom) conjunct).getProperty() instanceof OWLObjectProperty) {
+            this.existentialRestrictions
+                .put(
+                    ((OWLObjectProperty) ((OWLObjectSomeValuesFrom) conjunct).getProperty()).getIRI(),
+                    new ELConceptDescription(((OWLObjectSomeValuesFrom) conjunct).getFiller()));
+          } else {
+            throw new ELSyntaxException();
+          }
+        } else {
           throw new ELSyntaxException();
+        }
+      }
       return;
     }
     throw new ELSyntaxException();
@@ -247,7 +257,8 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final boolean isTop() {
-    return conceptNames.isEmpty() && existentialRestrictions.isEmpty();
+    return (conceptNames.isEmpty() || (conceptNames.size() == 1 && conceptNames.contains(df.getOWLThing().getIRI())))
+        && existentialRestrictions.isEmpty();
   }
 
   public final Signature getSignature() {
@@ -332,6 +343,13 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
     return result;
   }
 
+  public final void set(final ELConceptDescription that) {
+    this.conceptNames.clear();
+    this.existentialRestrictions.clear();
+    this.conceptNames.addAll(that.conceptNames);
+    this.existentialRestrictions.putAll(that.existentialRestrictions);
+  }
+
   public final boolean isSubsumedBy(final ELConceptDescription other) {
     return ELReasoner.isSubsumedBy(this, other);
   }
@@ -361,6 +379,7 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
       conceptNames.add(df.getOWLNothing().getIRI());
       existentialRestrictions.clear();
     } else {
+      conceptNames.remove(df.getOWLThing().getIRI());
       for (Entry<IRI, ELConceptDescription> er : existentialRestrictions.entries())
         er.getValue().reduce();
       final Function<Entry<IRI, ELConceptDescription>, Stream<Pair<Entry<IRI, ELConceptDescription>, Entry<IRI, ELConceptDescription>>>> f =
@@ -439,9 +458,25 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
   }
 
   public final long rank5() {
+    if (isBot())
+      return Long.MAX_VALUE;
     long rank = 0;
     ELConceptDescription C = this.clone().reduce();
     while (!C.isTop()) {
+      C = C.oneUpperNeighbor();
+      rank++;
+    }
+    return rank;
+  }
+
+  public final long boundedRank(long maxValue) {
+    if (isBot())
+      return Long.MAX_VALUE;
+    long rank = 0;
+    ELConceptDescription C = this.clone().reduce();
+    while (!C.isTop()) {
+      if (rank >= maxValue)
+        return Long.MAX_VALUE;
       C = C.oneUpperNeighbor();
       rank++;
     }
@@ -2392,7 +2427,7 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
         && this.existentialRestrictions.equals(other.existentialRestrictions);
   }
 
-//  public final boolean deepEquals(ELConceptDescription other) {
+  public final boolean deepEquals(ELConceptDescription other) {
 //    return this.conceptNames
 //        .stream()
 //        .parallel()
@@ -2421,7 +2456,17 @@ public final class ELConceptDescription implements LatticeElement<ELConceptDescr
 //                    .stream()
 //                    .parallel()
 //                    .anyMatch(se -> rd.getKey().equals(se.getKey()) && rd.getValue().deepEquals(se.getValue())));
-//  }
+    return this.conceptNames.equals(other.conceptNames)
+        && (this.existentialRestrictions.size() == other.existentialRestrictions.size())
+        && this.existentialRestrictions
+            .entries()
+            .parallelStream()
+            .allMatch(
+                x -> other.existentialRestrictions
+                    .entries()
+                    .parallelStream()
+                    .anyMatch(y -> (x.getKey().equals(y.getKey()) && x.getValue().deepEquals(y.getValue()))));
+  }
 
   @Override
   public final int hashCode() {

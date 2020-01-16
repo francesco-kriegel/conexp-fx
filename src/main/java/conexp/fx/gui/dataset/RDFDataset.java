@@ -4,7 +4,7 @@ package conexp.fx.gui.dataset;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -159,11 +159,11 @@ public class RDFDataset extends Dataset {
 
   public final void
       createDLModel(List<IRI> selectedConceptNames, List<IRI> selectedRoleNames, IRI selectedIsARoleName) {
-    ConExpFX.execute(TimeTask.create(this, "Extracting DL Model", () -> {
-      final OWLInterpretation i =
-          RDFImporter.extractInterpretation(statements, selectedConceptNames, selectedRoleNames, selectedIsARoleName);
-      ConExpFX.instance.treeView.addDataset(new DLDataset(RDFDataset.this, i));
-    }));
+//    ConExpFX.execute(TimeTask.create(this, "Extracting DL Model", () -> {
+//      final OWLInterpretation i =
+//          RDFImporter.extractInterpretation(statements, selectedConceptNames, selectedRoleNames, selectedIsARoleName);
+//      ConExpFX.instance.treeView.addDataset(new DLDataset(RDFDataset.this, i));
+//    }));
   }
 
   @Override

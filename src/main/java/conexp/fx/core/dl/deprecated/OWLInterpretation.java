@@ -4,7 +4,7 @@ package conexp.fx.core.dl.deprecated;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -37,7 +37,7 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.semanticweb.elk.util.collections.Triple;
+//import org.semanticweb.elk.util.collections.Triple;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -368,7 +368,8 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
   }
 
   public static final <T> Set<Set<T>> filterMinimal(final Set<Set<T>> sets) {
-    return OWLMinimizer.filterMinimalParallel(sets, (set1, set2) -> set1.containsAll(set2));
+//    return OWLMinimizer.filterMinimalParallel(sets, (set1, set2) -> set1.containsAll(set2));
+    throw new RuntimeException();
 //    return sets.parallelStream().filter(
 //        set1 -> !sets.parallelStream().anyMatch(
 //            set2 -> !set1.equals(set2) && set1.containsAll(set2))).collect(
@@ -696,91 +697,91 @@ public class OWLInterpretation extends AInterpretation<OWLClassExpression, OWLSu
     return fs;
   }
 
-  private final boolean applies(final ArrayList<IRI> f, final Triple<Integer, IRI, Integer> t) {
-    final IRI d = f.get(t.getFirst());
-    final IRI r = t.getSecond();
-    final IRI e = f.get(t.getThird());
-    return roleNameExtensions.get(r).contains(Pair.of(d, e));
-  }
-
-  public final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> getInducedRoleContext(final int roleDepth) {
-    final SetList<ArrayList<IRI>> _domain = getFunctions(roleDepth + 1);
-
-    final SetList<Triple<Integer, IRI, Integer>> _codomain = new HashSetArrayList<Triple<Integer, IRI, Integer>>();
-    for (IRI roleName : signature.getRoleNames()) {
-      for (int i = 2; i <= roleDepth; i++)
-        for (int j = 1; j <= i; j++) {
-          _codomain.add(new Triple<Integer, IRI, Integer>(j, roleName, j + 1));
-          if (i != 1)
-            _codomain.add(new Triple<Integer, IRI, Integer>(1, roleName, j + 1));
-        }
-
-    }
-    final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> inducedRoleContext =
-        new SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>>(_domain, _codomain, false);
-
-    for (ArrayList<IRI> o : _domain)
-      for (Triple<Integer, IRI, Integer> a : _codomain) {
-        if (applies(o, a))
-          inducedRoleContext.add(o, a);
-      }
-
-    return inducedRoleContext;
-  }
-
-  public final Set<OWLSubPropertyChainOfAxiom> getRoleInclusionBase(final int roleDepth) {
-    final Set<OWLSubPropertyChainOfAxiom> base = new HashSet<OWLSubPropertyChainOfAxiom>();
-
-    final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> cxt = getInducedRoleContext(roleDepth);
-    final SetClosureOperator<Triple<Integer, IRI, Integer>> clop = new SetClosureOperator<Triple<Integer, IRI, Integer>>() {
-
-      @Override
-      public Set<Triple<Integer, IRI, Integer>> closure(Set<Triple<Integer, IRI, Integer>> set) {
-        return set;
-//        if (set.parallelStream().anyMatch(
-//            t -> t.getFirst().equals(
-//                1) && t.getThird().equals(
-//                2)))
-//          return new HashSet<Triple<Integer, IRI, Integer>>(set);
-//        return new HashSet<Triple<Integer, IRI, Integer>>(cxt.colHeads());
-      }
-
-    };
-    final Result<ArrayList<IRI>, Triple<Integer, IRI, Integer>> result = NextClosures1
-        .compute(
-            cxt,
-            // clop,
-            true);
-    for (Entry<Set<Triple<Integer, IRI, Integer>>, Set<Triple<Integer, IRI, Integer>>> e : result.implications
-        .entrySet()) {
-      final List<Triple<Integer, IRI, Integer>> chain = new ArrayList<Triple<Integer, IRI, Integer>>(roleDepth);
-      final Triple<Integer, IRI, Integer> conclusion;
-      boolean chainEnded = false;
-      int i;
-      for (i = 1; !chainEnded || i <= roleDepth; i++) {
-        final int j = i;
-        final Optional<Triple<Integer, IRI, Integer>> opt =
-            e.getKey().parallelStream().filter(t -> t.getFirst().equals(j) && t.getThird().equals(j + 1)).findFirst();
-        if (opt.isPresent())
-          chain.add(opt.get());
-        else
-          chainEnded = true;
-      }
-      if (!chain.isEmpty())
-        System.out.println("found chain of size " + chain.size() + " " + chain);
-      final int j = chain.size() + 1;// i;
-      final Optional<Triple<Integer, IRI, Integer>> opt =
-          e.getValue().parallelStream().filter(t -> t.getFirst().equals(1) && t.getThird().equals(j)).findFirst();
-      if (opt.isPresent())
-        conclusion = opt.get();
-      else
-        conclusion = null;
-      if (conclusion != null) {
-        final List<OWLObjectPropertyExpression> subProperty =
-            chain.stream().map(t -> df.getOWLObjectProperty(t.getSecond())).collect(Collectors.toList());
-        base.add(df.getOWLSubPropertyChainOfAxiom(subProperty, df.getOWLObjectProperty(conclusion.getSecond())));
-      }
-    }
-    return base;
-  }
+//  private final boolean applies(final ArrayList<IRI> f, final Triple<Integer, IRI, Integer> t) {
+//    final IRI d = f.get(t.getFirst());
+//    final IRI r = t.getSecond();
+//    final IRI e = f.get(t.getThird());
+//    return roleNameExtensions.get(r).contains(Pair.of(d, e));
+//  }
+//
+//  public final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> getInducedRoleContext(final int roleDepth) {
+//    final SetList<ArrayList<IRI>> _domain = getFunctions(roleDepth + 1);
+//
+//    final SetList<Triple<Integer, IRI, Integer>> _codomain = new HashSetArrayList<Triple<Integer, IRI, Integer>>();
+//    for (IRI roleName : signature.getRoleNames()) {
+//      for (int i = 2; i <= roleDepth; i++)
+//        for (int j = 1; j <= i; j++) {
+//          _codomain.add(new Triple<Integer, IRI, Integer>(j, roleName, j + 1));
+//          if (i != 1)
+//            _codomain.add(new Triple<Integer, IRI, Integer>(1, roleName, j + 1));
+//        }
+//
+//    }
+//    final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> inducedRoleContext =
+//        new SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>>(_domain, _codomain, false);
+//
+//    for (ArrayList<IRI> o : _domain)
+//      for (Triple<Integer, IRI, Integer> a : _codomain) {
+//        if (applies(o, a))
+//          inducedRoleContext.add(o, a);
+//      }
+//
+//    return inducedRoleContext;
+//  }
+//
+//  public final Set<OWLSubPropertyChainOfAxiom> getRoleInclusionBase(final int roleDepth) {
+//    final Set<OWLSubPropertyChainOfAxiom> base = new HashSet<OWLSubPropertyChainOfAxiom>();
+//
+//    final SparseContext<ArrayList<IRI>, Triple<Integer, IRI, Integer>> cxt = getInducedRoleContext(roleDepth);
+//    final SetClosureOperator<Triple<Integer, IRI, Integer>> clop = new SetClosureOperator<Triple<Integer, IRI, Integer>>() {
+//
+//      @Override
+//      public Set<Triple<Integer, IRI, Integer>> closure(Set<Triple<Integer, IRI, Integer>> set) {
+//        return set;
+////        if (set.parallelStream().anyMatch(
+////            t -> t.getFirst().equals(
+////                1) && t.getThird().equals(
+////                2)))
+////          return new HashSet<Triple<Integer, IRI, Integer>>(set);
+////        return new HashSet<Triple<Integer, IRI, Integer>>(cxt.colHeads());
+//      }
+//
+//    };
+//    final Result<ArrayList<IRI>, Triple<Integer, IRI, Integer>> result = NextClosures1
+//        .compute(
+//            cxt,
+//            // clop,
+//            true);
+//    for (Entry<Set<Triple<Integer, IRI, Integer>>, Set<Triple<Integer, IRI, Integer>>> e : result.implications
+//        .entrySet()) {
+//      final List<Triple<Integer, IRI, Integer>> chain = new ArrayList<Triple<Integer, IRI, Integer>>(roleDepth);
+//      final Triple<Integer, IRI, Integer> conclusion;
+//      boolean chainEnded = false;
+//      int i;
+//      for (i = 1; !chainEnded || i <= roleDepth; i++) {
+//        final int j = i;
+//        final Optional<Triple<Integer, IRI, Integer>> opt =
+//            e.getKey().parallelStream().filter(t -> t.getFirst().equals(j) && t.getThird().equals(j + 1)).findFirst();
+//        if (opt.isPresent())
+//          chain.add(opt.get());
+//        else
+//          chainEnded = true;
+//      }
+//      if (!chain.isEmpty())
+//        System.out.println("found chain of size " + chain.size() + " " + chain);
+//      final int j = chain.size() + 1;// i;
+//      final Optional<Triple<Integer, IRI, Integer>> opt =
+//          e.getValue().parallelStream().filter(t -> t.getFirst().equals(1) && t.getThird().equals(j)).findFirst();
+//      if (opt.isPresent())
+//        conclusion = opt.get();
+//      else
+//        conclusion = null;
+//      if (conclusion != null) {
+//        final List<OWLObjectPropertyExpression> subProperty =
+//            chain.stream().map(t -> df.getOWLObjectProperty(t.getSecond())).collect(Collectors.toList());
+//        base.add(df.getOWLSubPropertyChainOfAxiom(subProperty, df.getOWLObjectProperty(conclusion.getSecond())));
+//      }
+//    }
+//    return base;
+//  }
 }

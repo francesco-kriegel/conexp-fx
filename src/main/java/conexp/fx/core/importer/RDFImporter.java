@@ -4,7 +4,7 @@ package conexp.fx.core.importer;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -62,7 +62,6 @@ import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.dl.Signature;
-import conexp.fx.core.dl.deprecated.OWLInterpretation;
 
 public class RDFImporter {
 
@@ -231,61 +230,61 @@ public class RDFImporter {
     }
   }
 
-  public static final OWLInterpretation extractInterpretation(final List<Statement> triples) {
-    return extractInterpretation(triples, IRI.create(RDF.TYPE.stringValue()));
-  }
-
-  public static final OWLInterpretation
-      extractInterpretation(final List<Statement> triples, final IRI selectedIsARoleName) {
-    final List<IRI> roleNames =
-        triples.parallelStream().map(triple -> IRI.create(triple.getPredicate().stringValue())).distinct().collect(
-            Collectors.toList());
-    if (!roleNames.contains(selectedIsARoleName))
-      throw new IllegalArgumentException();
-    roleNames.remove(selectedIsARoleName);
-    final List<IRI> conceptNames = triples
-        .parallelStream()
-        .filter(triple -> IRI.create(triple.getPredicate().stringValue()).equals(selectedIsARoleName))
-        .map(triple -> IRI.create(triple.getObject().stringValue()))
-        .collect(Collectors.toList());
-    return extractInterpretation(triples, conceptNames, roleNames, selectedIsARoleName);
-  }
-
-  public static final OWLInterpretation extractInterpretation(
-      final List<Statement> triples,
-      final List<IRI> selectedConceptNames,
-      final List<IRI> selectedRoleNames,
-      final IRI selectedIsARoleName) {
-    final Signature signature = new Signature(null);
-    signature.getConceptNames().addAll(selectedConceptNames);
-    signature.getRoleNames().addAll(selectedRoleNames);
-    signature.getIndividualNames().addAll(
-        triples
-            .parallelStream()
-            .filter(
-                triple -> IRI.create(triple.getPredicate().stringValue()).equals(selectedIsARoleName)
-                    && signature.getConceptNames().contains(IRI.create(triple.getObject().stringValue())))
-            .map(triple -> IRI.create(triple.getSubject().stringValue()))
-            .collect(Collectors.toSet()));
-    final OWLInterpretation i = new OWLInterpretation(signature);
-    triples.stream().forEach(triple -> {
-      if (IRI.create(triple.getPredicate().stringValue()).equals(selectedIsARoleName)) {
-        if (signature.getConceptNames().contains(IRI.create(triple.getObject().stringValue()))
-            && signature.getIndividualNames().contains(IRI.create(triple.getSubject().stringValue()))) {
-          i.addConceptNameAssertion(
-              IRI.create(triple.getObject().stringValue()),
-              IRI.create(triple.getSubject().stringValue()));
-        }
-      } else if (signature.getRoleNames().contains(IRI.create(triple.getPredicate().stringValue()))
-          && signature.getIndividualNames().contains(IRI.create(triple.getSubject().stringValue()))
-          && signature.getIndividualNames().contains(IRI.create(triple.getObject().stringValue()))) {
-        i.addRoleNameAssertion(
-            IRI.create(triple.getPredicate().stringValue()),
-            IRI.create(triple.getSubject().stringValue()),
-            IRI.create(triple.getObject().stringValue()));
-      }
-    });
-    return i;
-  }
+//  public static final OWLInterpretation extractInterpretation(final List<Statement> triples) {
+//    return extractInterpretation(triples, IRI.create(RDF.TYPE.stringValue()));
+//  }
+//
+//  public static final OWLInterpretation
+//      extractInterpretation(final List<Statement> triples, final IRI selectedIsARoleName) {
+//    final List<IRI> roleNames =
+//        triples.parallelStream().map(triple -> IRI.create(triple.getPredicate().stringValue())).distinct().collect(
+//            Collectors.toList());
+//    if (!roleNames.contains(selectedIsARoleName))
+//      throw new IllegalArgumentException();
+//    roleNames.remove(selectedIsARoleName);
+//    final List<IRI> conceptNames = triples
+//        .parallelStream()
+//        .filter(triple -> IRI.create(triple.getPredicate().stringValue()).equals(selectedIsARoleName))
+//        .map(triple -> IRI.create(triple.getObject().stringValue()))
+//        .collect(Collectors.toList());
+//    return extractInterpretation(triples, conceptNames, roleNames, selectedIsARoleName);
+//  }
+//
+//  public static final OWLInterpretation extractInterpretation(
+//      final List<Statement> triples,
+//      final List<IRI> selectedConceptNames,
+//      final List<IRI> selectedRoleNames,
+//      final IRI selectedIsARoleName) {
+//    final Signature signature = new Signature(null);
+//    signature.getConceptNames().addAll(selectedConceptNames);
+//    signature.getRoleNames().addAll(selectedRoleNames);
+//    signature.getIndividualNames().addAll(
+//        triples
+//            .parallelStream()
+//            .filter(
+//                triple -> IRI.create(triple.getPredicate().stringValue()).equals(selectedIsARoleName)
+//                    && signature.getConceptNames().contains(IRI.create(triple.getObject().stringValue())))
+//            .map(triple -> IRI.create(triple.getSubject().stringValue()))
+//            .collect(Collectors.toSet()));
+//    final OWLInterpretation i = new OWLInterpretation(signature);
+//    triples.stream().forEach(triple -> {
+//      if (IRI.create(triple.getPredicate().stringValue()).equals(selectedIsARoleName)) {
+//        if (signature.getConceptNames().contains(IRI.create(triple.getObject().stringValue()))
+//            && signature.getIndividualNames().contains(IRI.create(triple.getSubject().stringValue()))) {
+//          i.addConceptNameAssertion(
+//              IRI.create(triple.getObject().stringValue()),
+//              IRI.create(triple.getSubject().stringValue()));
+//        }
+//      } else if (signature.getRoleNames().contains(IRI.create(triple.getPredicate().stringValue()))
+//          && signature.getIndividualNames().contains(IRI.create(triple.getSubject().stringValue()))
+//          && signature.getIndividualNames().contains(IRI.create(triple.getObject().stringValue()))) {
+//        i.addRoleNameAssertion(
+//            IRI.create(triple.getPredicate().stringValue()),
+//            IRI.create(triple.getSubject().stringValue()),
+//            IRI.create(triple.getObject().stringValue()));
+//      }
+//    });
+//    return i;
+//  }
 
 }

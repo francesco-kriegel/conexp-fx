@@ -16,10 +16,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.jena.ext.com.google.common.collect.Lists;
+//import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.semanticweb.owlapi.model.IRI;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import conexp.fx.core.collections.Collections3;
@@ -30,7 +31,7 @@ import conexp.fx.core.math.BooleanMatrices;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as

@@ -7,7 +7,7 @@ package conexp.fx.core.math;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -36,7 +36,11 @@ import org.ujmp.core.calculation.Calculation.Ret;
 public final class BooleanMatrices {
 
   public static final BooleanMatrix clone(final BooleanMatrix m) {
-    return m.clone().toBooleanMatrix();
+    final BooleanMatrix copy = BooleanMatrices.empty(m.getRowCount(), m.getColumnCount());
+    copy.or(Ret.ORIG, m);
+    return copy;
+//    The below return statement sometimes yields read-only matrices.
+//    return m.clone().toBooleanMatrix();
   }
 
   public static final BooleanMatrix empty(final long size) {

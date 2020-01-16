@@ -11,7 +11,7 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -48,6 +48,12 @@ public class ELConceptInclusion {
     super();
     this.subsumee = subsumee;
     this.subsumer = subsumer;
+  }
+
+  public ELConceptInclusion(final OWLSubClassOfAxiom subClassOfAxiom) {
+    this(
+        new ELConceptDescription(subClassOfAxiom.getSubClass()),
+        new ELConceptDescription(subClassOfAxiom.getSuperClass()));
   }
 
   public final Signature getSignature() {
@@ -90,7 +96,7 @@ public class ELConceptInclusion {
   public String toString() {
     return toShortString();
   }
-  
+
   public String toLongString() {
     return subsumee.toString() + " " + UnicodeSymbols.SQSUBSETEQ + " " + subsumer.toString();
   }

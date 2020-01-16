@@ -4,7 +4,7 @@ package conexp.fx.core.math;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -26,19 +26,19 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public abstract class CachedFunction<T, R> implements Function<T, R> {
+public final class CachedFunction<T, R> implements Function<T, R> {
 
-  private final Map<T, R> cache = new ConcurrentHashMap<>();
+  private final Map<T, R>      cache = new ConcurrentHashMap<>();
+  private final Function<T, R> function;
 
-  protected CachedFunction() {
+  public CachedFunction(final Function<T, R> function) {
     super();
+    this.function = function;
   }
 
   @Override
   public final R apply(final T t) {
-    return cache.computeIfAbsent(t, this::compute);
+    return cache.computeIfAbsent(t, function::apply);
   }
-
-  protected abstract R compute(T t);
 
 }

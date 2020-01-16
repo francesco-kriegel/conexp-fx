@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -119,7 +119,7 @@ public class ELLeastCommonSubsumer {
   }
 
   public static final ELConceptDescription lcs(final Set<ELConceptDescription> Cs) {
-    Cs.parallelStream().forEach(ELConceptDescription::reduce);
+    Cs.parallelStream().filter(c -> !c.isBot()).forEach(ELConceptDescription::reduce);
     final Set<ELConceptDescription> Ds = Collections3.representatives(Cs, (X, Y) -> X.isEquivalentTo(Y));
     if (Ds.isEmpty())
       return ELConceptDescription.bot();
@@ -135,14 +135,18 @@ public class ELLeastCommonSubsumer {
   }
 
   public static final ELConceptDescription lcsOfMutuallyIncomparable(final Set<ELConceptDescription> Ds) {
+    final Set<ELConceptDescription> _Ds = new HashSet<>(Ds);
+    _Ds.removeIf(d -> d.isBot());
+    if (_Ds.isEmpty())
+      return ELConceptDescription.bot();
     final ELConceptDescription lcs = new ELConceptDescription();
-    final Iterator<ELConceptDescription> it = Ds.iterator();
+    final Iterator<ELConceptDescription> it = _Ds.iterator();
     final ELConceptDescription D = it.next();
     it.remove();
     final Set<IRI> commonConceptNames = D
         .getConceptNames()
         .parallelStream()
-        .filter(A -> Ds.parallelStream().map(ELConceptDescription::getConceptNames).allMatch(As -> As.contains(A)))
+        .filter(A -> _Ds.parallelStream().map(ELConceptDescription::getConceptNames).allMatch(As -> As.contains(A)))
         .collect(Collectors.toSet());
     lcs.getConceptNames().addAll(commonConceptNames);
     final Set<IRI> commonRoleNames = D
@@ -150,28 +154,31 @@ public class ELLeastCommonSubsumer {
         .keySet()
         .parallelStream()
         .filter(
-            r -> Ds.parallelStream().map(ELConceptDescription::getExistentialRestrictions).allMatch(
-                ERs -> ERs.keySet().parallelStream().anyMatch(r::equals)))
+            r -> _Ds
+                .parallelStream()
+                .map(ELConceptDescription::getExistentialRestrictions)
+                .allMatch(ERs -> ERs.keySet().parallelStream().anyMatch(r::equals)))
         .collect(Collectors.toSet());
-    Ds.add(D);
+    _Ds.add(D);
     commonRoleNames
         .parallelStream()
         .map(
-            r -> Pair.of(
-                r,
-                Sets
-                    .cartesianProduct(
-                        Ds
-                            .parallelStream()
-                            .map(ELConceptDescription::getExistentialRestrictions)
-                            .map(m -> m.get(r))
-                            .map(HashSet::new)
-                            .collect(Collectors.toList()))
-                    .parallelStream()
-                    .map(HashSet::new)
-                    .map(ELLeastCommonSubsumer::lcsOfMutuallyIncomparable)
-                    .map(ELConceptDescription::reduce)
-                    .collect(Collectors.toSet())))
+            r -> Pair
+                .of(
+                    r,
+                    Sets
+                        .cartesianProduct(
+                            _Ds
+                                .parallelStream()
+                                .map(ELConceptDescription::getExistentialRestrictions)
+                                .map(m -> m.get(r))
+                                .map(HashSet::new)
+                                .collect(Collectors.toList()))
+                        .parallelStream()
+                        .map(HashSet::new)
+                        .map(ELLeastCommonSubsumer::lcsOfMutuallyIncomparable)
+                        .map(ELConceptDescription::reduce)
+                        .collect(Collectors.toSet())))
         .sequential()
         .forEach(p -> lcs.getExistentialRestrictions().putAll(p.x(), p.y()));;
     return lcs.clone().reduce();

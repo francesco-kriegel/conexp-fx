@@ -4,7 +4,7 @@ package conexp.fx.core.collections.relation;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -218,14 +218,15 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C> {
   }
 
   public Iterator<Pair<R, C>> iterator() {
-    return Iterators.filter(
-        ListIterators.<R, C> cartesianProduct(rowHeads().listIterator(), colHeads().listIterator(), 0),
-        new Predicate<Pair<R, C>>() {
+    return Iterators
+        .filter(
+            ListIterators.<R, C> cartesianProduct(rowHeads().listIterator(), colHeads().listIterator(), 0),
+            new Predicate<Pair<R, C>>() {
 
-          public final boolean apply(final Pair<R, C> p) {
-            return contains(p.x(), p.y());
-          }
-        });
+              public final boolean apply(final Pair<R, C> p) {
+                return contains(p.x(), p.y());
+              }
+            });
   }
 
   public int size() {
@@ -272,8 +273,8 @@ public abstract class AbstractRelation<R, C> implements Relation<R, C> {
   public String toString() {
     final StringBuilder s = new StringBuilder();
     s.append(getClass().getName() + "@" + hashCode() + "\r\n");
-    s.append(rowHeads().size() + " domain elements.\r\n");
-    s.append(colHeads().size() + " codomain elements.\r\n");
+    s.append(rowHeads().size() + " domain elements: " + rowHeads() + "\r\n");
+    s.append(colHeads().size() + " codomain elements. " + colHeads() + "\r\n");
     String spaces = "";
     while (spaces.length() < colspan)
       spaces += " ";

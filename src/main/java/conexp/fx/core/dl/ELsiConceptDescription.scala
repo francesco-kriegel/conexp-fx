@@ -15,7 +15,7 @@ import conexp.fx.core.collections.relation.Relation
 import conexp.fx.core.collections.setlist.SetList
 import conexp.fx.core.collections.setlist.SetLists
 import conexp.fx.core.math.BooleanMatrices
-import monix.eval.Coeval
+//import monix.eval.Coeval
 import conexp.fx.core.math.LatticeElement
 import org.ujmp.core.calculation.Calculation.Ret
 import com.google.common.collect.Sets
@@ -283,11 +283,22 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
         //      if (y.isLeft || !(mostSpecificConsequence.interpretation.getDomain contains y)) {
         //        println("inserting: " + c.approximate(2) + "   @   " + (if (y.isLeft) y.left.get else y.right.get.approximate(2)))
         c.interpretation.getConceptNameExtensionMatrix.row(c.element).forEach(a ⇒ {
-          mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.add(y, a)
-          while (!mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.contains(y, a)) {
-            System.err.println("something does not work...")
-            mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.rewriteMatrix()
+          mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.synchronized {
+            var n = 0
             mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.add(y, a)
+            while (!mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.contains(y, a)) {
+              n += 1
+              System.err.println("\r\n\r\n"
+                + "### attempt " + n + "\r\n"
+                + "Need to rewrite matrix when adding\r\n"
+                + "the pair (" + y + "," + a + ")"
+                + "to the matrix " + mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix + "\r\n"
+                + "This happened within a call of ELsiConceptDescription.mostSpecificConsequence()\r\n"
+                + "where the concept is " + this.approximate(2) + "\r\n"
+                + "and the TBox is " + tbox)
+              mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.rewriteMatrix()
+              mostSpecificConsequence.interpretation.getConceptNameExtensionMatrix.add(y, a)
+            }
           }
         })
         c.interpretation.getRoleNameExtensionMatrixMap.keySet().forEach(role ⇒
@@ -296,7 +307,9 @@ class ELsiConceptDescription[I](val interpretation: ELInterpretation2[I], val el
             val d = c.rotate(successor)
             val z = Right(d)
             insert(z, d)
-            mostSpecificConsequence.interpretation.getRoleNameExtensionMatrix(role).add(y, z)
+            mostSpecificConsequence.interpretation.getRoleNameExtensionMatrix(role).synchronized {
+              mostSpecificConsequence.interpretation.getRoleNameExtensionMatrix(role).add(y, z)
+            }
           }))
       }
     }

@@ -4,7 +4,7 @@ package conexp.fx.core.dl;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2019 Francesco Kriegel
+ * Copyright (C) 2010 - 2020 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -56,18 +56,20 @@ public class ELReasoner {
    * @return true, iff concept1 is subsumed by concept2 (w.r.t. empty TBox)
    */
   public static final boolean isSubsumedBy(final ELConceptDescription concept1, final ELConceptDescription concept2) {
-    if (concept1.isBot())
+    final ELConceptDescription _concept1 = concept1.clone().reduce();
+    final ELConceptDescription _concept2 = concept2.clone().reduce();
+    if (_concept1.isBot())
       return true;
-    if (concept2.isTop())
+    if (_concept2.isTop())
       return true;
-    if (!concept1.getConceptNames().containsAll(concept2.getConceptNames()))
+    if (!_concept1.getConceptNames().containsAll(_concept2.getConceptNames()))
       return false;
-    return concept2
+    return _concept2
         .getExistentialRestrictions()
         .entries()
         .parallelStream()
         .allMatch(
-            existentialRestriction2 -> concept1
+            existentialRestriction2 -> _concept1
                 .getExistentialRestrictions()
                 .entries()
                 .parallelStream()
