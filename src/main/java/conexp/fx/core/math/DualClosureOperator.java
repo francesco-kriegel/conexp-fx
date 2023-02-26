@@ -4,7 +4,7 @@ package conexp.fx.core.math;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -26,9 +26,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Function;
 
-import conexp.fx.core.dl.ELConceptDescription;
-import conexp.fx.core.dl.ELInterpretation2;
-import conexp.fx.core.dl.ELTBox;
+//import conexp.fx.core.dl.ELConceptDescription;
+//import conexp.fx.core.dl.ELInterpretation2;
+//import conexp.fx.core.dl.ELTBox;
 
 @FunctionalInterface
 public interface DualClosureOperator<T extends LatticeElement<T>> extends Function<T, T> {
@@ -92,31 +92,6 @@ public interface DualClosureOperator<T extends LatticeElement<T>> extends Functi
         return closure;
       }
     };
-  }
-
-  public static <I> DualClosureOperator<ELConceptDescription>
-      fromInterpretation(final ELInterpretation2<I> i, final int d) {
-    if (d < 0)
-      throw new IllegalArgumentException();
-    else
-      return c -> {
-        if (c.roleDepth() > d)
-          throw new IllegalArgumentException();
-        else
-          return i.getMostSpecificConceptDescription(i.getExtension(c), d);
-      };
-  }
-
-  public static DualClosureOperator<ELConceptDescription> fromTBox(final ELTBox t, final int d) {
-    if (d < 0)
-      throw new IllegalArgumentException();
-    else
-      return c -> {
-        if (c.roleDepth() > d)
-          throw new IllegalArgumentException();
-        else
-          return t.getMostSpecificConsequence(c, d);
-      };
   }
 
 }

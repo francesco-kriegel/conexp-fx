@@ -4,7 +4,7 @@ package conexp.fx.gui.graph;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-import org.semanticweb.owlapi.model.OWLClassExpression;
+//import org.semanticweb.owlapi.model.OWLClassExpression;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -50,7 +50,7 @@ import conexp.fx.core.layout.ConceptMovement;
 import conexp.fx.core.layout.LayoutEvolution;
 import conexp.fx.core.math.Points;
 import conexp.fx.core.util.Constants;
-import conexp.fx.core.util.OWLUtil;
+//import conexp.fx.core.util.OWLUtil;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.dataset.FCADataset;
 import conexp.fx.gui.graph.option.AnimationSpeed;
@@ -599,8 +599,8 @@ public final class ConceptGraph<G, M> extends Graph<Concept<G, M>, Circle> {
       },
           // TODO: the type check for OWLClassExpression is currently a workaround, and will be removed in the future.
           new SimpleStringProperty(
-              attribute instanceof OWLClassExpression ? OWLUtil.toString((OWLClassExpression) attribute)
-                  : attribute.toString()),
+//              attribute instanceof OWLClassExpression ? OWLUtil.toString((OWLClassExpression) attribute) : 
+                attribute.toString()),
           true);
       text.styleProperty().bind(controlBox.textSizeBinding);
       synchronized (attributeLabels) {

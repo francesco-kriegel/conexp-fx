@@ -5,7 +5,7 @@
 
   <groupId>me.kriegel.francesco</groupId>
   <artifactId>conexp-fx</artifactId>
-  <version>5.5.1-SNAPSHOT</version>
+  <version>6.0.0-SNAPSHOT</version>
   <name>Concept Explorer FX</name>
   <description>Software for Formal Concept Analysis with Description Logics Extensions</description>
   <packaging>jar</packaging>
@@ -163,60 +163,6 @@
       <version>1.0.6</version>
     </dependency>
     <dependency>
-      <groupId>net.sourceforge.owlapi</groupId>
-      <artifactId>owlapi-distribution</artifactId>
-      <version>4.1.3</version>
-      <!-- <version>4.0.1</version> -->
-      <!-- <version>3.5.7</version> -->
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <!-- <dependency> -->
-    <!-- <groupId>de.tu-dresden.inf.lat.jcel</groupId> -->
-    <!-- <artifactId>jcel-owlapi</artifactId> -->
-    <!-- <version>0.24.1</version> -->
-    <!-- </dependency> -->
-    <dependency>
-      <groupId>org.semanticweb.elk</groupId>
-      <artifactId>elk-owlapi</artifactId>
-      <version>0.4.3</version>
-      <exclusions>
-        <exclusion>
-          <groupId>net.sourceforge.owlapi</groupId>
-          <artifactId>owlapi-apibinding</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>net.sourceforge.owlapi</groupId>
-          <artifactId>owlapi-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>net.sourceforge.owlapi</groupId>
-          <artifactId>owlapi-impl</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <!-- <dependency> -->
-    <!-- <groupId>com.hermit-reasoner</groupId> -->
-    <!-- <artifactId>org.semanticweb.hermit</artifactId> -->
-    <!-- <version>1.3.8.4</version> -->
-    <!-- <exclusions> -->
-    <!-- <exclusion> -->
-    <!-- <groupId>net.sourceforge.owlapi</groupId> -->
-    <!-- <artifactId>owlapi-distribution</artifactId> -->
-    <!-- </exclusion> -->
-    <!-- </exclusions> -->
-    <!-- </dependency> -->
-    <!-- <dependency> -->
-    <!-- <groupId>org.apache.jena</groupId> -->
-    <!-- <artifactId>apache-jena-libs</artifactId> -->
-    <!-- <version>3.10.0</version> -->
-    <!-- <type>pom</type> -->
-    <!-- </dependency> -->
-    <dependency>
       <groupId>org.openrdf.sesame</groupId>
       <artifactId>sesame-runtime</artifactId>
       <!-- <version>4.1.2</version> -->
@@ -262,30 +208,6 @@
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.scala-lang.modules</groupId>
-      <artifactId>scala-parser-combinators_${scala.compat.version}</artifactId>
-      <version>1.1.0</version>
-    </dependency>
-    <!-- <dependency> <groupId>org.specs2</groupId> <artifactId>specs2-core_${scala.compat.version}</artifactId> 
-      <version>4.0.2</version> <scope>test</scope> </dependency> <dependency> <groupId>org.specs2</groupId> 
-      <artifactId>specs2-junit_${scala.compat.version}</artifactId> <version>4.0.2</version> 
-      <scope>test</scope> </dependency> <dependency> <groupId>org.scalatest</groupId> 
-      <artifactId>scalatest_${scala.compat.version}</artifactId> <version>3.0.5</version> 
-      <scope>test</scope> </dependency> <dependency> <groupId>org.scala-lang.modules</groupId> 
-      <artifactId>scala-java8-compat_2.11</artifactId> <version>0.7.0</version> 
-      </dependency> <dependency> <groupId>me.enkode</groupId> <artifactId>java8-converters_2.11</artifactId> 
-      <version>1.2.0-SNAPSHOT</version> </dependency> -->
-    <dependency>
-      <groupId>com.netflix.hollow</groupId>
-      <artifactId>hollow</artifactId>
-      <version>3.0.1</version>
-    </dependency>
-    <!-- <dependency> -->
-    <!-- <groupId>io.monix</groupId> -->
-    <!-- <artifactId>monix-eval_2.12</artifactId> -->
-    <!-- <version>3.0.0-RC5</version> -->
-    <!-- </dependency> -->
   </dependencies>
 
   <build>

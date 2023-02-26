@@ -4,7 +4,7 @@ package conexp.fx.core.builder;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -47,8 +47,8 @@ public final class Requests {
     NEW("New Context", ""),
     IMPORT("Import Context", ""),
     SCALE("Scale Context", ""),
-    CONSTRUCT("Construction Context", ""),
-    DL_CONTEXT("DL Context", "");
+    CONSTRUCT("Construction Context", "");//,
+//    DL_CONTEXT("DL Context", "");
 
 //    OTHER("Other Context", "");
     public final String title;
@@ -61,12 +61,12 @@ public final class Requests {
   }
 
   public static enum Type {
-    INDUCED_CONTEXT(
-        "Induced Context",
-        "An induced context from a DL interpretation.",
-        Metatype.DL_CONTEXT,
-        false,
-        Source.NULL),
+//    INDUCED_CONTEXT(
+//        "Induced Context",
+//        "An induced context from a DL interpretation.",
+//        Metatype.DL_CONTEXT,
+//        false,
+//        Source.NULL),
     NEW_CONTEXT(
         "New Context",
         "Creates a new empty Formal Context of desired size.",

@@ -4,7 +4,7 @@ package conexp.fx.core.util;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -25,9 +25,7 @@ package conexp.fx.core.util;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -66,11 +64,15 @@ public enum FileFormat {
     this.title = title;
     this.suffix = suffix;
     String suffixes = "";
-    for (String s : suffix)
+    final List<String> extensions = new LinkedList<String>();
+    for (String s : suffix) {
       suffixes += ", *." + s;
-    this.extensionFilter = new ExtensionFilter(
-        title + suffixes,
-        Arrays.asList(suffix).parallelStream().map(s -> "*." + s).collect(Collectors.toList()));
+      extensions.add("*." + s);
+    }
+//    this.extensionFilter = new ExtensionFilter(
+//        title + suffixes,
+//        Arrays.asList(suffix).parallelStream().map(s -> "*." + s).collect(Collectors.toList()));
+    this.extensionFilter = new ExtensionFilter(title + suffixes, extensions);
   }
 
   @Override

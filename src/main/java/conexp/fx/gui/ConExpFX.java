@@ -7,7 +7,7 @@ package conexp.fx.gui;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
 import conexp.fx.core.builder.Requests;
@@ -132,7 +133,7 @@ public class ConExpFX extends Application {
       buildViewMenu();
       buildHelpMenu();
       menuBar.getMenus().addAll(contextMenu, viewMenu, helpMenu);
-      menuBar.setUseSystemMenuBar(true);
+//      menuBar.setUseSystemMenuBar(true);
       rootPane.setTop(menuBar);
     }
 
@@ -250,7 +251,8 @@ public class ConExpFX extends Application {
 //        final Object foo = instance == null ? 0 : instance;
 //        synchronized (foo) {
           Dataset active = null;
-          final Iterator<TreeItem<Control>> it = getSelectionModel().getSelectedItems().iterator();
+//          final Iterator<TreeItem<Control>> it = getSelectionModel().getSelectedItems().iterator();
+          final Iterator<TreeItem<Control>> it = Iterators.filter(getSelectionModel().getSelectedItems().iterator(), x -> x != null);
           if (it.hasNext()) {
             TreeItem<?> selectedItem = it.next();
             if (selectedItem.isLeaf())
@@ -278,22 +280,30 @@ public class ConExpFX extends Application {
         @Override
         public synchronized void onChanged(ListChangeListener.Change<? extends TreeItem<Control>> c) {
 //          synchronized (instance) {
-            while (c.next()) {
-              if (c.wasAdded())
-                c
-                    .getAddedSubList()
-                    .stream()
-                    .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
-                    .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
-                    .forEach(item -> contentPane.getItems().add(item.getDatasetView().getContentNode()));
-              if (c.wasRemoved())
-                c
-                    .getRemoved()
-                    .stream()
-                    .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
-                    .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
-                    .forEach(item -> contentPane.getItems().remove(item.getDatasetView().getContentNode()));
-            }
+          // The below code sometimes throws IndexOutOfBoundsExceptions for no apparent reason.
+//            while (c.next()) {
+//              if (c.wasAdded())
+//                c
+//                    .getAddedSubList()
+//                    .stream()
+//                    .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
+//                    .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
+//                    .forEach(item -> contentPane.getItems().add(item.getDatasetView().getContentNode()));
+//              if (c.wasRemoved())
+//                c
+//                    .getRemoved()
+//                    .stream()
+//                    .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
+//                    .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
+//                    .forEach(item -> contentPane.getItems().remove(item.getDatasetView().getContentNode()));
+//            }
+          // Let's do it as follows instead.
+          contentPane.getItems().clear();
+          getSelectionModel().getSelectedItems()
+                  .stream()
+                  .filter(item -> item instanceof DatasetView<?>.DatasetViewTreeItem)
+                  .map(item -> (DatasetView<?>.DatasetViewTreeItem) item)
+                  .forEach(item -> contentPane.getItems().add(item.getDatasetView().getContentNode()));
             Platform2.runOnFXThreadAndWaitTryCatch(() -> {
 //              synchronized (instance) {
                 final double pos = contentPane.getItems().isEmpty() ? 0d : 1d / (double) contentPane.getItems().size();

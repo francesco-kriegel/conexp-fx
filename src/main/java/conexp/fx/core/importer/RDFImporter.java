@@ -4,7 +4,7 @@ package conexp.fx.core.importer;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -55,13 +55,13 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.memory.MemoryStore;
-import org.semanticweb.owlapi.model.IRI;
+//import org.semanticweb.owlapi.model.IRI;
 
 import conexp.fx.core.collections.Pair;
 import conexp.fx.core.collections.setlist.HashSetArrayList;
 import conexp.fx.core.collections.setlist.SetList;
 import conexp.fx.core.context.MatrixContext;
-import conexp.fx.core.dl.Signature;
+//import conexp.fx.core.dl.Signature;
 
 public class RDFImporter {
 

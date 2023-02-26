@@ -1,19 +1,19 @@
 package conexp.fx.gui.context;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLClassExpression;
+//import org.semanticweb.owlapi.apibinding.OWLManager;
+//import org.semanticweb.owlapi.model.OWLClassExpression;
 
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Implication;
 import conexp.fx.core.math.GuavaIsomorphism;
-import conexp.fx.core.util.OWLUtil;
+//import conexp.fx.core.util.OWLUtil;
 import conexp.fx.gui.dataset.FCADataset;
 
 /*
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -90,13 +90,13 @@ public class ImplicationWidget<G, M> extends BorderPane {
                     .<Implication<G, M>, String> create()
                     .text("Premise")
                     .cellValueFactory(p -> Bindings.createObjectBinding(() -> {
-                      if (!p.getValue().getPremise().isEmpty()
-                          && p.getValue().getPremise().iterator().next() instanceof OWLClassExpression)
-                        return OWLUtil.toString(
-                            OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
-                                Collections3.transform(
-                                    p.getValue().getPremise(),
-                                    GuavaIsomorphism.create(x -> (OWLClassExpression) x, null))));
+//                      if (!p.getValue().getPremise().isEmpty()
+//                          && p.getValue().getPremise().iterator().next() instanceof OWLClassExpression)
+//                        return OWLUtil.toString(
+//                            OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
+//                                Collections3.transform(
+//                                    p.getValue().getPremise(),
+//                                    GuavaIsomorphism.create(x -> (OWLClassExpression) x, null))));
                       return p.getValue().getPremise().toString();
                     }))
                     .build(),
@@ -104,13 +104,13 @@ public class ImplicationWidget<G, M> extends BorderPane {
                     .<Implication<G, M>, String> create()
                     .text("Conclusion")
                     .cellValueFactory(p -> Bindings.createObjectBinding(() -> {
-                      if (!p.getValue().getConclusion().isEmpty()
-                          && p.getValue().getConclusion().iterator().next() instanceof OWLClassExpression)
-                        return OWLUtil.toString(
-                            OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
-                                Collections3.transform(
-                                    p.getValue().getConclusion(),
-                                    GuavaIsomorphism.create(x -> (OWLClassExpression) x, null))));
+//                      if (!p.getValue().getConclusion().isEmpty()
+//                          && p.getValue().getConclusion().iterator().next() instanceof OWLClassExpression)
+//                        return OWLUtil.toString(
+//                            OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
+//                                Collections3.transform(
+//                                    p.getValue().getConclusion(),
+//                                    GuavaIsomorphism.create(x -> (OWLClassExpression) x, null))));
                       return p.getValue().getConclusion().toString();
                     }))
                     .build())

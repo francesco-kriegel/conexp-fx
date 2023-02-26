@@ -4,7 +4,7 @@ package conexp.fx.gui.context;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,13 +22,13 @@ package conexp.fx.gui.context;
  * #L%
  */
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLClassExpression;
+//import org.semanticweb.owlapi.apibinding.OWLManager;
+//import org.semanticweb.owlapi.model.OWLClassExpression;
 
 import conexp.fx.core.collections.Collections3;
 import conexp.fx.core.context.Concept;
 import conexp.fx.core.math.GuavaIsomorphism;
-import conexp.fx.core.util.OWLUtil;
+//import conexp.fx.core.util.OWLUtil;
 import conexp.fx.gui.dataset.FCADataset;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.TableColumnBuilder;
@@ -78,13 +78,13 @@ public class ConceptWidget<G, M> extends BorderPane {
                 .<Concept<G, M>, String> create()
                 .text("Intent")
                 .cellValueFactory(p -> Bindings.createObjectBinding(() -> {
-                  if (!p.getValue().getIntent().isEmpty()
-                      && p.getValue().getIntent().iterator().next() instanceof OWLClassExpression)
-                    return OWLUtil.toString(
-                        OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
-                            Collections3.transform(
-                                p.getValue().getIntent(),
-                                GuavaIsomorphism.create(x -> (OWLClassExpression) x, null))));
+//                  if (!p.getValue().getIntent().isEmpty()
+//                      && p.getValue().getIntent().iterator().next() instanceof OWLClassExpression)
+//                    return OWLUtil.toString(
+//                        OWLManager.getOWLDataFactory().getOWLObjectIntersectionOf(
+//                            Collections3.transform(
+//                                p.getValue().getIntent(),
+//                                GuavaIsomorphism.create(x -> (OWLClassExpression) x, null))));
                   final String s = p.getValue().getIntent().toString();
                   return s.substring(1, s.length() - 1);
                 }))

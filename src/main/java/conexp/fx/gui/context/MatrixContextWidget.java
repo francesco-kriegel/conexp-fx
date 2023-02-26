@@ -4,7 +4,7 @@ package conexp.fx.gui.context;
  * #%L
  * Concept Explorer FX
  * %%
- * Copyright (C) 2010 - 2020 Francesco Kriegel
+ * Copyright (C) 2010 - 2022 Francesco Kriegel
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -28,7 +28,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.semanticweb.owlapi.model.OWLClassExpression;
+//import org.semanticweb.owlapi.model.OWLClassExpression;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
@@ -41,7 +41,7 @@ import conexp.fx.core.context.MatrixContext;
 import conexp.fx.core.context.MatrixContext.Incidence;
 import conexp.fx.core.util.Constants;
 import conexp.fx.core.util.IdGenerator;
-import conexp.fx.core.util.OWLUtil;
+//import conexp.fx.core.util.OWLUtil;
 import conexp.fx.gui.ConExpFX;
 import conexp.fx.gui.cellpane.Cell;
 import conexp.fx.gui.cellpane.CellPane;
@@ -514,7 +514,8 @@ public class MatrixContextWidget<G, M> extends BorderPane {
       try {
         final M m = context.colHeads().get(contentCoordinates.get().y());
         final String string =
-            m instanceof OWLClassExpression ? OWLUtil.toString((OWLClassExpression) m) : m.toString();
+//            m instanceof OWLClassExpression ? OWLUtil.toString((OWLClassExpression) m) : 
+              m.toString();
         textContent.set(string);
         view.setImage(LaTeX.toFXImage(string, (float) (16d * zoomFactor.get())));
       } catch (IndexOutOfBoundsException __) {}
