@@ -4,4 +4,4 @@ Software for Formal Concept Analysis with Description Logic Extensions
 
 Webpage [https://francesco-kriegel.github.io/conexp-fx/](https://francesco-kriegel.github.io/conexp-fx/)
 
-Copyright ⓒ 2010-2019 Francesco Kriegel
+Copyright ⓒ 2010-2023 Francesco Kriegel
